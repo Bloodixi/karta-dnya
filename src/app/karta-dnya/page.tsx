@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { cardOfDay, formatDateRu, todayKey } from "@/lib/daily";
+import { cardOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
+import { findTarotExtra } from "@/lib/content";
 
 export const revalidate = 1800;
 
@@ -14,6 +15,8 @@ export const metadata: Metadata = {
 export default function CardOfDayPage() {
   const date = todayKey();
   const today = cardOfDay(date);
+  const tomorrow = cardOfDay(shiftKey(date, 1));
+  const extra = today ? findTarotExtra(today.card.slug) : null;
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/karta-dnya", label: "Карта дня" }]} />
@@ -38,8 +41,10 @@ export default function CardOfDayPage() {
             <p>{today.card.love}</p>
             <h2>В делах</h2>
             <p>{today.card.career}</p>
+            {extra && (<><h2>Как прожить этот день</h2><p>{extra.dayCard}</p></>)}
             <h2>Совет дня</h2>
             <blockquote>{today.card.advice}</blockquote>
+            {tomorrow && (<p className="text-sm text-muted">Карта на завтра: <Link href={`/taro/karty/${tomorrow.card.slug}`}>{tomorrow.card.name}</Link>{tomorrow.reversed ? " (перевёрнутая)" : ""}. Загляните завтра за толкованием.</p>)}
             <p>
               <Link href={`/taro/karty/${today.card.slug}`}>Подробнее о карте «{today.card.name}»</Link> · <Link href="/taro/karty">все 78 карт</Link> · <Link href="/taro">раздел Таро</Link>
             </p>

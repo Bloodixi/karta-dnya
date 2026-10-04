@@ -94,7 +94,10 @@ export type NumerologyNumber = { number: number; title: string; keywords: string
 export type Dream = { slug: string; word: string; short: string; meaning: string; variants: { when: string; means: string }[]; mood: string };
 export type Stone = { slug: string; name: string; color: string; chakra: string; zodiac: string[]; properties: string[]; description: string; howToUse: string; care: string };
 
+export type TarotExtra = { yesno: string; yesnoWhy: string; health: string; positions: { past: string; present: string; future: string }; combos: { with: string; means: string }[]; dayCard: string };
 export const getTarot = () => readJson<TarotCard[]>("tarot.json", []);
+export const getTarotExtra = () => readJson<Record<string, TarotExtra>>("tarot-extra.json", {});
+export const findTarotExtra = (slug: string): TarotExtra | null => getTarotExtra()[slug] || null;
 export const getZodiac = () => readJson<Zodiac[]>("zodiac.json", []);
 export const getHoroscopeBank = () => readJson<HoroscopeBank>("horoscope-bank.json", { general: [], love: [], career: [], health: [], advice: [], mood: [] });
 export const getNumerology = () => readJson<NumerologyNumber[]>("numerology.json", []);
