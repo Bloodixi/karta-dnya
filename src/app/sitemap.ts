@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getArticles, getDreams, getStones, getTarot, getZodiac } from "@/lib/content";
 import { allPairs } from "@/lib/compat";
-import { PERIOD_KEYS } from "@/lib/daily";
+import { PERIOD_KEYS, shiftKey, todayKey } from "@/lib/daily";
 import { SECTION_KEYS, SITE } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: u("/chislo-sudby"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/taro/karty"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/taro/da-net"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: u("/lunnyy-kalendar"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
   ];
   for (const s of SECTION_KEYS) out.push({ url: u(`/${s}`), lastModified: now, changeFrequency: "weekly", priority: 0.8 });
   const periods = PERIOD_KEYS.filter((p) => p !== "segodnya");
@@ -23,6 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     for (const p of periods) out.push({ url: u(`/goroskop/${z.slug}/${p}`), lastModified: now, changeFrequency: "daily", priority: 0.7 });
   }
   out.push({ url: u("/sovmestimost"), lastModified: now, changeFrequency: "monthly", priority: 0.8 });
+  for (let i = -7; i <= 30; i++) { const k = shiftKey(todayKey(), i); out.push({ url: u(`/lunnyy-kalendar/${k}`), lastModified: now, changeFrequency: "daily", priority: 0.6 }); }
   for (const pr of allPairs()) out.push({ url: u(`/sovmestimost/${pr.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
   for (const c of getTarot()) out.push({ url: u(`/taro/karty/${c.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
   for (const d of getDreams()) out.push({ url: u(`/sonnik/${d.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });

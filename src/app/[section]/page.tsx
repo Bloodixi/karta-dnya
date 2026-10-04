@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/[section]">): Pro
 
 const SECTION_TOOLS: Partial<Record<SectionKey, { href: string; title: string }[]>> = {
   taro: [{ href: "/karta-dnya", title: "Карта дня" }, { href: "/taro/da-net", title: "Таро да или нет" }, { href: "/taro/karty", title: "Значения всех карт" }],
-  astrologiya: [{ href: "/goroskop", title: "Гороскоп на сегодня" }, { href: "/goroskop/zavtra", title: "На завтра" }, { href: "/sovmestimost", title: "Совместимость" }],
+  astrologiya: [{ href: "/goroskop", title: "Гороскоп на сегодня" }, { href: "/goroskop/zavtra", title: "На завтра" }, { href: "/sovmestimost", title: "Совместимость" }, { href: "/lunnyy-kalendar", title: "Лунный календарь" }],
   numerologiya: [{ href: "/chislo-sudby", title: "Калькулятор числа судьбы" }],
   sonnik: [{ href: "/sonnik", title: "Все символы сонника" }],
   kamni: [{ href: "/kamni", title: "Каталог камней" }],

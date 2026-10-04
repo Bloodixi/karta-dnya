@@ -74,7 +74,7 @@ export async function getArticle(section: SectionKey, slug: string): Promise<Art
   const file = `${slug}.md`;
   if (!fs.existsSync(path.join(ARTICLES, section, file))) return null;
   const { body, ...meta } = parseMeta(section, file);
-  const html = String(await remark().use(remarkGfm).use(remarkHtml, { sanitize: false }).process(body));
+  const html = String(await remark().use(remarkGfm).use(remarkHtml, { sanitize: true }).process(body));
   return { ...meta, html, text: body };
 }
 
