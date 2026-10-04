@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
+import Metrika from "@/components/Metrika";
 import { SITE } from "@/lib/site";
 
 const display = Cormorant_Garamond({ variable: "--font-display", subsets: ["latin", "cyrillic"], weight: ["500", "600", "700"] });
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="flex-1">{children}</main>
         <Footer />
         <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", name: SITE.name, url: SITE.url, inLanguage: "ru" }} />
+        <Metrika />
       </body>
     </html>
   );
