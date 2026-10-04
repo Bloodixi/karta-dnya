@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: u("/goroskop"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: u("/chislo-sudby"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/taro/karty"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: u("/taro/da-net"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
   ];
   for (const s of SECTION_KEYS) out.push({ url: u(`/${s}`), lastModified: now, changeFrequency: "weekly", priority: 0.8 });
   const periods = PERIOD_KEYS.filter((p) => p !== "segodnya");
