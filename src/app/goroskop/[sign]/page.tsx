@@ -2,18 +2,31 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import HoroscopeCard from "@/components/HoroscopeCard";
+import HoroscopeGrid from "@/components/HoroscopeGrid";
+import PeriodNav from "@/components/PeriodNav";
 import { findZodiac, getStones, getZodiac } from "@/lib/content";
-import { formatDateRu, horoscopeFor, todayKey } from "@/lib/daily";
+import { allHoroscopes, horoscopeFor, PERIODS, PERIOD_KEYS, periodLabel, todayKey, type PeriodKey } from "@/lib/daily";
 
 export const revalidate = 1800;
 export const dynamicParams = false;
 
+const isPeriod = (s: string): s is PeriodKey => (PERIOD_KEYS as string[]).includes(s) && s !== "segodnya";
+
 export function generateStaticParams() {
-  return getZodiac().map((z) => ({ sign: z.slug }));
+  return [...getZodiac().map((z) => ({ sign: z.slug })), ...PERIOD_KEYS.filter((p) => p !== "segodnya").map((p) => ({ sign: p }))];
 }
 
 export async function generateMetadata({ params }: PageProps<"/goroskop/[sign]">): Promise<Metadata> {
   const { sign } = await params;
+  if (isPeriod(sign)) {
+    const t = PERIODS[sign].title;
+    return {
+      title: `Гороскоп ${t} для всех знаков зодиака`,
+      description: `Гороскоп ${t} для каждого знака зодиака: общий фон, любовь, работа и деньги, самочувствие и совет. ${periodLabel(sign)}.`,
+      alternates: { canonical: `/goroskop/${sign}` },
+    };
+  }
   const z = findZodiac(sign);
   if (!z) return {};
   return {
@@ -25,10 +38,22 @@ export async function generateMetadata({ params }: PageProps<"/goroskop/[sign]">
 
 export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">) {
   const { sign } = await params;
+  const date = todayKey();
+  if (isPeriod(sign)) {
+    const items = allHoroscopes(sign, date);
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <Breadcrumbs items={[{ href: "/goroskop", label: "Гороскоп" }, { href: `/goroskop/${sign}`, label: PERIODS[sign].title }]} />
+        <h1 className="text-3xl md:text-4xl font-semibold">Гороскоп {PERIODS[sign].title}: {periodLabel(sign, date)}</h1>
+        <p className="text-muted mt-2 max-w-2xl">Прогноз {PERIODS[sign].title} для каждого знака: общий фон, любовь, дела, самочувствие и совет.</p>
+        <div className="mt-4"><PeriodNav current={sign} /></div>
+        <HoroscopeGrid items={items} period={sign} />
+      </div>
+    );
+  }
   const z = findZodiac(sign);
   if (!z) notFound();
-  const date = todayKey();
-  const h = horoscopeFor(z, date);
+  const h = horoscopeFor(z, "segodnya", date);
   const all = getZodiac();
   const name = (s: string) => all.find((x) => x.slug === s);
   const stones = getStones().filter((s) => s.zodiac.includes(z.slug)).slice(0, 4);
@@ -42,22 +67,8 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
           <p className="text-muted">{z.dates} · {z.element} · {z.planet}</p>
         </div>
       </div>
-
-      {h && (
-        <section className="card p-6 mt-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl">{formatDateRu(date)}</h2>
-            <span className="chip">настроение: {h.mood}</span>
-          </div>
-          <p className="mt-3 text-lg">{h.general}</p>
-          <div className="grid gap-4 sm:grid-cols-3 mt-5 text-sm">
-            <div><p className="font-semibold">Любовь <span className="stars">{"★".repeat(h.score.love)}</span></p><p className="text-muted mt-1">{h.love}</p></div>
-            <div><p className="font-semibold">Работа и деньги <span className="stars">{"★".repeat(h.score.career)}</span></p><p className="text-muted mt-1">{h.career}</p></div>
-            <div><p className="font-semibold">Самочувствие <span className="stars">{"★".repeat(h.score.energy)}</span></p><p className="text-muted mt-1">{h.health}</p></div>
-          </div>
-          <p className="mt-5 border-l-2 border-gold pl-3 italic">{h.advice}</p>
-        </section>
-      )}
+      <div className="mt-4"><PeriodNav current="segodnya" sign={z.slug} /></div>
+      {h && <div className="mt-4"><HoroscopeCard h={h} /></div>}
 
       <section className="prose mt-10">
         <h2>Характер знака {z.name}</h2>
@@ -74,8 +85,9 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
         <p>{z.health}</p>
         <h2>Совместимость</h2>
         <p>
-          Лучше всего: {z.compatibility.best.map((s, i) => { const o = name(s); return o ? <span key={s}>{i > 0 && ", "}<Link href={`/goroskop/${s}`}>{o.name}</Link></span> : null; })}.
-          Сложнее: {z.compatibility.hard.map((s, i) => { const o = name(s); return o ? <span key={s}>{i > 0 && ", "}<Link href={`/goroskop/${s}`}>{o.name}</Link></span> : null; })}.
+          Лучше всего: {z.compatibility.best.map((s, i) => { const o = name(s); return o ? <span key={s}>{i > 0 && ", "}<Link href={`/sovmestimost/${z.slug}-${s}`}>{o.name}</Link></span> : null; })}.
+          Сложнее: {z.compatibility.hard.map((s, i) => { const o = name(s); return o ? <span key={s}>{i > 0 && ", "}<Link href={`/sovmestimost/${z.slug}-${s}`}>{o.name}</Link></span> : null; })}.
+          {" "}<Link href="/sovmestimost">Проверить любую пару →</Link>
         </p>
         <h2>Талисманы</h2>
         <p>Камень: {z.stone}. Цвет: {z.color}. Счастливые числа: {z.luckyNumbers.join(", ")}.</p>
