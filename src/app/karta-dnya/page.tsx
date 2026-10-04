@@ -1,0 +1,53 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { cardOfDay, formatDateRu, todayKey } from "@/lib/daily";
+
+export const revalidate = 1800;
+
+export const metadata: Metadata = {
+  title: "Карта дня Таро: вытянуть бесплатно и прочитать толкование",
+  description: "Карта дня Таро на сегодня: одна карта, её значение в прямом и перевёрнутом положении, совет на день. Обновляется каждую полночь.",
+  alternates: { canonical: "/karta-dnya" },
+};
+
+export default function CardOfDayPage() {
+  const date = todayKey();
+  const today = cardOfDay(date);
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <Breadcrumbs items={[{ href: "/karta-dnya", label: "Карта дня" }]} />
+      <h1 className="text-3xl md:text-4xl font-semibold">Карта дня — {formatDateRu(date)}</h1>
+      <p className="text-muted mt-2 max-w-2xl">
+        Одна карта на сегодня для всех. Прочитайте значение, выделите одну мысль и понаблюдайте, как она проявится в течение дня. Это не предсказание, а повод для внимательности.
+      </p>
+      {today ? (
+        <div className="mt-8 grid gap-8 md:grid-cols-[260px_1fr] items-start">
+          <div className={`tarot-card w-60 md:w-full ${today.reversed ? "reversed" : ""}`}>
+            <div>
+              <p className="text-xs uppercase tracking-widest opacity-70">{today.card.arcana === "major" ? "Старший аркан" : today.card.suitName}</p>
+              <p className="display text-3xl mt-2">{today.card.name}</p>
+              <p className="text-sm mt-3 opacity-80">{today.card.keywords.join(" · ")}</p>
+            </div>
+          </div>
+          <div className="prose">
+            <p className="chip">{today.reversed ? "перевёрнутое положение" : "прямое положение"}</p>
+            <h2>Значение</h2>
+            <p>{today.reversed ? today.card.reversed : today.card.upright}</p>
+            <h2>В отношениях</h2>
+            <p>{today.card.love}</p>
+            <h2>В делах</h2>
+            <p>{today.card.career}</p>
+            <h2>Совет дня</h2>
+            <blockquote>{today.card.advice}</blockquote>
+            <p>
+              <Link href={`/taro/karty/${today.card.slug}`}>Подробнее о карте «{today.card.name}»</Link> · <Link href="/taro/karty">все 78 карт</Link> · <Link href="/taro">раздел Таро</Link>
+            </p>
+          </div>
+        </div>
+      ) : (
+        <p className="mt-6 text-muted">Колода готовится, загляните чуть позже.</p>
+      )}
+    </div>
+  );
+}
