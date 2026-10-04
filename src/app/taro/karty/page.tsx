@@ -18,6 +18,7 @@ export default function CardsPage() {
       <Breadcrumbs items={[{ href: "/taro", label: "Таро" }, { href: "/taro/karty", label: "Значения карт" }]} />
       <h1 className="text-3xl md:text-4xl font-semibold">Значения карт Таро</h1>
       <p className="text-muted mt-2 max-w-2xl">78 карт колоды Райдера–Уэйта. Нажмите на карту, чтобы прочитать значение в прямом и перевёрнутом положении, для любви и работы.</p>
+      <div className="mt-4 flex flex-wrap gap-2"><Link href="/taro/arkany/starshie" className="btn btn-ghost">Старшие арканы</Link><Link href="/taro/arkany/mladshie" className="btn btn-ghost">Младшие арканы</Link><Link href="/taro/tri-karty" className="btn btn-ghost">Расклад на три карты</Link></div>
       {!cards.length && <p className="text-muted mt-6">Колода готовится.</p>}
       {major.length > 0 && (
         <section className="mt-8">

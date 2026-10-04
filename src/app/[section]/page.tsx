@@ -20,9 +20,9 @@ export async function generateMetadata({ params }: PageProps<"/[section]">): Pro
 }
 
 const SECTION_TOOLS: Partial<Record<SectionKey, { href: string; title: string }[]>> = {
-  taro: [{ href: "/karta-dnya", title: "Карта дня" }, { href: "/taro/da-net", title: "Таро да или нет" }, { href: "/taro/karty", title: "Значения всех карт" }],
+  taro: [{ href: "/karta-dnya", title: "Карта дня" }, { href: "/taro/da-net", title: "Таро да или нет" }, { href: "/taro/tri-karty", title: "Три карты" }, { href: "/taro/karty", title: "Значения всех карт" }, { href: "/taro/arkany/starshie", title: "Старшие арканы" }, { href: "/taro/arkany/mladshie", title: "Младшие арканы" }],
   astrologiya: [{ href: "/goroskop", title: "Гороскоп на сегодня" }, { href: "/goroskop/zavtra", title: "На завтра" }, { href: "/sovmestimost", title: "Совместимость" }, { href: "/lunnyy-kalendar", title: "Лунный календарь" }],
-  numerologiya: [{ href: "/chislo-sudby", title: "Калькулятор числа судьбы" }],
+  numerologiya: [{ href: "/chislo-sudby", title: "Калькулятор числа судьбы" }, { href: "/kvadrat-pifagora", title: "Квадрат Пифагора" }],
   sonnik: [{ href: "/sonnik", title: "Все символы сонника" }],
   kamni: [{ href: "/kamni", title: "Каталог камней" }],
 };
