@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { getArticles, getStones } from "@/lib/content";
+import { getArticles, getStoneImages, getStones } from "@/lib/content";
 import { SECTIONS } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -13,19 +13,26 @@ export const metadata: Metadata = {
 
 export default function StonesPage() {
   const stones = getStones();
+  const images = getStoneImages();
   const articles = getArticles("kamni");
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/kamni", label: "Камни" }]} />
-      <h1 className="text-3xl md:text-4xl font-semibold">💎 Камни и талисманы</h1>
+      <h1 className="text-3xl md:text-4xl font-semibold">Камни и талисманы</h1>
       <p className="text-muted mt-2 max-w-2xl">{SECTIONS.kamni.description}</p>
       {stones.length ? (
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {stones.map((s) => (
-            <Link key={s.slug} href={`/kamni/${s.slug}`} className="card card-hover p-4">
-              <p className="font-semibold">{s.name}</p>
-              <p className="text-xs text-muted">{s.color}</p>
-              <p className="text-sm text-muted mt-2 line-clamp-2">{s.properties.join(", ")}</p>
+            <Link key={s.slug} href={`/kamni/${s.slug}`} className="card card-hover overflow-hidden flex flex-col">
+              {images[s.slug] && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={images[s.slug].thumb} width={400} height={300} alt={`${s.name}: фото`} loading="lazy" decoding="async" className="w-full aspect-[4/3] object-cover" />
+              )}
+              <span className="p-4 flex flex-col">
+                <p className="font-semibold">{s.name}</p>
+                <p className="text-xs text-muted">{s.color}</p>
+                <p className="text-sm text-muted mt-2 line-clamp-2">{s.properties.join(", ")}</p>
+              </span>
             </Link>
           ))}
         </div>

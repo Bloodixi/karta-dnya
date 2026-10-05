@@ -5,7 +5,8 @@ import ArticleCard from "@/components/ArticleCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
-import { findDream, findStone, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
+import StonePhoto from "@/components/StonePhoto";
+import { findDream, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
 import { SECTIONS, SECTION_KEYS, SITE, type SectionKey } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -143,18 +144,24 @@ function DreamPage({ slug }: { slug: string }) {
 
 function StonePage({ slug }: { slug: string }) {
   const s = findStone(slug)!;
+  const img = findStoneImage(slug);
   const zodiac = getZodiac();
   const signs = s.zodiac.map((z) => zodiac.find((x) => x.slug === z)).filter(Boolean);
   const others = getStones().filter((x) => x.slug !== slug).slice(0, 10);
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/kamni", label: "Камни" }, { href: `/kamni/${slug}`, label: s.name }]} />
-      <h1 className="text-3xl md:text-4xl font-semibold">{s.name}</h1>
-      <p className="text-muted mt-2">Цвет: {s.color} · Чакра: {s.chakra}</p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        {s.properties.map((p) => (
-          <span key={p} className="chip">{p}</span>
-        ))}
+      <div className="grid gap-8 md:grid-cols-[360px_1fr] items-start">
+        {img && <StonePhoto img={img} name={s.name} priority className="md:sticky md:top-24" />}
+        <div>
+          <h1 className="text-3xl md:text-4xl font-semibold">{s.name}</h1>
+          <p className="text-muted mt-2">Цвет: {s.color} · Чакра: {s.chakra}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {s.properties.map((p) => (
+              <span key={p} className="chip">{p}</span>
+            ))}
+          </div>
+        </div>
       </div>
       <div className="prose mt-6">
         <p>{s.description}</p>

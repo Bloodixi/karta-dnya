@@ -1,0 +1,212 @@
+{
+ "ametist": {
+  "file": "/stones/ametist.webp",
+  "thumb": "/stones/ametist-400.webp",
+  "author": "JJ Harrison",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Amethyst._Magaliesburg,_South_Africa.jpg"
+ },
+ "rozovyy-kvarc": {
+  "file": "/stones/rozovyy-kvarc.webp",
+  "thumb": "/stones/rozovyy-kvarc-400.webp",
+  "author": "Raimond Spekking",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Rosenquarz._Hühnerkobel,_Zwiesel,_Bayrischer_Wald-8843.jpg"
+ },
+ "chernyy-turmalin": {
+  "file": "/stones/chernyy-turmalin.webp",
+  "thumb": "/stones/chernyy-turmalin-400.webp",
+  "author": "Ivar Leidus",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Schorl_-_Galiléia,_Minas_Gerais,_Brazil.jpg"
+ },
+ "citrin": {
+  "file": "/stones/citrin.webp",
+  "thumb": "/stones/citrin-400.webp",
+  "author": "Paweł Maliszczak [hardleo.com]",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Rough_Citrine_Cristals_Quartz_from_Brasil.jpg"
+ },
+ "lunnyy-kamen": {
+  "file": "/stones/lunnyy-kamen.webp",
+  "thumb": "/stones/lunnyy-kamen-400.webp",
+  "author": "SpeakingArch",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Gold,_amethyst_and_moonstone_Brooch,_Madras,_circa_1850_CE,_V&A_Museum,_London.jpg"
+ },
+ "lazurit": {
+  "file": "/stones/lazurit.webp",
+  "thumb": "/stones/lazurit-400.webp",
+  "author": "W.carter",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Tumble-polished_lapis_lazuli_2.jpg"
+ },
+ "malahit": {
+  "file": "/stones/malahit.webp",
+  "thumb": "/stones/malahit-400.webp",
+  "author": "JJ Harrison",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Malachite,_Zaire.jpg"
+ },
+ "tigrovyy-glaz": {
+  "file": "/stones/tigrovyy-glaz.webp",
+  "thumb": "/stones/tigrovyy-glaz-400.webp",
+  "author": "W.carter",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Egg-shaped_tiger's_eye_quartz_2.jpg"
+ },
+ "obsidian": {
+  "file": "/stones/obsidian.webp",
+  "thumb": "/stones/obsidian-400.webp",
+  "author": "James St. John",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Obsidian_27.jpg"
+ },
+ "agat": {
+  "file": "/stones/agat.webp",
+  "thumb": "/stones/agat-400.webp",
+  "author": "I2Overcome",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Blue_Lace_Agate_from_Namibia_(polished).jpg"
+ },
+ "biryuza": {
+  "file": "/stones/biryuza.webp",
+  "thumb": "/stones/biryuza-400.webp",
+  "author": "W.carter",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Raw_turquoise_from_Arizona_1.jpg"
+ },
+ "yantar": {
+  "file": "/stones/yantar.webp",
+  "thumb": "/stones/yantar-400.webp",
+  "author": "uploaded with permission from User Lanzi by Ra'ike on de.wik",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Amber_Bernstein_many_stones.jpg"
+ },
+ "nefrit": {
+  "file": "/stones/nefrit.webp",
+  "thumb": "/stones/nefrit-400.webp",
+  "author": "Lê Phạm Gia Hy",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Siberian-nephrite-jade-bangle-vong-kieng-ngoc-bich-kimquigems.jpg"
+ },
+ "granat": {
+  "file": "/stones/granat.webp",
+  "thumb": "/stones/granat-400.webp",
+  "author": "Didier Descouens",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:AlmandinInde.jpg"
+ },
+ "gornyy-hrustal": {
+  "file": "/stones/gornyy-hrustal.webp",
+  "thumb": "/stones/gornyy-hrustal-400.webp",
+  "author": "JJ Harrison",
+  "license": "CC BY-SA 2.5",
+  "source": "https://commons.wikimedia.org/wiki/File:Quartz,_Tibet.jpg"
+ },
+ "selenit": {
+  "file": "/stones/selenit.webp",
+  "thumb": "/stones/selenit-400.webp",
+  "author": "Didier Descouens",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Gypse_Caresse.jpg"
+ },
+ "pirit": {
+  "file": "/stones/pirit.webp",
+  "thumb": "/stones/pirit-400.webp",
+  "author": "Ivar Leidus",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Pyrite_-_Huanzala_mine,_Huallanca,_Bolognesi,_Ancash,_Peru.jpg"
+ },
+ "labradorit": {
+  "file": "/stones/labradorit.webp",
+  "thumb": "/stones/labradorit-400.webp",
+  "author": "No machine-readable author provided. Kluka assumed (based on",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Labradoryt,_Madagaskar.JPG"
+ },
+ "aventurin": {
+  "file": "/stones/aventurin.webp",
+  "thumb": "/stones/aventurin-400.webp",
+  "author": "Ra'ike (see also: de:Benutzer:Ra'ike)",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Quarz_-_Aventurin.jpg"
+ },
+ "serdolik": {
+  "file": "/stones/serdolik.webp",
+  "thumb": "/stones/serdolik-400.webp",
+  "author": "W.carter",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Four_carnelian_cabochons.jpg"
+ },
+ "hrizolit": {
+  "file": "/stones/hrizolit.webp",
+  "thumb": "/stones/hrizolit-400.webp",
+  "author": "Steve Jurvetson",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Peridot_crystal_(51742300233).jpg"
+ },
+ "gematit": {
+  "file": "/stones/gematit.webp",
+  "thumb": "/stones/gematit-400.webp",
+  "author": "Eric Polk",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Hematite_NHMLA.png"
+ },
+ "flyuorit": {
+  "file": "/stones/flyuorit.webp",
+  "thumb": "/stones/flyuorit-400.webp",
+  "author": "Didier Descouens",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Fluorine_MHNT.MIN.2010.16.1.jpg"
+ },
+ "akvamarin": {
+  "file": "/stones/akvamarin.webp",
+  "thumb": "/stones/akvamarin-400.webp",
+  "author": "Stephanie Clifford from Arlington, VA, USA",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Beryl_-_Aquamarine_(2932215213).jpg"
+ },
+ "topaz": {
+  "file": "/stones/topaz.webp",
+  "thumb": "/stones/topaz-400.webp",
+  "author": "Didier Descouens",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Topaze_Brésil.jpg"
+ },
+ "oniks": {
+  "file": "/stones/oniks.webp",
+  "thumb": "/stones/oniks-400.webp",
+  "author": "Simon Eugster --Simon 14:41, 11 April 2006 (UTC)",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Onyx.jpg"
+ },
+ "opal": {
+  "file": "/stones/opal.webp",
+  "thumb": "/stones/opal-400.webp",
+  "author": "автор не указан",
+  "license": "Public domain",
+  "source": "https://commons.wikimedia.org/wiki/File:Opal_banded.jpg"
+ },
+ "sodalit": {
+  "file": "/stones/sodalit.webp",
+  "thumb": "/stones/sodalit-400.webp",
+  "author": "AlexeiAVA",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Sodalite_ball_2.jpg"
+ },
+ "yashma": {
+  "file": "/stones/yashma.webp",
+  "thumb": "/stones/yashma-400.webp",
+  "author": "James St. John",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Tabu_Tabu_Jasper_(South_Africa)_(41889473312).jpg"
+ },
+ "zhemchug": {
+  "file": "/stones/zhemchug.webp",
+  "thumb": "/stones/zhemchug-400.webp",
+  "author": "Friedrich Haag",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Oval_004_2025_01_17.jpg"
+ }
+}
