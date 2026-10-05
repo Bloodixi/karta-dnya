@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PairPicker from "@/components/PairPicker";
+import ZodiacSign from "@/components/ZodiacSign";
 import { getZodiac } from "@/lib/content";
 import { allPairs, compatibility, parsePair } from "@/lib/compat";
 
@@ -43,8 +44,16 @@ export default async function PairPage({ params }: PageProps<"/sovmestimost/[pai
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/sovmestimost", label: "Совместимость" }, { href: `/sovmestimost/${pair}`, label: `${p.a.name} и ${p.b.name}` }]} />
-      <h1 className="text-3xl md:text-4xl font-semibold">{p.a.symbol} {p.a.name} и {p.b.symbol} {p.b.name}: совместимость</h1>
-      <p className="text-muted mt-2">{p.a.element} и {p.b.element} · {c.verdict}</p>
+      <div className="flex items-center gap-4">
+        <div className="flex shrink-0 -space-x-3">
+          <ZodiacSign symbol={p.a.symbol} element={p.a.element} slug={`pa-${p.a.slug}`} size={72} />
+          <ZodiacSign symbol={p.b.symbol} element={p.b.element} slug={`pb-${p.b.slug}`} size={72} />
+        </div>
+        <div>
+          <h1 className="text-3xl md:text-4xl font-semibold">{p.a.name} и {p.b.name}: совместимость</h1>
+          <p className="text-muted mt-1">{p.a.element} и {p.b.element} · {c.verdict}</p>
+        </div>
+      </div>
       <div className="mt-6 grid gap-6 md:grid-cols-[280px_1fr] items-start">
         <div className="card p-6 text-center">
           <p className="display text-6xl">{c.score}%</p>

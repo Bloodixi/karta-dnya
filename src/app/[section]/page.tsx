@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ArticleCard from "@/components/ArticleCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { IconBadge } from "@/components/Icons";
 import { getArticles } from "@/lib/content";
 import { SECTIONS, SECTION_KEYS, type SectionKey } from "@/lib/site";
 
@@ -37,9 +38,10 @@ export default async function SectionPage({ params }: PageProps<"/[section]">) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: `/${key}`, label: s.title }]} />
-      <h1 className="text-4xl font-semibold">
-        {s.emoji} {s.title}
-      </h1>
+      <div className="flex items-center gap-4">
+        <IconBadge name={s.icon} className="!w-14 !h-14 shrink-0" />
+        <h1 className="text-4xl font-semibold">{s.title}</h1>
+      </div>
       <p className="text-muted mt-2 max-w-2xl text-lg">{s.description}</p>
       {tools.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">

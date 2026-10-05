@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import TarotCardView from "@/components/TarotCardView";
 import { findTarot, findTarotExtra, getTarot } from "@/lib/content";
 
 export const dynamicParams = false;
@@ -35,13 +36,10 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/taro", label: "Таро" }, { href: "/taro/karty", label: "Значения карт" }, { href: `/taro/karty/${slug}`, label: c.name }]} />
       <div className="grid gap-8 md:grid-cols-[240px_1fr] items-start">
-        <div className="tarot-card w-56 md:w-full">
-          <div>
-            <p className="text-xs uppercase tracking-widest opacity-70">{c.arcana === "major" ? `Старший аркан ${c.number}` : c.suitName}</p>
-            <p className="display text-3xl mt-2">{c.name}</p>
-            <p className="text-sm mt-3 opacity-80">{c.keywords.join(" · ")}</p>
-          </div>
-        </div>
+        <figure className="w-56 md:w-full md:sticky md:top-24">
+          <TarotCardView slug={c.slug} name={c.name} priority />
+          <figcaption className="text-xs text-muted mt-3 text-center">{c.arcana === "major" ? `Старший аркан ${c.number}` : c.suitName} · колода Райдера–Уэйта, 1909</figcaption>
+        </figure>
         <div className="prose">
           <h1 className="text-3xl md:text-4xl font-semibold !mt-0">{c.name}: значение карты Таро</h1>
           {c.description && <p>{c.description}</p>}

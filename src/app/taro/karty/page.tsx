@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import TarotCardView from "@/components/TarotCardView";
 import { getTarot } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -23,12 +24,12 @@ export default function CardsPage() {
       {major.length > 0 && (
         <section className="mt-8">
           <h2 className="text-2xl mb-3">Старшие арканы</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
             {major.map((c) => (
-              <Link key={c.slug} href={`/taro/karty/${c.slug}`} className="card card-hover p-3 text-center">
-                <p className="text-xs text-muted">{c.number}</p>
-                <p className="font-semibold">{c.name}</p>
-                <p className="text-[11px] text-muted mt-1">{c.keywords.slice(0, 2).join(", ")}</p>
+              <Link key={c.slug} href={`/taro/karty/${c.slug}`} className="text-center group">
+                <TarotCardView slug={c.slug} name={c.name} className="tcard-thumb" sizes="(min-width: 1024px) 130px, (min-width: 640px) 20vw, 28vw" />
+                <p className="font-semibold mt-2 text-sm group-hover:text-accent">{c.number}. {c.name}</p>
+                <p className="text-xs text-muted">{c.keywords.slice(0, 2).join(", ")}</p>
               </Link>
             ))}
           </div>
@@ -40,11 +41,12 @@ export default function CardsPage() {
         return (
           <section key={suit} className="mt-8">
             <h2 className="text-2xl mb-3">{list[0].suitName}</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-4">
               {list.map((c) => (
-                <Link key={c.slug} href={`/taro/karty/${c.slug}`} className="card card-hover p-3 text-center">
-                  <p className="font-semibold text-sm">{c.name}</p>
-                  <p className="text-[11px] text-muted mt-1">{c.keywords.slice(0, 2).join(", ")}</p>
+                <Link key={c.slug} href={`/taro/karty/${c.slug}`} className="text-center group">
+                  <TarotCardView slug={c.slug} name={c.name} className="tcard-thumb" sizes="(min-width: 1024px) 130px, (min-width: 640px) 20vw, 28vw" />
+                  <p className="font-semibold mt-2 text-sm group-hover:text-accent">{c.name}</p>
+                  <p className="text-xs text-muted">{c.keywords.slice(0, 2).join(", ")}</p>
                 </Link>
               ))}
             </div>

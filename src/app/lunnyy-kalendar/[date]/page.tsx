@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import MoonPhase from "@/components/MoonPhase";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, PHASES } from "@/lib/moon";
 
@@ -40,7 +41,7 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
       <h1 className="text-3xl md:text-4xl font-semibold">Лунный календарь на {formatDateRu(date)}</h1>
       <div className="card p-6 mt-6 grid gap-6 md:grid-cols-[160px_1fr] items-center">
         <div className="text-center">
-          <p className="text-7xl">{ph.emoji}</p>
+          <MoonPhase age={d.age} size={140} className="mx-auto" title={ph.name} />
           <p className="text-sm text-muted mt-2">освещённость {d.illumination}%</p>
         </div>
         <div>
@@ -50,8 +51,8 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
           <div className="grid sm:grid-cols-2 gap-3 mt-4 text-sm">
             <div className="card p-3"><p className="font-semibold">Благоприятно</p><p className="text-muted">{ld.good}</p></div>
             <div className="card p-3"><p className="font-semibold">Лучше избегать</p><p className="text-muted">{ld.avoid}</p></div>
-            <div className="card p-3"><p className="font-semibold">✂️ Стрижка</p><p className="text-muted">{ld.hair}</p></div>
-            <div className="card p-3"><p className="font-semibold">🌱 Сад и огород</p><p className="text-muted">{ld.garden}</p></div>
+            <div className="card p-3"><p className="font-semibold">Стрижка</p><p className="text-muted">{ld.hair}</p></div>
+            <div className="card p-3"><p className="font-semibold">Сад и огород</p><p className="text-muted">{ld.garden}</p></div>
           </div>
         </div>
       </div>

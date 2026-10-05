@@ -82,3 +82,46 @@ h1, h2, h3, .display { font-family: var(--font-display), Georgia, serif; letter-
 .tarot-card { aspect-ratio: 5 / 8; border-radius: 1rem; border: 2px solid var(--gold); background: linear-gradient(160deg, var(--night), color-mix(in oklab, var(--night) 60%, var(--accent))); color: #f6edd8; display: grid; place-items: center; text-align: center; padding: 1rem; box-shadow: 0 20px 50px -30px rgba(0,0,0,.6); }
 .tarot-card.reversed { transform: rotate(180deg); }
 .tarot-card.reversed > * { transform: rotate(180deg); }
+
+/* ---------- Карта Таро: иллюстрация + рубашка, переворот ---------- */
+.tcard { position: relative; aspect-ratio: 11 / 19; perspective: 1400px; }
+.tcard-inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.tcard.is-down .tcard-inner { transform: rotateY(180deg); }
+.tcard-face, .tcard-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 14px; overflow: hidden; border: 2px solid var(--gold); background: var(--night); box-shadow: 0 28px 50px -30px rgba(10, 6, 30, 0.75); }
+.tcard-back { transform: rotateY(180deg); }
+.tcard-face img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tcard.flip-in .tcard-inner { animation: tcard-flip 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s both; }
+@keyframes tcard-flip { from { transform: rotateY(180deg); } to { transform: rotateY(0deg); } }
+.tcard-float { animation: tcard-float 7s ease-in-out 1.5s infinite; }
+@keyframes tcard-float { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-8px) rotate(-0.5deg); } }
+.tcard-thumb { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+a:hover .tcard-thumb, a:focus-visible .tcard-thumb { transform: translateY(-4px) scale(1.02); }
+
+/* ---------- Ночное небо (шапка главной и тёмные блоки) ---------- */
+.night { position: relative; overflow: hidden; color: #f1ebff; background: radial-gradient(70% 90% at 80% 0%, color-mix(in oklab, var(--accent) 45%, #1b1538), transparent 65%), linear-gradient(180deg, #0f0b20 0%, #1b1538 70%, #1b1538 100%); }
+.night .text-muted { color: #b9afd8; }
+.night .chip { background: rgba(243, 231, 201, 0.12); color: #f3e7c9; }
+.night .btn-ghost { color: #f1ebff; border-color: rgba(243, 231, 201, 0.35); }
+.night .btn-ghost:hover { border-color: var(--gold); }
+.night-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 90px; background: linear-gradient(180deg, transparent, var(--bg)); pointer-events: none; }
+.starfield { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.twinkle { animation: twinkle 4.5s ease-in-out infinite; }
+.twinkle-1 { animation-delay: -1.5s; }
+.twinkle-2 { animation-delay: -3s; }
+@keyframes twinkle { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+.gold-text { color: var(--gold); }
+.display-glow { text-shadow: 0 0 40px rgba(184, 137, 43, 0.25); }
+
+/* ---------- Иконки и медальоны ---------- */
+.icon-badge { display: inline-grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 999px; color: var(--accent); background: color-mix(in oklab, var(--accent) 12%, var(--surface)); border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent); }
+.card-hover:hover .icon-badge { color: var(--accent-ink); background: var(--accent); }
+.frame-gold { border: 1px solid color-mix(in oklab, var(--gold) 55%, transparent); box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 5px color-mix(in oklab, var(--gold) 35%, transparent); }
+.ornament { display: flex; align-items: center; gap: 0.75rem; }
+.ornament::before, .ornament::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); opacity: 0.6; }
+.ornament::after { background: linear-gradient(90deg, var(--gold), transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tcard-inner { transition: none; }
+  .tcard.flip-in .tcard-inner, .tcard-float, .twinkle { animation: none; }
+  .twinkle { opacity: 0.8; }
+}

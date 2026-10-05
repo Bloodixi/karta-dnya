@@ -5,6 +5,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import HoroscopeCard from "@/components/HoroscopeCard";
 import HoroscopeGrid from "@/components/HoroscopeGrid";
 import PeriodNav from "@/components/PeriodNav";
+import ZodiacSign from "@/components/ZodiacSign";
 import { findZodiac, getStones, getZodiac } from "@/lib/content";
 import { allHoroscopes, horoscopeFor, PERIODS, PERIOD_KEYS, periodLabel, todayKey, type PeriodKey } from "@/lib/daily";
 
@@ -61,7 +62,7 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/goroskop", label: "Гороскоп" }, { href: `/goroskop/${sign}`, label: z.name }]} />
       <div className="flex items-center gap-4">
-        <span className="text-5xl">{z.symbol}</span>
+        <ZodiacSign symbol={z.symbol} element={z.element} slug={`sign-${z.slug}`} size={84} className="shrink-0" />
         <div>
           <h1 className="text-3xl md:text-4xl font-semibold">{z.name}: гороскоп на сегодня</h1>
           <p className="text-muted">{z.dates} · {z.element} · {z.planet}</p>

@@ -6,6 +6,7 @@
 - `src/app/**/page.tsx` — страницы; динамические сегменты со `generateStaticParams` и `dynamicParams = false`.
 - `src/lib/content.ts` — чтение Markdown/JSON (`getX`/`findX`); `src/lib/site.ts` — `SITE`, `SECTIONS`, `TOOLS`.
 - `src/components/` — `Breadcrumbs` (BreadcrumbList), `Faq` (FAQPage), `JsonLd`, виджеты (`YesNo`, `DestinyCalc`, `Pythagoras`, …) — client-компоненты только для интерактива.
+- Визуал: `TarotCardView` (картинка карты из `public/cards/<slug>[-160|@2x].webp`, колода Райдера–Уэйта, рубашка `CardBack`, переворот классами `.tcard`), `ZodiacSign` (SVG-медальон знака по стихии), `MoonPhase` (SVG фазы по возрасту Луны), `Starfield` + секция `.night`, `Icon`/`IconBadge` вместо эмодзи (имена в `site.ts`).
 - `src/app/sitemap.ts`, `robots.ts` — каждый новый тип страниц добавлять в sitemap.
 - `docs/seo-core.md` — 100 запросов и целевые URL; `content/plan.json` — план из 50 статей (пишутся конвейером `../board.sh content`).
 

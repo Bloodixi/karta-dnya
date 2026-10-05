@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import TarotCardView from "@/components/TarotCardView";
 import { cardOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { findTarotExtra } from "@/lib/content";
 
@@ -26,12 +27,9 @@ export default function CardOfDayPage() {
       </p>
       {today ? (
         <div className="mt-8 grid gap-8 md:grid-cols-[260px_1fr] items-start">
-          <div className={`tarot-card w-60 md:w-full ${today.reversed ? "reversed" : ""}`}>
-            <div>
-              <p className="text-xs uppercase tracking-widest opacity-70">{today.card.arcana === "major" ? "Старший аркан" : today.card.suitName}</p>
-              <p className="display text-3xl mt-2">{today.card.name}</p>
-              <p className="text-sm mt-3 opacity-80">{today.card.keywords.join(" · ")}</p>
-            </div>
+          <div className="w-60 md:w-full md:sticky md:top-24">
+            <TarotCardView slug={today.card.slug} name={today.card.name} reversed={today.reversed} flipIn priority />
+            <p className="text-xs text-muted mt-3 text-center">{today.card.arcana === "major" ? "Старший аркан" : today.card.suitName} · {today.card.keywords.slice(0, 3).join(" · ")}</p>
           </div>
           <div className="prose">
             <p className="chip">{today.reversed ? "перевёрнутое положение" : "прямое положение"}</p>

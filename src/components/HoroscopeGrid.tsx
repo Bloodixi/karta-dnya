@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ZodiacSign from "./ZodiacSign";
 import type { Horoscope, PeriodKey } from "@/lib/daily";
 
 export default function HoroscopeGrid({ items, period }: { items: Horoscope[]; period: PeriodKey }) {
@@ -9,7 +10,7 @@ export default function HoroscopeGrid({ items, period }: { items: Horoscope[]; p
       {items.map((h) => (
         <Link key={h.sign.slug} href={href(h.sign.slug)} className="card card-hover p-5">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{h.sign.symbol}</span>
+            <ZodiacSign symbol={h.sign.symbol} element={h.sign.element} slug={`grid-${h.sign.slug}`} size={48} className="shrink-0" />
             <div>
               <p className="font-semibold text-lg">{h.sign.name}</p>
               <p className="text-xs text-muted">{h.sign.dates}</p>

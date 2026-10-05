@@ -45,7 +45,7 @@ export default function Pythagoras() {
             {[1, 4, 7, 2, 5, 8, 3, 6, 9].map((n) => (
               <div key={n} className="card p-3 text-center">
                 <p className="display text-xl">{res.counts[n] ? String(n).repeat(res.counts[n]) : "—"}</p>
-                <p className="text-[11px] text-muted">{CELLS[n - 1].title}</p>
+                <p className="text-xs text-muted">{CELLS[n - 1].title}</p>
               </div>
             ))}
           </div>

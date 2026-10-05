@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import TarotCardView from "@/components/TarotCardView";
 import { getTarot } from "@/lib/content";
 
 export const dynamicParams = false;
@@ -61,11 +62,14 @@ export default async function ArcanaPage({ params }: PageProps<"/taro/arkany/[gr
       {group === "starshie" ? (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((c) => (
-            <Link key={c.slug} href={`/taro/karty/${c.slug}`} className="card card-hover p-4">
-              <p className="text-xs text-muted">{c.number}</p>
-              <p className="font-semibold text-lg">{c.name}</p>
-              <p className="text-sm text-muted mt-1">{c.keywords.join(" · ")}</p>
-              <p className="text-sm mt-2 line-clamp-3">{c.upright}</p>
+            <Link key={c.slug} href={`/taro/karty/${c.slug}`} className="card card-hover p-4 flex gap-4">
+              <span className="w-20 shrink-0"><TarotCardView slug={c.slug} name={c.name} className="tcard-thumb" sizes="80px" /></span>
+              <span>
+                <p className="text-xs text-muted">{c.number}</p>
+                <p className="font-semibold text-lg">{c.name}</p>
+                <p className="text-sm text-muted mt-1">{c.keywords.join(" · ")}</p>
+                <p className="text-sm mt-2 line-clamp-3">{c.upright}</p>
+              </span>
             </Link>
           ))}
         </div>
@@ -80,7 +84,7 @@ export default async function ArcanaPage({ params }: PageProps<"/taro/arkany/[gr
                 {list.map((c) => (
                   <Link key={c.slug} href={`/taro/karty/${c.slug}`} className="card card-hover p-3 text-center">
                     <p className="font-semibold text-sm">{c.name}</p>
-                    <p className="text-[11px] text-muted mt-1">{c.keywords.slice(0, 2).join(", ")}</p>
+                    <p className="text-xs text-muted mt-1">{c.keywords.slice(0, 2).join(", ")}</p>
                   </Link>
                 ))}
               </div>
