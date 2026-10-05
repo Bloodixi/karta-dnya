@@ -29,7 +29,7 @@ export default function Home() {
             </div>
           </div>
           {today && (
-            <Link href="/karta-dnya" className="justify-self-center w-48 md:w-56" aria-label="Карта дня">
+            <Link href="/karta-dnya" className="justify-self-center w-48 md:w-56">
               <div className={`tarot-card ${today.reversed ? "reversed" : ""}`}>
                 <div>
                   <p className="text-xs uppercase tracking-widest opacity-70">Карта дня</p>
