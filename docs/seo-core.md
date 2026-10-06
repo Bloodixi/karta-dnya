@@ -74,8 +74,8 @@
 | число судьбы по дате рождения | very-high | инструмент | /chislo-sudby |
 | нумерология по дате рождения | very-high | инструмент | /numerologiya/po-date-rozhdeniya (new) |
 | нумерология онлайн | high | инструмент | /chislo-sudby |
-| значение чисел на часах | very-high | инфо | /numerologiya/chisla-na-chasah (new) |
-| одинаковые цифры на часах | high | инфо | /numerologiya/chisla-na-chasah (new) |
+| значение чисел на часах | very-high | инфо | /numerologiya/chisla-na-chasah |
+| одинаковые цифры на часах | high | инфо | /numerologiya/chisla-na-chasah |
 | число имени расчет | high | инструмент | /numerologiya/chislo-imeni (new) |
 | квадрат пифагора | very-high | инструмент | /numerologiya/kvadrat-pifagora (new) |
 | совместимость по дате рождения | very-high | инструмент | /numerologiya/sovmestimost (new) |
@@ -84,7 +84,7 @@
 | мастер числа 11 22 33 | mid | инфо | /numerologiya/master-chisla (new) |
 | личный год нумерология | mid | инструмент | /numerologiya/lichnyy-god (new) |
 | счастливое число по дате рождения | mid | инструмент | /numerologiya/schastlivoe-chislo (new) |
-| значение числа 1111 | mid | инфо | /numerologiya/chisla-na-chasah/1111 (new) |
+| значение числа 1111 | mid | инфо | /numerologiya/chisla-na-chasah/11-11 |
 
 ## Сонник (14)
 

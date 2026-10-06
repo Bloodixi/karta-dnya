@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
-import { DIGITS, getClockNumbers } from "@/lib/clock";
+import { DIGITS, getClockNumbers, type ClockNumber } from "@/lib/clock";
 
 export const metadata: Metadata = {
   title: "Значение чисел на часах: одинаковые и зеркальные цифры",
@@ -17,20 +17,23 @@ const FAQ = [
   { q: "Считаются ли цифры на телефоне, а не на настенных часах?", a: "Да, источник не важен. Важен момент, когда вы случайно заметили время, а не искали его специально." },
 ];
 
-export default function ClockHubPage() {
-  const all = getClockNumbers();
-  const doubles = all.filter((c) => c.kind === "double");
-  const mirrors = all.filter((c) => c.kind === "mirror");
-  const Grid = ({ items }: { items: typeof all }) => (
+function Grid({ items }: { items: ClockNumber[] }) {
+  return (
     <div className="grid-lines grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6">
       {items.map((c) => (
-        <Link key={c.slug} href={`/numerologiya/chisla-na-chasah/${c.slug}`} className="p-4 text-center hover:bg-surface transition-colors">
+        <Link key={c.slug} href={`/numerologiya/chisla-na-chasah/${c.slug}`} className="p-3 sm:p-4 text-center hover:bg-surface transition-colors">
           <span className="display text-2xl block">{c.time}</span>
-          <span className="text-xs text-muted">{c.title}</span>
+          <span className="text-xs text-muted break-words">{c.title}</span>
         </Link>
       ))}
     </div>
   );
+}
+
+export default function ClockHubPage() {
+  const all = getClockNumbers();
+  const doubles = all.filter((c) => c.kind === "double");
+  const mirrors = all.filter((c) => c.kind === "mirror");
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/numerologiya/chisla-na-chasah", label: "Числа на часах" }]} />
