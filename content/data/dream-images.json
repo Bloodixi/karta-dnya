@@ -718,5 +718,485 @@
   "thumb": "/dreams/zvezdy-320.webp",
   "model": "stabilityai/stable-diffusion-xl-base-1.0",
   "prompt": "a sky full of stars over a sleeping field. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "muzh": {
+  "file": "/dreams/muzh.webp",
+  "thumb": "/dreams/muzh-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "two wedding rings resting together on a windowsill at night, soft moonlight, a cup of tea beside them. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "zhena": {
+  "file": "/dreams/zhena.webp",
+  "thumb": "/dreams/zhena-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a warm lit kitchen window seen from a dark garden, a woman's silhouette arranging flowers inside. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "paren": {
+  "file": "/dreams/paren.webp",
+  "thumb": "/dreams/paren-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a young man's silhouette leaning on a lamppost under a starry sky, holding a single flower. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "devushka": {
+  "file": "/dreams/devushka.webp",
+  "thumb": "/dreams/devushka-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a young woman in a flowing dress walking through a field of night flowers, long hair lifted by wind. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "podruga": {
+  "file": "/dreams/podruga.webp",
+  "thumb": "/dreams/podruga-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "two cups of tea on a small table by a window, two chairs turned toward each other, soft lamp glow. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "drug": {
+  "file": "/dreams/drug.webp",
+  "thumb": "/dreams/drug-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "two figures sitting side by side on a hilltop watching the night sky, one pointing at a star. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "nachalnik": {
+  "file": "/dreams/nachalnik.webp",
+  "thumb": "/dreams/nachalnik-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a tall empty leather chair behind a dark wooden desk, a single golden lamp lit, large window with city lights. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "kollega": {
+  "file": "/dreams/kollega.webp",
+  "thumb": "/dreams/kollega-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "two desks facing each other under one hanging lamp, papers and a shared cup of coffee, quiet office at night. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "uchitel": {
+  "file": "/dreams/uchitel.webp",
+  "thumb": "/dreams/uchitel-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "an empty classroom at dusk, chalkboard with faint glowing constellations drawn in chalk, one lit desk. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "sosedi": {
+  "file": "/dreams/sosedi.webp",
+  "thumb": "/dreams/sosedi-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a row of small houses at night with warm windows, two neighbors talking over a low garden fence. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "babushka": {
+  "file": "/dreams/babushka.webp",
+  "thumb": "/dreams/babushka-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "an old woman's hands knitting a golden scarf in a rocking chair by a glowing stove, warm shadows. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "dedushka": {
+  "file": "/dreams/dedushka.webp",
+  "thumb": "/dreams/dedushka-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "an elderly man sitting on a wooden bench under an old tree at night, wooden cane, pocket watch glowing. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "brat": {
+  "file": "/dreams/brat.webp",
+  "thumb": "/dreams/brat-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "two boys silhouetted on a rooftop at night, shoulder to shoulder, looking at distant city lights. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "sestra": {
+  "file": "/dreams/sestra.webp",
+  "thumb": "/dreams/sestra-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "two girls braiding each other's hair in front of a round mirror, moonlight through lace curtains. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "doch": {
+  "file": "/dreams/doch.webp",
+  "thumb": "/dreams/doch-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a small girl holding a glowing paper lantern, standing in a dark garden, looking up at stars. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "syn": {
+  "file": "/dreams/syn.webp",
+  "thumb": "/dreams/syn-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a boy launching a paper airplane from a hill at night, the plane leaving a faint golden trail. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "rody": {
+  "file": "/dreams/rody.webp",
+  "thumb": "/dreams/rody-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a glowing seed cracking open into a small golden sprout on dark soil under moonlight. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "razvod": {
+  "file": "/dreams/razvod.webp",
+  "thumb": "/dreams/razvod-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "two chairs facing away from each other on a quiet night shore, a single thread of light between them. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "beremennaya-podruga": {
+  "file": "/dreams/beremennaya-podruga.webp",
+  "thumb": "/dreams/beremennaya-podruga-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a round glowing moon over a garden, a woman's silhouette with hands resting on her belly beside a friend. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "volosy-vypadayut": {
+  "file": "/dreams/volosy-vypadayut.webp",
+  "thumb": "/dreams/volosy-vypadayut-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a wooden hairbrush with long strands of dark hair on a vanity table, a single candle, dim mirror. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "kotyata": {
+  "file": "/dreams/kotyata.webp",
+  "thumb": "/dreams/kotyata-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "three small kittens curled up in a wicker basket under a window with moonlight. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "shchenok": {
+  "file": "/dreams/shchenok.webp",
+  "thumb": "/dreams/shchenok-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a fluffy puppy sitting in tall grass at night, looking up with a tilted head, fireflies around. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "chernaya-koshka": {
+  "file": "/dreams/chernaya-koshka.webp",
+  "thumb": "/dreams/chernaya-koshka-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a black cat with glowing golden eyes sitting on a garden wall under a crescent moon. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "belaya-koshka": {
+  "file": "/dreams/belaya-koshka.webp",
+  "thumb": "/dreams/belaya-koshka-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a white cat curled on a dark velvet cushion, soft glow, a few stars through the window. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "sobaka-kusaet": {
+  "file": "/dreams/sobaka-kusaet.webp",
+  "thumb": "/dreams/sobaka-kusaet-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a dog with bared teeth guarding a gate at night, tense posture, tall shadows behind. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "ukus-zmei": {
+  "file": "/dreams/ukus-zmei.webp",
+  "thumb": "/dreams/ukus-zmei-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a snake with open fangs rising from dark leaves toward a bare ankle, moonlit garden path. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "lyagushka": {
+  "file": "/dreams/lyagushka.webp",
+  "thumb": "/dreams/lyagushka-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a green frog sitting on a lily pad in a dark pond, round moon reflected in the water. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "cherepaha": {
+  "file": "/dreams/cherepaha.webp",
+  "thumb": "/dreams/cherepaha-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a large old tortoise slowly walking across a moonlit sand dune, stars overhead. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "zhivaya-ryba": {
+  "file": "/dreams/zhivaya-ryba.webp",
+  "thumb": "/dreams/zhivaya-ryba-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a silver fish leaping out of dark water in an arc of sparkling droplets under moonlight. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "akula": {
+  "file": "/dreams/akula.webp",
+  "thumb": "/dreams/akula-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a shark's fin cutting through dark calm water, shaft of moonlight under the surface. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "delfin": {
+  "file": "/dreams/delfin.webp",
+  "thumb": "/dreams/delfin-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "two dolphins leaping together over moonlit waves, glowing spray. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "babochka": {
+  "file": "/dreams/babochka.webp",
+  "thumb": "/dreams/babochka-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a large luminous butterfly resting on an open palm, night garden, soft glow on wings. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "pchely": {
+  "file": "/dreams/pchely.webp",
+  "thumb": "/dreams/pchely-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "golden bees hovering around a honeycomb hanging from a branch, dark night background. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "osy": {
+  "file": "/dreams/osy.webp",
+  "thumb": "/dreams/osy-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a paper wasp nest under a wooden eave, a few wasps circling, moonlight on the wall. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "muravi": {
+  "file": "/dreams/muravi.webp",
+  "thumb": "/dreams/muravi-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a line of ants carrying tiny golden leaves across a stone path under moonlight. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "tarakany": {
+  "file": "/dreams/tarakany.webp",
+  "thumb": "/dreams/tarakany-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "an old kitchen shelf at night, a single lantern, small dark insects scurrying along the edge. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "chervi": {
+  "file": "/dreams/chervi.webp",
+  "thumb": "/dreams/chervi-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "earthworms in rich dark soil beside a sprouting seedling, soft moon glow from above. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "vshi": {
+  "file": "/dreams/vshi.webp",
+  "thumb": "/dreams/vshi-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a fine-toothed wooden comb lying on a white linen cloth, a few tiny golden specks, candlelight. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "golubi": {
+  "file": "/dreams/golubi.webp",
+  "thumb": "/dreams/golubi-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "two white doves perched on a stone windowsill at dusk, soft glow, scattered feathers. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "vorona": {
+  "file": "/dreams/vorona.webp",
+  "thumb": "/dreams/vorona-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a crow perched on a leafless branch against a deep indigo sky with a pale moon. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "sova": {
+  "file": "/dreams/sova.webp",
+  "thumb": "/dreams/sova-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a large owl with glowing eyes sitting on a branch in a moonlit forest. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "orel": {
+  "file": "/dreams/orel.webp",
+  "thumb": "/dreams/orel-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "an eagle soaring high over mountain peaks at night, wings spread wide against a starry sky. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "petuh": {
+  "file": "/dreams/petuh.webp",
+  "thumb": "/dreams/petuh-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a proud rooster standing on a wooden fence at the first light of dawn, stars fading. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "kuritsa": {
+  "file": "/dreams/kuritsa.webp",
+  "thumb": "/dreams/kuritsa-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a hen with small chicks in a straw nest inside a dim barn, lantern glow. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "korova": {
+  "file": "/dreams/korova.webp",
+  "thumb": "/dreams/korova-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a calm cow standing in a meadow under a full moon, a milk pail at her feet. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "svinya": {
+  "file": "/dreams/svinya.webp",
+  "thumb": "/dreams/svinya-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a plump pink pig sleeping on straw in a wooden pen, moonlight through the slats. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "slon": {
+  "file": "/dreams/slon.webp",
+  "thumb": "/dreams/slon-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a majestic elephant walking under a starry sky, a small glowing lantern hanging from its tusk. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "tigr": {
+  "file": "/dreams/tigr.webp",
+  "thumb": "/dreams/tigr-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a tiger lying calmly in tall night grass, stripes lit by moonlight, eyes glowing. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "lev": {
+  "file": "/dreams/lev.webp",
+  "thumb": "/dreams/lev-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a lion resting on a rocky ledge under a starry sky, mane lit with golden glow. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "lisa": {
+  "file": "/dreams/lisa.webp",
+  "thumb": "/dreams/lisa-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a fox with a bushy tail peering from behind a tree in a moonlit forest. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "zayats": {
+  "file": "/dreams/zayats.webp",
+  "thumb": "/dreams/zayats-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a hare sitting upright in a snowy field under a full moon, ears alert. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "olen": {
+  "file": "/dreams/olen.webp",
+  "thumb": "/dreams/olen-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a deer with tall antlers standing in a misty moonlit forest clearing. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "yozh": {
+  "file": "/dreams/yozh.webp",
+  "thumb": "/dreams/yozh-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a small hedgehog with an apple on its back walking through fallen leaves at night. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "drakon": {
+  "file": "/dreams/drakon.webp",
+  "thumb": "/dreams/drakon-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a long serpentine dragon coiled around a crescent moon among clouds, scales glowing. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "bumazhnye-dengi": {
+  "file": "/dreams/bumazhnye-dengi.webp",
+  "thumb": "/dreams/bumazhnye-dengi-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a neat stack of folded paper banknotes tied with a golden ribbon on a dark wooden table, candlelight. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "monety": {
+  "file": "/dreams/monety.webp",
+  "thumb": "/dreams/monety-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a scattering of old golden coins on a dark velvet cloth, one coin standing upright, soft glow. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "koshelek": {
+  "file": "/dreams/koshelek.webp",
+  "thumb": "/dreams/koshelek-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a worn leather wallet lying open on a cobblestone street at night, a single glowing coin inside. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "serebro": {
+  "file": "/dreams/serebro.webp",
+  "thumb": "/dreams/serebro-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a silver goblet and silver spoon on a dark table, reflecting a crescent moon. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "chasy": {
+  "file": "/dreams/chasy.webp",
+  "thumb": "/dreams/chasy-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "an antique pocket watch with an open lid floating among stars, hands glowing gold. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "kompyuter": {
+  "file": "/dreams/kompyuter.webp",
+  "thumb": "/dreams/kompyuter-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a laptop glowing on a dark desk at night, screen showing soft swirling stars, cup of tea beside it. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "avariya": {
+  "file": "/dreams/avariya.webp",
+  "thumb": "/dreams/avariya-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a crumpled paper car at a crossroads under a flickering streetlamp, scattered glowing petals on asphalt. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "avtobus": {
+  "file": "/dreams/avtobus.webp",
+  "thumb": "/dreams/avtobus-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "an old bus with warm lit windows waiting at a lonely night stop, a single lamppost. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "metro": {
+  "file": "/dreams/metro.webp",
+  "thumb": "/dreams/metro-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "an empty underground station at night, an arriving train with glowing headlights, arched tiled walls. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "aeroport": {
+  "file": "/dreams/aeroport.webp",
+  "thumb": "/dreams/aeroport-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a lone suitcase on a glossy floor of an empty airport terminal, large window with a departing plane and stars. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "vokzal": {
+  "file": "/dreams/vokzal.webp",
+  "thumb": "/dreams/vokzal-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "an old railway station platform at night, a clock, lamps, and a train with glowing windows waiting. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "bolnitsa": {
+  "file": "/dreams/bolnitsa.webp",
+  "thumb": "/dreams/bolnitsa-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a long quiet hospital corridor with one open door spilling warm golden light, a potted plant. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "operatsiya": {
+  "file": "/dreams/operatsiya.webp",
+  "thumb": "/dreams/operatsiya-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a surgeon's lamp casting a circle of soft light over an empty table, a single golden thread and needle. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "universitet": {
+  "file": "/dreams/universitet.webp",
+  "thumb": "/dreams/universitet-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a grand old university hall at night, tall arched windows, a desk with books and a glowing lamp. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "novaya-rabota": {
+  "file": "/dreams/novaya-rabota.webp",
+  "thumb": "/dreams/novaya-rabota-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a clean empty desk by a large window at dawn, a new notebook and a single pen, city waking below. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "uvolnenie": {
+  "file": "/dreams/uvolnenie.webp",
+  "thumb": "/dreams/uvolnenie-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a cardboard box with a potted plant and a framed photo on an empty desk, open door with light behind. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "zarplata": {
+  "file": "/dreams/zarplata.webp",
+  "thumb": "/dreams/zarplata-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a sealed envelope with a golden wax seal resting on a stack of papers beside a lit candle. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "novaya-kvartira": {
+  "file": "/dreams/novaya-kvartira.webp",
+  "thumb": "/dreams/novaya-kvartira-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "an empty bright room with tall windows, a set of keys on the floor, moonlight and city lights outside. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "remont": {
+  "file": "/dreams/remont.webp",
+  "thumb": "/dreams/remont-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a ladder and a paint can in a half-painted room, a wall glowing in fresh lavender, moonlight through the window. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "pereezd": {
+  "file": "/dreams/pereezd.webp",
+  "thumb": "/dreams/pereezd-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "stacked moving boxes by an open door, a truck with lit headlights outside under a starry sky. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "griby": {
+  "file": "/dreams/griby.webp",
+  "thumb": "/dreams/griby-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a wicker basket full of mushrooms on mossy forest ground, small glowing mushrooms around it. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "yabloki": {
+  "file": "/dreams/yabloki.webp",
+  "thumb": "/dreams/yabloki-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "red apples hanging on a branch under a crescent moon, one apple fallen on the grass. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "vinograd": {
+  "file": "/dreams/vinograd.webp",
+  "thumb": "/dreams/vinograd-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a heavy bunch of dark grapes hanging from a vine, dew drops catching moonlight. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "rozy": {
+  "file": "/dreams/rozy.webp",
+  "thumb": "/dreams/rozy-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a bouquet of deep red roses wrapped in paper lying on a dark windowsill under moonlight. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "tort": {
+  "file": "/dreams/tort.webp",
+  "thumb": "/dreams/tort-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a tall layered cake with glowing candles on a round table, dark room, soft golden light. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ },
+ "kofe": {
+  "file": "/dreams/kofe.webp",
+  "thumb": "/dreams/kofe-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "a steaming cup of coffee on a wooden table by a window, stars outside, swirling steam like a tiny galaxy. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
  }
 }
