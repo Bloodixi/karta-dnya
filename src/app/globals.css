@@ -71,7 +71,12 @@
 
 html { scroll-behavior: smooth; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-sans), system-ui, sans-serif; line-height: 1.6; }
-h1, h2, h3, .display { font-family: var(--font-display), Georgia, serif; font-weight: 400 !important; letter-spacing: -0.01em; line-height: 1.12; }
+h1, h2, h3, .display { font-family: var(--font-display), Georgia, serif; font-weight: 400 !important; letter-spacing: -0.01em; line-height: 1.12; text-rendering: geometricPrecision; font-synthesis: none; }
+/* У Prata очень тонкие соединительные штрихи: на светлом фоне в Windows они «рвутся». Тёмный текст чуть утолщаем обводкой. */
+:root:not([data-theme="dark"]) h1, :root:not([data-theme="dark"]) h2, :root:not([data-theme="dark"]) h3, :root:not([data-theme="dark"]) .display { -webkit-text-stroke: 0.35px currentColor; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) h1, :root:not([data-theme="light"]) h2, :root:not([data-theme="light"]) h3, :root:not([data-theme="light"]) .display { -webkit-text-stroke: 0; } }
+.night h1, .night h2, .night h3, .night .display { -webkit-text-stroke: 0; }
+h3, .display.text-xl, .display.text-lg { -webkit-text-stroke: 0.25px currentColor; }
 .mono { font-family: var(--font-mono), ui-monospace, monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .mono-text { font-family: var(--font-mono), ui-monospace, monospace; font-size: 0.8rem; color: var(--muted); }
 
