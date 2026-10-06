@@ -6,6 +6,7 @@ import { SECTIONS, type SectionKey } from "@/lib/site";
 export const alt = "Карта дня";
 export const size = OG_SIZE;
 export const contentType = "image/png";
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   const out: { section: string; slug: string }[] = [];

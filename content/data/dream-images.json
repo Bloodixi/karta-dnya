@@ -1,0 +1,8 @@
+{
+ "voda": {
+  "file": "/dreams/voda.webp",
+  "thumb": "/dreams/voda-320.webp",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "prompt": "clear still water with soft ripples reflecting a crescent moon. Dream dictionary illustration, soft dreamy watercolor and ink, deep indigo night with warm gold accents, gentle glow, minimal centered composition, calm mystical mood, no text, no letters, no watermark"
+ }
+}

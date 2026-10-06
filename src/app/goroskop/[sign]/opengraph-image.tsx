@@ -6,6 +6,7 @@ import { PERIODS, PERIOD_KEYS, type PeriodKey } from "@/lib/daily";
 export const alt = "Гороскоп";
 export const size = OG_SIZE;
 export const contentType = "image/png";
+export const dynamicParams = false;
 
 const ELEMENT: Record<string, string> = { "Огонь": "#c4583f", "Земля": "#3f7a52", "Воздух": "#7b5fc2", "Вода": "#2f6f9a" };
 

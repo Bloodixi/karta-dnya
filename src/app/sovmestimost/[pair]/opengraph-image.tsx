@@ -5,6 +5,7 @@ import { allPairs, compatibility, parsePair } from "@/lib/compat";
 export const alt = "Совместимость знаков зодиака";
 export const size = OG_SIZE;
 export const contentType = "image/png";
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return allPairs().map((p) => ({ pair: p.slug }));

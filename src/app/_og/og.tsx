@@ -15,12 +15,15 @@ export async function ogFonts() {
 }
 
 export async function cardDataUrl(slug: string): Promise<string> {
+  if (!/^[a-z0-9-]+$/.test(slug)) throw new Error("bad slug");
   const buf = await readFile(join(process.cwd(), "public", "cards", `${slug}-og.jpg`));
   return `data:image/jpeg;base64,${buf.toString("base64")}`;
 }
 
 /** Любая jpg-картинка из public как data URL (для satori: webp не поддерживается). */
 export async function publicJpgDataUrl(rel: string): Promise<string | null> {
+  // Только простые пути вида /dreams/<slug>-og.jpg: никаких «..», абсолютных путей и спецсимволов.
+  if (!/^\/[a-z0-9-]+\/[a-z0-9-]+\.jpg$/.test(rel)) return null;
   try {
     const buf = await readFile(join(process.cwd(), "public", ...rel.split("/").filter(Boolean)));
     return `data:image/jpeg;base64,${buf.toString("base64")}`;

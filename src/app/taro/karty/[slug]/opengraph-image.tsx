@@ -5,6 +5,7 @@ import { findTarot, getTarot } from "@/lib/content";
 export const alt = "Значение карты Таро";
 export const size = OG_SIZE;
 export const contentType = "image/png";
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return getTarot().map((c) => ({ slug: c.slug }));
