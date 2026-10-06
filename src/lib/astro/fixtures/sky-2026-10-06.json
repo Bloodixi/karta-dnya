@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-06T09:00:00.000Z",
+  "positions": [
+    { "body": "sun", "lon": 193.2, "sign": "vesy", "signIndex": 6, "degree": 13.2, "speed": 0.985, "retrograde": false },
+    { "body": "moon", "lon": 52.4, "sign": "telets", "signIndex": 1, "degree": 22.4, "speed": 13.1, "retrograde": false },
+    { "body": "mercury", "lon": 188.3, "sign": "vesy", "signIndex": 6, "degree": 8.3, "speed": -0.92, "retrograde": true },
+    { "body": "venus", "lon": 214.1, "sign": "skorpion", "signIndex": 7, "degree": 4.1, "speed": 1.23, "retrograde": false },
+    { "body": "mars", "lon": 227.5, "sign": "skorpion", "signIndex": 7, "degree": 17.5, "speed": 0.68, "retrograde": false },
+    { "body": "jupiter", "lon": 113.4, "sign": "rak", "signIndex": 3, "degree": 23.4, "speed": 0.12, "retrograde": false },
+    { "body": "saturn", "lon": 357.2, "sign": "ryby", "signIndex": 11, "degree": 27.2, "speed": -0.03, "retrograde": true },
+    { "body": "uranus", "lon": 62.1, "sign": "bliznetsy", "signIndex": 2, "degree": 2.1, "speed": -0.03, "retrograde": true },
+    { "body": "neptune", "lon": 0.6, "sign": "oven", "signIndex": 0, "degree": 0.6, "speed": -0.02, "retrograde": true },
+    { "body": "pluto", "lon": 301.7, "sign": "vodoley", "signIndex": 10, "degree": 1.7, "speed": 0.003, "retrograde": false }
+  ],
+  "aspects": [
+    { "a": "moon", "b": "jupiter", "kind": "sextile", "orb": 1.0, "applying": true },
+    { "a": "moon", "b": "mars", "kind": "opposition", "orb": 4.9, "applying": true },
+    { "a": "sun", "b": "mercury", "kind": "conjunction", "orb": 4.9, "applying": true },
+    { "a": "venus", "b": "pluto", "kind": "square", "orb": 2.4, "applying": false },
+    { "a": "mars", "b": "jupiter", "kind": "trine", "orb": 5.9, "applying": false },
+    { "a": "jupiter", "b": "saturn", "kind": "trine", "orb": 3.8, "applying": true }
+  ],
+  "moon": { "phase": "waning-gibbous", "illumination": 0.89, "age": 18.0, "voidOfCourse": false }
+}
