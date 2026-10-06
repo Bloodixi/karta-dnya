@@ -30,7 +30,7 @@ export default async function Image({ params }: { params: Promise<{ sign: string
         </div>
         {z && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 300, height: 300, borderRadius: 999, background: ELEMENT[z.element] || C.bg2, border: `4px solid ${C.gold}`, alignSelf: "center", boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }}>
-            <div style={{ display: "flex", fontFamily: "Cormorant", fontSize: 150, color: C.cream, lineHeight: 1 }}>{z.name.slice(0, 1)}</div>
+            <div style={{ display: "flex", fontFamily: "Prata", fontSize: 150, color: C.cream, lineHeight: 1 }}>{z.name.slice(0, 1)}</div>
           </div>
         )}
       </Frame>

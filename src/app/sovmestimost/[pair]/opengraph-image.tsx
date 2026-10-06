@@ -25,7 +25,7 @@ export default async function Image({ params }: { params: Promise<{ pair: string
         </div>
         {c && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: 300, height: 300, borderRadius: 999, border: `4px solid ${C.gold}`, background: C.bg2, alignSelf: "center" }}>
-            <div style={{ display: "flex", fontFamily: "Cormorant", fontSize: 120, color: C.cream, lineHeight: 1 }}>{c.score}%</div>
+            <div style={{ display: "flex", fontFamily: "Prata", fontSize: 120, color: C.cream, lineHeight: 1 }}>{c.score}%</div>
             <div style={{ display: "flex", fontSize: 22, color: C.muted }}>общая совместимость</div>
           </div>
         )}

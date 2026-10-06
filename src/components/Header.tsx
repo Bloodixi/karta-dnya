@@ -3,10 +3,10 @@ import { SECTIONS, SECTION_KEYS, SITE } from "@/lib/site";
 
 export default function Header() {
   return (
-    <header className="border-b border-line bg-surface/80 backdrop-blur sticky top-0 z-20">
+    <header className="border-b border-line bg-bg/85 backdrop-blur sticky top-0 z-20">
       <div className="mx-auto max-w-6xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
-        <Link href="/" className="display text-xl font-semibold tracking-tight">
-          <span className="text-gold">✦</span> {SITE.name}
+        <Link href="/" className="display text-xl tracking-tight inline-flex items-center gap-2">
+          <span aria-hidden="true" className="inline-block w-2.5 h-2.5 bg-gold rotate-45" /> {SITE.name}
         </Link>
         <nav className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted" aria-label="Разделы">
           {SECTION_KEYS.map((k) => (

@@ -21,7 +21,7 @@ export default async function Image() {
           <div style={{ display: "flex", marginTop: 28, fontSize: 24, color: C.cream }}>Карта дня Таро · толкование и совет на karta-dnya.ru</div>
         </div>
         {img && (
-          <div style={{ display: "flex", width: 262, height: 452, borderRadius: 16, border: `3px solid ${C.gold}`, overflow: "hidden", transform: today?.reversed ? "rotate(180deg)" : "none", boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }}>
+          <div style={{ display: "flex", width: 262, height: 452, borderRadius: 10, border: `3px solid ${C.gold}`, overflow: "hidden", ...(today?.reversed ? { transform: "rotate(180deg)" } : {}), boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img} width={262} height={452} alt="" style={{ objectFit: "cover" }} />
           </div>

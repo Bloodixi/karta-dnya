@@ -18,7 +18,7 @@ export function generateStaticParams() {
 
 function Photo({ src }: { src: string }) {
   return (
-    <div style={{ display: "flex", width: 440, height: 330, borderRadius: 18, border: `3px solid ${C.gold}`, overflow: "hidden", alignSelf: "center", boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }}>
+    <div style={{ display: "flex", width: 440, height: 330, borderRadius: 10, border: `3px solid ${C.gold}`, overflow: "hidden", alignSelf: "center", boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} width={440} height={330} alt="" style={{ objectFit: "cover" }} />
     </div>

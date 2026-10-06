@@ -6,8 +6,8 @@ export default function Footer() {
     <footer className="mt-16 border-t border-line bg-sunk">
       <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 md:grid-cols-3 text-sm">
         <div>
-          <p className="display text-lg font-semibold">
-            <span className="text-gold">✦</span> {SITE.name}
+          <p className="display text-lg inline-flex items-center gap-2">
+            <span aria-hidden="true" className="inline-block w-2 h-2 bg-gold rotate-45" /> {SITE.name}
           </p>
           <p className="text-muted mt-2 max-w-sm">{SITE.tagline}.</p>
           <p className="text-muted mt-3 text-xs">
@@ -16,7 +16,7 @@ export default function Footer() {
           <p className="text-muted mt-2 text-xs">Иллюстрации карт: колода Райдера–Уэйта (Памела Колман Смит, 1909), общественное достояние. Фото камней — Wikimedia Commons, авторы и лицензии указаны под каждым фото.</p>
         </div>
         <div>
-          <p className="font-semibold mb-2">Разделы</p>
+          <p className="mono mb-3">Разделы</p>
           <ul className="grid gap-1 text-muted">
             {SECTION_KEYS.map((k) => (
               <li key={k}>
@@ -28,7 +28,7 @@ export default function Footer() {
           </ul>
         </div>
         <div>
-          <p className="font-semibold mb-2">Инструменты</p>
+          <p className="mono mb-3">Инструменты</p>
           <ul className="grid gap-1 text-muted">
             {TOOLS.map((t) => (
               <li key={t.href}>

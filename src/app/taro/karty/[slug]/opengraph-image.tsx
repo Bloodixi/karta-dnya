@@ -25,7 +25,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           <div style={{ display: "flex", marginTop: 28, fontSize: 24, color: C.cream }}>Прямое и перевёрнутое положение, любовь, работа, совет</div>
         </div>
         {img && (
-          <div style={{ display: "flex", width: 262, height: 452, borderRadius: 16, border: `3px solid ${C.gold}`, overflow: "hidden", boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }}>
+          <div style={{ display: "flex", width: 262, height: 452, borderRadius: 10, border: `3px solid ${C.gold}`, overflow: "hidden", boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img} width={262} height={452} alt="" style={{ objectFit: "cover" }} />
           </div>

@@ -1,33 +1,39 @@
 @import "tailwindcss";
 
+/* Палитра «Графит и лаванда»: графитовая ночь, серебристая бумага, лаванда как единственный акцент, латунь вместо золота. */
 :root {
   color-scheme: light;
-  --bg: #f7f3ec;
-  --surface: #fffdf9;
-  --sunk: #efe8dc;
-  --ink: #1f1a2e;
-  --muted: #655d78;
-  --line: #e2d9c9;
-  --accent: #6b3fa0;
+  --bg: #ecebee;
+  --surface: #f6f5f8;
+  --sunk: #e3e1e6;
+  --ink: #222226;
+  --muted: #605d6c;
+  --line: #d6d4da;
+  --accent: #7c6a9c;
+  --accent-soft: #b3a2cc;
   --accent-ink: #ffffff;
-  --gold: #b8892b;
-  --gold-soft: #f3e7c9;
-  --night: #1b1538;
+  --gold: #a89e8c;
+  --gold-soft: #e7e3dc;
+  --night: #1b1b1f;
+  --night-2: #242428;
+  --night-ink: #ece9f1;
+  --night-muted: #a5a3ad;
+  --night-line: #333338;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --bg: #110d22;
-    --surface: #1a1433;
-    --sunk: #150f2b;
-    --ink: #ece6f7;
-    --muted: #a79dc2;
-    --line: #2d2550;
-    --accent: #b899ea;
-    --accent-ink: #15102a;
-    --gold: #e0b55a;
-    --gold-soft: #2e2540;
-    --night: #0b0818;
+    --bg: #1b1b1f;
+    --surface: #242428;
+    --sunk: #1f1f23;
+    --ink: #ece9f1;
+    --muted: #a5a3ad;
+    --line: #333338;
+    --accent: #b3a2cc;
+    --accent-soft: #8f7fb0;
+    --accent-ink: #1b1b1f;
+    --gold: #b5ab97;
+    --gold-soft: #2c2a2e;
   }
 }
 
@@ -39,18 +45,23 @@
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --color-accent-ink: var(--accent-ink);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
   --color-night: var(--night);
   --font-display: var(--font-display), Georgia, serif;
   --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
 }
 
 html { scroll-behavior: smooth; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-sans), system-ui, sans-serif; line-height: 1.6; }
-h1, h2, h3, .display { font-family: var(--font-display), Georgia, serif; letter-spacing: -0.01em; }
+h1, h2, h3, .display { font-family: var(--font-display), Georgia, serif; font-weight: 400 !important; letter-spacing: -0.01em; line-height: 1.12; }
+.mono { font-family: var(--font-mono), ui-monospace, monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.mono-text { font-family: var(--font-mono), ui-monospace, monospace; font-size: 0.8rem; color: var(--muted); }
 
+/* ---------- текст статей ---------- */
 .prose { max-width: 72ch; font-size: 1.06rem; }
 .prose h2 { font-size: 1.6rem; margin: 2rem 0 0.75rem; line-height: 1.25; }
 .prose h3 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }
@@ -60,65 +71,70 @@ h1, h2, h3, .display { font-family: var(--font-display), Georgia, serif; letter-
 .prose li { margin: 0.3rem 0; }
 .prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in oklab, var(--accent) 40%, transparent); }
 .prose a:hover { text-decoration-color: var(--accent); }
-.prose blockquote { border-left: 3px solid var(--gold); padding-left: 1rem; color: var(--muted); margin: 1rem 0; font-style: italic; }
+.prose blockquote { border-left: 2px solid var(--gold); padding-left: 1rem; color: var(--muted); margin: 1rem 0; font-style: italic; }
 .prose table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--line); padding: 0.45rem 0.7rem; text-align: left; vertical-align: top; }
-.prose th { background: var(--sunk); }
+.prose th { background: var(--sunk); font-family: var(--font-mono), monospace; font-size: 0.8rem; letter-spacing: 0.04em; }
 .prose strong { color: var(--ink); }
-.prose code { background: var(--sunk); padding: 0.1rem 0.35rem; border-radius: 0.3rem; font-size: 0.92em; }
+.prose code { background: var(--sunk); padding: 0.1rem 0.35rem; border-radius: 2px; font-size: 0.92em; font-family: var(--font-mono), monospace; }
 .prose hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
-.prose img { border-radius: 0.75rem; max-width: 100%; }
+.prose img { border-radius: 4px; max-width: 100%; }
 
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 1rem; }
-.card-hover { transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; }
-.card-hover:hover { transform: translateY(-2px); border-color: var(--gold); box-shadow: 0 10px 30px -18px rgba(27, 21, 56, 0.45); }
-.btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.1rem; border-radius: 999px; font-weight: 600; background: var(--accent); color: var(--accent-ink); transition: filter 0.15s ease; }
-.btn:hover { filter: brightness(1.08); }
-.btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
-.btn-ghost:hover { border-color: var(--gold); }
-.chip { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; padding: 0.2rem 0.65rem; border-radius: 999px; background: var(--sunk); color: var(--muted); }
+/* ---------- базовые компоненты ---------- */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; }
+.card-hover { transition: transform 0.2s ease, border-color 0.2s ease; }
+.card-hover:hover { transform: translateY(-3px); border-color: var(--gold); }
+.btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.1rem; border-radius: 2px; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); font-family: var(--font-mono), monospace; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+.btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
+.btn-ghost:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip { display: inline-flex; align-items: center; gap: 0.35rem; font-family: var(--font-mono), monospace; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.6rem; border-radius: 2px; border: 1px solid var(--line); color: var(--muted); background: transparent; }
 .stars { color: var(--gold); letter-spacing: 0.08em; }
-.hero-glow { background: radial-gradient(60% 80% at 50% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%); }
-.tarot-card { aspect-ratio: 5 / 8; border-radius: 1rem; border: 2px solid var(--gold); background: linear-gradient(160deg, var(--night), color-mix(in oklab, var(--night) 60%, var(--accent))); color: #f6edd8; display: grid; place-items: center; text-align: center; padding: 1rem; box-shadow: 0 20px 50px -30px rgba(0,0,0,.6); }
-.tarot-card.reversed { transform: rotate(180deg); }
-.tarot-card.reversed > * { transform: rotate(180deg); }
+.hero-glow { background: transparent; }
+.rule { height: 1px; background: var(--line); }
 
 /* ---------- Карта Таро: иллюстрация + рубашка, переворот ---------- */
 .tcard { position: relative; aspect-ratio: 11 / 19; perspective: 1400px; }
 .tcard-inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
 .tcard.is-down .tcard-inner { transform: rotateY(180deg); }
-.tcard-face, .tcard-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 14px; overflow: hidden; border: 2px solid var(--gold); background: var(--night); box-shadow: 0 28px 50px -30px rgba(10, 6, 30, 0.75); }
+.tcard-face, .tcard-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 10px; overflow: hidden; border: 1px solid var(--gold); background: var(--night); box-shadow: 0 30px 50px -30px rgba(10, 10, 20, 0.7); }
 .tcard-back { transform: rotateY(180deg); }
 .tcard-face img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .tcard.flip-in .tcard-inner { animation: tcard-flip 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s both; }
 @keyframes tcard-flip { from { transform: rotateY(180deg); } to { transform: rotateY(0deg); } }
 .tcard-float { animation: tcard-float 7s ease-in-out 1.5s infinite; }
-@keyframes tcard-float { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-8px) rotate(-0.5deg); } }
-.tcard-thumb { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-a:hover .tcard-thumb, a:focus-visible .tcard-thumb { transform: translateY(-4px) scale(1.02); }
+@keyframes tcard-float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-6px) rotate(-0.3deg); } }
+.tcard-thumb { transition: transform 0.2s ease; }
+a:hover .tcard-thumb, a:focus-visible .tcard-thumb, button:hover .tcard-thumb { transform: translateY(-4px) scale(1.02); }
 
-/* ---------- Ночное небо (шапка главной и тёмные блоки) ---------- */
-.night { position: relative; overflow: hidden; color: #f1ebff; background: radial-gradient(70% 90% at 80% 0%, color-mix(in oklab, var(--accent) 45%, #1b1538), transparent 65%), linear-gradient(180deg, #0f0b20 0%, #1b1538 70%, #1b1538 100%); }
-.night .text-muted { color: #b9afd8; }
-.night .chip { background: rgba(243, 231, 201, 0.12); color: #f3e7c9; }
-.night .btn-ghost { color: #f1ebff; border-color: rgba(243, 231, 201, 0.35); }
-.night .btn-ghost:hover { border-color: var(--gold); }
-.night-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 90px; background: linear-gradient(180deg, transparent, var(--bg)); pointer-events: none; }
-.starfield { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* ---------- Ночная секция: графит с тонкой линовкой ---------- */
+.night { position: relative; overflow: hidden; color: var(--night-ink); background: linear-gradient(180deg, #19191d 0%, var(--night) 100%); }
+.night::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(236, 233, 241, 0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(236, 233, 241, 0.055) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(75% 95% at 50% 40%, #000 25%, transparent 100%); }
+.night .text-muted { color: var(--night-muted); }
+.night .chip { border-color: var(--night-line); color: var(--night-muted); }
+.night .btn { background: var(--night-ink); border-color: var(--night-ink); color: var(--night); }
+.night .btn:hover { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--night); }
+.night .btn-ghost { background: transparent; color: var(--night-ink); border-color: rgba(236, 233, 241, 0.5); }
+.night .btn-ghost:hover { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--night); }
+.night-edge { height: 10px; background: var(--bg); margin-top: -10px; position: relative; z-index: 1; -webkit-mask: radial-gradient(5px at 50% 0, transparent 96%, #000) 50% / 12px 100% repeat-x; mask: radial-gradient(5px at 50% 0, transparent 96%, #000) 50% / 12px 100% repeat-x; }
+.starfield { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.6; }
 .twinkle { animation: twinkle 4.5s ease-in-out infinite; }
 .twinkle-1 { animation-delay: -1.5s; }
 .twinkle-2 { animation-delay: -3s; }
 @keyframes twinkle { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
 .gold-text { color: var(--gold); }
-.display-glow { text-shadow: 0 0 40px rgba(184, 137, 43, 0.25); }
+.display-glow { text-shadow: none; }
+.sticker { display: inline-block; font-family: var(--font-mono), monospace; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.35rem 0.6rem; border: 1px solid var(--gold); color: var(--gold); background: var(--night); border-radius: 2px; transform: rotate(-6deg); }
 
-/* ---------- Иконки и медальоны ---------- */
-.icon-badge { display: inline-grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 999px; color: var(--accent); background: color-mix(in oklab, var(--accent) 12%, var(--surface)); border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent); }
-.card-hover:hover .icon-badge { color: var(--accent-ink); background: var(--accent); }
-.frame-gold { border: 1px solid color-mix(in oklab, var(--gold) 55%, transparent); box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 5px color-mix(in oklab, var(--gold) 35%, transparent); }
-.ornament { display: flex; align-items: center; gap: 0.75rem; }
-.ornament::before, .ornament::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); opacity: 0.6; }
-.ornament::after { background: linear-gradient(90deg, var(--gold), transparent); }
+/* ---------- Иконки, медальоны, сетки ---------- */
+.icon-badge { display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 2px; color: var(--accent); background: transparent; border: 1px solid var(--line); }
+.card-hover:hover .icon-badge { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+.frame-gold { border: 1px solid var(--line); box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px color-mix(in oklab, var(--gold) 45%, transparent); }
+.ornament { display: flex; align-items: baseline; gap: 1rem; }
+.ornament::before, .ornament::after { content: none; }
+.grid-lines { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.grid-lines > * { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.zglyph { font-family: "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols", serif; color: var(--accent); font-size: 1.9rem; line-height: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   .tcard-inner { transition: none; }
