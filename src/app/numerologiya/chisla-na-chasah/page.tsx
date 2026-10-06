@@ -17,11 +17,8 @@ const FAQ = [
   { q: "Считаются ли цифры на телефоне, а не на настенных часах?", a: "Да, источник не важен. Важен момент, когда вы случайно заметили время, а не искали его специально." },
 ];
 
-export default function ClockHubPage() {
-  const all = getClockNumbers();
-  const doubles = all.filter((c) => c.kind === "double");
-  const mirrors = all.filter((c) => c.kind === "mirror");
-  const Grid = ({ items }: { items: typeof all }) => (
+function Grid({ items }: { items: ReturnType<typeof getClockNumbers> }) {
+  return (
     <div className="grid-lines grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6">
       {items.map((c) => (
         <Link key={c.slug} href={`/numerologiya/chisla-na-chasah/${c.slug}`} className="p-4 text-center hover:bg-surface transition-colors">
@@ -31,6 +28,12 @@ export default function ClockHubPage() {
       ))}
     </div>
   );
+}
+
+export default function ClockHubPage() {
+  const all = getClockNumbers();
+  const doubles = all.filter((c) => c.kind === "double");
+  const mirrors = all.filter((c) => c.kind === "mirror");
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/numerologiya/chisla-na-chasah", label: "Числа на часах" }]} />
