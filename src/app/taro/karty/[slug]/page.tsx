@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/taro/karty/[slug]
   const c = findTarot(slug);
   if (!c) return {};
   return {
-    title: `${c.name} Таро: значение карты в прямом и перевёрнутом положении`,
+    title: `${c.name} Таро: значение и толкование карты`,
     description: `${c.name}: ${c.upright}`.slice(0, 158),
     alternates: { canonical: `/taro/karty/${slug}` },
   };

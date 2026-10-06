@@ -6,7 +6,7 @@ import ThreeCards from "@/components/ThreeCards";
 import { getTarot } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Расклад Таро на три карты онлайн: прошлое, настоящее, будущее",
+  title: "Расклад Таро на три карты онлайн: прошлое и будущее",
   description: "Бесплатный онлайн-расклад Таро на три карты: прошлое, настоящее и будущее ситуации. Вытяните карты, прочитайте значения и совет, узнайте, как читать связку.",
   alternates: { canonical: "/taro/tri-karty" },
 };

@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps<"/[section]">): Pro
   const { section } = await params;
   const s = SECTIONS[section as SectionKey];
   if (!s) return {};
-  return { title: s.title, description: s.description, alternates: { canonical: `/${section}` } };
+  return { title: s.seoTitle ?? s.title, description: s.description, alternates: { canonical: `/${section}` } };
 }
 
 const SECTION_TOOLS: Partial<Record<SectionKey, { href: string; title: string }[]>> = {

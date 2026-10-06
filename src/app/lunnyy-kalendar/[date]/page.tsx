@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/lunnyy-kalendar/[
   if (!DATE_RE.test(date)) return {};
   const d = dayInfo(date);
   return {
-    title: `Лунный календарь на ${formatDateRu(date)}: ${d.lunarDay}-й лунный день, ${PHASES[d.phase].name.toLowerCase()}`,
+    title: `Лунный календарь на ${formatDateRu(date).replace(/\s*г\.$/, "")}: ${d.lunarDay}-й лунный день`,
     description: `${formatDateRu(date)}: ${d.lunarDay}-й лунный день, ${PHASES[d.phase].name}, Луна в знаке ${d.sign.name}. Что благоприятно, чего избегать, стрижка и посадки.`,
     alternates: { canonical: `/lunnyy-kalendar/${date}` },
   };

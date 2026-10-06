@@ -5,7 +5,7 @@ import Faq from "@/components/Faq";
 import Pythagoras from "@/components/Pythagoras";
 
 export const metadata: Metadata = {
-  title: "Квадрат Пифагора по дате рождения: рассчитать онлайн с расшифровкой",
+  title: "Квадрат Пифагора по дате рождения: рассчитать онлайн",
   description: "Калькулятор квадрата Пифагора (психоматрицы) по дате рождения: рабочие числа, 9 ячеек и расшифровка характера, энергии, здоровья, логики и памяти.",
   alternates: { canonical: "/kvadrat-pifagora" },
 };

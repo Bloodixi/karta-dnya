@@ -13,7 +13,7 @@ const mono = IBM_Plex_Mono({ variable: "--font-mono", subsets: ["latin", "cyrill
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
-  title: { default: `${SITE.name} — ${SITE.tagline}`, template: `%s — ${SITE.name}` },
+  title: { default: `${SITE.name} — Таро, астрология, нумерология и сонник`, template: `%s — ${SITE.name}` },
   description: SITE.description,
   openGraph: { type: "website", locale: SITE.locale, siteName: SITE.name },
   robots: { index: true, follow: true },

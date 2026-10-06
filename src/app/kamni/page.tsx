@@ -6,7 +6,7 @@ import { getArticles, getStoneImages, getStones } from "@/lib/content";
 import { SECTIONS } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Камни и талисманы: свойства минералов и кому они подходят",
+  title: "Камни и талисманы: свойства минералов и кому подходят",
   description: "Каталог камней и минералов: свойства, цвет, чакра, кому подходит по знаку зодиака, как носить и очищать. Аметист, розовый кварц, турмалин, цитрин и другие.",
   alternates: { canonical: "/kamni" },
 };

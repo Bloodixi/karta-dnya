@@ -7,7 +7,7 @@ import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import StonePhoto from "@/components/StonePhoto";
 import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
-import { SECTIONS, SECTION_KEYS, SITE, type SectionKey } from "@/lib/site";
+import { pageTitle, SECTIONS, SECTION_KEYS, SITE, type SectionKey } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -28,12 +28,12 @@ export async function generateMetadata({ params }: PageProps<"/[section]/[slug]"
   }
   if (key === "kamni") {
     const s = findStone(slug);
-    if (s) return { title: `${s.name}: свойства камня, кому подходит и как носить`, description: s.description.slice(0, 160), alternates: { canonical: `/kamni/${slug}` } };
+    if (s) return { title: `${s.name}: свойства, кому подходит и как носить`, description: s.description.slice(0, 160), alternates: { canonical: `/kamni/${slug}` } };
   }
   const a = await getArticle(key, slug);
   if (!a) return {};
   return {
-    title: a.title,
+    title: pageTitle(a.title),
     description: a.description,
     alternates: { canonical: `/${section}/${slug}` },
     openGraph: { type: "article", title: a.title, description: a.description, publishedTime: a.date },

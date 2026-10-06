@@ -9,7 +9,7 @@ import { dayInfo, LUNAR_DAYS, monthDays, PHASES } from "@/lib/moon";
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
-  title: "Лунный календарь на сегодня: лунный день, фаза Луны и рекомендации",
+  title: "Лунный календарь на сегодня: лунный день и фаза Луны",
   description: "Лунный календарь на сегодня и на месяц: фаза Луны, лунный день, знак Луны, благоприятные дни для стрижки, посадок и важных дел.",
   alternates: { canonical: "/lunnyy-kalendar" },
 };
