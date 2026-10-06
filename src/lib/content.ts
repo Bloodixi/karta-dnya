@@ -23,6 +23,10 @@ export type ArticleMeta = {
 };
 export type Article = ArticleMeta & { html: string; text: string };
 
+export function readJsonData<T>(name: string, fallback: T): T {
+  return readJson(name, fallback);
+}
+
 function readJson<T>(name: string, fallback: T): T {
   try {
     return JSON.parse(fs.readFileSync(path.join(DATA, name), "utf8")) as T;

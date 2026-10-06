@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getArticles, getDreams, getStones, getTarot, getZodiac } from "@/lib/content";
 import { allPairs } from "@/lib/compat";
+import { getClockNumbers } from "@/lib/clock";
 import { PERIOD_KEYS, shiftKey, todayKey } from "@/lib/daily";
 import { SECTION_KEYS, SITE } from "@/lib/site";
 
@@ -20,6 +21,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: u("/taro/arkany/starshie"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: u("/taro/arkany/mladshie"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
   ];
+  out.push({ url: u("/numerologiya/chisla-na-chasah"), lastModified: now, changeFrequency: "monthly", priority: 0.8 });
+  for (const c of getClockNumbers()) out.push({ url: u(`/numerologiya/chisla-na-chasah/${c.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
   for (const s of SECTION_KEYS) out.push({ url: u(`/${s}`), lastModified: now, changeFrequency: "weekly", priority: 0.8 });
   const periods = PERIOD_KEYS.filter((p) => p !== "segodnya");
   for (const p of periods) out.push({ url: u(`/goroskop/${p}`), lastModified: now, changeFrequency: "daily", priority: 0.8 });
