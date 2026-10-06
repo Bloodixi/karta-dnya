@@ -11,9 +11,10 @@ export const SITE = {
 
 export type SectionKey = "taro" | "astrologiya" | "numerologiya" | "sonnik" | "praktiki" | "kamni";
 
-export const SECTIONS: Record<SectionKey, { title: string; short: string; description: string; emoji: string; icon: IconName }> = {
+export const SECTIONS: Record<SectionKey, { title: string; short: string; seoTitle?: string; description: string; emoji: string; icon: IconName }> = {
   taro: {
     title: "Таро",
+    seoTitle: "Таро: значения карт, расклады и гадания онлайн",
     short: "Таро",
     emoji: "🃏",
     icon: "card",
@@ -42,6 +43,7 @@ export const SECTIONS: Record<SectionKey, { title: string; short: string; descri
   },
   praktiki: {
     title: "Практики",
+    seoTitle: "Практики: медитации, ритуалы и работа с намерением",
     short: "Практики",
     emoji: "🕯️",
     icon: "candle",
@@ -57,6 +59,25 @@ export const SECTIONS: Record<SectionKey, { title: string; short: string; descri
 };
 
 export const SECTION_KEYS = Object.keys(SECTIONS) as SectionKey[];
+
+/** Предел длины <title> вместе с суффиксом «— Карта дня» из layout. */
+export const TITLE_MAX = 65;
+
+/**
+ * Title для generateMetadata: короткий — с суффиксом бренда по шаблону layout; длиннее 53 символов,
+ * но помещающийся в 65 — без суффикса (`absolute`); совсем длинный режется по последнему знаку препинания.
+ */
+export function pageTitle(title: string): string | { absolute: string } {
+  const t = title.trim();
+  const suffix = ` — ${SITE.name}`.length;
+  if (t.length + suffix <= TITLE_MAX) return t;
+  if (t.length <= TITLE_MAX) return { absolute: t };
+  const limit = TITLE_MAX - suffix;
+  const cut = Math.max(...[":", ";", " —", ","].map((p) => t.lastIndexOf(p, limit)));
+  if (cut >= 25) return t.slice(0, cut).trim();
+  const space = t.lastIndexOf(" ", TITLE_MAX);
+  return { absolute: t.slice(0, space > 25 ? space : TITLE_MAX).trim() };
+}
 
 export const TOOLS: { href: string; title: string; text: string; emoji: string; icon: IconName }[] = [
   { href: "/karta-dnya", title: "Карта дня", text: "Одна карта Таро на сегодня и короткое толкование", emoji: "🃏", icon: "card" },

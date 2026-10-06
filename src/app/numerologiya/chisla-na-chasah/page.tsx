@@ -5,7 +5,7 @@ import Faq from "@/components/Faq";
 import { DIGITS, getClockNumbers } from "@/lib/clock";
 
 export const metadata: Metadata = {
-  title: "Значение чисел на часах: одинаковые и зеркальные цифры",
+  title: "Числа на часах: значение одинаковых и зеркальных цифр",
   description: "Что значат одинаковые и зеркальные числа на часах: 11:11, 22:22, 12:12, 00:00, 21:21 и ещё 30 сочетаний. Значение каждой цифры, любовь, деньги и совет.",
   alternates: { canonical: "/numerologiya/chisla-na-chasah" },
 };

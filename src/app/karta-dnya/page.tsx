@@ -8,7 +8,7 @@ import { findTarotExtra } from "@/lib/content";
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
-  title: "Карта дня Таро: вытянуть бесплатно и прочитать толкование",
+  title: "Карта дня Таро: вытянуть бесплатно с толкованием",
   description: "Карта дня Таро на сегодня: одна карта, её значение в прямом и перевёрнутом положении, совет на день. Обновляется каждую полночь.",
   alternates: { canonical: "/karta-dnya" },
 };

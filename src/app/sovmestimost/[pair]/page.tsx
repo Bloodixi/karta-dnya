@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps<"/sovmestimost/[pai
   if (!p) return {};
   const c = compatibility(p.a, p.b);
   return {
-    title: `${p.a.name} и ${p.b.name}: совместимость в любви, дружбе и работе — ${c.score}%`,
+    title: `${p.a.name} и ${p.b.name}: совместимость в любви и дружбе`,
     description: `Совместимость ${p.a.name} и ${p.b.name}: ${c.score}%, ${c.verdict}. Как складываются любовь, быт и работа, на что обратить внимание и совет паре.`,
     alternates: { canonical: `/sovmestimost/${pair}` },
   };

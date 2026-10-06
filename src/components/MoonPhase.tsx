@@ -12,8 +12,7 @@ export default function MoonPhase({ age, size = 96, className = "", title }: { a
   const termSweep = waxing ? (k > 0 ? 0 : 1) : k > 0 ? 1 : 0;
   const lit = `M50 ${50 - r} A${r} ${r} 0 0 ${limbSweep} 50 ${50 + r} A${rx} ${r} 0 0 ${termSweep} 50 ${50 - r} Z`;
   return (
-    <svg viewBox="0 0 100 100" width={size} height={size} className={className} role={title ? "img" : undefined} aria-hidden={title ? undefined : "true"} focusable="false">
-      {title && <title>{title}</title>}
+    <svg viewBox="0 0 100 100" width={size} height={size} className={className} role={title ? "img" : undefined} aria-label={title} aria-hidden={title ? undefined : "true"} focusable="false">
       <defs>
         <radialGradient id="moon-lit" cx="0.4" cy="0.35" r="0.8">
           <stop offset="0" stopColor="#f6f3fa" />

@@ -6,7 +6,7 @@ import { getZodiac } from "@/lib/content";
 import { compatibility } from "@/lib/compat";
 
 export const metadata: Metadata = {
-  title: "Совместимость знаков зодиака: таблица пар в любви и браке",
+  title: "Совместимость знаков зодиака: таблица пар в любви",
   description: "Совместимость знаков зодиака в любви, дружбе и работе: выберите два знака и получите процент и разбор пары. Полная таблица 12×12 и лучшие пары.",
   alternates: { canonical: "/sovmestimost" },
 };

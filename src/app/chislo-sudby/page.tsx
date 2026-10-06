@@ -5,7 +5,7 @@ import DestinyCalc from "@/components/DestinyCalc";
 import { getArticles, getNumerology } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Число судьбы по дате рождения: калькулятор онлайн и значение",
+  title: "Число судьбы по дате рождения: калькулятор и значение",
   description: "Рассчитайте число судьбы по дате рождения онлайн за секунду и узнайте его значение: характер, любовь, работа, мастер-числа 11, 22 и 33.",
   alternates: { canonical: "/chislo-sudby" },
 };
