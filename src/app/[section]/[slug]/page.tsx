@@ -6,7 +6,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import StonePhoto from "@/components/StonePhoto";
-import { findDream, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
+import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
 import { SECTIONS, SECTION_KEYS, SITE, type SectionKey } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -104,14 +104,25 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
 
 function DreamPage({ slug }: { slug: string }) {
   const d = findDream(slug)!;
+  const img = findDreamImage(slug);
   const others = getDreams().filter((x) => x.slug !== slug).slice(0, 12);
   const moodLabel = d.mood === "warning" ? "предупреждение" : d.mood === "good" ? "благоприятный знак" : "нейтральный символ";
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/sonnik", label: "Сонник" }, { href: `/sonnik/${slug}`, label: d.word }]} />
-      <h1 className="text-3xl md:text-4xl font-semibold">К чему снится {d.word.toLowerCase()}</h1>
-      <p className="chip mt-3">🌙 {moodLabel}</p>
-      <p className="text-lg mt-4 max-w-[72ch]">{d.short}</p>
+      <div className="grid gap-8 md:grid-cols-[360px_1fr] items-start">
+        {img && (
+          <figure className="frame-gold rounded-2xl overflow-hidden bg-surface">
+            {/* eslint-disable-next-line @next/next/no-img-element -- next/image без оптимизации не даёт srcset */}
+            <img src={img.file} srcSet={`${img.thumb} 320w, ${img.file} 640w`} sizes="(min-width: 768px) 360px, 90vw" width={640} height={480} alt={`${d.word}: иллюстрация символа сна`} loading="eager" fetchPriority="high" decoding="async" className="w-full h-auto block" />
+          </figure>
+        )}
+        <div>
+          <h1 className="text-3xl md:text-4xl font-semibold">К чему снится {d.word.toLowerCase()}</h1>
+          <p className="chip mt-3">{moodLabel}</p>
+          <p className="text-lg mt-4 max-w-[72ch]">{d.short}</p>
+        </div>
+      </div>
       <div className="prose mt-4">
         <p>{d.meaning}</p>
         {d.variants.length > 0 && (

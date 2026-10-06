@@ -19,6 +19,16 @@ export async function cardDataUrl(slug: string): Promise<string> {
   return `data:image/jpeg;base64,${buf.toString("base64")}`;
 }
 
+/** Любая jpg-картинка из public как data URL (для satori: webp не поддерживается). */
+export async function publicJpgDataUrl(rel: string): Promise<string | null> {
+  try {
+    const buf = await readFile(join(process.cwd(), "public", ...rel.split("/").filter(Boolean)));
+    return `data:image/jpeg;base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
 export const C = { bg: "#1b1538", bg2: "#2a1f5a", ink: "#f1ebff", muted: "#b9afd8", gold: "#d9b45a", cream: "#f3e7c9", accent: "#b899ea" };
 
 export function Stars() {

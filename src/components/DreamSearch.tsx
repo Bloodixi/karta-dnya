@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-export default function DreamSearch({ items }: { items: { slug: string; word: string; short: string }[] }) {
+export default function DreamSearch({ items }: { items: { slug: string; word: string; short: string; thumb?: string }[] }) {
   const [q, setQ] = useState("");
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -22,9 +22,15 @@ export default function DreamSearch({ items }: { items: { slug: string; word: st
       <p className="text-xs text-muted mt-2">Символов: {list.length}</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((d) => (
-          <Link key={d.slug} href={`/sonnik/${d.slug}`} className="card card-hover p-4">
-            <p className="font-semibold">{d.word}</p>
-            <p className="text-sm text-muted mt-1 line-clamp-2">{d.short}</p>
+          <Link key={d.slug} href={`/sonnik/${d.slug}`} className="card card-hover p-3 flex gap-3 items-center">
+            {d.thumb && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={d.thumb} width={96} height={72} alt="" loading="lazy" decoding="async" className="w-24 h-18 shrink-0 rounded-lg object-cover aspect-[4/3]" />
+            )}
+            <span>
+              <p className="font-semibold">{d.word}</p>
+              <p className="text-sm text-muted mt-1 line-clamp-2">{d.short}</p>
+            </span>
           </Link>
         ))}
       </div>

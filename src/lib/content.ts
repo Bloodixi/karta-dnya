@@ -103,6 +103,9 @@ export const getHoroscopeBank = () => readJson<HoroscopeBank>("horoscope-bank.js
 export const getNumerology = () => readJson<NumerologyNumber[]>("numerology.json", []);
 export const getDreams = () => readJson<Dream[]>("dreams.json", []).sort((a, b) => a.word.localeCompare(b.word, "ru"));
 export const getStones = () => readJson<Stone[]>("stones.json", []);
+export type DreamImage = { file: string; thumb: string; model: string };
+export const getDreamImages = () => readJson<Record<string, DreamImage>>("dream-images.json", {});
+export const findDreamImage = (slug: string): DreamImage | null => getDreamImages()[slug] || null;
 export type StoneImage = { file: string; thumb: string; author: string; license: string; source: string };
 export const getStoneImages = () => readJson<Record<string, StoneImage>>("stone-images.json", {});
 export const findStoneImage = (slug: string): StoneImage | null => getStoneImages()[slug] || null;
