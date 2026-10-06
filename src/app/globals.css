@@ -119,7 +119,7 @@ h3, .display.text-xl, .display.text-lg { -webkit-text-stroke: 0.25px currentColo
 .tcard-face, .tcard-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 10px; overflow: hidden; border: 1px solid var(--gold); background: var(--night); box-shadow: 0 30px 50px -30px rgba(10, 10, 20, 0.7); }
 .tcard-back { transform: rotateY(180deg); }
 .tcard-face img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.tcard.flip-in .tcard-inner { animation: tcard-flip 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s both; }
+.tcard.flip-in .tcard-inner { animation: tcard-flip 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) var(--flip-delay, 0.1s) both; }
 @keyframes tcard-flip { from { transform: rotateY(180deg); } to { transform: rotateY(0deg); } }
 .tcard-float { animation: tcard-float 7s ease-in-out 1.5s infinite; }
 @keyframes tcard-float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-6px) rotate(-0.3deg); } }

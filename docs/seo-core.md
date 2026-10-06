@@ -20,9 +20,9 @@
 | Запрос | Частотность (оценка) | Интент (инфо/инструмент) | Целевая страница |
 |---|---|---|---|
 | карта дня таро | very-high | инструмент | /karta-dnya |
-| таро онлайн | very-high | инструмент | /taro/rasklady (new) |
-| гадание на картах таро онлайн бесплатно | very-high | инструмент | /taro/rasklady (new) |
-| расклад таро на любовь | high | инструмент | /taro/rasklady/lyubov (new) |
+| таро онлайн | very-high | инструмент | /taro/rasklady |
+| гадание на картах таро онлайн бесплатно | very-high | инструмент | /taro/rasklady |
+| расклад таро на любовь | high | инструмент | /taro/rasklady/na-lyubov |
 | таро да нет | high | инструмент | /taro/da-net (new) |
 | значение карт таро | high | инфо | /taro/karty |
 | старшие арканы таро значение | high | инфо | /taro/starshie-arkany (new) |
@@ -32,10 +32,10 @@
 | смерть таро значение | mid | инфо | /taro/karty/smert |
 | влюбленные таро значение | mid | инфо | /taro/karty/vlyublennye |
 | расклад на три карты | high | инфо | /taro/rasklad-na-tri-karty (есть статья) |
-| кельтский крест расклад | mid | инфо | /taro/rasklady/keltskiy-krest (new) |
+| кельтский крест расклад | mid | инфо | /taro/rasklady/keltskiy-krest |
 | как гадать на картах таро | high | инфо | /taro/kak-nachat-gadat (есть статья) |
 | перевернутые карты таро | mid | инфо | /taro/perevernutye-karty (new) |
-| расклад на отношения | high | инструмент | /taro/rasklady/otnosheniya (new) |
+| расклад на отношения | high | инструмент | /taro/rasklady/na-otnosheniya |
 | таро на сегодня | high | инструмент | /karta-dnya |
 | масти таро значение | low | инфо | /taro/masti (new) |
 | какую колоду таро выбрать | low | инфо | /taro/kolody (new) |

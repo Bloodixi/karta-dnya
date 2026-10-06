@@ -35,7 +35,7 @@ export default function YesNoPage() {
           <li>Спрашивайте про себя и свои решения, а не про чужие мысли.</li>
           <li>Не переспрашивайте сразу: первая карта честнее десятой.</li>
         </ul>
-        <p>Для более подробного ответа посмотрите <Link href="/taro/rasklad-tri-karty">расклад на три карты</Link> или прочитайте <Link href="/taro/kak-nachat-gadat-na-taro">руководство для новичков</Link>. Значения всех карт собраны в <Link href="/taro/karty">каталоге карт</Link>.</p>
+        <p>Для более подробного ответа посмотрите <Link href="/taro/rasklad-tri-karty">расклад на три карты</Link> или прочитайте <Link href="/taro/kak-nachat-gadat-na-taro">руководство для новичков</Link>. Значения всех карт собраны в <Link href="/taro/karty">каталоге карт</Link>, а другие схемы — на странице <Link href="/taro/rasklady">все расклады Таро онлайн</Link>.</p>
       </section>
       <Faq items={FAQ} />
     </div>

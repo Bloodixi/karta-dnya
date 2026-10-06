@@ -102,6 +102,16 @@ export type TarotExtra = { yesno: string; yesnoWhy: string; health: string; posi
 export const getTarot = () => readJson<TarotCard[]>("tarot.json", []);
 export const getTarotExtra = () => readJson<Record<string, TarotExtra>>("tarot-extra.json", {});
 export const findTarotExtra = (slug: string): TarotExtra | null => getTarotExtra()[slug] || null;
+export type SpreadPosition = { name: string; meaning: string };
+export type Spread = {
+  slug: string; title: string; query: string; theme: string; short: string; intro: string[];
+  positions: SpreadPosition[]; howTo: string[]; faq: Faq[];
+  /** Если задан — расклад живёт на отдельной странице (например /taro/tri-karty), своя страница в каталоге не создаётся. */
+  href?: string;
+};
+export const getSpreads = () => readJson<Spread[]>("spreads.json", []);
+export const findSpread = (slug: string): Spread | null => getSpreads().find((s) => s.slug === slug && !s.href) || null;
+export const spreadHref = (s: Spread) => s.href || `/taro/rasklady/${s.slug}`;
 export const getZodiac = () => readJson<Zodiac[]>("zodiac.json", []);
 export const getHoroscopeBank = () => readJson<HoroscopeBank>("horoscope-bank.json", { general: [], love: [], career: [], health: [], advice: [], mood: [] });
 export const getNumerology = () => readJson<NumerologyNumber[]>("numerology.json", []);
