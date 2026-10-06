@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SECTIONS, SECTION_KEYS, SITE } from "@/lib/site";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
   return (
@@ -15,7 +16,8 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-        <div className="ml-auto flex gap-2 text-sm">
+        <div className="ml-auto flex items-center gap-2 text-sm">
+          <ThemeToggle />
           <Link href="/karta-dnya" className="btn btn-ghost !py-1.5 !px-3">
             Карта дня
           </Link>
