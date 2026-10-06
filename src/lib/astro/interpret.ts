@@ -232,7 +232,8 @@ function aspectFact(data: AstroData, a: Body, b: Body, kind: AspectKind): string
   const pa = data.planets[a], pb = data.planets[b], asp = data.aspects[kind];
   const found = data.aspectPhrases.find((p) => (p.a === a && p.b === b || p.a === b && p.b === a) && p.kind === kind);
   const body = (found ? found.text.split(/(?<=[.!?])\s/)[0].replace(/[.!?]$/, "") : asp?.text ?? "").replace(":", " —");
-  return `${pa?.name ?? a} ${asp?.withText ?? kind} ${pb?.instrumental ?? b}: ${body ? body[0].toLowerCase() + body.slice(1) : ""}`.trim();
+  const properNoun = Object.values(data.planets).some((p) => body.startsWith(p.name));
+  return `${pa?.name ?? a} ${asp?.withText ?? kind} ${pb?.instrumental ?? b}: ${body && !properNoun ? body[0].toLowerCase() + body.slice(1) : body}`.trim();
 }
 
 /** Нейтральная фраза сферы (house "any") — когда событий в сфере нет. */
@@ -366,6 +367,29 @@ export function computeScores(events: SignEvent[], sky: Sky, data: AstroData = g
 
 // ---------- «Что на небе» ----------
 
+/** Медленные планеты: их взаимные аспекты длятся месяцами и не годятся как факт дня. */
+const SLOW_BODIES = new Set<Body>(["jupiter", "saturn", "uranus", "neptune", "pluto"]);
+/** Дальние планеты: их взаимные аспекты держатся годами — не факт недели. */
+const OUTER_BODIES = new Set<Body>(["uranus", "neptune", "pluto"]);
+
+/** Винительный падеж знака («переходит в Овна», «во Льва»): у одушевлённых совпадает с родительным, у остальных — с именительным. */
+const ACCUSATIVE: Record<SignSlug, string> = {
+  oven: "Овна", telets: "Тельца", bliznetsy: "Близнецы", rak: "Рака", lev: "Льва", deva: "Деву",
+  vesy: "Весы", skorpion: "Скорпиона", strelets: "Стрельца", kozerog: "Козерога", vodoley: "Водолея", ryby: "Рыбы",
+};
+
+/** «в Овне», но «во Льве»/«во Льва». */
+function inSign(form: string): string {
+  return `${/^Ль/.test(form) ? "во" : "в"} ${form}`;
+}
+
+/** Какие ингрессы — факт периода: день — только Луна; неделя и месяц — всё, кроме Луны; год — медленные планеты. */
+function ingressMatters(body: Body, pg: PeriodGroup): boolean {
+  if (pg === "day") return body === "moon";
+  if (pg === "year") return SLOW_BODIES.has(body);
+  return body !== "moon";
+}
+
 /**
  * 3–5 фактов простыми словами: Луна и фаза, ретроградные планеты (с датой окончания, если среди allEvents есть retro-end),
  * ингрессы и лунации периода, самые точные аспекты, сезон Солнца.
@@ -382,7 +406,7 @@ export function skyFacts(sky: Sky, period: PeriodKey, key: string, periodEvents:
 
   if (pg === "day" && moon) {
     const ms = sign(moon.sign);
-    if (ms) facts.push(`Луна в ${ms.locative}: ${ms.moonText}`);
+    if (ms) facts.push(`Луна ${inSign(ms.locative)}: ${ms.moonText}`);
     const phase = data.texts.phases[sky.moon.phase];
     if (phase) facts.push(cap(phase));
     if (sky.moon.voidOfCourse && data.texts.voidOfCourse) facts.push(data.texts.voidOfCourse);
@@ -400,7 +424,7 @@ export function skyFacts(sky: Sky, period: PeriodKey, key: string, periodEvents:
     const end = allEvents.filter((e) => e.kind === "retro-end" && e.body === p.body && dayIndex(mskKey(e.date)) >= dayIndex(key)).sort((a, b) => a.date.localeCompare(b.date))[0];
     const until = end ? ` до ${dateRu(mskKey(end.date))}` : "";
     const tip = P[p.body]?.retroShort ?? "самое время перепроверять, а не начинать";
-    facts.push(`${name(p.body)} ретрограден${p.body === "venus" ? "а" : ""}${until}: ${tip}`);
+    facts.push(`${name(p.body)} ${p.body === "venus" ? "ретроградна" : "ретрограден"}${until}: ${tip}`);
   }
 
   // Ингрессы и лунации внутри периода (для месяца и года — главные события).
@@ -408,20 +432,24 @@ export function skyFacts(sky: Sky, period: PeriodKey, key: string, periodEvents:
     if (facts.length >= 5) break;
     const d = dateRu(mskKey(e.date));
     const es = sign(e.sign);
-    if (e.kind === "ingress" && es && (pg !== "day" || e.body === "moon")) {
-      facts.push(`${name(e.body)} переходит в ${es.name} ${d}: ${P[e.body]?.themes[0] ?? "перемены"} — ${es.ingressText}`);
-    } else if (e.kind === "new-moon") {
-      facts.push(`Новолуние ${d}${es ? ` в ${es.locative}` : ""}: время намерений и тихого старта`);
-    } else if (e.kind === "full-moon") {
-      facts.push(`Полнолуние ${d}${es ? ` в ${es.locative}` : ""}: итоги видны отчётливее, чувства ярче`);
-    } else if (e.kind === "retro-start" && pg !== "day") {
+    if (e.kind === "ingress" && es && ingressMatters(e.body, pg)) {
+      facts.push(`${name(e.body)} переходит ${inSign(ACCUSATIVE[e.sign!] ?? es.name)} ${d}: ${P[e.body]?.themes[0] ?? "перемены"} — ${es.ingressText}`);
+    } else if (e.kind === "new-moon" && pg !== "year") {
+      facts.push(`Новолуние ${d}${es ? ` ${inSign(es.locative)}` : ""}: время намерений и тихого старта`);
+    } else if (e.kind === "full-moon" && pg !== "year") {
+      facts.push(`Полнолуние ${d}${es ? ` ${inSign(es.locative)}` : ""}: итоги видны отчётливее, чувства ярче`);
+    } else if (e.kind === "retro-start" && pg !== "day" && (pg !== "year" || SLOW_BODIES.has(e.body))) {
       facts.push(`${name(e.body)} разворачивается в ретроградное движение ${d}: пересматривайте, а не начинайте`);
     }
   }
 
   // Самые точные аспекты (сначала с Луной/Солнцем — для дня, иначе любые).
+  // В дневных прогнозах аспекты между медленными планетами (Юпитер…Плутон между собой) не показываем: они держатся месяцами
+  // и в «что на небе сегодня» выглядят ложно-свежими; остаются Луна, Солнце и быстрые планеты.
   const sorted = sky.aspects.slice().sort((a, b) => a.orb - b.orb);
-  const relevant = pg === "day" ? sorted : sorted.filter((a) => a.a !== "moon" && a.b !== "moon");
+  const relevant = pg === "day"
+    ? sorted.filter((a) => !(SLOW_BODIES.has(a.a) && SLOW_BODIES.has(a.b)))
+    : sorted.filter((a) => a.a !== "moon" && a.b !== "moon" && (pg !== "week" || !(OUTER_BODIES.has(a.a) && OUTER_BODIES.has(a.b))));
   for (const a of relevant.slice(0, 2)) {
     if (facts.length >= 5) break;
     facts.push(aspectFact(data, a.a, a.b, a.kind));
@@ -430,11 +458,11 @@ export function skyFacts(sky: Sky, period: PeriodKey, key: string, periodEvents:
   // Сезон Солнца и заполнение до трёх фактов.
   if (facts.length < 5 && sun && pg !== "day") {
     const ss = sign(sun.sign);
-    if (ss) facts.push(`Солнце в ${ss.locative}: ${ss.sunText}`);
+    if (ss) facts.push(`Солнце ${inSign(ss.locative)}: ${ss.sunText}`);
   }
   if (facts.length < 3 && sun) {
     const ss = sign(sun.sign);
-    if (ss && !facts.some((f) => f.startsWith("Солнце в"))) facts.push(`Солнце в ${ss.locative}: ${ss.sunText}`);
+    if (ss && !facts.some((f) => f.startsWith("Солнце в"))) facts.push(`Солнце ${inSign(ss.locative)}: ${ss.sunText}`);
   }
   let i = 0;
   while (facts.length < 3 && i < data.texts.neutralSky.length) facts.push(data.texts.neutralSky[i++]);
