@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: u("/lunnyy-kalendar"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: u("/taro/tri-karty"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/kvadrat-pifagora"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: u("/astrologiya/natalnaya-karta"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/taro/arkany/starshie"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: u("/taro/arkany/mladshie"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
   ];
