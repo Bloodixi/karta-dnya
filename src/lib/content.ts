@@ -96,7 +96,7 @@ export type Zodiac = {
 export type HoroscopeBank = { general: string[]; love: string[]; career: string[]; health: string[]; advice: string[]; mood: string[] };
 export type NumerologyNumber = { number: number; title: string; keywords: string[]; description: string; love: string; career: string; challenge: string };
 export type Dream = { slug: string; word: string; short: string; meaning: string; variants: { when: string; means: string }[]; mood: string };
-export type Stone = { slug: string; name: string; color: string; chakra: string; zodiac: string[]; properties: string[]; description: string; howToUse: string; care: string };
+export type Stone = { slug: string; name: string; color: string; chakra: string; zodiac: string[]; numbers: number[]; properties: string[]; description: string; howToUse: string; care: string };
 
 export type TarotExtra = { yesno: string; yesnoWhy: string; health: string; positions: { past: string; present: string; future: string }; combos: { with: string; means: string }[]; dayCard: string };
 export const getTarot = () => readJson<TarotCard[]>("tarot.json", []);

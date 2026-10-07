@@ -208,5 +208,110 @@
   "author": "Friedrich Haag",
   "license": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:Oval_004_2025_01_17.jpg"
+ },
+ "izumrud": {
+  "file": "/stones/izumrud.webp",
+  "thumb": "/stones/izumrud-400.webp",
+  "author": "Didier Descouens",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:(Muzo)_Emerald_crystal_in_its_matrix.jpg"
+ },
+ "rubin": {
+  "file": "/stones/rubin.webp",
+  "thumb": "/stones/rubin-400.webp",
+  "author": "Robert M. Lavinsky",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Corundum-215330.jpg"
+ },
+ "sapfir": {
+  "file": "/stones/sapfir.webp",
+  "thumb": "/stones/sapfir-400.webp",
+  "author": "James St. John",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Sapphire_(corundum)_(26663158752).jpg"
+ },
+ "dymchatyy-kvarc": {
+  "file": "/stones/dymchatyy-kvarc.webp",
+  "thumb": "/stones/dymchatyy-kvarc-400.webp",
+  "author": "James St. John",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Smoky_quartz_8.jpg"
+ },
+ "hrizopraz": {
+  "file": "/stones/hrizopraz.webp",
+  "thumb": "/stones/hrizopraz-400.webp",
+  "author": "James St. John",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Chrysoprase_(Australia)_1.jpg"
+ },
+ "rodonit": {
+  "file": "/stones/rodonit.webp",
+  "thumb": "/stones/rodonit-400.webp",
+  "author": "Didier Descouens",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Rhodonite_Australie.jpg"
+ },
+ "kuncit": {
+  "file": "/stones/kuncit.webp",
+  "thumb": "/stones/kuncit-400.webp",
+  "author": "Parent Géry",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Kunzite_2.jpg"
+ },
+ "charoit": {
+  "file": "/stones/charoit.webp",
+  "thumb": "/stones/charoit-400.webp",
+  "author": "Géry PARENT",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Charoite,_aegirine,_tinaksite_1.jpg"
+ },
+ "lepidolit": {
+  "file": "/stones/lepidolit.webp",
+  "thumb": "/stones/lepidolit-400.webp",
+  "author": "Zbynek Burival",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Lepidolite_from_Rozna_Czech_Republic.jpg"
+ },
+ "amazonit": {
+  "file": "/stones/amazonit.webp",
+  "thumb": "/stones/amazonit-400.webp",
+  "author": "James St. John",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Amazonite_4.jpg"
+ },
+ "apatit": {
+  "file": "/stones/apatit.webp",
+  "thumb": "/stones/apatit-400.webp",
+  "author": "Masha Milshina",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Apatite_crystal_anisotropy_01.jpg"
+ },
+ "geliotrop": {
+  "file": "/stones/geliotrop.webp",
+  "thumb": "/stones/geliotrop-400.webp",
+  "author": "James St. John",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Bloodstone_2_(49035785073).jpg"
+ },
+ "kianit": {
+  "file": "/stones/kianit.webp",
+  "thumb": "/stones/kianit-400.webp",
+  "author": "James St. John",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Kyanite_1.jpg"
+ },
+ "shungit": {
+  "file": "/stones/shungit.webp",
+  "thumb": "/stones/shungit-400.webp",
+  "author": "James St. John",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Shungite_(Zaonezhskaya_Formation,_middle_Paleoproterozoic,_1.98-2.09_Ga;_Shun'ga_River_area,_northwestern_Russia)_9.jpg"
+ },
+ "almaz": {
+  "file": "/stones/almaz.webp",
+  "thumb": "/stones/almaz-400.webp",
+  "author": "James St. John",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Octahedral_diamond_(18024044222).jpg"
  }
 }
