@@ -6,6 +6,7 @@ import { PERIOD_KEYS, shiftKey, todayKey } from "@/lib/daily";
 import { SECTION_KEYS, SITE } from "@/lib/site";
 import { getAuthors } from "@/lib/authors";
 import { getMoonSigns } from "@/lib/moonSigns";
+import { getAffirmationTopics } from "@/lib/affirmations";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -29,6 +30,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: u("/taro/arkany/starshie"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: u("/taro/arkany/mladshie"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
   ];
+  out.push({ url: u("/praktiki/affirmacii"), lastModified: now, changeFrequency: "weekly", priority: 0.8 });
+  out.push({ url: u("/praktiki/affirmacii/dnya"), lastModified: now, changeFrequency: "daily", priority: 0.8 });
+  for (const t of getAffirmationTopics()) out.push({ url: u(`/praktiki/affirmacii/${t.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.7 });
   out.push({ url: u("/taro/rasklady"), lastModified: now, changeFrequency: "monthly", priority: 0.8 });
   for (const s of getSpreads()) if (!s.href) out.push({ url: u(`/taro/rasklady/${s.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.7 });
   out.push({ url: u("/numerologiya/chisla-na-chasah"), lastModified: now, changeFrequency: "monthly", priority: 0.8 });

@@ -111,7 +111,7 @@
 | Запрос | Частотность (оценка) | Интент (инфо/инструмент) | Целевая страница |
 |---|---|---|---|
 | медитация для начинающих | high | инфо | /praktiki/meditaciya-dlya-nachinayushchih (есть статья) |
-| аффирмации на каждый день | high | инфо | /praktiki/affirmacii (new) |
+| аффирмации на каждый день | high | инфо | /praktiki/affirmacii |
 | энергетическая чистка дома | mid | инфо | /praktiki/ochishchenie-doma (new) |
 | ритуал на новолуние | mid | инфо | /praktiki/ritual-novolunie (new) |
 | дыхательные практики | high | инфо | /praktiki/dyhatelnye (new) |

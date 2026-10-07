@@ -4,7 +4,7 @@ import { getHoroscopeBank, getTarot, getZodiac, type TarotCard, type Zodiac } fr
 import type { HoroscopeText } from "./astro/types";
 
 /** Детерминированный генератор: одна и та же дата → тот же результат у всех посетителей, без базы данных. */
-function hash(str: string): number {
+export function hash(str: string): number {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i);
