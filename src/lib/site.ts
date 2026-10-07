@@ -88,4 +88,5 @@ export const TOOLS: { href: string; title: string; text: string; emoji: string; 
   { href: "/goroskop/zavtra", title: "Гороскоп на завтра", text: "Чтобы подготовиться заранее", emoji: "🌅", icon: "sunrise" },
   { href: "/taro/da-net", title: "Таро да или нет", text: "Одна карта на закрытый вопрос", emoji: "🔮", icon: "ball" },
   { href: "/lunnyy-kalendar", title: "Лунный календарь", text: "Лунный день, фаза, стрижка и посадки", emoji: "🌙", icon: "calendar" },
+  { href: "/astrologiya/natalnaya-karta", title: "Натальная карта", text: "Планеты, дома и Асцендент по дате, времени и месту рождения", emoji: "✨", icon: "star" },
 ];

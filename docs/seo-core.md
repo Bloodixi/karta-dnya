@@ -60,7 +60,7 @@
 | фазы луны сегодня | high | инструмент | /lunnyy-kalendar/segodnya (new) |
 | совместимость знаков зодиака | very-high | инструмент | /astrologiya/sovmestimost (есть статья; инструмент new) |
 | знаки зодиака по датам | very-high | инфо | /astrologiya/znaki-zodiaka-po-datam (есть статья) |
-| натальная карта онлайн | very-high | инструмент | /astrologiya/natalnaya-karta (new) |
+| натальная карта онлайн | very-high | инструмент | /astrologiya/natalnaya-karta |
 | восходящий знак как узнать | high | инструмент | /astrologiya/voshodyaschiy-znak (new) |
 | ретроградный меркурий | high | инфо | /astrologiya/retrogradnyy-merkuriy (new) |
 | луна в знаках зодиака | mid | инфо | /astrologiya/luna-v-znakah (new) |
