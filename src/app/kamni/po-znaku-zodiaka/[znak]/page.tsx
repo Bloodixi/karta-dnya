@@ -22,10 +22,16 @@ export async function generateMetadata({ params }: PageProps<"/kamni/po-znaku-zo
   const { znak } = await params;
   const z = findZodiac(znak);
   if (!z) return {};
-  const top = stonesForSign(znak).slice(0, 3).map((s) => s.name.toLowerCase()).join(", ");
+  const names = stonesForSign(znak).map((s) => s.name.toLowerCase());
+  // Description 140–160: пробуем варианты с датами и разным числом камней, берём первый подходящий по длине.
+  const variants: [number, boolean][] = [[4, true], [3, true], [5, false], [4, false], [3, false]];
+  const descs = variants.map(([n, dates]) =>
+    `Камни для знака ${z.name}${dates ? ` (${z.dates})` : ""}: ${names.slice(0, n).join(", ")} и другие. Почему они созвучны стихии ${z.element}, как носить талисман и с какого камня начать.`,
+  );
+  const description = descs.find((d) => d.length >= 140 && d.length <= 160) ?? descs[descs.length - 1];
   return {
     title: pageTitle(`Камни для знака ${z.name}: талисманы и как их носить`),
-    description: `Какие камни подходят знаку ${z.name} (${z.dates}): ${top} и другие. Почему эти минералы созвучны стихии ${z.element}, как носить талисман и с какого камня начать.`,
+    description,
     alternates: { canonical: `${HUB}/${znak}` },
   };
 }
