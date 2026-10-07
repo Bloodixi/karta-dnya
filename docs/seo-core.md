@@ -2,6 +2,8 @@
 
 Частотность оценена экспертно (Wordstat недоступен): very-high >100k/мес, high 30-100k, mid 5-30k, low <5k.
 
+Пометки целевых страниц: без пометки — страница есть на сайте (сверено с sitemap 08.10.2026); «new, в плане» — тема в content/plan.json, статью допишет конвейер; «new» — ещё не запланировано.
+
 ## Выводы
 
 1. Самые ёмкие кластеры: гороскоп (сегодня/завтра/неделя/месяц/по знакам), лунный календарь, таро онлайн/карта дня и нумерология (дата рождения, числа на часах, квадрат Пифагора).
@@ -23,22 +25,22 @@
 | таро онлайн | very-high | инструмент | /taro/rasklady |
 | гадание на картах таро онлайн бесплатно | very-high | инструмент | /taro/rasklady |
 | расклад таро на любовь | high | инструмент | /taro/rasklady/na-lyubov |
-| таро да нет | high | инструмент | /taro/da-net (new) |
+| таро да нет | high | инструмент | /taro/da-net |
 | значение карт таро | high | инфо | /taro/karty |
-| старшие арканы таро значение | high | инфо | /taro/starshie-arkany (new) |
-| младшие арканы таро | mid | инфо | /taro/mladshie-arkany (new) |
+| старшие арканы таро значение | high | инфо | /taro/arkany/starshie (статья /taro/starshie-arkany-taro) |
+| младшие арканы таро | mid | инфо | /taro/arkany/mladshie (статья /taro/mladshie-arkany-taro в плане) |
 | шут таро значение | mid | инфо | /taro/karty/shut |
 | башня таро значение | mid | инфо | /taro/karty/bashnya |
 | смерть таро значение | mid | инфо | /taro/karty/smert |
 | влюбленные таро значение | mid | инфо | /taro/karty/vlyublennye |
-| расклад на три карты | high | инфо | /taro/rasklad-na-tri-karty (есть статья) |
+| расклад на три карты | high | инфо | /taro/tri-karty (статья /taro/rasklad-tri-karty) |
 | кельтский крест расклад | mid | инфо | /taro/rasklady/keltskiy-krest |
-| как гадать на картах таро | high | инфо | /taro/kak-nachat-gadat (есть статья) |
-| перевернутые карты таро | mid | инфо | /taro/perevernutye-karty (new) |
+| как гадать на картах таро | high | инфо | /taro/kak-nachat-gadat-na-taro (есть статья) |
+| перевернутые карты таро | mid | инфо | /taro/perevernutye-karty-taro (new, в плане) |
 | расклад на отношения | high | инструмент | /taro/rasklady/na-otnosheniya |
 | таро на сегодня | high | инструмент | /karta-dnya |
-| масти таро значение | low | инфо | /taro/masti (new) |
-| какую колоду таро выбрать | low | инфо | /taro/kolody (new) |
+| масти таро значение | low | инфо | /taro/masti-taro-znachenie (new, в плане) |
+| какую колоду таро выбрать | low | инфо | /taro/kolody-taro-kakuyu-vybrat (new, в плане) |
 
 ## Астрология и гороскоп (22)
 
@@ -50,23 +52,24 @@
 | гороскоп на месяц | very-high | инструмент | /goroskop/mesyats |
 | гороскоп на год | very-high | инструмент | /goroskop/god и /goroskop/<znak>/god |
 | гороскоп овен | very-high | инструмент | /goroskop/oven |
-| гороскоп телец | high | инструмент | /goroskop/telec |
+| гороскоп телец | high | инструмент | /goroskop/telets |
 | гороскоп рак | high | инструмент | /goroskop/rak |
 | гороскоп лев | high | инструмент | /goroskop/lev |
 | гороскоп дева | high | инструмент | /goroskop/deva |
 | гороскоп скорпион | high | инструмент | /goroskop/skorpion |
 | гороскоп рыбы | high | инструмент | /goroskop/ryby |
 | лунный календарь | very-high | инструмент | /lunnyy-kalendar |
-| фазы луны сегодня | high | инструмент | /lunnyy-kalendar/segodnya (new) |
-| совместимость знаков зодиака | very-high | инструмент | /astrologiya/sovmestimost (есть статья; инструмент new) |
+| фазы луны сегодня | high | инструмент | /lunnyy-kalendar и /lunnyy-kalendar/<дата> |
+| совместимость знаков зодиака | very-high | инструмент | /sovmestimost и /sovmestimost/<пара> (статья /astrologiya/sovmestimost-znakov-zodiaka) |
 | знаки зодиака по датам | very-high | инфо | /astrologiya/znaki-zodiaka-po-datam (есть статья) |
 | натальная карта онлайн | very-high | инструмент | /astrologiya/natalnaya-karta |
-| восходящий знак как узнать | high | инструмент | /astrologiya/voshodyaschiy-znak (new) |
+| восходящий знак как узнать | high | инструмент | /astrologiya/voshodyaschiy-znak |
 | ретроградный меркурий | high | инфо | /astrologiya/retrogradnyy-merkuriy |
 | луна в знаках зодиака | mid | инфо | /astrologiya/luna-v-znake и /astrologiya/luna-v-znake/<znak> |
 | транзиты планет сегодня | mid | инструмент | /astrologiya/tranzity |
-| стихии знаков зодиака | mid | инфо | /astrologiya/stihii (new) |
-| дома в астрологии | mid | инфо | /astrologiya/doma (new) |
+| стихии знаков зодиака | mid | инфо | /astrologiya/stihii-znakov-zodiaka (new, в плане) |
+| дома в астрологии | mid | инфо | /astrologiya/doma-v-astrologii |
+| фазы луны | high | инфо | /astrologiya/fazy-luny-znachenie (new, в плане) |
 
 ## Нумерология (14)
 
@@ -86,6 +89,8 @@
 | личный год нумерология | mid | инструмент | /numerologiya/lichnyy-god |
 | счастливое число по дате рождения | mid | инструмент | /numerologiya/schastlivoe-chislo |
 | значение числа 1111 | mid | инфо | /numerologiya/chisla-na-chasah/11-11 |
+| матрица судьбы по дате рождения | very-high | инструмент | /matrica-sudby, /matrica-sudby/arkany/<n>, /matrica-sudby/sovmestimost |
+| матрица судьбы расшифровка | high | инфо | /numerologiya/matrica-sudby-rasshifrovka (new, в плане) |
 
 ## Сонник (14)
 
@@ -94,32 +99,35 @@
 | сонник | very-high | инструмент | /sonnik |
 | к чему снится змея | high | инфо | /sonnik/zmeya |
 | к чему снится вода | high | инфо | /sonnik/voda |
-| к чему снятся умершие родственники | high | инфо | /sonnik/umershie (new) |
+| к чему снятся умершие родственники | high | инфо | /sonnik/umershiy-rodstvennik (статья /sonnik/k-chemu-snyatsya-umershie) |
 | к чему снятся зубы | high | инфо | /sonnik/zuby |
-| к чему снится беременность | mid | инфо | /sonnik/beremennost (new) |
-| к чему снится свадьба | mid | инфо | /sonnik/svadba (new) |
-| к чему снится кошка | mid | инфо | /sonnik/koshka (new) |
-| к чему снится падение | mid | инфо | /sonnik/padenie (new) |
-| к чему снится бывший | high | инфо | /sonnik/byvshiy (new) |
-| к чему снятся деньги | high | инфо | /sonnik/dengi (new) |
-| сонник по алфавиту | high | инфо | /sonnik/alfavit (new) |
-| к чему снится погоня | low | инфо | /sonnik/pogonya (new) |
+| к чему снится беременность | mid | инфо | /sonnik/beremennost |
+| к чему снится свадьба | mid | инфо | /sonnik/svadba |
+| к чему снится кошка | mid | инфо | /sonnik/koshka |
+| к чему снится падение | mid | инфо | /sonnik/padenie |
+| к чему снится бывший | high | инфо | /sonnik/byvshiy (статья /sonnik/k-chemu-snitsya-byvshiy) |
+| к чему снятся деньги | high | инфо | /sonnik/dengi |
+| сонник по алфавиту | high | инфо | /sonnik (указатель А–Я) |
+| к чему снится погоня | low | инфо | /sonnik/pogonya |
 | толкование снов онлайн | high | инструмент | /sonnik |
 
 ## Практики (10)
 
 | Запрос | Частотность (оценка) | Интент (инфо/инструмент) | Целевая страница |
 |---|---|---|---|
-| медитация для начинающих | high | инфо | /praktiki/meditaciya-dlya-nachinayushchih (есть статья) |
-| аффирмации на каждый день | high | инфо | /praktiki/affirmacii |
-| энергетическая чистка дома | mid | инфо | /praktiki/ochishchenie-doma (new) |
-| ритуал на новолуние | mid | инфо | /praktiki/ritual-novolunie (new) |
-| дыхательные практики | high | инфо | /praktiki/dyhatelnye (new) |
-| как вести дневник снов | low | инфо | /praktiki/dnevnik-snov (new) |
-| ритуал на деньги | high | инфо | /praktiki/ritual-na-dengi (new) |
-| заземление практика | low | инфо | /praktiki/zazemlenie (new) |
-| медитация на изобилие | mid | инфо | /praktiki/meditaciya-izobilie (new) |
-| ритуал на полнолуние | mid | инфо | /praktiki/ritual-polnolunie (new) |
+| медитация для начинающих | high | инфо | /praktiki/meditatsiya-dlya-nachinayushchih (есть статья) |
+| аффирмации на каждый день | high | инфо | /praktiki/affirmacii (статья /praktiki/affirmacii-na-kazhdyy-den) |
+| энергетическая чистка дома | mid | инфо | /praktiki/ochishchenie-doma-energeticheskoe |
+| ритуал на новолуние | mid | инфо | /praktiki/ritual-na-novolunie |
+| дыхательные практики | high | инфо | /praktiki/dyhatelnye-praktiki |
+| как вести дневник снов | low | инфо | /praktiki/dnevnik-snov (new, в плане) |
+| ритуал на деньги | high | инфо | /praktiki/ritual-na-dengi (new, в плане) |
+| заземление практика | low | инфо | /praktiki/zazemlenie (new, в плане) |
+| медитация на изобилие | mid | инфо | /praktiki/meditaciya-na-izobilie (new, в плане) |
+| ритуал на полнолуние | mid | инфо | /praktiki/ritual-na-polnolunie (new, в плане) |
+| значение рун | high | инструмент | /runy, /runy/<руна>, /runy/runa-dnya |
+| гадание на рунах | mid | инфо | /praktiki/gadanie-na-runah-dlya-nachinayushchih (new, в плане) |
+| хиромантия | mid | инфо | /praktiki/hiromantiya-dlya-nachinayushchih (new, в плане) |
 
 ## Камни (10)
 
@@ -130,26 +138,26 @@
 | значение камней и минералов | high | инфо | /kamni |
 | аметист свойства | mid | инфо | /kamni/ametist |
 | розовый кварц свойства | mid | инфо | /kamni/rozovyy-kvarc |
-| как очистить камни | mid | инфо | /kamni/ochistka (new) |
-| камни для привлечения денег | mid | инфо | /kamni/dlya-deneg (new) |
+| как очистить камни | mid | инфо | /kamni/kak-ochistit-kamni |
+| камни для привлечения денег | mid | инфо | /kamni/kamni-dlya-deneg |
 | лунный камень свойства | mid | инфо | /kamni/lunnyy-kamen |
 | тигровый глаз свойства | mid | инфо | /kamni/tigrovyy-glaz |
-| камни-талисманы для любви | low | инфо | /kamni/dlya-lyubvi (new) |
+| камни-талисманы для любви | low | инфо | /kamni/kamni-dlya-lyubvi (new, в плане) |
 
 ## Общие (эзотерика) (10)
 
 | Запрос | Частотность (оценка) | Интент (инфо/инструмент) | Целевая страница |
 |---|---|---|---|
 | эзотерика | very-high | инфо | / (главная) |
-| что такое эзотерика | high | инфо | /o-ezoterike (new) |
+| что такое эзотерика | high | инфо | /praktiki/chto-takoe-ezoterika (new, в плане) |
 | гадание онлайн бесплатно | very-high | инструмент | /karta-dnya |
 | гадания на сегодня | high | инструмент | /karta-dnya |
-| как узнать свое предназначение | high | инфо | /chislo-sudby |
-| знаки судьбы | mid | инфо | /o-ezoterike/znaki-sudby (new) |
-| энергетика человека | mid | инфо | /praktiki/energiya (new) |
-| чакры значение | high | инфо | /praktiki/chakry (new) |
-| приметы на сегодня | high | инфо | /priznaki (new) |
-| эзотерика для начинающих | mid | инфо | /o-ezoterike/dlya-nachinayushchih (new) |
+| как узнать свое предназначение | high | инфо | /chislo-sudby (статья /numerologiya/kak-uznat-svoe-prednaznachenie в плане) |
+| знаки судьбы | mid | инфо | /praktiki/znaki-sudby (new, в плане) |
+| энергетика человека | mid | инфо | /praktiki/energetika-cheloveka (new, в плане) |
+| чакры значение | high | инфо | /praktiki/chakry-znachenie (new, в плане) |
+| приметы на сегодня | high | инфо | /praktiki/primety-na-segodnya (new, в плане) |
+| эзотерика для начинающих | mid | инфо | /praktiki/ezoterika-dlya-nachinayushchih (new, в плане) |
 
 ## Рекомендации по перелинковке и структуре
 
