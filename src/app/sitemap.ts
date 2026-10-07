@@ -21,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: u("/taro/tri-karty"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/kvadrat-pifagora"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/astrologiya/natalnaya-karta"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: u("/astrologiya/voshodyaschiy-znak"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/astrologiya/retrogradnyy-merkuriy"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: u("/astrologiya/luna-v-znake"), lastModified: now, changeFrequency: "daily", priority: 0.8 },
     { url: u("/astrologiya/tranzity"), lastModified: now, changeFrequency: "daily", priority: 0.8 },

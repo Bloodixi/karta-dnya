@@ -80,6 +80,7 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
       <section className="prose mt-10">
         <h2>Характер знака {z.name}</h2>
         <p>{z.description}</p>
+        <p className="text-sm text-muted">Это портрет солнечного знака — внутреннего ядра. За первое впечатление отвечает <Link href={`/astrologiya/voshodyaschiy-znak#asc-${z.slug}`}>восходящий знак (Асцендент)</Link>: его можно рассчитать по дате, времени и городу рождения.</p>
         <div className="grid sm:grid-cols-2 gap-6 not-prose mt-4">
           <div className="card p-4"><p className="font-semibold">Сильные стороны</p><ul className="mt-2 text-sm text-muted list-disc ml-5">{z.strengths.map((s) => <li key={s}>{s}</li>)}</ul></div>
           <div className="card p-4"><p className="font-semibold">Над чем работать</p><ul className="mt-2 text-sm text-muted list-disc ml-5">{z.weaknesses.map((s) => <li key={s}>{s}</li>)}</ul></div>
