@@ -98,7 +98,7 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
         </p>
         <h2>Талисманы</h2>
         <p>Камень: {z.stone}. Цвет: {z.color}. Счастливые числа: {z.luckyNumbers.join(", ")}.</p>
-        {stones.length > 0 && <p>Подробнее о камнях: {stones.map((s, i) => <span key={s.slug}>{i > 0 && ", "}<Link href={`/kamni/${s.slug}`}>{s.name}</Link></span>)}.</p>}
+        {stones.length > 0 && <p>Подробнее о камнях: {stones.map((s, i) => <span key={s.slug}>{i > 0 && ", "}<Link href={`/kamni/${s.slug}`}>{s.name}</Link></span>)}. <Link href={`/kamni/po-znaku-zodiaka/${z.slug}`}>Все камни для знака {z.name} →</Link></p>}
       </section>
 
       <section className="mt-10">

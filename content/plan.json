@@ -1203,7 +1203,9 @@
     "links": [
       "/kamni",
       "/chislo-sudby",
-      "/goroskop"
+      "/goroskop",
+      "/kamni/po-date-rozhdeniya",
+      "/kamni/po-znaku-zodiaka"
     ]
   },
   {

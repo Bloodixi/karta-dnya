@@ -3,7 +3,7 @@ import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getArticles, getStoneImages, getStones } from "@/lib/content";
-import { SECTIONS } from "@/lib/site";
+import { SECTIONS, SECTION_TOOLS } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Камни и талисманы: свойства минералов и кому подходят",
@@ -20,6 +20,11 @@ export default function StonesPage() {
       <Breadcrumbs items={[{ href: "/kamni", label: "Камни" }]} />
       <h1 className="text-3xl md:text-4xl font-semibold">Камни и талисманы</h1>
       <p className="text-muted mt-2 max-w-2xl">{SECTIONS.kamni.description}</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {(SECTION_TOOLS.kamni || []).filter((t) => t.href !== "/kamni").map((t) => (
+          <Link key={t.href} href={t.href} className="btn btn-ghost">{t.title}</Link>
+        ))}
+      </div>
       {stones.length ? (
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {stones.map((s) => (
