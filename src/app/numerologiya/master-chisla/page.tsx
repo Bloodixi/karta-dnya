@@ -11,8 +11,8 @@ import { birthdayNumber, cleanName, destinyByParts, destinyNumber, formatDate, i
 const PATH = "/numerologiya/master-chisla";
 
 export const metadata: Metadata = {
-  title: "Мастер-числа 11, 22 и 33 в нумерологии: значение и проверка",
-  description: "Что такое мастер-числа 11, 22 и 33 в нумерологии: значение каждого, чем они отличаются от 2, 4 и 6, как их считать и калькулятор-проверка, есть ли мастер-число в вашей дате и имени.",
+  title: "Мастер-числа 11, 22 и 33: значение и проверка по дате",
+  description: "Мастер-числа 11, 22 и 33 в нумерологии: значение каждого, чем они отличаются от 2, 4 и 6, как их считать, и проверка, есть ли мастер-число в вашей дате и имени.",
   alternates: { canonical: PATH },
 };
 
@@ -65,7 +65,7 @@ export default async function MasterNumbersPage({ searchParams }: PageProps<type
           )}
           {full.number !== parts.number && <p className="text-muted">Два способа расчёта дали разные числа: {full.number} и {parts.number}. Так бывает, когда промежуточная сумма в одном из способов попадает на 11, 22 или 33. На сайте мы используем первый способ, но знать о втором полезно.</p>}
         </div>
-        <ShareLink path={`https://karta-dnya.ru${PATH}?d=${date.iso}${nm ? `&n=${encodeURIComponent(nm.clean)}` : ""}`} />
+        <ShareLink path={`https://karta-dnya.ru${PATH}?d=${date.iso}${nm ? `&n=${nm.clean}` : ""}`} />
       </section>
     );
   }

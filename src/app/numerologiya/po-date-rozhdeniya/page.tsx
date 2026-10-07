@@ -12,7 +12,7 @@ const PATH = "/numerologiya/po-date-rozhdeniya";
 
 export const metadata: Metadata = {
   title: "Нумерология по дате рождения: полный расчёт онлайн",
-  description: "Нумерология по дате рождения и имени онлайн: число судьбы, число дня рождения, числа имени, души и личности, личный год и счастливые числа с понятными трактовками.",
+  description: "Нумерология по дате рождения и имени онлайн: число судьбы, число дня рождения, числа имени, души и личности, личный год и счастливые числа с трактовками.",
   alternates: { canonical: PATH },
 };
 
@@ -44,7 +44,7 @@ export default async function NumerologyByDatePage({ searchParams }: PageProps<t
     const nm = name ? nameNumbers(name) : null;
     const nameTexts = getNameNumbers();
     const dInfo = info(destiny.number);
-    const query = `?d=${date.iso}${name ? `&n=${encodeURIComponent(name)}` : ""}`;
+    const query = `?d=${date.iso}${name ? `&n=${name}` : ""}`;
     result = (
       <section className="mt-8" id="rezultat">
         <div className="ornament mb-4">

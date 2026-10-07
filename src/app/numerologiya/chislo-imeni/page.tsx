@@ -12,7 +12,7 @@ const PATH = "/numerologiya/chislo-imeni";
 
 export const metadata: Metadata = {
   title: "Число имени: рассчитать онлайн по таблице букв",
-  description: "Калькулятор числа имени онлайн по кириллической таблице: число имени (выражения), число души по гласным и число личности по согласным. Значения чисел 1–9 и мастер-чисел 11, 22, 33.",
+  description: "Калькулятор числа имени онлайн по кириллической таблице букв: число имени, число души по гласным и число личности по согласным. Значения чисел 1–9, 11, 22 и 33.",
   alternates: { canonical: PATH },
 };
 
@@ -75,7 +75,7 @@ export default async function NameNumberPage({ searchParams }: PageProps<typeof 
               <p className="text-sm mt-2">Число имени описывает подачу, число судьбы — вектор пути. Посчитайте оба в <Link href={`/numerologiya/po-date-rozhdeniya?n=${encodeURIComponent(nm.clean)}`} className="text-accent underline">сводном расчёте по дате и имени</Link>.</p>
             </div>
           </div>
-          <ShareLink path={`https://karta-dnya.ru${PATH}?n=${encodeURIComponent(nm.clean)}`} />
+          <ShareLink path={`https://karta-dnya.ru${PATH}?n=${nm.clean}`} />
         </section>
       )}
 
