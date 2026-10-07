@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-export type IconName = "card" | "sun" | "hash" | "moon" | "hearts" | "sunrise" | "ball" | "calendar" | "candle" | "gem" | "star" | "rune";
+export type IconName = "card" | "sun" | "hash" | "moon" | "hearts" | "sunrise" | "ball" | "calendar" | "candle" | "gem" | "star" | "rune" | "menu" | "close";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   card: (<><rect x="5" y="2.5" width="14" height="19" rx="2.5" /><path d="M12 8l1.4 2.9 3.1.4-2.3 2.2.6 3.1L12 15.1 9.2 16.6l.6-3.1-2.3-2.2 3.1-.4z" /></>),
@@ -15,6 +15,8 @@ const PATHS: Record<IconName, React.ReactNode> = {
   gem: (<><path d="M7 3h10l4 5-9 13L3 8z" /><path d="M3 8h18M9.5 8 12 21 14.5 8M7 3l2.5 5M17 3l-2.5 5" /></>),
   rune: (<><path d="M8 3v18" /><path d="M8 9l8-5.5M8 16l8-5.5" /></>),
   star: (<path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7z" />),
+  menu: (<path d="M4 7h16M4 12h16M4 17h10" />),
+  close: (<path d="M6 6l12 12M18 6 6 18" />),
 };
 
 /** Линейные иконки в одном стиле вместо эмодзи: одинаково выглядят на всех устройствах и красятся через currentColor. */

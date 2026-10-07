@@ -154,7 +154,7 @@ export default async function AscendantPage({ searchParams }: PageProps<"/astrol
                       <p className="font-semibold">{SHORT[slug]}</p>
                       <p className="text-muted mt-1">{texts[slug]}</p>
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap"><Link href={`/goroskop/${slug}`} className="text-accent underline">Гороскоп {s.genitive}</Link></td>
+                    <td className="py-3 px-4 whitespace-nowrap"><Link href={`/goroskop/${slug}`} className="inline-block py-2 md:py-0 text-accent underline">Гороскоп {s.genitive}</Link></td>
                   </tr>
                 );
               })}

@@ -29,7 +29,7 @@ export default function ThemeToggle() {
   };
   const label = theme === "dark" ? "Включить светлую тему" : "Включить тёмную тему";
   return (
-    <button type="button" onClick={toggle} aria-label={label} title={label} className="icon-badge !w-9 !h-9 cursor-pointer hover:border-accent hover:text-accent">
+    <button type="button" onClick={toggle} aria-label={label} title={label} className="icon-badge !w-11 !h-11 md:!w-9 md:!h-9 shrink-0 cursor-pointer hover:border-accent hover:text-accent">
       <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
     </button>
   );

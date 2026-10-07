@@ -160,3 +160,17 @@ a:hover .tcard-thumb, a:focus-visible .tcard-thumb, button:hover .tcard-thumb { 
   .tcard.flip-in .tcard-inner, .tcard-float, .twinkle { animation: none; }
   .twinkle { opacity: 0.8; }
 }
+
+/* Телефон: поля не мельче 16px (иначе iOS приближает страницу при фокусе), служебный текст читаемее. */
+@media (max-width: 47.99rem) {
+  :root { --text-xs: 0.8125rem; }
+  input, select, textarea { font-size: 16px; }
+  .mono { font-size: 0.75rem; }
+  .chip { font-size: 0.74rem; }
+}
+/* Касание: кнопки и чипы под палец, без зависимости от наведения. */
+@media (pointer: coarse) {
+  .btn { min-height: 2.75rem; }
+  .chip { min-height: 2.25rem; }
+  .card-hover:hover { transform: none; }
+}

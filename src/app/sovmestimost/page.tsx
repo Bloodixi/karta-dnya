@@ -49,13 +49,13 @@ export default function CompatIndex() {
               <tbody>
                 {signs.map((a) => (
                   <tr key={a.slug}>
-                    <th className="p-1 text-left whitespace-nowrap">{a.symbol} {a.name}</th>
+                    <th className="p-1 text-left whitespace-nowrap sticky left-0 bg-surface">{a.symbol} {a.name}</th>
                     {signs.map((b) => {
                       const c = compatibility(a, b);
                       const bg = c.score >= 80 ? "bg-green-500/25" : c.score >= 65 ? "bg-yellow-500/25" : "bg-red-500/15";
                       return (
                         <td key={b.slug} className={`p-1 text-center ${bg}`}>
-                          <Link href={`/sovmestimost/${a.slug}-${b.slug}`} className="block">{c.score}</Link>
+                          <Link href={`/sovmestimost/${a.slug}-${b.slug}`} className="block min-w-9 py-2 sm:min-w-0 sm:py-0">{c.score}</Link>
                         </td>
                       );
                     })}
