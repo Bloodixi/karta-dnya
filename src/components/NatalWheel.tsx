@@ -5,7 +5,7 @@ import type { Body } from "@/lib/astro/types";
 export const PLANET_GLYPH: Record<Body, string> = {
   sun: "☉", moon: "☽", mercury: "☿", venus: "♀", mars: "♂", jupiter: "♃", saturn: "♄", uranus: "♅", neptune: "♆", pluto: "♇",
 };
-export const SIGN_GLYPHS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+export const SIGN_GLYPHS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"].map((g) => g + "\uFE0E"); // текстовый вариант, не эмодзи
 const GLYPH_FONT = "'Segoe UI Symbol','Apple Symbols','Noto Sans Symbols','Noto Sans Symbols 2',serif";
 
 const C = 200;
