@@ -89,4 +89,18 @@ export const TOOLS: { href: string; title: string; text: string; emoji: string; 
   { href: "/taro/da-net", title: "Таро да или нет", text: "Одна карта на закрытый вопрос", emoji: "🔮", icon: "ball" },
   { href: "/lunnyy-kalendar", title: "Лунный календарь", text: "Лунный день, фаза, стрижка и посадки", emoji: "🌙", icon: "calendar" },
   { href: "/astrologiya/natalnaya-karta", title: "Натальная карта", text: "Планеты, дома и Асцендент по дате, времени и месту рождения", emoji: "✨", icon: "star" },
+  { href: "/numerologiya/po-date-rozhdeniya", title: "Нумерология по дате рождения", text: "Число судьбы, дня рождения, имени и личный год в одном расчёте", emoji: "🔢", icon: "hash" },
+];
+
+/** Инструменты раздела «Нумерология»: порядок — для хаба и блока перелинковки. */
+export const NUMEROLOGY_TOOLS: { href: string; title: string; text: string }[] = [
+  { href: "/numerologiya/po-date-rozhdeniya", title: "Нумерология по дате рождения", text: "Все числа даты и имени в одном расчёте" },
+  { href: "/chislo-sudby", title: "Число судьбы", text: "Калькулятор и значения чисел 1–9, 11, 22, 33" },
+  { href: "/numerologiya/sovmestimost", title: "Совместимость по дате рождения", text: "Две даты, процент и разбор пары чисел" },
+  { href: "/numerologiya/chislo-imeni", title: "Число имени", text: "Число выражения, души и личности по буквам" },
+  { href: "/numerologiya/lichnyy-god", title: "Личный год", text: "Какой год цикла идёт у вас сейчас" },
+  { href: "/numerologiya/schastlivoe-chislo", title: "Счастливое число", text: "Ваше число удачи, дни и ряд чисел" },
+  { href: "/numerologiya/master-chisla", title: "Мастер-числа 11, 22, 33", text: "Что они значат и есть ли они у вас" },
+  { href: "/kvadrat-pifagora", title: "Квадрат Пифагора", text: "Психоматрица по дате рождения" },
+  { href: "/numerologiya/chisla-na-chasah", title: "Числа на часах", text: "Одинаковые и зеркальные сочетания" },
 ];

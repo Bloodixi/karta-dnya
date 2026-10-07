@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { NumerologyNumber } from "@/lib/content";
 import { destinyNumber, isValidDate } from "@/lib/numerology";
@@ -49,6 +50,7 @@ export default function DestinyCalc({ numbers }: { numbers: NumerologyNumber[] }
               <p>{info.career}</p>
               <h3>Над чем работать</h3>
               <p>{info.challenge}</p>
+              <p><Link href={`/chislo-sudby/${info.number}`}>Подробнее о числе {info.number}: совместимость, сильные стороны, частые вопросы</Link></p>
             </div>
           ) : (
             <p className="text-muted mt-3">Описание числа готовится.</p>

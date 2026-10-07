@@ -73,18 +73,18 @@
 | Запрос | Частотность (оценка) | Интент (инфо/инструмент) | Целевая страница |
 |---|---|---|---|
 | число судьбы по дате рождения | very-high | инструмент | /chislo-sudby |
-| нумерология по дате рождения | very-high | инструмент | /numerologiya/po-date-rozhdeniya (new) |
+| нумерология по дате рождения | very-high | инструмент | /numerologiya/po-date-rozhdeniya |
 | нумерология онлайн | high | инструмент | /chislo-sudby |
 | значение чисел на часах | very-high | инфо | /numerologiya/chisla-na-chasah |
 | одинаковые цифры на часах | high | инфо | /numerologiya/chisla-na-chasah |
-| число имени расчет | high | инструмент | /numerologiya/chislo-imeni (new) |
-| квадрат пифагора | very-high | инструмент | /numerologiya/kvadrat-pifagora (new) |
-| совместимость по дате рождения | very-high | инструмент | /numerologiya/sovmestimost (new) |
-| число судьбы 7 | mid | инфо | /chislo-sudby/7 (new) |
-| число судьбы 9 | mid | инфо | /chislo-sudby/9 (new) |
-| мастер числа 11 22 33 | mid | инфо | /numerologiya/master-chisla (new) |
-| личный год нумерология | mid | инструмент | /numerologiya/lichnyy-god (new) |
-| счастливое число по дате рождения | mid | инструмент | /numerologiya/schastlivoe-chislo (new) |
+| число имени расчет | high | инструмент | /numerologiya/chislo-imeni |
+| квадрат пифагора | very-high | инструмент | /kvadrat-pifagora |
+| совместимость по дате рождения | very-high | инструмент | /numerologiya/sovmestimost |
+| число судьбы 7 | mid | инфо | /chislo-sudby/7 |
+| число судьбы 9 | mid | инфо | /chislo-sudby/9 |
+| мастер числа 11 22 33 | mid | инфо | /numerologiya/master-chisla |
+| личный год нумерология | mid | инструмент | /numerologiya/lichnyy-god |
+| счастливое число по дате рождения | mid | инструмент | /numerologiya/schastlivoe-chislo |
 | значение числа 1111 | mid | инфо | /numerologiya/chisla-na-chasah/11-11 |
 
 ## Сонник (14)

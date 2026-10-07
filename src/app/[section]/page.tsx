@@ -5,7 +5,7 @@ import ArticleCard from "@/components/ArticleCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { IconBadge } from "@/components/Icons";
 import { getArticles } from "@/lib/content";
-import { SECTIONS, SECTION_KEYS, type SectionKey } from "@/lib/site";
+import { NUMEROLOGY_TOOLS, SECTIONS, SECTION_KEYS, type SectionKey } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps<"/[section]">): Pro
 const SECTION_TOOLS: Partial<Record<SectionKey, { href: string; title: string }[]>> = {
   taro: [{ href: "/karta-dnya", title: "Карта дня" }, { href: "/taro/rasklady", title: "Расклады онлайн" }, { href: "/taro/da-net", title: "Таро да или нет" }, { href: "/taro/tri-karty", title: "Три карты" }, { href: "/taro/karty", title: "Значения всех карт" }, { href: "/taro/arkany/starshie", title: "Старшие арканы" }, { href: "/taro/arkany/mladshie", title: "Младшие арканы" }],
   astrologiya: [{ href: "/goroskop", title: "Гороскоп на сегодня" }, { href: "/goroskop/zavtra", title: "На завтра" }, { href: "/goroskop/god", title: "На год" }, { href: "/astrologiya/natalnaya-karta", title: "Натальная карта" }, { href: "/astrologiya/retrogradnyy-merkuriy", title: "Ретроградный Меркурий" }, { href: "/astrologiya/luna-v-znake", title: "Луна в знаке" }, { href: "/astrologiya/tranzity", title: "Транзиты" }, { href: "/sovmestimost", title: "Совместимость" }, { href: "/lunnyy-kalendar", title: "Лунный календарь" }],
-  numerologiya: [{ href: "/chislo-sudby", title: "Калькулятор числа судьбы" }, { href: "/kvadrat-pifagora", title: "Квадрат Пифагора" }, { href: "/numerologiya/chisla-na-chasah", title: "Числа на часах" }],
+  numerologiya: NUMEROLOGY_TOOLS.map((t) => ({ href: t.href, title: t.title })),
   sonnik: [{ href: "/sonnik", title: "Все символы сонника" }],
   kamni: [{ href: "/kamni", title: "Каталог камней" }],
 };
