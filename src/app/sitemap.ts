@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getArticles, getDreams, getSpreads, getStones, getTarot, getZodiac } from "@/lib/content";
+import { getArticles, getDreams, getNumerology, getSpreads, getStones, getTarot, getZodiac } from "@/lib/content";
 import { allPairs } from "@/lib/compat";
 import { getClockNumbers } from "@/lib/clock";
 import { PERIOD_KEYS, shiftKey, todayKey } from "@/lib/daily";
@@ -32,6 +32,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const s of getSpreads()) if (!s.href) out.push({ url: u(`/taro/rasklady/${s.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.7 });
   out.push({ url: u("/numerologiya/chisla-na-chasah"), lastModified: now, changeFrequency: "monthly", priority: 0.8 });
   for (const c of getClockNumbers()) out.push({ url: u(`/numerologiya/chisla-na-chasah/${c.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
+  for (const p of ["/numerologiya/po-date-rozhdeniya", "/numerologiya/sovmestimost", "/numerologiya/chislo-imeni", "/numerologiya/lichnyy-god", "/numerologiya/schastlivoe-chislo", "/numerologiya/master-chisla"]) out.push({ url: u(p), lastModified: now, changeFrequency: "monthly", priority: 0.8 });
+  for (const n of getNumerology()) out.push({ url: u(`/chislo-sudby/${n.number}`), lastModified: now, changeFrequency: "monthly", priority: 0.7 });
   for (const s of SECTION_KEYS) out.push({ url: u(`/${s}`), lastModified: now, changeFrequency: "weekly", priority: 0.8 });
   const periods = PERIOD_KEYS.filter((p) => p !== "segodnya");
   for (const p of periods) out.push({ url: u(`/goroskop/${p}`), lastModified: now, changeFrequency: "daily", priority: 0.8 });
