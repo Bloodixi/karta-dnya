@@ -18,7 +18,6 @@ export function neighbours(slug: string): { prev: Rune; next: Rune } | null {
   return { prev: all[(i + all.length - 1) % all.length], next: all[(i + 1) % all.length] };
 }
 
-const lc = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 const firstSentence = (s: string) => (s.match(/^.+?[.!?](?=\s|$)/)?.[0] ?? s);
 
 export function runeFaq(r: Rune): Faq[] {
@@ -28,7 +27,7 @@ export function runeFaq(r: Rune): Faq[] {
     r.reversed
       ? { q: `Что значит перевёрнутая руна ${r.name}?`, a: firstSentence(r.reversed) + " " + (r.reversed.split(/(?<=[.!?])\s+/)[1] ?? "") }
       : { q: `Бывает ли руна ${r.name} в перевёрнутом положении?`, a: `Нет. Знак руны ${r.name} симметричен, поэтому при перевороте выглядит так же, и трактовка не меняется. Таких рун в Старшем Футарке девять.` },
-    { q: `К какому атту относится руна ${r.name}?`, a: `Руна ${r.name} стоит ${r.pos}-й в ряду из 24 знаков и входит в «${ATTS[r.att].title.toLowerCase()}». С ней связывают такие образы: ${lc(r.associations)}.` },
+    { q: `К какому атту относится руна ${r.name}?`, a: `Руна ${r.name} стоит ${r.pos}-й в ряду из 24 знаков и входит в «${ATTS[r.att].title.toLowerCase()}». С ней связывают такие образы: ${r.associations}.` },
   ];
 }
 

@@ -16,14 +16,18 @@ export function generateStaticParams() {
 }
 
 function describe(r: NonNullable<ReturnType<typeof findRune>>): string {
-  const kw = r.keywords.slice(0, 4).join(", ");
-  const variants = [
-    `Руна ${r.name} (${r.orig}): значение в гадании, ${r.reversed ? "прямое и перевёрнутое положение, " : ""}в любви и работе. Ключевые слова: ${kw}. Совет и простая практика.`,
-    `Руна ${r.name} (${r.orig}): значение, ${r.reversed ? "прямое и перевёрнутое положение, " : ""}любовь, работа и совет. Ключевые слова: ${kw}. Как использовать руну.`,
-    `Руна ${r.name}: значение в гадании, ${r.reversed ? "прямое и перевёрнутое положение, " : ""}в любви и работе. Ключевые слова: ${kw}. Совет и практика на каждый день.`,
-    `Руна ${r.name} (${r.orig}) Старшего Футарка: значение в любви, работе, ${r.reversed ? "перевёрнутое положение, " : ""}совет. Ключевые слова: ${kw}. Простая практика.`,
-  ];
-  return variants.find((d) => d.length >= 140 && d.length <= 160) ?? variants.sort((a, b) => Math.abs(a.length - 150) - Math.abs(b.length - 150))[0];
+  const rev = r.reversed ? "прямое и перевёрнутое положение, " : "";
+  const variants: string[] = [];
+  for (const n of [4, 3, 2, 5]) {
+    const kw = r.keywords.slice(0, n).join(", ");
+    variants.push(
+      `Руна ${r.name} (${r.orig}): значение в гадании, ${rev}в любви и работе. Ключевые слова: ${kw}. Совет и простая практика.`,
+      `Руна ${r.name} (${r.orig}): значение, ${rev}любовь, работа и совет. Ключевые слова: ${kw}. Как использовать руну.`,
+      `Руна ${r.name}: значение в гадании, ${rev}в любви и работе. Ключевые слова: ${kw}. Совет и практика на каждый день.`,
+      `Руна ${r.name} (${r.orig}) Старшего Футарка: значение в любви, работе, ${r.reversed ? "перевёрнутое положение, " : ""}совет. Ключевые слова: ${kw}. Простая практика.`,
+    );
+  }
+  return variants.find((d) => d.length >= 140 && d.length <= 160) ?? variants[0];
 }
 
 export async function generateMetadata({ params }: PageProps<"/runy/[slug]">): Promise<Metadata> {
@@ -71,7 +75,7 @@ export default async function RunePage({ params }: PageProps<"/runy/[slug]">) {
             <h2>Как использовать руну {r.name}</h2>
             <p>{r.practice} Руна не гарантирует результата, она лишь задаёт тему для размышления. Если вам не подходит трактовка, опирайтесь на собственное ощущение и здравый смысл.</p>
             <p>
-              Связанные образы: {r.associations.toLowerCase()}. Хотите узнать, какая руна выпала на сегодня? Загляните на страницу <Link href="/runy/runa-dnya">«Руна дня»</Link>.
+              Связанные образы: {r.associations}. Хотите узнать, какая руна выпала на сегодня? Загляните на страницу <Link href="/runy/runa-dnya">«Руна дня»</Link>.
             </p>
           </div>
         </article>

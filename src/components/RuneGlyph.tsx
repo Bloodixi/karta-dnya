@@ -11,7 +11,7 @@ const GLYPHS: Record<string, string> = {
   hagalaz: "M6 0V60 M34 0V60 M6 20L34 40",
   nauthiz: "M20 0V60 M6 20L34 40",
   isa: "M20 0V60",
-  jera: "M24 4L8 18L24 32 M16 28L32 42L16 56",
+  jera: "M6 14L20 4V34 M34 26L20 56V26",
   eihwaz: "M20 0V60 M20 0L34 12 M20 60L6 48",
   perthro: "M6 0V60 M6 0L30 14L16 30L30 46L6 60",
   algiz: "M20 0V60 M20 30L6 8 M20 30L34 8",
