@@ -18,7 +18,7 @@ export default function DestinyPage() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/chislo-sudby", label: "Число судьбы" }]} />
       <h1 className="text-3xl md:text-4xl font-semibold">Число судьбы по дате рождения</h1>
-      <p className="text-muted mt-2 max-w-2xl">Сложите все цифры даты рождения до одной цифры, кроме мастер-чисел 11, 22 и 33. Калькулятор сделает это за вас и покажет значение. Нужны сразу все числа даты и имени — откройте <Link className="text-accent underline" href="/numerologiya/po-date-rozhdeniya">нумерологию по дате рождения</Link>.</p>
+      <p className="text-muted mt-2 max-w-2xl">Сложите все цифры даты рождения до одной цифры, кроме мастер-чисел 11, 22 и 33. Калькулятор сделает это за вас и покажет значение. Нужны сразу все числа даты и имени — откройте <Link className="text-accent underline" href="/numerologiya/po-date-rozhdeniya">нумерологию по дате рождения</Link>, а для разбора через 22 аркана — <Link className="text-accent underline" href="/matrica-sudby">матрицу судьбы</Link>.</p>
       <div className="mt-6 max-w-2xl">
         <DestinyCalc numbers={numbers} />
       </div>

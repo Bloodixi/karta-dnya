@@ -73,6 +73,7 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
           )}
           <h2>Совет карты</h2>
           <blockquote>{c.advice}</blockquote>
+          {c.arcana === "major" && <p>Этот образ есть и в матрице судьбы: <Link href={`/matrica-sudby/arkany/${c.number === 0 ? 22 : c.number}`}>{c.number === 0 ? 22 : c.number} аркан, {c.name}</Link>.</p>}
         </div>
       </div>
       <div className="mt-10 flex flex-wrap gap-2 justify-between text-sm">
