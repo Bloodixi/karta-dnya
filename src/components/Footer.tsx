@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { horoscopeAuthor } from "@/lib/authors";
 import { SECTIONS, SECTION_KEYS, SITE, TOOLS } from "@/lib/site";
 
 export default function Footer() {
+  const author = horoscopeAuthor();
   return (
     <footer className="mt-16 border-t border-line bg-sunk">
       <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 md:grid-cols-3 text-sm">
@@ -14,6 +16,11 @@ export default function Footer() {
             Материалы сайта носят развлекательный и познавательный характер и не заменяют консультацию специалистов.
           </p>
           <p className="text-muted mt-2 text-xs">Иллюстрации карт: колода Райдера–Уэйта (Памела Колман Смит, 1909), общественное достояние. Фото камней — Wikimedia Commons, авторы и лицензии указаны под каждым фото.</p>
+          {author && (
+            <p className="text-muted mt-2 text-xs">
+              Гороскопы — <Link href={`/avtory/${author.slug}`} className="hover:text-ink underline">{author.name}</Link>, {author.role}. <Link href="/astrologiya/kak-my-schitaem" className="hover:text-ink underline">Как мы считаем</Link>.
+            </p>
+          )}
         </div>
         <div>
           <p className="mono mb-3">Разделы</p>

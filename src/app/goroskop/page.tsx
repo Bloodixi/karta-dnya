@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { horoscopeAuthor } from "@/lib/authors";
 import PeriodNav from "@/components/PeriodNav";
 import HoroscopeGrid from "@/components/HoroscopeGrid";
 import { allHoroscopes, formatDateRu, todayKey } from "@/lib/daily";
@@ -15,6 +17,7 @@ export const metadata: Metadata = {
 export default function HoroscopePage() {
   const date = todayKey();
   const items = allHoroscopes("segodnya", date);
+  const author = horoscopeAuthor();
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/goroskop", label: "Гороскоп" }]} />
@@ -22,6 +25,7 @@ export default function HoroscopePage() {
       <p className="text-muted mt-2 max-w-2xl">Короткий прогноз для каждого знака: настроение дня, любовь, дела и один совет. Выберите знак, чтобы прочитать подробнее, или переключите период.</p>
       <div className="mt-4"><PeriodNav current="segodnya" /></div>
       <HoroscopeGrid items={items} period="segodnya" />
+      {author && items.some((h) => h.source === "astro") && <AuthorCard author={author} note="гороскопы ведёт" className="mt-10" />}
     </div>
   );
 }

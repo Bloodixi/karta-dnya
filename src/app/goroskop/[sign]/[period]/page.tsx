@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import JsonLd from "@/components/JsonLd";
+import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
+import { SITE } from "@/lib/site";
 import HoroscopeCard from "@/components/HoroscopeCard";
 import PeriodNav from "@/components/PeriodNav";
 import ZodiacSign from "@/components/ZodiacSign";
@@ -36,6 +40,7 @@ export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[s
   if (!z || !PERIODS[pk] || pk === "segodnya") notFound();
   const h = horoscopeFor(z, pk, todayKey());
   const all = getZodiac();
+  const author = horoscopeAuthor();
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/goroskop", label: "Гороскоп" }, { href: `/goroskop/${sign}`, label: z.name }, { href: `/goroskop/${sign}/${period}`, label: PERIODS[pk].title }]} />
@@ -59,6 +64,22 @@ export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[s
           ))}
         </div>
       </section>
+      {author && h?.source === "astro" && <AuthorCard author={author} note="гороскопы ведёт" className="mt-10" />}
+      {h?.source === "astro" && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: `${z.name}: гороскоп ${PERIODS[pk].title}, ${h.label}`,
+            datePublished: h.key,
+            dateModified: h.key,
+            inLanguage: "ru",
+            mainEntityOfPage: `${SITE.url}/goroskop/${sign}/${period}`,
+            ...(author ? { author: authorJsonLd(author) } : {}),
+            publisher: { "@type": "Organization", name: SITE.name },
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { horoscopeAuthor } from "@/lib/authors";
 import Faq from "@/components/Faq";
 import NatalCalc, { type NatalRefs } from "@/components/NatalCalc";
 import { getArticles, type Faq as FaqItem } from "@/lib/content";
@@ -44,6 +46,7 @@ export default function NatalPage() {
     aspects: Object.values(data.aspects).map((a) => ({ kind: a.kind, name: a.name, withText: a.withText })),
   };
   const articles = getArticles("astrologiya").slice(0, 4);
+  const author = horoscopeAuthor();
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/astrologiya", label: "Астрология" }, { href: "/astrologiya/natalnaya-karta", label: "Натальная карта" }]} />
@@ -60,6 +63,8 @@ export default function NatalPage() {
         <p>Дома отвечают на вопрос «в какой сфере жизни»: первый — личность и подача себя, четвёртый — дом и семья, седьмой — партнёрство, десятый — призвание и карьера. Начало первого дома называется Асцендентом, или восходящим знаком, и во многом определяет первое впечатление, которое вы производите. Аспекты — углы между планетами — показывают, какие части характера поддерживают друг друга, а какие спорят и тем самым дают энергию для роста.</p>
         <p>Калькулятор использует современные эфемериды и систему домов Плацидуса, переводит местное время рождения во всемирное с учётом часового пояса и летнего времени, а трактовки написаны спокойным языком: карта не предсказывает событий и ничего не предрешает, она лишь описывает склонности, с которыми вы пришли в мир, и помогает лучше понять себя. Если время рождения неизвестно, карту всё равно можно рассчитать — без домов, но с положениями планет и аспектами.</p>
       </section>
+
+      {author && <AuthorCard author={author} className="mt-10" />}
 
       <Faq items={FAQ} />
 

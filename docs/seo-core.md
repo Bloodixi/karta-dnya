@@ -45,10 +45,10 @@
 | Запрос | Частотность (оценка) | Интент (инфо/инструмент) | Целевая страница |
 |---|---|---|---|
 | гороскоп на сегодня | very-high | инструмент | /goroskop |
-| гороскоп на завтра | very-high | инструмент | /goroskop/zavtra (new) |
-| гороскоп на неделю | very-high | инструмент | /goroskop/nedelya (new) |
-| гороскоп на месяц | very-high | инструмент | /goroskop/mesyac (new) |
-| гороскоп на год | very-high | инструмент | /goroskop/god (new) |
+| гороскоп на завтра | very-high | инструмент | /goroskop/zavtra |
+| гороскоп на неделю | very-high | инструмент | /goroskop/nedelya |
+| гороскоп на месяц | very-high | инструмент | /goroskop/mesyats |
+| гороскоп на год | very-high | инструмент | /goroskop/god и /goroskop/<znak>/god |
 | гороскоп овен | very-high | инструмент | /goroskop/oven |
 | гороскоп телец | high | инструмент | /goroskop/telec |
 | гороскоп рак | high | инструмент | /goroskop/rak |
@@ -56,14 +56,15 @@
 | гороскоп дева | high | инструмент | /goroskop/deva |
 | гороскоп скорпион | high | инструмент | /goroskop/skorpion |
 | гороскоп рыбы | high | инструмент | /goroskop/ryby |
-| лунный календарь | very-high | инструмент | /lunnyy-kalendar (new) |
+| лунный календарь | very-high | инструмент | /lunnyy-kalendar |
 | фазы луны сегодня | high | инструмент | /lunnyy-kalendar/segodnya (new) |
 | совместимость знаков зодиака | very-high | инструмент | /astrologiya/sovmestimost (есть статья; инструмент new) |
 | знаки зодиака по датам | very-high | инфо | /astrologiya/znaki-zodiaka-po-datam (есть статья) |
 | натальная карта онлайн | very-high | инструмент | /astrologiya/natalnaya-karta |
 | восходящий знак как узнать | high | инструмент | /astrologiya/voshodyaschiy-znak (new) |
-| ретроградный меркурий | high | инфо | /astrologiya/retrogradnyy-merkuriy (new) |
-| луна в знаках зодиака | mid | инфо | /astrologiya/luna-v-znakah (new) |
+| ретроградный меркурий | high | инфо | /astrologiya/retrogradnyy-merkuriy |
+| луна в знаках зодиака | mid | инфо | /astrologiya/luna-v-znake и /astrologiya/luna-v-znake/<znak> |
+| транзиты планет сегодня | mid | инструмент | /astrologiya/tranzity |
 | стихии знаков зодиака | mid | инфо | /astrologiya/stihii (new) |
 | дома в астрологии | mid | инфо | /astrologiya/doma (new) |
 

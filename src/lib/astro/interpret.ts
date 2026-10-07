@@ -220,20 +220,27 @@ function pickPhrase(data: AstroData, sign: SignInfo, period: PeriodKey, key: str
 /** Сколько кандидатов нужно, чтобы фраза не повторялась в 7 соседних днях. */
 const MIN_ROTATION = 7;
 
+/** Дательный падеж тел — для оппозиции («в оппозиции к Сатурну»). */
+const DATIVE: Record<Body, string> = {
+  sun: "Солнцу", moon: "Луне", mercury: "Меркурию", venus: "Венере", mars: "Марсу",
+  jupiter: "Юпитеру", saturn: "Сатурну", uranus: "Урану", neptune: "Нептуну", pluto: "Плутону",
+};
+
 function aspectDraft(data: AstroData, a: Body, b: Body, kind: AspectKind): string {
   const found = data.aspectPhrases.find((p) => (p.a === a && p.b === b || p.a === b && p.b === a) && p.kind === kind);
   if (found) return found.text;
   const pa = data.planets[a], pb = data.planets[b], asp = data.aspects[kind];
-  return `${pa?.name ?? a} ${asp?.withText ?? kind} ${pb?.instrumental ?? b}: ${asp?.text ?? ""}`.trim();
+  return `${pa?.name ?? a} ${asp?.withText ?? kind} ${kind === "opposition" ? DATIVE[b] : pb?.instrumental ?? b}: ${asp?.text ?? ""}`.trim();
 }
 
 /** Строка для «Что на небе»: «Венера в трине с Юпитером: первое предложение фразы об аспекте». */
 function aspectFact(data: AstroData, a: Body, b: Body, kind: AspectKind): string {
   const pa = data.planets[a], pb = data.planets[b], asp = data.aspects[kind];
+  const second = kind === "opposition" ? DATIVE[b] : pb?.instrumental ?? b;
   const found = data.aspectPhrases.find((p) => (p.a === a && p.b === b || p.a === b && p.b === a) && p.kind === kind);
   const body = (found ? found.text.split(/(?<=[.!?])\s/)[0].replace(/[.!?]$/, "") : asp?.text ?? "").replace(":", " —");
   const properNoun = Object.values(data.planets).some((p) => body.startsWith(p.name));
-  return `${pa?.name ?? a} ${asp?.withText ?? kind} ${pb?.instrumental ?? b}: ${body && !properNoun ? body[0].toLowerCase() + body.slice(1) : body}`.trim();
+  return `${pa?.name ?? a} ${asp?.withText ?? kind} ${second}: ${body && !properNoun ? body[0].toLowerCase() + body.slice(1) : body}`.trim();
 }
 
 /** Нейтральная фраза сферы (house "any") — когда событий в сфере нет. */
