@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getHoroscopeBank, getTarot, getZodiac, type TarotCard, type Zodiac } from "./content";
+import { getHoroscopeBank, getRunes, getTarot, getZodiac, type Rune, type TarotCard, type Zodiac } from "./content";
 import type { HoroscopeText } from "./astro/types";
 
 /** Детерминированный генератор: одна и та же дата → тот же результат у всех посетителей, без базы данных. */
@@ -51,6 +51,15 @@ export function cardOfDay(dateKey = todayKey()): { card: TarotCard; reversed: bo
   if (!cards.length) return null;
   const h = hash("card:" + dateKey);
   return { card: cards[h % cards.length], reversed: (h >>> 8) % 4 === 0 };
+}
+
+/** Руна дня: одна на дату по Москве; перевёрнутой бывает только у рун, у которых такое положение есть (примерно в четверти дней). */
+export function runeOfDay(dateKey = todayKey()): { rune: Rune; reversed: boolean } | null {
+  const runes = getRunes();
+  if (!runes.length) return null;
+  const h = hash("rune:" + dateKey);
+  const rune = runes[h % runes.length];
+  return { rune, reversed: !!rune.reversed && (h >>> 8) % 4 === 0 };
 }
 
 // ---------- периоды ----------

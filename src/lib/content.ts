@@ -117,6 +117,11 @@ export type BirthdayNumberText = { number: number; title: string; text: string }
 export type Dream = { slug: string; word: string; short: string; meaning: string; variants: { when: string; means: string }[]; mood: string };
 export type Stone = { slug: string; name: string; color: string; chakra: string; zodiac: string[]; numbers: number[]; properties: string[]; description: string; howToUse: string; care: string };
 
+export type Rune = {
+  slug: string; pos: number; name: string; orig: string; sound: string; att: 1 | 2 | 3; translation: string; associations: string; keywords: string[];
+  about: string; upright: string; reversed: string | null; love: string; work: string; advice: string; practice: string;
+};
+
 export type TarotExtra = { yesno: string; yesnoWhy: string; health: string; positions: { past: string; present: string; future: string }; combos: { with: string; means: string }[]; dayCard: string };
 export const getTarot = () => readJson<TarotCard[]>("tarot.json", []);
 export const getTarotExtra = () => readJson<Record<string, TarotExtra>>("tarot-extra.json", {});
@@ -140,6 +145,7 @@ export const getNameNumbers = () => readJson<NameNumberText[]>("numerology-name.
 export const getPersonalYears = () => readJson<PersonalYearText[]>("numerology-year.json", []);
 export const getLuckyNumbers = () => readJson<LuckyNumberText[]>("numerology-lucky.json", []);
 export const getBirthdayNumbers = () => readJson<BirthdayNumberText[]>("numerology-birthday.json", []);
+export const getRunes = () => readJson<Rune[]>("runes.json", []);
 export const getDreams = () => readJson<Dream[]>("dreams.json", []).sort((a, b) => a.word.localeCompare(b.word, "ru"));
 export const getStones = () => readJson<Stone[]>("stones.json", []);
 export type DreamImage = { file: string; thumb: string; model: string };
@@ -153,3 +159,4 @@ export const findTarot = (slug: string) => getTarot().find((c) => c.slug === slu
 export const findZodiac = (slug: string) => getZodiac().find((z) => z.slug === slug) || null;
 export const findDream = (slug: string) => getDreams().find((d) => d.slug === slug) || null;
 export const findStone = (slug: string) => getStones().find((s) => s.slug === slug) || null;
+export const findRune = (slug: string) => getRunes().find((r) => r.slug === slug) || null;

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getArticles, getDreams, getNumerology, getSpreads, getStones, getTarot, getZodiac } from "@/lib/content";
+import { getArticles, getDreams, getNumerology, getRunes, getSpreads, getStones, getTarot, getZodiac } from "@/lib/content";
 import { allPairs } from "@/lib/compat";
 import { getClockNumbers } from "@/lib/clock";
 import { PERIOD_KEYS, shiftKey, todayKey } from "@/lib/daily";
@@ -48,6 +48,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const c of getTarot()) out.push({ url: u(`/taro/karty/${c.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
   for (const d of getDreams()) out.push({ url: u(`/sonnik/${d.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
   for (const s of getStones()) out.push({ url: u(`/kamni/${s.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
+  out.push({ url: u("/runy/runa-dnya"), lastModified: now, changeFrequency: "daily", priority: 0.9 });
+  for (const r of getRunes()) out.push({ url: u(`/runy/${r.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.7 });
   out.push({ url: u("/kamni/po-znaku-zodiaka"), lastModified: now, changeFrequency: "monthly", priority: 0.8 });
   out.push({ url: u("/kamni/po-date-rozhdeniya"), lastModified: now, changeFrequency: "monthly", priority: 0.8 });
   for (const z of getZodiac()) out.push({ url: u(`/kamni/po-znaku-zodiaka/${z.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.7 });

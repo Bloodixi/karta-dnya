@@ -9,7 +9,7 @@ export const SITE = {
     "Эзотерический портал: карта дня, гороскоп на сегодня, значения карт Таро, число судьбы, сонник, камни-талисманы и практики для спокойной жизни.",
 };
 
-export type SectionKey = "taro" | "astrologiya" | "numerologiya" | "sonnik" | "praktiki" | "kamni";
+export type SectionKey = "taro" | "astrologiya" | "numerologiya" | "sonnik" | "praktiki" | "kamni" | "runy";
 
 export const SECTIONS: Record<SectionKey, { title: string; short: string; seoTitle?: string; description: string; emoji: string; icon: IconName }> = {
   taro: {
@@ -56,6 +56,14 @@ export const SECTIONS: Record<SectionKey, { title: string; short: string; seoTit
     icon: "gem",
     description: "Свойства минералов, камни по знаку зодиака, как выбирать, носить и очищать талисманы.",
   },
+  runy: {
+    title: "Руны",
+    seoTitle: "Руны: значение 24 рун Старшего Футарка и руна дня",
+    short: "Руны",
+    emoji: "ᚠ",
+    icon: "rune",
+    description: "Значение 24 рун Старшего Футарка в прямом и перевёрнутом положении, руна дня и спокойные советы, как пользоваться рунами.",
+  },
 };
 
 export const SECTION_KEYS = Object.keys(SECTIONS) as SectionKey[];
@@ -83,6 +91,7 @@ export const TOOLS: { href: string; title: string; text: string; emoji: string; 
   { href: "/karta-dnya", title: "Карта дня", text: "Одна карта Таро на сегодня и короткое толкование", emoji: "🃏", icon: "card" },
   { href: "/goroskop", title: "Гороскоп на сегодня", text: "Для каждого знака: общий фон, любовь, дела, совет", emoji: "✨", icon: "sun" },
   { href: "/chislo-sudby", title: "Число судьбы", text: "Рассчитать по дате рождения за секунду", emoji: "🔢", icon: "hash" },
+  { href: "/runy/runa-dnya", title: "Руна дня", text: "Одна руна Футарка на сегодня и короткая трактовка", emoji: "ᚠ", icon: "rune" },
   { href: "/sonnik", title: "Сонник", text: "Найти символ сна и прочитать толкование", emoji: "🌙", icon: "moon" },
   { href: "/sovmestimost", title: "Совместимость", text: "Два знака, процент и разбор пары", emoji: "💞", icon: "hearts" },
   { href: "/goroskop/zavtra", title: "Гороскоп на завтра", text: "Чтобы подготовиться заранее", emoji: "🌅", icon: "sunrise" },
@@ -111,5 +120,7 @@ export const SECTION_TOOLS: Partial<Record<SectionKey, { href: string; title: st
   astrologiya: [{ href: "/goroskop", title: "Гороскоп на сегодня" }, { href: "/goroskop/zavtra", title: "На завтра" }, { href: "/goroskop/god", title: "На год" }, { href: "/astrologiya/natalnaya-karta", title: "Натальная карта" }, { href: "/astrologiya/voshodyaschiy-znak", title: "Восходящий знак" }, { href: "/astrologiya/retrogradnyy-merkuriy", title: "Ретроградный Меркурий" }, { href: "/astrologiya/luna-v-znake", title: "Луна в знаке" }, { href: "/astrologiya/tranzity", title: "Транзиты" }, { href: "/sovmestimost", title: "Совместимость" }, { href: "/lunnyy-kalendar", title: "Лунный календарь" }],
   numerologiya: NUMEROLOGY_TOOLS.map((t) => ({ href: t.href, title: t.title })),
   sonnik: [{ href: "/sonnik", title: "Все символы сонника" }],
+  runy: [{ href: "/runy", title: "Значение всех рун" }, { href: "/runy/runa-dnya", title: "Руна дня" }],
+  praktiki: [{ href: "/runy", title: "Руны: значение и руна дня" }, { href: "/runy/runa-dnya", title: "Руна дня" }],
   kamni: [{ href: "/kamni", title: "Каталог камней" }, { href: "/kamni/po-znaku-zodiaka", title: "Камни по знаку зодиака" }, { href: "/kamni/po-date-rozhdeniya", title: "Камень по дате рождения" }],
 };
