@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import JsonLd from "@/components/JsonLd";
+import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
+import { SITE } from "@/lib/site";
 import HoroscopeCard from "@/components/HoroscopeCard";
 import HoroscopeGrid from "@/components/HoroscopeGrid";
 import PeriodNav from "@/components/PeriodNav";
@@ -40,6 +44,7 @@ export async function generateMetadata({ params }: PageProps<"/goroskop/[sign]">
 export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">) {
   const { sign } = await params;
   const date = todayKey();
+  const author = horoscopeAuthor();
   if (isPeriod(sign)) {
     const items = allHoroscopes(sign, date);
     return (
@@ -49,6 +54,7 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
         <p className="text-muted mt-2 max-w-2xl">Прогноз {PERIODS[sign].title} для каждого знака: общий фон, любовь, дела, самочувствие и совет.</p>
         <div className="mt-4"><PeriodNav current={sign} /></div>
         <HoroscopeGrid items={items} period={sign} />
+        {author && items.some((h) => h.source === "astro") && <AuthorCard author={author} note="гороскопы ведёт" className="mt-10" />}
       </div>
     );
   }
@@ -103,6 +109,22 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
           ))}
         </div>
       </section>
+      {author && h?.source === "astro" && <AuthorCard author={author} note="гороскопы ведёт" className="mt-10" />}
+      {h?.source === "astro" && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: `${z.name}: гороскоп на сегодня, ${h.label}`,
+            datePublished: h.key,
+            dateModified: h.key,
+            inLanguage: "ru",
+            mainEntityOfPage: `${SITE.url}/goroskop/${sign}`,
+            ...(author ? { author: authorJsonLd(author) } : {}),
+            publisher: { "@type": "Organization", name: SITE.name },
+          }}
+        />
+      )}
     </div>
   );
 }

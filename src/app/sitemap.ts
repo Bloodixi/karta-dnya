@@ -4,6 +4,8 @@ import { allPairs } from "@/lib/compat";
 import { getClockNumbers } from "@/lib/clock";
 import { PERIOD_KEYS, shiftKey, todayKey } from "@/lib/daily";
 import { SECTION_KEYS, SITE } from "@/lib/site";
+import { getAuthors } from "@/lib/authors";
+import { getMoonSigns } from "@/lib/moonSigns";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -19,6 +21,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: u("/taro/tri-karty"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/kvadrat-pifagora"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/astrologiya/natalnaya-karta"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: u("/astrologiya/retrogradnyy-merkuriy"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: u("/astrologiya/luna-v-znake"), lastModified: now, changeFrequency: "daily", priority: 0.8 },
+    { url: u("/astrologiya/tranzity"), lastModified: now, changeFrequency: "daily", priority: 0.8 },
+    { url: u("/astrologiya/kak-my-schitaem"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: u("/taro/arkany/starshie"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: u("/taro/arkany/mladshie"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
   ];
@@ -39,6 +45,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const c of getTarot()) out.push({ url: u(`/taro/karty/${c.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
   for (const d of getDreams()) out.push({ url: u(`/sonnik/${d.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
   for (const s of getStones()) out.push({ url: u(`/kamni/${s.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
-  for (const a of getArticles()) out.push({ url: u(`/${a.section}/${a.slug}`), lastModified: new Date(a.date || now), changeFrequency: "monthly", priority: 0.7 });
+  for (const m of getMoonSigns()) out.push({ url: u(`/astrologiya/luna-v-znake/${m.slug}`), lastModified: now, changeFrequency: "weekly", priority: 0.6 });
+  for (const a of getAuthors()) out.push({ url: u(`/avtory/${a.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.5 });
+  const seen = new Set(out.map((x) => x.url));
+  for (const a of getArticles()) {
+    const url = u(`/${a.section}/${a.slug}`);
+    if (seen.has(url)) continue; // статья, которую заменила отдельная страница (например, ретроградный Меркурий)
+    out.push({ url, lastModified: new Date(a.date || now), changeFrequency: "monthly", priority: 0.7 });
+  }
   return out;
 }

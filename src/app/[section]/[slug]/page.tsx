@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ArticleCard from "@/components/ArticleCard";
+import AuthorCard from "@/components/AuthorCard";
+import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
@@ -57,6 +59,7 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
   const a = await getArticle(key, slug);
   if (!a) notFound();
   const more = getArticles(key).filter((x) => x.slug !== slug).slice(0, 3);
+  const author = key === "astrologiya" ? horoscopeAuthor() : null;
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: `/${key}`, label: SECTIONS[key].title }, { href: `/${key}/${slug}`, label: a.title }]} />
@@ -68,6 +71,7 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
         </p>
       </header>
       <div className="prose mt-6" dangerouslySetInnerHTML={{ __html: a.html }} />
+      {author && <AuthorCard author={author} className="mt-10 max-w-[72ch]" />}
       <Faq items={a.faq} />
       {a.tags.length > 0 && (
         <p className="mt-8 flex flex-wrap gap-2">
@@ -95,6 +99,7 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
           datePublished: a.date,
           inLanguage: "ru",
           mainEntityOfPage: `${SITE.url}/${key}/${slug}`,
+          ...(author ? { author: authorJsonLd(author) } : {}),
           publisher: { "@type": "Organization", name: SITE.name },
         }}
       />
