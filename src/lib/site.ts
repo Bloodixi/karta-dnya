@@ -96,6 +96,7 @@ export const TOOLS: { href: string; title: string; text: string; emoji: string; 
 export const NUMEROLOGY_TOOLS: { href: string; title: string; text: string }[] = [
   { href: "/numerologiya/po-date-rozhdeniya", title: "Нумерология по дате рождения", text: "Все числа даты и имени в одном расчёте" },
   { href: "/chislo-sudby", title: "Число судьбы", text: "Калькулятор и значения чисел 1–9, 11, 22, 33" },
+  { href: "/matrica-sudby", title: "Матрица судьбы", text: "Арканы по дате рождения и центр матрицы" },
   { href: "/numerologiya/sovmestimost", title: "Совместимость по дате рождения", text: "Две даты, процент и разбор пары чисел" },
   { href: "/numerologiya/chislo-imeni", title: "Число имени", text: "Число выражения, души и личности по буквам" },
   { href: "/numerologiya/lichnyy-god", title: "Личный год", text: "Какой год цикла идёт у вас сейчас" },

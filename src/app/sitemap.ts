@@ -34,6 +34,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   out.push({ url: u("/numerologiya/chisla-na-chasah"), lastModified: now, changeFrequency: "monthly", priority: 0.8 });
   for (const c of getClockNumbers()) out.push({ url: u(`/numerologiya/chisla-na-chasah/${c.slug}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
   for (const p of ["/numerologiya/po-date-rozhdeniya", "/numerologiya/sovmestimost", "/numerologiya/chislo-imeni", "/numerologiya/lichnyy-god", "/numerologiya/schastlivoe-chislo", "/numerologiya/master-chisla"]) out.push({ url: u(p), lastModified: now, changeFrequency: "monthly", priority: 0.8 });
+  for (const p of ["/matrica-sudby", "/matrica-sudby/arkany", "/matrica-sudby/sovmestimost"]) out.push({ url: u(p), lastModified: now, changeFrequency: "monthly", priority: 0.8 });
+  for (let n = 1; n <= 22; n++) out.push({ url: u(`/matrica-sudby/arkany/${n}`), lastModified: now, changeFrequency: "monthly", priority: 0.6 });
   for (const n of getNumerology()) out.push({ url: u(`/chislo-sudby/${n.number}`), lastModified: now, changeFrequency: "monthly", priority: 0.7 });
   for (const s of SECTION_KEYS) out.push({ url: u(`/${s}`), lastModified: now, changeFrequency: "weekly", priority: 0.8 });
   const periods = PERIOD_KEYS.filter((p) => p !== "segodnya");

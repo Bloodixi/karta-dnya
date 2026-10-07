@@ -107,6 +107,7 @@ export default async function NumerologyByDatePage({ searchParams }: PageProps<t
         <p className="mt-4 flex flex-wrap gap-2">
           <Link href={`/numerologiya/sovmestimost?a=${date.iso}`} className="btn btn-ghost">Проверить совместимость с партнёром</Link>
           <Link href="/kvadrat-pifagora" className="btn btn-ghost">Квадрат Пифагора</Link>
+          <Link href={`/matrica-sudby?d=${date.iso}`} className="btn btn-ghost">Матрица судьбы</Link>
         </p>
         <ShareLink path={`https://karta-dnya.ru${PATH}${query}`} />
       </section>
@@ -145,7 +146,7 @@ export default async function NumerologyByDatePage({ searchParams }: PageProps<t
         <p>Число судьбы, сведённое к 1–9, и ряд чисел, которые к нему сводятся (например, 3, 12, 21, 30). Это числа, которые по традиции считают удачными для важных дат и выборов. Подробнее на странице <Link href="/numerologiya/schastlivoe-chislo">счастливого числа</Link>.</p>
         <h2>Как мы считаем</h2>
         <p>Все цифры даты складываются подряд: 14.03.1987 → 1 + 4 + 0 + 3 + 1 + 9 + 8 + 7 = 33, это мастер-число, оно остаётся. Для 25.11.1990 сумма 28 → 2 + 8 = 10 → 1. Некоторые школы складывают день, месяц и год по отдельности, и результат может отличаться, поэтому на странице <Link href="/numerologiya/master-chisla">мастер-чисел</Link> мы показываем оба способа. Для имени используется таблица по порядку алфавита: А, И, С, Ъ = 1; Б, Й, Т, Ы = 2 и так далее. Латинские буквы считаются по пифагорейской таблице.</p>
-        <p>Нумерология — это способ поговорить с собой о характере и этапах жизни, а не прогноз и не диагноз. Результаты стоит читать как подсказку, а решения принимать самостоятельно. Для полноты портрета посмотрите также <Link href="/kvadrat-pifagora">квадрат Пифагора</Link> и <Link href="/numerologiya/sovmestimost">совместимость по дате рождения</Link>.</p>
+        <p>Нумерология — это способ поговорить с собой о характере и этапах жизни, а не прогноз и не диагноз. Результаты стоит читать как подсказку, а решения принимать самостоятельно. Для полноты портрета посмотрите также <Link href="/kvadrat-pifagora">квадрат Пифагора</Link> <Link href="/matrica-sudby">матрицу судьбы</Link> с 22 арканами и <Link href="/numerologiya/sovmestimost">совместимость по дате рождения</Link>.</p>
       </section>
 
       <Faq items={FAQ} />
