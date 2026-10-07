@@ -46,6 +46,7 @@ export default function CardOfDayPage() {
             <p>
               <Link href={`/taro/karty/${today.card.slug}`}>Подробнее о карте «{today.card.name}»</Link> · <Link href="/taro/karty">все 78 карт</Link> · <Link href="/taro">раздел Таро</Link>
             </p>
+            <p className="text-sm text-muted">Любите символы попроще? Посмотрите <Link href="/runy/runa-dnya">руну дня</Link> из Старшего Футарка.</p>
           </div>
         </div>
       ) : (

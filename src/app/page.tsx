@@ -10,7 +10,7 @@ import { SECTIONS, SECTION_KEYS, TOOLS } from "@/lib/site";
 
 export const revalidate = 3600;
 
-const TOOL_KIND: Record<string, string> = { "/karta-dnya": "таро", "/goroskop": "астрология", "/chislo-sudby": "нумерология", "/sonnik": "сонник", "/sovmestimost": "астрология", "/goroskop/zavtra": "астрология", "/taro/da-net": "таро", "/lunnyy-kalendar": "луна", "/astrologiya/natalnaya-karta": "астрология", "/numerologiya/po-date-rozhdeniya": "нумерология" };
+const TOOL_KIND: Record<string, string> = { "/karta-dnya": "таро", "/goroskop": "астрология", "/chislo-sudby": "нумерология", "/sonnik": "сонник", "/runy/runa-dnya": "руны", "/sovmestimost": "астрология", "/goroskop/zavtra": "астрология", "/taro/da-net": "таро", "/lunnyy-kalendar": "луна", "/astrologiya/natalnaya-karta": "астрология", "/numerologiya/po-date-rozhdeniya": "нумерология" };
 
 export default function Home() {
   const date = todayKey();

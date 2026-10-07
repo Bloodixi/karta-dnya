@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-export type IconName = "card" | "sun" | "hash" | "moon" | "hearts" | "sunrise" | "ball" | "calendar" | "candle" | "gem" | "star";
+export type IconName = "card" | "sun" | "hash" | "moon" | "hearts" | "sunrise" | "ball" | "calendar" | "candle" | "gem" | "star" | "rune";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   card: (<><rect x="5" y="2.5" width="14" height="19" rx="2.5" /><path d="M12 8l1.4 2.9 3.1.4-2.3 2.2.6 3.1L12 15.1 9.2 16.6l.6-3.1-2.3-2.2 3.1-.4z" /></>),
@@ -13,6 +13,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
   calendar: (<><rect x="3" y="4.5" width="18" height="16.5" rx="2.5" /><path d="M3 9.5h18M8 2.5v4M16 2.5v4" /><path d="M14.5 16.8A3 3 0 0 1 11.2 13a2.3 2.3 0 1 0 3.3 3.8z" /></>),
   candle: (<><path d="M9 11h6v10H9z" /><path d="M12 11V8" /><path d="M12 2.5c-1.5 2-2 3-2 4a2 2 0 0 0 4 0c0-1-.5-2-2-4z" /></>),
   gem: (<><path d="M7 3h10l4 5-9 13L3 8z" /><path d="M3 8h18M9.5 8 12 21 14.5 8M7 3l2.5 5M17 3l-2.5 5" /></>),
+  rune: (<><path d="M8 3v18" /><path d="M8 9l8-5.5M8 16l8-5.5" /></>),
   star: (<path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7z" />),
 };
 
