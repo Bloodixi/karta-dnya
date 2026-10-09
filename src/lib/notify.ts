@@ -1,3 +1,8 @@
+/** Экранирование для parse_mode HTML: всё, что пришло от покупателя, пропускать через неё. */
+export function escapeHtml(v: unknown): string {
+  return String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 /** Уведомление владельцу в Telegram (TELEGRAM_BOT_TOKEN + TELEGRAM_OWNER_CHAT). Без переменных — тихо пропускает. */
 export async function notifyOwner(html: string): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;

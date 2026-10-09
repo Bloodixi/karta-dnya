@@ -27,7 +27,7 @@ export function RazborGoal({ counter, goal }: { counter?: string; goal: string }
   return null;
 }
 
-/** Форма оплаты: цель «razbor_checkout» при отправке, обычный POST на /api/razbor/checkout. */
+/** Форма оплаты: цель «razbor_checkout_click» при отправке, обычный POST на /api/razbor/checkout. */
 export function RazborCheckoutForm({ counter, children }: { counter?: string; children: ReactNode }) {
   const [busy, setBusy] = useState(false);
   return (
@@ -36,7 +36,7 @@ export function RazborCheckoutForm({ counter, children }: { counter?: string; ch
       action="/api/razbor/checkout"
       aria-busy={busy}
       onSubmit={() => {
-        reachGoal(counter, "razbor_checkout");
+        reachGoal(counter, "razbor_checkout_click");
         setBusy(true);
       }}
       className={busy ? "opacity-70 pointer-events-none" : undefined}

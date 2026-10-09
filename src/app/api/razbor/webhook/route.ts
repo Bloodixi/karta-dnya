@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { notifyOwner } from "@/lib/notify";
+import { escapeHtml as h, notifyOwner } from "@/lib/notify";
 import { razborUrl } from "@/lib/razborOrder";
 import { getPayment } from "@/lib/yookassa";
 
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const md = p.metadata ?? {};
     const url = razborUrl(p);
     await notifyOwner(
-      `💰 Оплачен разбор: ${p.amount.value} ₽\nДата: ${md.date}${md.name ? `, имя: ${md.name}` : ""}${md.email ? `\nE-mail: ${md.email}` : ""}\nЗаказ ${md.order} · платёж ${p.id}${url ? `\n<a href="${url}">Ссылка на разбор</a>` : ""}`,
+      `💰 Оплачен разбор: ${h(p.amount.value)} ₽\nДата: ${h(md.date)}${md.name ? `, имя: ${h(md.name)}` : ""}${md.email ? `\nE-mail: ${h(md.email)}` : ""}\nЗаказ ${h(md.order)} · платёж ${h(p.id)}${url ? `\n<a href="${h(url)}">Ссылка на разбор</a>` : ""}`,
     );
     return NextResponse.json({ ok: true });
   } catch (e) {
