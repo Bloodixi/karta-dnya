@@ -3,6 +3,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import Pythagoras from "@/components/Pythagoras";
+import RazborCta from "@/components/RazborCta";
 
 export const metadata: Metadata = {
   title: "Квадрат Пифагора по дате рождения: рассчитать онлайн",
@@ -27,6 +28,7 @@ export default function PythagorasPage() {
         <h2>Как считается</h2>
         <p>Складываются все цифры даты рождения (первое рабочее число), затем цифры результата (второе). Третье число — первое минус удвоенная первая цифра дня рождения, четвёртое — сумма цифр третьего. Все цифры даты и рабочих чисел раскладываются по ячейкам от 1 до 9. Подробнее с примером в статье <Link href="/numerologiya/kvadrat-pifagora">как рассчитать и расшифровать квадрат Пифагора</Link>, а итоговое число даты смотрите в <Link href="/chislo-sudby">калькуляторе числа судьбы</Link>.</p>
       </section>
+      <RazborCta />
       <Faq items={FAQ} />
     </div>
   );

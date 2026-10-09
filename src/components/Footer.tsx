@@ -49,12 +49,21 @@ export default function Footer() {
                 Значения карт Таро
               </Link>
             </li>
+            <li>
+              <Link href="/razbor" className="hover:text-ink">
+                Разбор по дате рождения
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
       <div className="border-t border-line">
         <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted">
           © {new Date().getFullYear()} {SITE.name}. Все материалы защищены.
+          <span className="mx-2" aria-hidden="true">·</span>
+          <Link href="/oferta" className="hover:text-ink underline">Оферта</Link>
+          <span className="mx-2" aria-hidden="true">·</span>
+          <Link href="/vozvrat" className="hover:text-ink underline">Возврат</Link>
         </p>
       </div>
     </footer>

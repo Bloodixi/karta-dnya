@@ -4,6 +4,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import NumerologyNav from "@/components/NumerologyNav";
+import RazborCta from "@/components/RazborCta";
 import { DateField, FormError, ShareLink, TextField } from "@/components/NumerologyFields";
 import { getBirthdayNumbers, getLuckyNumbers, getNameNumbers, getNumerology, getPersonalYears } from "@/lib/content";
 import { birthdayNumber, cleanName, currentYearMsk, destinyNumber, formatDate, isMaster, luckyNumbers, nameNumbers, parseDate, personalYear } from "@/lib/numerology";
@@ -130,6 +131,8 @@ export default async function NumerologyByDatePage({ searchParams }: PageProps<t
       </div>
 
       {result}
+
+      <RazborCta date={date?.iso} />
 
       <section className="prose mt-12">
         <h2>Что показывает нумерология по дате рождения</h2>

@@ -9,6 +9,18 @@ export const SITE = {
     "Эзотерический портал: карта дня, гороскоп на сегодня, значения карт Таро, число судьбы, сонник, камни-талисманы и практики для спокойной жизни.",
 };
 
+/** Реквизиты продавца для оферты, возврата и чеков. ЗАПОЛНЯЕТ ВЛАДЕЛЕЦ: пока inn начинается с «TODO»,
+ *  на /oferta и /vozvrat висит плашка «Реквизиты уточняются». */
+export const SELLER = {
+  name: "TODO ФИО",
+  inn: "TODO",
+  email: "TODO",
+  status: "самозанятый, плательщик налога на профессиональный доход",
+};
+
+/** Реквизиты ещё не заполнены владельцем. */
+export const SELLER_DRAFT = SELLER.inn.startsWith("TODO");
+
 export type SectionKey = "taro" | "astrologiya" | "numerologiya" | "sonnik" | "praktiki" | "kamni" | "runy";
 
 export const SECTIONS: Record<SectionKey, { title: string; short: string; seoTitle?: string; description: string; emoji: string; icon: IconName }> = {
