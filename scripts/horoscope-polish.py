@@ -258,12 +258,12 @@ def run_claude(prompt: str, model: str, timeout: int) -> tuple[str, float | None
         status = data.get("api_error_status")
         tag = "ЛИМИТ: " if status == 429 or "limit" in str(data.get("result", "")).lower() else ""
         return "", data.get("total_cost_usd"), f"{tag}ответ с ошибкой{f' (HTTP {status})' if status else ''}: {str(data.get('result', data.get('subtype')))[:200]}"
+    return str(data.get("result", "")), data.get("total_cost_usd"), None
 
 
 def is_limit(errors: dict[str, list[str]]) -> bool:
     """Исчерпан лимит сессии/запросов — дальше стучаться бессмысленно, остаток остаётся черновиком."""
     return any(e.startswith("ЛИМИТ") for v in errors.values() for e in v)
-    return str(data.get("result", "")), data.get("total_cost_usd"), None
 
 
 def polish_batch(drafts: list[dict], events: list[dict], period: str, key: str, model: str, timeout: int,
