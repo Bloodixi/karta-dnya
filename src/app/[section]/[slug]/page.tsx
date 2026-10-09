@@ -8,7 +8,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import StonePhoto from "@/components/StonePhoto";
-import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
+import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac, type TocItem } from "@/lib/content";
 import { pageTitle, SECTIONS, SECTION_KEYS, SITE, type SectionKey } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -60,6 +60,7 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
   if (!a) notFound();
   const more = getArticles(key).filter((x) => x.slug !== slug).slice(0, 3);
   const author = key === "astrologiya" ? horoscopeAuthor() : null;
+  const showToc = a.toc.length >= 3;
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: `/${key}`, label: SECTIONS[key].title }, { href: `/${key}/${slug}`, label: a.title }]} />
@@ -70,7 +71,31 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
           {new Date(a.date).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })} · {a.readingMinutes} мин чтения
         </p>
       </header>
-      <div className="prose mt-6" dangerouslySetInnerHTML={{ __html: a.html }} />
+      {a.cover && (
+        <figure className="frame-gold rounded-2xl overflow-hidden bg-surface mt-6 max-w-4xl">
+          {/* eslint-disable-next-line @next/next/no-img-element -- next/image без оптимизации не даёт srcset */}
+          <img src={a.cover.file} srcSet={`${a.cover.thumb} 600w, ${a.cover.file} 1200w`} sizes="(min-width: 960px) 896px, 92vw" width={1200} height={675} alt={a.title} loading="eager" fetchPriority="high" decoding="async" className="w-full h-auto block" />
+        </figure>
+      )}
+      <div className={showToc ? "lg:grid lg:grid-cols-[minmax(0,72ch)_15rem] lg:gap-12 mt-6" : "mt-6"}>
+        <div className="min-w-0">
+          {showToc && (
+            <details className="toc-mobile lg:hidden card px-4 py-3 mb-4">
+              <summary className="cursor-pointer font-semibold">Содержание</summary>
+              <TocList items={a.toc} />
+            </details>
+          )}
+          <div className="prose prose-article" dangerouslySetInnerHTML={{ __html: a.html }} />
+        </div>
+        {showToc && (
+          <aside className="hidden lg:block">
+            <nav aria-label="Содержание" className="sticky top-24 border-l border-line pl-4">
+              <p className="text-sm font-semibold mb-2">Содержание</p>
+              <TocList items={a.toc} />
+            </nav>
+          </aside>
+        )}
+      </div>
       {author && <AuthorCard author={author} className="mt-10 max-w-[72ch]" />}
       <Faq items={a.faq} />
       {a.tags.length > 0 && (
@@ -104,6 +129,18 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
         }}
       />
     </article>
+  );
+}
+
+function TocList({ items }: { items: TocItem[] }) {
+  return (
+    <ol className="mt-2 space-y-1.5 text-sm">
+      {items.map((t) => (
+        <li key={t.id}>
+          <a href={`#${t.id}`} className="text-muted hover:text-ink leading-snug block">{t.title}</a>
+        </li>
+      ))}
+    </ol>
   );
 }
 

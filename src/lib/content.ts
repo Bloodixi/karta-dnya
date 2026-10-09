@@ -20,8 +20,12 @@ export type ArticleMeta = {
   tags: string[];
   faq: Faq[];
   readingMinutes: number;
+  cover: ArticleCover | null;
 };
-export type Article = ArticleMeta & { html: string; text: string };
+/** Обложка статьи: public/articles/<slug>.webp (1200×675) и <slug>-600.webp; готовит tools/site/article-covers.py. */
+export type ArticleCover = { file: string; thumb: string };
+export type TocItem = { id: string; title: string };
+export type Article = ArticleMeta & { html: string; text: string; toc: TocItem[] };
 
 export function readJsonData<T>(name: string, fallback: T): T {
   return readJson(name, fallback);
@@ -45,6 +49,25 @@ function listArticleFiles(section: SectionKey): string[] {
   return fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
 }
 
+const COVERS = path.join(process.cwd(), "public", "articles");
+
+function findCover(slug: string): ArticleCover | null {
+  if (!fs.existsSync(path.join(COVERS, `${slug}.webp`))) return null;
+  const thumb = fs.existsSync(path.join(COVERS, `${slug}-600.webp`)) ? `/articles/${slug}-600.webp` : `/articles/${slug}.webp`;
+  return { file: `/articles/${slug}.webp`, thumb };
+}
+
+/** Проставляет id заголовкам h2 (sanitize их срезает) и собирает оглавление. */
+function withToc(html: string): { html: string; toc: TocItem[] } {
+  const toc: TocItem[] = [];
+  const out = html.replace(/<h2>([\s\S]*?)<\/h2>/g, (_m, inner: string) => {
+    const id = `r${toc.length + 1}`;
+    toc.push({ id, title: inner.replace(/<[^>]+>/g, "").replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&").trim() });
+    return `<h2 id="${id}">${inner}</h2>`;
+  });
+  return { html: out, toc };
+}
+
 function parseMeta(section: SectionKey, file: string): ArticleMeta & { body: string } {
   const raw = fs.readFileSync(path.join(ARTICLES, section, file), "utf8");
   const { data, content } = matter(raw);
@@ -57,6 +80,7 @@ function parseMeta(section: SectionKey, file: string): ArticleMeta & { body: str
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
     faq: Array.isArray(data.faq) ? data.faq.filter((x: Faq) => x && x.q && x.a) : [],
     readingMinutes: Math.max(1, Math.round(wordCount(content) / 180)),
+    cover: findCover(file.replace(/\.md$/, "")),
     body: content,
   };
 }
@@ -78,8 +102,9 @@ export async function getArticle(section: SectionKey, slug: string): Promise<Art
   const file = `${slug}.md`;
   if (!fs.existsSync(path.join(ARTICLES, section, file))) return null;
   const { body, ...meta } = parseMeta(section, file);
-  const html = String(await remark().use(remarkGfm).use(remarkHtml, { sanitize: true }).process(body));
-  return { ...meta, html, text: body };
+  const raw = String(await remark().use(remarkGfm).use(remarkHtml, { sanitize: true }).process(body));
+  const { html, toc } = withToc(raw);
+  return { ...meta, html, text: body, toc };
 }
 
 // ---------- данные ----------
