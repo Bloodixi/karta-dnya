@@ -42,7 +42,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="flex-1">{children}</main>
         <Footer />
         <TabBar />
-        <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", name: SITE.name, url: SITE.url, inLanguage: "ru" }} />
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@graph": [
+              { "@type": "WebSite", "@id": `${SITE.url}/#website`, name: SITE.name, alternateName: "karta-dnya.ru", url: SITE.url, inLanguage: "ru", publisher: { "@id": `${SITE.url}/#org` } },
+              { "@type": "Organization", "@id": `${SITE.url}/#org`, name: SITE.name, url: SITE.url, logo: `${SITE.url}/logo-512.png` },
+            ],
+          }}
+        />
         <Metrika />
       </body>
     </html>

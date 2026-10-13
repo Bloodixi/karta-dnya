@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { horoscopeAuthor } from "@/lib/authors";
 import { SECTIONS, SECTION_KEYS, SITE, TOOLS } from "@/lib/site";
@@ -9,7 +10,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 md:grid-cols-3 text-sm">
         <div>
           <p className="display text-lg inline-flex items-center gap-2">
-            <span aria-hidden="true" className="inline-block w-2 h-2 bg-gold rotate-45" /> {SITE.name}
+            <Image src="/logo-192.png" alt="" width={24} height={24} className="rounded" /> {SITE.name}
           </p>
           <p className="text-muted mt-2 max-w-sm">{SITE.tagline}.</p>
           <p className="text-muted mt-3 text-xs">
