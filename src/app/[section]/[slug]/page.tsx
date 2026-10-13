@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps<"/[section]/[slug]"
   }
   if (key === "kamni") {
     const s = findStone(slug);
-    if (s) return { title: `${s.name}: свойства, кому подходит и как носить`, description: s.description.slice(0, 160), alternates: { canonical: `/kamni/${slug}` } };
+    if (s) return { title: s.name.length > 12 ? `${s.name}: свойства и кому подходит` : `${s.name}: свойства, кому подходит и как носить`, description: s.description.slice(0, 160), alternates: { canonical: `/kamni/${slug}` } };
   }
   const a = await getArticle(key, slug);
   if (!a) return {};

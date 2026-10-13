@@ -11,7 +11,7 @@ import { formatDate, luckyNumbers, parseDate } from "@/lib/numerology";
 const PATH = "/numerologiya/schastlivoe-chislo";
 
 export const metadata: Metadata = {
-  title: "Счастливое число по дате рождения: рассчитать онлайн",
+  title: "Счастливое число по дате рождения онлайн",
   description: "Калькулятор счастливого числа по дате рождения: главное число удачи, ряд счастливых чисел до 99, удачные дни месяца и значение каждого числа от 1 до 9.",
   alternates: { canonical: PATH },
 };
