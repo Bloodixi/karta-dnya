@@ -10,6 +10,7 @@ import HoroscopeCard from "@/components/HoroscopeCard";
 import HoroscopeGrid from "@/components/HoroscopeGrid";
 import PeriodNav from "@/components/PeriodNav";
 import ZodiacSign from "@/components/ZodiacSign";
+import Subscribe from "@/components/Subscribe";
 import { findZodiac, getStones, getZodiac } from "@/lib/content";
 import { allHoroscopes, horoscopeFor, PERIODS, PERIOD_KEYS, periodLabel, todayKey, type PeriodKey } from "@/lib/daily";
 
@@ -101,6 +102,8 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
         <p>Камень: {z.stone}. Цвет: {z.color}. Счастливые числа: {z.luckyNumbers.join(", ")}.</p>
         {stones.length > 0 && <p>Подробнее о камнях: {stones.map((s, i) => <span key={s.slug}>{i > 0 && ", "}<Link href={`/kamni/${s.slug}`}>{s.name}</Link></span>)}. <Link href={`/kamni/po-znaku-zodiaka/${z.slug}`}>Все камни для знака {z.name} →</Link></p>}
       </section>
+
+      <Subscribe campaign="goroskop" className="mt-10" />
 
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Другие знаки</h2>

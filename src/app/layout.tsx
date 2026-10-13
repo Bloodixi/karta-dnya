@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import TabBar from "@/components/TabBar";
 import JsonLd from "@/components/JsonLd";
 import Metrika from "@/components/Metrika";
-import { SITE } from "@/lib/site";
+import { SITE, SOCIAL } from "@/lib/site";
 
 const display = Prata({ variable: "--font-display", subsets: ["latin", "cyrillic"], weight: "400" });
 const sans = Golos_Text({ variable: "--font-sans", subsets: ["latin", "cyrillic"], weight: ["400", "500", "600"] });
@@ -47,7 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             "@context": "https://schema.org",
             "@graph": [
               { "@type": "WebSite", "@id": `${SITE.url}/#website`, name: SITE.name, alternateName: "karta-dnya.ru", url: SITE.url, inLanguage: "ru", publisher: { "@id": `${SITE.url}/#org` } },
-              { "@type": "Organization", "@id": `${SITE.url}/#org`, name: SITE.name, url: SITE.url, logo: `${SITE.url}/logo-512.png` },
+              { "@type": "Organization", "@id": `${SITE.url}/#org`, name: SITE.name, url: SITE.url, logo: `${SITE.url}/logo-512.png`, sameAs: Object.values(SOCIAL).map((s) => s.url) },
             ],
           }}
         />

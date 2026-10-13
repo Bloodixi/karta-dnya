@@ -9,6 +9,18 @@ export const SITE = {
     "Эзотерический портал: карта дня, гороскоп на сегодня, значения карт Таро, число судьбы, сонник, камни-талисманы и практики для спокойной жизни.",
 };
 
+/** Реквизиты продавца для оферты, возврата и чеков. ЗАПОЛНЯЕТ ВЛАДЕЛЕЦ: пока inn или email начинаются с «TODO»,
+ *  на /oferta и /vozvrat висит плашка «Реквизиты уточняются». */
+export const SELLER = {
+  name: "Столяров Виталий Игоревич",
+  inn: "744517853783",
+  email: "TODO",
+  status: "самозанятый, плательщик налога на профессиональный доход",
+};
+
+/** Реквизиты ещё не заполнены владельцем. */
+export const SELLER_DRAFT = SELLER.inn.startsWith("TODO") || SELLER.email.startsWith("TODO");
+
 export type SectionKey = "taro" | "astrologiya" | "numerologiya" | "sonnik" | "praktiki" | "kamni" | "runy";
 
 export const SECTIONS: Record<SectionKey, { title: string; short: string; seoTitle?: string; description: string; emoji: string; icon: IconName }> = {
@@ -125,3 +137,10 @@ export const SECTION_TOOLS: Partial<Record<SectionKey, { href: string; title: st
   praktiki: [{ href: "/praktiki/affirmacii", title: "Аффирмации" }, { href: "/praktiki/affirmacii/dnya", title: "Аффирмация дня" }, { href: "/praktiki/affirmacii/na-dengi", title: "На деньги" }, { href: "/praktiki/affirmacii/dlya-zhenschin", title: "Для женщин" }, { href: "/runy/runa-dnya", title: "Руна дня" }],
   kamni: [{ href: "/kamni", title: "Каталог камней" }, { href: "/kamni/po-znaku-zodiaka", title: "Камни по знаку зодиака" }, { href: "/kamni/po-date-rozhdeniya", title: "Камень по дате рождения" }],
 };
+
+/** Наши площадки: ссылки в футере, блок подписки, sameAs организации. */
+export const SOCIAL = {
+  telegram: { title: "Telegram", handle: "@karta_dnya_ru", url: "https://t.me/karta_dnya_ru" },
+  youtube: { title: "YouTube", handle: "@karta_dnya_ru", url: "https://www.youtube.com/@karta_dnya_ru" },
+  vk: { title: "ВКонтакте", handle: "club242081949", url: "https://vk.com/club242081949" },
+} as const;

@@ -4,6 +4,7 @@ import ArticleCard from "@/components/ArticleCard";
 import { IconBadge } from "@/components/Icons";
 import MoonPhase from "@/components/MoonPhase";
 import TarotCardView from "@/components/TarotCardView";
+import Subscribe from "@/components/Subscribe";
 import { getArticles, getZodiac } from "@/lib/content";
 import { cardOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, PHASES } from "@/lib/moon";
@@ -130,6 +131,10 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      <div className="mx-auto max-w-6xl px-4 pt-12">
+        <Subscribe campaign="home" />
+      </div>
 
       <section className="mx-auto max-w-6xl px-4 pt-12">
         <div className="ornament mb-5"><h2 className="text-3xl">Разделы</h2><span className="mono">{SECTION_KEYS.length} темы</span></div>

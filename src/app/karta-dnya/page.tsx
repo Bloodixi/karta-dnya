@@ -3,6 +3,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import TarotCardView from "@/components/TarotCardView";
+import Subscribe from "@/components/Subscribe";
 import { cardOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { findTarotExtra } from "@/lib/content";
 
@@ -60,6 +61,7 @@ export default function CardOfDayPage() {
       ) : (
         <p className="mt-6 text-muted">Колода готовится, загляните чуть позже.</p>
       )}
+      <Subscribe campaign="karta-dnya" className="mt-10" />
       <Faq items={FAQ} />
     </div>
   );

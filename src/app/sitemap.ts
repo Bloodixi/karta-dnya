@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const out: MetadataRoute.Sitemap = [
     { url: u("/"), lastModified: now, changeFrequency: "daily", priority: 1 },
     { url: u("/karta-dnya"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: u("/privacy"), lastModified: new Date("2026-10-14"), changeFrequency: "yearly", priority: 0.1 },
     { url: u("/goroskop"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: u("/chislo-sudby"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: u("/taro/karty"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
