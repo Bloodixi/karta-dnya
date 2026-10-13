@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Faq from "@/components/Faq";
 import TarotCardView from "@/components/TarotCardView";
 import { cardOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { findTarotExtra } from "@/lib/content";
@@ -8,10 +9,17 @@ import { findTarotExtra } from "@/lib/content";
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
-  title: "Карта дня Таро: вытянуть бесплатно с толкованием",
-  description: "Карта дня Таро на сегодня: одна карта, её значение в прямом и перевёрнутом положении, совет на день. Обновляется каждую полночь.",
+  title: { absolute: "Карта дня Таро на сегодня: значение и совет дня" },
+  description: "Карта дня Таро на сегодня: одна карта для всех, её значение в прямом или перевёрнутом положении, любовь, дела и совет на день. Новая карта каждую полночь.",
   alternates: { canonical: "/karta-dnya" },
 };
+
+const FAQ = [
+  { q: "Что такое карта дня?", a: "Одна карта Таро, вытянутая на текущие сутки. Она не предсказывает события, а задаёт тему для внимания: на что посмотреть внимательнее и какой настрой выбрать." },
+  { q: "Когда меняется карта дня на сегодня?", a: "Каждую полночь по московскому времени. Карта одна для всех посетителей, поэтому её можно обсудить с друзьями." },
+  { q: "Что значит перевёрнутая карта дня?", a: "Перевёрнутое положение смягчает или переворачивает смысл карты: тема та же, но проявляется через задержку, сомнение или внутреннюю работу." },
+  { q: "Чем карта дня отличается от гороскопа на сегодня?", a: "Гороскоп написан для вашего знака зодиака и опирается на положение планет, а карта дня одна для всех и работает как общий совет. Их удобно читать вместе." },
+];
 
 export default function CardOfDayPage() {
   const date = todayKey();
@@ -21,7 +29,7 @@ export default function CardOfDayPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/karta-dnya", label: "Карта дня" }]} />
-      <h1 className="text-3xl md:text-4xl font-semibold">Карта дня — {formatDateRu(date)}</h1>
+      <h1 className="text-3xl md:text-4xl font-semibold">Карта дня на сегодня, {formatDateRu(date)}</h1>
       <p className="text-muted mt-2 max-w-2xl">
         Одна карта на сегодня для всех. Прочитайте значение, выделите одну мысль и понаблюдайте, как она проявится в течение дня. Это не предсказание, а повод для внимательности.
       </p>
@@ -46,12 +54,13 @@ export default function CardOfDayPage() {
             <p>
               <Link href={`/taro/karty/${today.card.slug}`}>Подробнее о карте «{today.card.name}»</Link> · <Link href="/taro/karty">все 78 карт</Link> · <Link href="/taro">раздел Таро</Link>
             </p>
-            <p className="text-sm text-muted">Любите символы попроще? Посмотрите <Link href="/runy/runa-dnya">руну дня</Link> из Старшего Футарка.</p>
+            <p className="text-sm text-muted">Любите символы попроще? Посмотрите <Link href="/runy/runa-dnya">руну дня</Link> из Старшего Футарка. Прогноз для своего знака — в <Link href="/goroskop">гороскопе на сегодня</Link>.</p>
           </div>
         </div>
       ) : (
         <p className="mt-6 text-muted">Колода готовится, загляните чуть позже.</p>
       )}
+      <Faq items={FAQ} />
     </div>
   );
 }
