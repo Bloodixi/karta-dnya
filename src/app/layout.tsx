@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   openGraph: { type: "website", locale: SITE.locale, siteName: SITE.name },
   robots: { index: true, follow: true },
   alternates: { canonical: "/" },
+  other: { "zen-verification": "aHCHPveu0o4Sy73w9ZPxMM8SNFqTWecWOpSsZqI30YqiyVU0ItQg6o8eVaiOMmhD" }, // подтверждение сайта для канала dzen.ru/karta_dnya_ru
 };
 
 export const viewport: Viewport = {
