@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
-import { DIGITS, digitsOf, findClock, getClockNumbers } from "@/lib/clock";
+import { DIGITS, clockDescription, clockFaq, clockSteps, clockTitle, compactTime, digitsOf, findClock, getClockNumbers, relatedClocks } from "@/lib/clock";
+import { pageTitle } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -16,8 +17,8 @@ export async function generateMetadata({ params }: PageProps<"/numerologiya/chis
   const c = findClock(time);
   if (!c) return {};
   return {
-    title: `${c.time} на часах: значение в ангельской нумерологии`,
-    description: c.short.slice(0, 160),
+    title: pageTitle(clockTitle(c)),
+    description: clockDescription(c),
     alternates: { canonical: `/numerologiya/chisla-na-chasah/${time}` },
   };
 }
@@ -33,12 +34,16 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
   const digits = Array.from(new Set(digitsOf(c.time)));
   const others = all.filter((x) => x.slug !== time && x.kind === c.kind).slice(0, 12);
   const paragraphs = c.meaning.split(/\n+/).filter(Boolean);
+  const { mirror, sameSum } = relatedClocks(c, all);
+  const steps = clockSteps(c);
+  const faq = clockFaq(c);
+  const kindWord = c.kind === "double" ? "одинаковые" : "зеркальные";
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/numerologiya/chisla-na-chasah", label: "Числа на часах" }, { href: `/numerologiya/chisla-na-chasah/${time}`, label: c.time }]} />
       <div className="grid gap-8 md:grid-cols-[280px_1fr] items-start">
         <div className="card frame-gold p-6 text-center md:sticky md:top-24">
-          <p className="mono">{c.kind === "double" ? "одинаковые цифры" : "зеркальные цифры"}</p>
+          <p className="mono">{kindWord} цифры · {compactTime(c.time)}</p>
           <p className="display text-6xl mt-3">{c.time}</p>
           <p className="display text-xl mt-2">{c.title}</p>
           <p className="text-sm text-muted mt-3">{c.keywords.join(" · ")}</p>
@@ -46,25 +51,46 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
           <p className="text-sm text-muted mt-1">{DIGITS[c.sum]?.title}: {DIGITS[c.sum]?.text}</p>
         </div>
         <div className="prose">
-          <h1 className="text-3xl md:text-4xl !mt-0">{c.time} на часах: значение</h1>
+          <h1 className="text-3xl md:text-4xl !mt-0">{c.time} на часах: значение и что это значит</h1>
           <p className="text-lg">{c.short}</p>
           {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
-          <h2>В любви и отношениях</h2>
+          <h2>{c.time} в любви и отношениях</h2>
           <p>{c.love}</p>
-          <h2>В работе и деньгах</h2>
+          <h2>{c.time} в работе и деньгах</h2>
           <p>{c.money}</p>
           <h2>Из чего складывается {c.time}</h2>
           <ul>
             {digits.map((d) => <li key={d}><strong>{d} · {DIGITS[d].title}.</strong> {DIGITS[d].text}</li>)}
           </ul>
-          <h2>Совет</h2>
+          <h2>Что делать, если видите {c.time}</h2>
+          <p>Сначала просто заметьте, о чём вы думали в момент, когда взглянули на часы: подсказка относится к этой мысли. Дальше можно выбрать один из спокойных шагов:</p>
+          <ul>
+            {steps.map((s, i) => <li key={i}>{s}</li>)}
+          </ul>
+          <h2>Совет на день</h2>
           <blockquote>{c.advice}</blockquote>
           <p>Хотите узнать свой постоянный фон, а не подсказку момента? Рассчитайте <Link href="/chislo-sudby">число судьбы</Link> или постройте <Link href="/kvadrat-pifagora">квадрат Пифагора</Link>.</p>
         </div>
       </div>
-      <Faq items={c.faq} />
+      <Faq items={faq} />
+      {mirror.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-2xl mb-3">Зеркальные и похожие на {c.time}</h2>
+          <div className="flex flex-wrap gap-2">
+            {mirror.map((o) => <Link key={o.slug} href={`/numerologiya/chisla-na-chasah/${o.slug}`} className="chip hover:text-ink">{o.time} · {o.title}</Link>)}
+          </div>
+        </section>
+      )}
+      {sameSum.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-2xl mb-3">С той же суммой цифр</h2>
+          <div className="flex flex-wrap gap-2">
+            {sameSum.map((o) => <Link key={o.slug} href={`/numerologiya/chisla-na-chasah/${o.slug}`} className="chip hover:text-ink">{o.time}</Link>)}
+          </div>
+        </section>
+      )}
       <section className="mt-10">
-        <h2 className="text-2xl mb-3">Другие {c.kind === "double" ? "одинаковые" : "зеркальные"} числа</h2>
+        <h2 className="text-2xl mb-3">Другие {kindWord} числа на часах</h2>
         <div className="flex flex-wrap gap-2">
           {others.map((o) => <Link key={o.slug} href={`/numerologiya/chisla-na-chasah/${o.slug}`} className="chip hover:text-ink">{o.time}</Link>)}
           <Link href="/numerologiya/chisla-na-chasah" className="chip hover:text-ink">все числа на часах →</Link>
