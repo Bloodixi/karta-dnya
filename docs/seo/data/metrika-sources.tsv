@@ -1,0 +1,5 @@
+lastTrafficSource	visits	users	bounceRate	pageDepth	avgVisitDurationSeconds
+Direct traffic	42.0	38.0	71.43	1.36	30.83
+Search engine traffic	7.0	7.0	42.86	1.14	73.14
+Internal traffic	2.0	1.0	50.0	1.0	8.0
+Link traffic	2.0	2.0	100.0	1.0	0.0
