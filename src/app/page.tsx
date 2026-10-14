@@ -1,14 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
 import { IconBadge } from "@/components/Icons";
 import MoonPhase from "@/components/MoonPhase";
 import TarotCardView from "@/components/TarotCardView";
+import Subscribe from "@/components/Subscribe";
 import { getArticles, getZodiac } from "@/lib/content";
 import { cardOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
-import { dayInfo, PHASES } from "@/lib/moon";
+import { dayInfo, LUNAR_DAYS, PHASES } from "@/lib/moon";
+import { signByDate } from "@/lib/stones";
 import { SECTIONS, SECTION_KEYS, TOOLS } from "@/lib/site";
 
 export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  title: { absolute: "Карта дня на сегодня: Таро, гороскоп и лунный день" },
+  description: "Карта дня на сегодня: карта Таро с толкованием, гороскоп для каждого знака и лунный календарь. Какой сегодня день по гороскопу и в каком знаке Луна.",
+  alternates: { canonical: "/" },
+};
 
 const TOOL_KIND: Record<string, string> = { "/karta-dnya": "таро", "/goroskop": "астрология", "/chislo-sudby": "нумерология", "/sonnik": "сонник", "/runy/runa-dnya": "руны", "/sovmestimost": "астрология", "/goroskop/zavtra": "астрология", "/taro/da-net": "таро", "/lunnyy-kalendar": "луна", "/astrologiya/natalnaya-karta": "астрология", "/numerologiya/po-date-rozhdeniya": "нумерология" };
 
@@ -19,13 +28,16 @@ export default function Home() {
   const moon = dayInfo(date);
   const articles = getArticles().slice(0, 6);
   const zodiac = getZodiac();
+  const [, month, day] = date.split("-").map(Number);
+  const sun = signByDate(month, day);
+  const ld = LUNAR_DAYS[moon.lunarDay];
   return (
     <div>
       <section className="night">
         <div className="relative mx-auto max-w-6xl px-4 pt-12 pb-20 md:pt-16 md:pb-24 grid gap-10 md:grid-cols-[1.2fr_0.8fr] items-center">
           <div>
             <p className="mono mb-5">{formatDateRu(date)} · {moon.lunarDay}-й лунный день · Луна в знаке {moon.sign.name}</p>
-            <h1 className="text-4xl md:text-6xl leading-[1.08]">Одна карта на сегодня.<br />Гороскоп без тумана.</h1>
+            <h1 className="text-4xl md:text-6xl leading-[1.08]">Карта дня на сегодня.<br />Гороскоп без тумана.</h1>
             <p className="text-muted mt-5 max-w-xl text-lg">
               Каждый день: карта Таро, прогноз для вашего знака и лунный календарь. Коротко и спокойно, как повод присмотреться к дню.
             </p>
@@ -78,6 +90,21 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pt-12">
+        <div className="ornament mb-5"><h2 className="text-3xl">Какой сегодня день по гороскопу</h2><span className="mono">{formatDateRu(date, { day: "numeric", month: "long" })}</span></div>
+        <div className="prose max-w-3xl">
+          <p>
+            Сегодня {formatDateRu(date)}{sun ? <>, Солнце в знаке <Link href={`/goroskop/${sun.slug}`}>{sun.name}</Link></> : null}, Луна в знаке{" "}
+            <Link href={`/astrologiya/luna-v-znake/${moon.sign.slug}`}>{moon.sign.name}</Link>, {moon.lunarDay}-й лунный день{ld ? ` («${ld.symbol}»)` : ""}. {PHASES[moon.phase].name}: {PHASES[moon.phase].text}
+          </p>
+          <p>
+            Карта Таро на сегодня — {today ? <Link href="/karta-dnya">{today.card.name}{today.reversed ? " в перевёрнутом положении" : ""}</Link> : <Link href="/karta-dnya">карта дня</Link>}.
+            Прогноз для своего знака смотрите в <Link href="/goroskop">гороскопе на сегодня</Link>, подробности о Луне — в <Link href={`/lunnyy-kalendar/${date}`}>лунном календаре</Link>,
+            а личную астрологическую карту по дате, времени и месту рождения построит <Link href="/astrologiya/natalnaya-karta">натальная карта</Link>.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-12">
         <div className="ornament mb-5"><h2 className="text-3xl">Инструменты</h2><span className="mono">{TOOLS.length} ежедневных</span></div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {TOOLS.map((t, i) => (
@@ -104,6 +131,10 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      <div className="mx-auto max-w-6xl px-4 pt-12">
+        <Subscribe campaign="home" />
+      </div>
 
       <section className="mx-auto max-w-6xl px-4 pt-12">
         <div className="ornament mb-5"><h2 className="text-3xl">Разделы</h2><span className="mono">{SECTION_KEYS.length} темы</span></div>

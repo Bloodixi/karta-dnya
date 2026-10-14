@@ -1,6 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { horoscopeAuthor } from "@/lib/authors";
-import { SECTIONS, SECTION_KEYS, SITE, TOOLS } from "@/lib/site";
+import { SECTIONS, SECTION_KEYS, SITE, SOCIAL, TOOLS } from "@/lib/site";
 
 export default function Footer() {
   const author = horoscopeAuthor();
@@ -9,9 +10,14 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 md:grid-cols-3 text-sm">
         <div>
           <p className="display text-lg inline-flex items-center gap-2">
-            <span aria-hidden="true" className="inline-block w-2 h-2 bg-gold rotate-45" /> {SITE.name}
+            <Image src="/logo-192.png" alt="" width={24} height={24} className="rounded" /> {SITE.name}
           </p>
           <p className="text-muted mt-2 max-w-sm">{SITE.tagline}.</p>
+          <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+            {Object.values(SOCIAL).map((s) => (
+              <a key={s.url} href={s.url} target="_blank" rel="noopener" className="hover:text-ink underline">{s.title}</a>
+            ))}
+          </p>
           <p className="text-muted mt-3 text-xs">
             Материалы сайта носят развлекательный и познавательный характер и не заменяют консультацию специалистов.
           </p>
@@ -64,6 +70,8 @@ export default function Footer() {
           <Link href="/oferta" className="hover:text-ink underline">Оферта</Link>
           <span className="mx-2" aria-hidden="true">·</span>
           <Link href="/vozvrat" className="hover:text-ink underline">Возврат</Link>
+          <span className="mx-2" aria-hidden="true">·</span>
+          <Link href="/privacy" className="hover:text-ink underline">Конфиденциальность</Link>
         </p>
       </div>
     </footer>

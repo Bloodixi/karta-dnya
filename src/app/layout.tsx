@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import TabBar from "@/components/TabBar";
 import JsonLd from "@/components/JsonLd";
 import Metrika from "@/components/Metrika";
-import { SITE } from "@/lib/site";
+import { SITE, SOCIAL } from "@/lib/site";
 
 const display = Prata({ variable: "--font-display", subsets: ["latin", "cyrillic"], weight: "400" });
 const sans = Golos_Text({ variable: "--font-sans", subsets: ["latin", "cyrillic"], weight: ["400", "500", "600"] });
@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   openGraph: { type: "website", locale: SITE.locale, siteName: SITE.name },
   robots: { index: true, follow: true },
   alternates: { canonical: "/" },
+  other: { "zen-verification": "aHCHPveu0o4Sy73w9ZPxMM8SNFqTWecWOpSsZqI30YqiyVU0ItQg6o8eVaiOMmhD" }, // подтверждение сайта для канала dzen.ru/karta_dnya_ru
 };
 
 export const viewport: Viewport = {
@@ -42,7 +43,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="flex-1">{children}</main>
         <Footer />
         <TabBar />
-        <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", name: SITE.name, url: SITE.url, inLanguage: "ru" }} />
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@graph": [
+              { "@type": "WebSite", "@id": `${SITE.url}/#website`, name: SITE.name, alternateName: "karta-dnya.ru", url: SITE.url, inLanguage: "ru", publisher: { "@id": `${SITE.url}/#org` } },
+              { "@type": "Organization", "@id": `${SITE.url}/#org`, name: SITE.name, url: SITE.url, logo: `${SITE.url}/logo-512.png`, sameAs: Object.values(SOCIAL).map((s) => s.url) },
+            ],
+          }}
+        />
         <Metrika />
       </body>
     </html>

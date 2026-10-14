@@ -137,3 +137,10 @@ export const SECTION_TOOLS: Partial<Record<SectionKey, { href: string; title: st
   praktiki: [{ href: "/praktiki/affirmacii", title: "Аффирмации" }, { href: "/praktiki/affirmacii/dnya", title: "Аффирмация дня" }, { href: "/praktiki/affirmacii/na-dengi", title: "На деньги" }, { href: "/praktiki/affirmacii/dlya-zhenschin", title: "Для женщин" }, { href: "/runy/runa-dnya", title: "Руна дня" }],
   kamni: [{ href: "/kamni", title: "Каталог камней" }, { href: "/kamni/po-znaku-zodiaka", title: "Камни по знаку зодиака" }, { href: "/kamni/po-date-rozhdeniya", title: "Камень по дате рождения" }],
 };
+
+/** Наши площадки: ссылки в футере, блок подписки, sameAs организации. */
+export const SOCIAL = {
+  telegram: { title: "Telegram", handle: "@karta_dnya_ru", url: "https://t.me/karta_dnya_ru" },
+  youtube: { title: "YouTube", handle: "@karta_dnya_ru", url: "https://www.youtube.com/@karta_dnya_ru" },
+  vk: { title: "ВКонтакте", handle: "club242081949", url: "https://vk.com/club242081949" },
+} as const;
