@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import MoonPhase from "@/components/MoonPhase";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
-import { dayInfo, LUNAR_DAYS, PHASES } from "@/lib/moon";
+import { dayInfo, LUNAR_DAYS, moonWindow, moonWindowKeys, PHASES } from "@/lib/moon";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -12,8 +12,7 @@ export const dynamicParams = true;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export function generateStaticParams() {
-  const today = todayKey();
-  return Array.from({ length: 120 }, (_, i) => ({ date: shiftKey(today, i - 30) }));
+  return moonWindowKeys(todayKey()).map((date) => ({ date }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/lunnyy-kalendar/[date]">): Promise<Metadata> {
@@ -33,6 +32,9 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
   const [y, m, dd] = date.split("-").map(Number);
   if (y < 2000 || y > 2100 || m < 1 || m > 12 || dd < 1 || dd > 31) notFound();
   const d = dayInfo(date);
+  const win = moonWindow(todayKey());
+  const prev = shiftKey(date, -1);
+  const next = shiftKey(date, 1);
   const ld = LUNAR_DAYS[d.lunarDay];
   const ph = PHASES[d.phase];
   return (
@@ -57,9 +59,9 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
         </div>
       </div>
       <div className="mt-6 flex flex-wrap gap-2 justify-between text-sm">
-        <Link href={`/lunnyy-kalendar/${shiftKey(date, -1)}`} className="btn btn-ghost">← {formatDateRu(shiftKey(date, -1), { day: "numeric", month: "long" })}</Link>
+        {prev >= win.from && prev <= win.to ? <Link href={`/lunnyy-kalendar/${prev}`} className="btn btn-ghost">← {formatDateRu(prev, { day: "numeric", month: "long" })}</Link> : <span />}
         <Link href="/lunnyy-kalendar" className="btn btn-ghost">Сегодня и месяц</Link>
-        <Link href={`/lunnyy-kalendar/${shiftKey(date, 1)}`} className="btn btn-ghost">{formatDateRu(shiftKey(date, 1), { day: "numeric", month: "long" })} →</Link>
+        {next >= win.from && next <= win.to ? <Link href={`/lunnyy-kalendar/${next}`} className="btn btn-ghost">{formatDateRu(next, { day: "numeric", month: "long" })} →</Link> : <span />}
       </div>
     </div>
   );
