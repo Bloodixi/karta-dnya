@@ -20,6 +20,7 @@ export type Order = {
   receipt_uuid?: string; // чек «Мой налог»
   receipt_url?: string;
   mail_sent_at?: string; // письмо покупателю с разбором и чеком
+  receipt_due?: boolean; // боевая оплата: чек и письмо обязательны (тестовые заказы — без них)
 };
 
 const ID_RE = /^[\w-]{6,64}$/;

@@ -3,7 +3,7 @@
  * дубликат данных — в metadata платежа: по нему заказ восстанавливается, если файла нет. Только сервер.
  */
 import { getPayment, recentPayments, type Payment } from "./yookassa";
-import { getOrder, settleOrder, type Order } from "./razborStore";
+import { getOrder, patchOrder, settleOrder, type Order } from "./razborStore";
 import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
@@ -57,6 +57,45 @@ export function orderFromPayment(p: Payment): Order | null {
 }
 
 /**
+ * После оплаты: чек «Мой налог» и письмо покупателю (каждое — один раз на заказ).
+ * Возвращает строки для уведомления владельцу и заказ с обновлёнными полями.
+ */
+const finishing = new Map<string, Promise<{ order?: Order; lines: string[] }>>();
+function finishPaid(order: Order): Promise<{ order?: Order; lines: string[] }> {
+  // вебхук и страница «Спасибо» могут прийти одновременно — второй ждёт первый, чек не пробивается дважды
+  const running = finishing.get(order.id);
+  if (running) return running;
+  const job = doFinishPaid(order).finally(() => finishing.delete(order.id));
+  finishing.set(order.id, job);
+  return job;
+}
+
+async function doFinishPaid(order: Order): Promise<{ order?: Order; lines: string[] }> {
+  order = (await patchOrder(order.id, { receipt_due: true })) ?? { ...order, receipt_due: true };
+  const r = await issueReceipt(order);
+  const o = r.receipt ?? order;
+  const m = await mailBuyer(o);
+  const lines = [
+    o.receipt_url ? `<a href="${h(o.receipt_url)}">Чек «Мой налог»</a>` : `<b>⚠️ Чек не пробит</b> (${h(r.error)}) — сайт повторит при следующем открытии заказа`,
+    m.sent ? `✉️ Письмо отправлено на ${h(o.email)}` : `<b>⚠️ Письмо не отправлено</b> (${h(m.error)})`,
+  ];
+  return { order: o, lines };
+}
+
+/** Повтор для оплаченного заказа без чека или письма (сеть ФНС или почты была недоступна). Владельцу — что получилось. */
+async function retryPaid(o: Order): Promise<Order> {
+  if (!o.receipt_due || (o.receipt_uuid && (o.mail_sent_at || !o.email))) return o;
+  const before = { receipt: Boolean(o.receipt_uuid), mail: Boolean(o.mail_sent_at) };
+  const f = await finishPaid(o);
+  const after = f.order ?? o;
+  const fresh = (await getOrder(o.id)) ?? after;
+  if ((!before.receipt && fresh.receipt_uuid) || (!before.mail && fresh.mail_sent_at)) {
+    await notifyPayment([`<b>↻ Заказ ${h(o.id)} доделан</b>`, ...f.lines].join("\n"), true);
+  }
+  return fresh;
+}
+
+/**
  * Сверяет заказ с уже перепроверенным в API платежом и, если статус стал итоговым, записывает его.
  * Уведомление владельцу уходит один раз — при первом переходе в paid (вебхук или страница «Спасибо», кто раньше).
  */
@@ -69,15 +108,8 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
     const test = p.test ? " · тест" : "";
     if (order.status === "paid") {
       const url = `${SITE.url}/razbor/r/${order.token}`;
-      // тестовый магазин чек в налоговую не пробивает
-      const r = p.test ? {} : await issueReceipt(order);
-      const receipt = r.receipt?.receipt_url
-        ? `<a href="${h(r.receipt.receipt_url)}">Чек «Мой налог»</a>`
-        : r.error
-          ? `<b>⚠️ Чек не пробит</b> (${h(r.error)}) — оформи вручную в «Мой налог»`
-          : "";
-      const m = p.test ? {} : await mailBuyer(r.receipt ?? order);
-      const mail = m.sent ? `✉️ Письмо отправлено на ${h(order.email)}` : m.error ? `<b>⚠️ Письмо не отправлено</b> (${h(m.error)})` : "";
+      // тестовый магазин чек в налоговую не пробивает и письма не шлёт
+      const f = p.test ? { lines: [] } : await finishPaid(order);
       await notifyPayment(
         [
           `<b>💳 Оплачен разбор — ${h(p.amount.value)} ₽</b>${test}`,
@@ -85,8 +117,7 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
           `Дата рождения: ${h(order.date)}${order.name ? `\nИмя: ${h(order.name)}` : ""}${order.email ? `\nE-mail: ${h(order.email)}` : ""}`,
           "",
           `<a href="${h(url)}">Открыть разбор</a>`,
-          ...(receipt ? [receipt] : []),
-          ...(mail ? [mail] : []),
+          ...f.lines,
           `<i>Заказ ${h(order.id)} · платёж ${h(p.id)}</i>`,
         ].join("\n"),
       );
@@ -121,5 +152,6 @@ export async function orderState(orderId: string, cookiePaymentId?: string): Pro
   if (!o) return { status: "unknown" };
   if (o.status !== "paid") return { status: o.status };
   if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
+  if (o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
   return { status: "paid", path: `/razbor/r/${o.token}`, receipt: o.receipt_url };
 }
