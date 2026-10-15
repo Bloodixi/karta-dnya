@@ -4,7 +4,7 @@
  */
 import { getPayment, recentPayments, type Payment } from "./yookassa";
 import { getOrder, settleOrder, type Order } from "./razborStore";
-import { escapeHtml as h, notifyOwner } from "./notify";
+import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeToken } from "./razborToken";
 import type { RazborInput } from "./razbor";
 import { SITE } from "./site";
@@ -63,11 +63,26 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
   if (!id) return null;
   if (p.status !== "succeeded" && p.status !== "canceled") return (await getOrder(id)) ?? orderFromPayment(p);
   const { order, changed } = await settleOrder(id, p.status === "succeeded" ? "paid" : "canceled", () => orderFromPayment(p), p.id);
-  if (changed && order?.status === "paid") {
-    const url = `${SITE.url}/razbor/r/${order.token}`;
-    await notifyOwner(
-      `Оплачен разбор: ${h(p.amount.value)} ₽${p.test ? " (тест)" : ""}\nДата: ${h(order.date)}${order.name ? `, имя: ${h(order.name)}` : ""}${order.email ? `\nE-mail: ${h(order.email)}` : ""}\nЗаказ ${h(order.id)} · платёж ${h(p.id)}\n<a href="${h(url)}">Ссылка на разбор</a>`,
-    );
+  if (changed && order) {
+    const test = p.test ? " · тест" : "";
+    if (order.status === "paid") {
+      const url = `${SITE.url}/razbor/r/${order.token}`;
+      await notifyPayment(
+        [
+          `<b>💳 Оплачен разбор — ${h(p.amount.value)} ₽</b>${test}`,
+          "",
+          `Дата рождения: ${h(order.date)}${order.name ? `\nИмя: ${h(order.name)}` : ""}${order.email ? `\nE-mail: ${h(order.email)}` : ""}`,
+          "",
+          `<a href="${h(url)}">Открыть разбор</a>`,
+          `<i>Заказ ${h(order.id)} · платёж ${h(p.id)}</i>`,
+        ].join("\n"),
+      );
+    } else if (order.status === "canceled") {
+      await notifyPayment(
+        `<b>✖️ Оплата отменена — ${h(p.amount.value)} ₽</b>${test}\n<i>Заказ ${h(order.id)} · платёж ${h(p.id)}</i>`,
+        true,
+      );
+    }
   }
   return order;
 }
