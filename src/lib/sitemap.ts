@@ -41,6 +41,8 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
       daily("/", 1);
       daily("/karta-dnya", 0.9);
       add("/privacy", changed(app("privacy")), "yearly", 0.1);
+      add("/oferta", changed(app("oferta")), "yearly", 0.2);
+      add("/vozvrat", changed(app("vozvrat")), "yearly", 0.2);
       for (const a of getAuthors()) add(`/avtory/${a.slug}`, changed(app("avtory"), data("authors.json")), "monthly", 0.5);
       break;
     case "goroskop": {
@@ -92,6 +94,7 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
       add("/chislo-sudby", num, "monthly", 0.8);
       for (const n of getNumerology()) add(`/chislo-sudby/${n.number}`, num, "monthly", 0.7);
       add("/kvadrat-pifagora", changed(app("kvadrat-pifagora")), "monthly", 0.8);
+      add("/razbor", changed(app("razbor/page.tsx"), "src/lib/razbor.ts"), "monthly", 0.8);
       const clock = changed(app("numerologiya/chisla-na-chasah"), data("clock-numbers.json"));
       add("/numerologiya/chisla-na-chasah", clock, "monthly", 0.8);
       for (const c of getClockNumbers()) add(`/numerologiya/chisla-na-chasah/${c.slug}`, clock, "monthly", 0.6);

@@ -3,6 +3,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DestinyCalc from "@/components/DestinyCalc";
 import NumerologyNav from "@/components/NumerologyNav";
+import RazborCta from "@/components/RazborCta";
 import { getArticles, getNumerology } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -41,6 +42,7 @@ export default function DestinyPage() {
           Подробнее: {articles.map((a, i) => <span key={a.slug}>{i > 0 && ", "}<Link className="text-accent underline" href={`/numerologiya/${a.slug}`}>{a.title}</Link></span>)}.
         </p>
       )}
+      <RazborCta />
       <NumerologyNav current="/chislo-sudby" />
     </div>
   );

@@ -14,7 +14,7 @@ export const SITE = {
 export const SELLER = {
   name: "Столяров Виталий Игоревич",
   inn: "744517853783",
-  email: "TODO",
+  email: "help@karta-dnya.ru",
   status: "самозанятый, плательщик налога на профессиональный доход",
 };
 

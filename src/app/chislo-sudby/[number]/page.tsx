@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import NumerologyNav from "@/components/NumerologyNav";
+import RazborCta from "@/components/RazborCta";
 import { findNumerology, getNumerology } from "@/lib/content";
 import { isMaster, NUMBER_WORDS, toCore } from "@/lib/numerology";
 import { pageTitle } from "@/lib/site";
@@ -105,6 +106,7 @@ export default async function DestinyNumberPage({ params }: PageProps<"/chislo-s
         </aside>
       </div>
 
+      <RazborCta />
       <Faq items={n.faq ?? []} />
       <NumerologyNav current="/chislo-sudby" />
     </div>

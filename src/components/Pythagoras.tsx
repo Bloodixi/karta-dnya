@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { digitsSum, isValidDate } from "@/lib/numerology";
+import { isValidDate } from "@/lib/numerology";
+import { pythagoras } from "@/lib/pythagoras";
 
 const CELLS: { digit: number; title: string; levels: string[] }[] = [
   { digit: 1, title: "Характер и воля", levels: ["мягкий, уступчивый характер", "спокойная уверенность, умеет настоять", "сильная воля, лидер по природе", "очень сильный характер, тяжело идёт на уступки"] },
@@ -15,17 +16,7 @@ const CELLS: { digit: number; title: string; levels: string[] }[] = [
   { digit: 9, title: "Память и ум", levels: ["память избирательная, важны заметки", "хорошая память и сообразительность", "очень хорошая память, схватывает на лету", "феноменальная память"] },
 ];
 
-function compute(d: number, m: number, y: number) {
-  const digits = `${d}${m}${y}`.split("").map(Number);
-  const first = digits.reduce((a, b) => a + b, 0);
-  const second = digitsSum(first);
-  const third = first - 2 * digits.find((x) => x !== 0)!;
-  const fourth = digitsSum(Math.abs(third));
-  const all = [...digits, ...String(first).split("").map(Number), ...String(second).split("").map(Number), ...String(Math.abs(third)).split("").map(Number), ...String(fourth).split("").map(Number)];
-  const counts: Record<number, number> = {};
-  for (let i = 1; i <= 9; i++) counts[i] = all.filter((x) => x === i).length;
-  return { digits, work: [first, second, third, fourth], counts };
-}
+const compute = pythagoras;
 
 export default function Pythagoras() {
   const [date, setDate] = useState("");

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import NumerologyNav from "@/components/NumerologyNav";
+import RazborCta from "@/components/RazborCta";
 import { DateField, FormError, NumberField, ShareLink } from "@/components/NumerologyFields";
 import { getPersonalYears } from "@/lib/content";
 import { currentYearMsk, formatDate, parseDate, personalMonth, personalYear } from "@/lib/numerology";
@@ -102,6 +103,8 @@ export default async function PersonalYearPage({ searchParams }: PageProps<typeo
       </div>
 
       {result}
+
+      <RazborCta date={date?.iso} />
 
       <section className="mt-12">
         <div className="ornament mb-4"><h2 className="text-2xl">Девять личных лет</h2><span className="mono">значение каждого</span></div>
