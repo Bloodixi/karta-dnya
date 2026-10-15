@@ -17,6 +17,7 @@ export async function POST(req: Request) {
   const email = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(emailRaw) ? emailRaw : "";
   const back = (q: string) => NextResponse.redirect(new URL(`/razbor?${q}#oplata`, SITE.url), 303);
   if (!birth) return back("err=date");
+  if (!email) return back(`d=${birth.iso}${name ? `&n=${encodeURIComponent(name)}` : ""}&err=email`);
   if (!yookassaReady()) return back(`d=${birth.iso}&err=pay`);
 
   const order = randomBytes(9).toString("base64url");

@@ -103,7 +103,11 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
         <div className="card p-6 frame-gold">
           <p className="mono">Полный разбор</p>
           <p className="display text-4xl mt-2">{RAZBOR.price} ₽</p>
-          <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты. Её можно сохранить в PDF.</p>
+          <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF.</p>
+
+          {err === "email" && (
+            <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">Укажи e-mail — на него придут ссылка на разбор и чек об оплате.</p>
+          )}
 
           {err === "pay" && (
             <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">
@@ -123,8 +127,8 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
               <input type="hidden" name="date" value={date.iso} />
               <input type="hidden" name="name" value={name} />
               <label className="grid gap-1 text-sm mt-5 max-w-sm">
-                E-mail (необязательно) — поможет восстановить ссылку на разбор
-                <input type="email" name="email" autoComplete="email" maxLength={200} placeholder="you@example.ru" className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
+                E-mail — пришлём сюда ссылку на разбор и чек
+                <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" aria-invalid={err === "email" || undefined} className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
               </label>
               <button type="submit" className="btn mt-4">
                 Получить полный разбор за {RAZBOR.price} ₽

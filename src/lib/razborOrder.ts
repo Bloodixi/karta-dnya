@@ -7,6 +7,7 @@ import { getOrder, settleOrder, type Order } from "./razborStore";
 import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
+import { mailBuyer } from "./razborMail";
 import type { RazborInput } from "./razbor";
 import { SITE } from "./site";
 
@@ -75,6 +76,8 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
         : r.error
           ? `<b>⚠️ Чек не пробит</b> (${h(r.error)}) — оформи вручную в «Мой налог»`
           : "";
+      const m = p.test ? {} : await mailBuyer(r.receipt ?? order);
+      const mail = m.sent ? `✉️ Письмо отправлено на ${h(order.email)}` : m.error ? `<b>⚠️ Письмо не отправлено</b> (${h(m.error)})` : "";
       await notifyPayment(
         [
           `<b>💳 Оплачен разбор — ${h(p.amount.value)} ₽</b>${test}`,
@@ -83,6 +86,7 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
           "",
           `<a href="${h(url)}">Открыть разбор</a>`,
           ...(receipt ? [receipt] : []),
+          ...(mail ? [mail] : []),
           `<i>Заказ ${h(order.id)} · платёж ${h(p.id)}</i>`,
         ].join("\n"),
       );

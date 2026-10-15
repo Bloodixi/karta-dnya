@@ -19,6 +19,7 @@ export type Order = {
   mo: number; // месяц, с которого идёт помесячный прогноз
   receipt_uuid?: string; // чек «Мой налог»
   receipt_url?: string;
+  mail_sent_at?: string; // письмо покупателю с разбором и чеком
 };
 
 const ID_RE = /^[\w-]{6,64}$/;
