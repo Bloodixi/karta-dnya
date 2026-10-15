@@ -117,3 +117,18 @@ export function monthDays(year: number, month: number): DayInfo[] {
   const n = new Date(Date.UTC(year, month, 0)).getUTCDate();
   return Array.from({ length: n }, (_, i) => dayInfo(`${year}-${String(month).padStart(2, "0")}-${String(i + 1).padStart(2, "0")}`));
 }
+
+/** Окно дат лунного календаря, которые сайт показывает, ссылает и отдаёт в sitemap:
+ *  с 1-го числа прошлого месяца до конца месяца через один (≈ 90 дней). Вне окна страницы дня тоже открываются, но на них не ссылаемся. */
+export function moonWindow(today: string): { from: string; to: string } {
+  const [y, m] = today.split("-").map(Number);
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  return { from: iso(new Date(Date.UTC(y, m - 2, 1))), to: iso(new Date(Date.UTC(y, m + 2, 0))) };
+}
+
+export function moonWindowKeys(today: string): string[] {
+  const { from, to } = moonWindow(today);
+  const out: string[] = [];
+  for (let d = new Date(`${from}T00:00:00Z`); d.toISOString().slice(0, 10) <= to; d.setUTCDate(d.getUTCDate() + 1)) out.push(d.toISOString().slice(0, 10));
+  return out;
+}

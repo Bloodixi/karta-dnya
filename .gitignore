@@ -7,3 +7,4 @@ tsconfig.tsbuildinfo
 
 # Гороскоп 3.0: события окна рядом с текстами — вспомогательные для редактора, пересчитываются каждую ночь
 content/data/horoscopes/*/*.events.json
+__pycache__/
