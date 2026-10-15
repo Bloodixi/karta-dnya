@@ -7,8 +7,17 @@ export type Payment = {
   paid: boolean;
   test?: boolean;
   amount: { value: string; currency: string };
+  refunded_amount?: { value: string; currency: string };
   metadata?: Record<string, string>;
   confirmation?: { type: string; confirmation_url?: string };
+  created_at: string;
+};
+
+export type Refund = {
+  id: string;
+  payment_id: string;
+  status: "pending" | "succeeded" | "canceled";
+  amount: { value: string; currency: string };
   created_at: string;
 };
 
@@ -52,6 +61,11 @@ export function createPayment(opts: { amount: number; description: string; retur
 export function getPayment(id: string): Promise<Payment> {
   if (!/^[\w-]{10,64}$/.test(id)) return Promise.reject(new Error("bad payment id"));
   return call<Payment>(`/payments/${id}`);
+}
+
+export function getRefund(id: string): Promise<Refund> {
+  if (!/^[\w-]{10,64}$/.test(id)) return Promise.reject(new Error("bad refund id"));
+  return call<Refund>(`/refunds/${id}`);
 }
 
 /** Платежи за последние сутки — запасной путь найти платёж по номеру заказа, если потерялась cookie. */

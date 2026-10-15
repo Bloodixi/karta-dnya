@@ -2,7 +2,7 @@
 import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-export type OrderStatus = "pending" | "paid" | "canceled";
+export type OrderStatus = "pending" | "paid" | "canceled" | "refunded";
 
 export type Order = {
   id: string;
@@ -23,6 +23,8 @@ export type Order = {
   receipt_due?: boolean; // боевая оплата: чек и письмо обязательны (тестовые заказы — без них)
   retry_at?: string; // последний повтор чека/письма
   retries?: number;
+  refunded_at?: string; // полный возврат: ссылки /r и чек закрыты
+  refund_ids?: string[]; // учтённые возвраты ЮKassa (уведомление — один раз на возврат)
   mismatch_at?: string; // оплата не сошлась с заказом (валюта/сумма) — владелец уже предупреждён
 };
 
@@ -68,12 +70,32 @@ function serial<T>(id: string, fn: () => Promise<T>): Promise<T> {
  * Переводит заказ в итоговый статус. Идемпотентно: `changed` = true только при первом переходе
  * (по нему шлём уведомление). Если файла нет (том потерян, заказ из старой версии), создаёт его из `fallback`.
  */
-export function settleOrder(id: string, status: Exclude<OrderStatus, "pending">, fallback: () => Order | null, paymentId: string): Promise<{ order: Order | null; changed: boolean }> {
+export function settleOrder(id: string, status: "paid" | "canceled", fallback: () => Order | null, paymentId: string): Promise<{ order: Order | null; changed: boolean }> {
   return serial(id, async () => {
     const o = (await getOrder(id)) ?? fallback();
     if (!o) return { order: null, changed: false };
-    if (o.status === "paid" || o.status === status) return { order: o, changed: false };
+    // возврат итоговый: повторное уведомление payment.succeeded не должно снова открыть заказ
+    if (o.status === "paid" || o.status === "refunded" || o.status === status) return { order: o, changed: false };
     const next: Order = { ...o, status, payment_id: paymentId || o.payment_id, paid_at: status === "paid" ? new Date().toISOString() : o.paid_at };
+    await saveOrder(next);
+    return { order: next, changed: true };
+  });
+}
+
+/**
+ * Учитывает возврат ЮKassa. Полный возврат переводит заказ в refunded (короткая ссылка и чек перестают открываться).
+ * `changed` = true только при первом учёте этого возврата.
+ */
+export function refundOrder(id: string, refundId: string, full: boolean, fallback: () => Order | null): Promise<{ order: Order | null; changed: boolean }> {
+  return serial(id, async () => {
+    const o = (await getOrder(id)) ?? fallback();
+    if (!o) return { order: null, changed: false };
+    if (o.refund_ids?.includes(refundId)) return { order: o, changed: false };
+    const next: Order = {
+      ...o,
+      refund_ids: [...(o.refund_ids ?? []), refundId].slice(-20),
+      ...(full ? { status: "refunded" as const, refunded_at: new Date().toISOString() } : {}),
+    };
     await saveOrder(next);
     return { order: next, changed: true };
   });

@@ -91,7 +91,7 @@ export function PaymentWaiter({ order, max = 30, fallback }: { order: string; ma
       try {
         const r = await fetch(`/api/razbor/status?o=${encodeURIComponent(order)}`, { cache: "no-store" });
         const s = (await r.json()) as { status?: string };
-        if (!stop && (s.status === "paid" || s.status === "canceled")) return router.refresh();
+        if (!stop && (s.status === "paid" || s.status === "canceled" || s.status === "refunded")) return router.refresh();
       } catch {}
       if (!stop) setTries((n) => n + 1);
     }, 2000);

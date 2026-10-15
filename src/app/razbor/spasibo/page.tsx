@@ -40,6 +40,7 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
     return { status: "unknown" as const, path: undefined, short: undefined, receipt: undefined };
   });
   const canceled = state.status === "canceled";
+  const refunded = state.status === "refunded";
   const waiting = Boolean(order) && (state.status === "pending" || state.status === "unknown");
 
   if (state.status === "paid" && state.path) {
@@ -69,7 +70,15 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="card p-6 md:p-8">
-        {canceled ? (
+        {refunded ? (
+          <>
+            <h1 className="text-3xl">Оплата возвращена</h1>
+            <p className="mt-3 text-muted">По этому заказу оформлен возврат, поэтому ссылка на разбор больше не открывается.</p>
+            <p className="mt-5">
+              <Link href="/razbor" className="btn btn-ghost">К странице разбора</Link>
+            </p>
+          </>
+        ) : canceled ? (
           <>
             <h1 className="text-3xl">Оплата не прошла</h1>
             <p className="mt-3 text-muted">Деньги не списаны. Можно попробовать ещё раз — бесплатная часть и форма оплаты ждут на странице разбора.</p>

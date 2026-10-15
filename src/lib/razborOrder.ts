@@ -2,8 +2,8 @@
  * Заказ разбора поверх платежа ЮKassa. Основная запись — файл заказа на томе (razborStore),
  * дубликат данных — в metadata платежа: по нему заказ восстанавливается, если файла нет. Только сервер.
  */
-import { getPayment, recentPayments, type Payment } from "./yookassa";
-import { getOrder, patchOrder, settleOrder, type Order } from "./razborStore";
+import { getPayment, recentPayments, type Payment, type Refund } from "./yookassa";
+import { getOrder, patchOrder, refundOrder, settleOrder, type Order } from "./razborStore";
 import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
@@ -205,7 +205,38 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
  */
 export const orderStateLimiter = () => sharedRateLimit("razbor-order-state", 60, 60_000);
 
-export type OrderState = { status: "unknown" | "pending" | "paid" | "canceled"; path?: string; short?: string; receipt?: string };
+/**
+ * Возврат (уведомление refund.succeeded, возврат уже перечитан из API). Полный — заказ refunded, ссылки /r/<id> и
+ * /razbor/chek/<id> закрываются. Чек «Мой налог» сайт сам не аннулирует (фискальное действие) — владелец делает это
+ * в «Мой налог» по уведомлению.
+ */
+export async function applyRefund(r: Refund): Promise<Order | null> {
+  if (r.status !== "succeeded") return null;
+  const p = await getPayment(r.payment_id);
+  const id = p.metadata?.order;
+  if (!id) return null; // чужой платёж магазина
+  const refunded = Number(p.refunded_amount?.value ?? r.amount.value);
+  const full = Number.isFinite(refunded) && refunded >= Number(p.amount.value);
+  const { order, changed } = await refundOrder(id, r.id, full, () => orderFromPayment(p));
+  if (changed && order) {
+    const test = p.test ? " · тест" : "";
+    const receipt = order.receipt_url ? ` (<a href="${h(order.receipt_url)}">чек ФНС</a>)` : "";
+    await notifyPayment(
+      [
+        full
+          ? `<b>↩️ Возврат по заказу ${h(id)} — ${h(r.amount.value)} ₽</b>${test}`
+          : `<b>↩️ Частичный возврат по заказу ${h(id)} — ${h(r.amount.value)} из ${h(p.amount.value)} ₽</b>${test}`,
+        full
+          ? `Ссылка на разбор и страница чека закрыты. Аннулируй чек в «Мой налог»${receipt}.`
+          : `Заказ остаётся открытым. Проверь чек в «Мой налог»${receipt}.`,
+        `<i>Заказ ${h(id)} · платёж ${h(p.id)} · возврат ${h(r.id)}</i>`,
+      ].join("\n"),
+    );
+  }
+  return order;
+}
+
+export type OrderState = { status: "unknown" | "pending" | "paid" | "canceled" | "refunded"; path?: string; short?: string; receipt?: string };
 
 /**
  * Состояние заказа для страницы «Спасибо»: файл заказа, а пока он не итоговый — живой статус платежа в ЮKassa.
@@ -215,8 +246,8 @@ export async function orderState(orderId: string, cookiePaymentId?: string, offl
   if (!isOrderId(orderId)) return { status: "unknown" };
   let o = await getOrder(orderId);
   if (offline) {
-    if (o?.status !== "paid") return { status: o?.status === "canceled" ? "canceled" : "pending" };
-  } else if (o?.status !== "paid") {
+    if (o?.status !== "paid") return { status: o?.status === "canceled" || o?.status === "refunded" ? o.status : "pending" };
+  } else if (o?.status !== "paid" && o?.status !== "refunded") {
     let p: Payment | null = null;
     if (o?.payment_id) {
       try {
