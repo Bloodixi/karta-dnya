@@ -1,26 +1,24 @@
 import { NextResponse } from "next/server";
-import { escapeHtml as h, notifyOwner } from "@/lib/notify";
-import { razborUrl } from "@/lib/razborOrder";
+import { applyPayment } from "@/lib/razborOrder";
 import { getPayment } from "@/lib/yookassa";
 
-const seen = new Set<string>();
+const EVENTS = new Set(["payment.succeeded", "payment.canceled"]);
 
-/** HTTP-уведомления ЮKassa. Телу не доверяем: статус перепроверяем запросом к API. */
+/**
+ * HTTP-уведомления ЮKassa. Принимаем только payment.succeeded / payment.canceled, телу не доверяем:
+ * статус перепроверяем GET /v3/payments/{id}. Повторные уведомления безопасны — заказ меняется и
+ * владелец получает сообщение только при первом переходе статуса (razborStore.settleOrder).
+ */
 export async function POST(req: Request) {
   let id = "";
   try {
-    const body = await req.json();
-    if (body?.event !== "payment.succeeded") return NextResponse.json({ ok: true });
-    id = String(body?.object?.id ?? "");
-    if (!id || seen.has(id)) return NextResponse.json({ ok: true });
+    const body = await req.json().catch(() => null);
+    if (!body || !EVENTS.has(body.event)) return NextResponse.json({ ok: true });
+    id = String(body.object?.id ?? "");
+    if (!id) return NextResponse.json({ ok: true });
     const p = await getPayment(id);
-    if (p.status !== "succeeded") return NextResponse.json({ ok: true });
-    seen.add(id);
-    const md = p.metadata ?? {};
-    const url = razborUrl(p);
-    await notifyOwner(
-      `💰 Оплачен разбор: ${h(p.amount.value)} ₽\nДата: ${h(md.date)}${md.name ? `, имя: ${h(md.name)}` : ""}${md.email ? `\nE-mail: ${h(md.email)}` : ""}\nЗаказ ${h(md.order)} · платёж ${h(p.id)}${url ? `\n<a href="${h(url)}">Ссылка на разбор</a>` : ""}`,
-    );
+    if (!p.metadata?.order) return NextResponse.json({ ok: true }); // чужой платёж магазина
+    await applyPayment(p);
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("razbor webhook:", id, e);

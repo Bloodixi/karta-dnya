@@ -1,12 +1,11 @@
 /** Мини-клиент ЮKassa API v3 (только сервер). Ключи — YOOKASSA_SHOP_ID / YOOKASSA_SECRET_KEY. */
-import { randomUUID } from "node:crypto";
-
 const API = "https://api.yookassa.ru/v3";
 
 export type Payment = {
   id: string;
   status: "pending" | "waiting_for_capture" | "succeeded" | "canceled";
   paid: boolean;
+  test?: boolean;
   amount: { value: string; currency: string };
   metadata?: Record<string, string>;
   confirmation?: { type: string; confirmation_url?: string };
@@ -28,7 +27,8 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await res.json()) as T;
 }
 
-export function createPayment(opts: { amount: number; description: string; returnUrl: string; metadata: Record<string, string>; email?: string }): Promise<Payment> {
+/** idempotenceKey — номер заказа: повтор того же запроса (сеть, двойной клик) не создаст второй платёж. */
+export function createPayment(opts: { amount: number; description: string; returnUrl: string; metadata: Record<string, string>; email?: string; idempotenceKey: string }): Promise<Payment> {
   const body: Record<string, unknown> = {
     amount: { value: opts.amount.toFixed(2), currency: "RUB" },
     capture: true,
@@ -36,14 +36,15 @@ export function createPayment(opts: { amount: number; description: string; retur
     description: opts.description.slice(0, 128),
     metadata: opts.metadata,
   };
-  // Чек по 54-ФЗ — только если магазин этого требует (у самозанятых чек в «Мой налог» ЮKassa формирует сама).
+  // Чек по 54-ФЗ передаём только при YOOKASSA_RECEIPT=1 — если в магазине включены чеки ЮKassa.
+  // В тестовом магазине чеки выключены; у самозанятого чек в «Мой налог» формирует сама ЮKassa.
   if (process.env.YOOKASSA_RECEIPT === "1" && opts.email) {
     body.receipt = {
       customer: { email: opts.email },
       items: [{ description: opts.description.slice(0, 128), quantity: "1.00", amount: body.amount, vat_code: 1, payment_mode: "full_payment", payment_subject: "service" }],
     };
   }
-  return call<Payment>("/payments", { method: "POST", body: JSON.stringify(body), headers: { "Idempotence-Key": randomUUID() } });
+  return call<Payment>("/payments", { method: "POST", body: JSON.stringify(body), headers: { "Idempotence-Key": opts.idempotenceKey } });
 }
 
 export function getPayment(id: string): Promise<Payment> {

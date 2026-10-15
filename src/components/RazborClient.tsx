@@ -54,19 +54,21 @@ export function PrintButton() {
   );
 }
 
-export function CopyLinkButton() {
+/** Копирует `url` (абсолютный или путь сайта) или адрес текущей страницы. */
+export function CopyLinkButton({ url }: { url?: string } = {}) {
   const [done, setDone] = useState(false);
   return (
     <button
       type="button"
       className="btn btn-ghost no-print"
       onClick={async () => {
+        const href = url ? new URL(url, window.location.origin).href : window.location.href;
         try {
-          await navigator.clipboard.writeText(window.location.href);
+          await navigator.clipboard.writeText(href);
           setDone(true);
           setTimeout(() => setDone(false), 2500);
         } catch {
-          window.prompt("Скопируй ссылку:", window.location.href);
+          window.prompt("Скопируй ссылку:", href);
         }
       }}
     >
@@ -75,18 +77,29 @@ export function CopyLinkButton() {
   );
 }
 
-/** Ждёт подтверждения оплаты: обновляет серверную страницу каждые 3 с, не больше `max` раз, потом показывает `fallback`. */
-export function PaymentWaiter({ max = 40, fallback }: { max?: number; fallback: ReactNode }) {
+/**
+ * Ждёт подтверждения оплаты: раз в 2 с спрашивает /api/razbor/status, не дольше `max` попыток (≈60 с).
+ * Когда статус итоговый — перерисовывает серверную страницу; по истечении времени показывает `fallback`.
+ */
+export function PaymentWaiter({ order, max = 30, fallback }: { order: string; max?: number; fallback: ReactNode }) {
   const router = useRouter();
   const [tries, setTries] = useState(0);
   useEffect(() => {
     if (tries >= max) return;
-    const t = setTimeout(() => {
-      setTries((n) => n + 1);
-      router.refresh();
-    }, 3000);
-    return () => clearTimeout(t);
-  }, [tries, max, router]);
+    let stop = false;
+    const t = setTimeout(async () => {
+      try {
+        const r = await fetch(`/api/razbor/status?o=${encodeURIComponent(order)}`, { cache: "no-store" });
+        const s = (await r.json()) as { status?: string };
+        if (!stop && (s.status === "paid" || s.status === "canceled")) return router.refresh();
+      } catch {}
+      if (!stop) setTries((n) => n + 1);
+    }, 2000);
+    return () => {
+      stop = true;
+      clearTimeout(t);
+    };
+  }, [tries, max, order, router]);
   if (tries >= max) return <>{fallback}</>;
   return (
     <p className="text-sm text-muted mt-4" aria-live="polite">

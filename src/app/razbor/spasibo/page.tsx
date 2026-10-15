@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { PaymentWaiter } from "@/components/RazborClient";
-import { findPayment, PAY_COOKIE, razborPath } from "@/lib/razborOrder";
-import { SELLER } from "@/lib/site";
+import { CopyLinkButton, PaymentWaiter } from "@/components/RazborClient";
+import { orderState, PAY_COOKIE } from "@/lib/razborOrder";
+import { SELLER, SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +17,7 @@ function Stuck({ order }: { order: string }) {
   const email = SELLER.email.includes("@") ? SELLER.email : null;
   return (
     <p className="mt-4">
-      Если оплата прошла, а разбор не открылся, напиши нам
+      Если ссылка потеряется или разбор не откроется, напиши нам
       {email ? (
         <>
           {" "}на <a href={`mailto:${email}?subject=${encodeURIComponent(`Разбор, заказ ${order}`)}`} className="text-accent underline">{email}</a>
@@ -33,15 +32,31 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
   const sp = await searchParams;
   const order = (Array.isArray(sp.o) ? sp.o[0] : sp.o)?.slice(0, 64) ?? "";
   const cookiePayment = (await cookies()).get(PAY_COOKIE)?.value;
-  const payment = order ? await findPayment(order, cookiePayment) : null;
+  const state = await orderState(order, cookiePayment).catch((e) => {
+    console.error("razbor spasibo:", order, e);
+    return { status: "unknown" as const, path: undefined };
+  });
+  const canceled = state.status === "canceled";
+  const waiting = Boolean(order) && (state.status === "pending" || state.status === "unknown");
 
-  if (payment?.status === "succeeded") {
-    const path = razborPath(payment);
-    if (path) redirect(path);
+  if (state.status === "paid" && state.path) {
+    const url = `${SITE.url}${state.path}`;
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <div className="card p-6 md:p-8">
+          <h1 className="text-3xl">Оплата прошла, разбор готов</h1>
+          <p className="mt-3 text-muted">Спасибо! Твой личный разбор открывается по ссылке ниже.</p>
+          <p className="mt-4 break-all rounded-lg border border-line bg-surface px-3 py-2 mono-text text-sm">{url}</p>
+          <p className="mt-3 font-medium">Сохрани эту ссылку: письмо с ней не приходит, а разбор открывается только по ней — на любом устройстве и в любой момент.</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Link href={state.path} className="btn">Открыть разбор</Link>
+            <CopyLinkButton url={state.path} />
+          </div>
+          <Stuck order={order} />
+        </div>
+      </div>
+    );
   }
-
-  const waiting = payment?.status === "pending" || payment?.status === "waiting_for_capture";
-  const canceled = payment?.status === "canceled";
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -58,7 +73,7 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
           <>
             <h1 className="text-3xl">Ждём подтверждение оплаты</h1>
             <p className="mt-3 text-muted">Обычно это занимает несколько секунд. Как только банк подтвердит платёж, разбор откроется сам.</p>
-            <PaymentWaiter fallback={<Stuck order={order} />} />
+            <PaymentWaiter order={order} fallback={<Stuck order={order} />} />
           </>
         ) : (
           <>
