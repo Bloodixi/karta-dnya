@@ -40,9 +40,26 @@ export function rateLimit(limit: number, windowMs: number): Limiter {
 }
 
 /**
+ * Лимитер с общим именем: один и тот же счётчик для страницы и API-маршрута. Next собирает их в разные
+ * серверные бандлы, поэтому модульная переменная могла бы раздвоиться — храним в globalThis.
+ */
+export function sharedRateLimit(name: string, limit: number, windowMs: number): Limiter {
+  const g = globalThis as typeof globalThis & { __rateLimits?: Map<string, Limiter> };
+  g.__rateLimits ??= new Map();
+  let l = g.__rateLimits.get(name);
+  if (!l) g.__rateLimits.set(name, (l = rateLimit(limit, windowMs)));
+  return l;
+}
+
+/**
  * IP клиента. Его ставит прокси сервера (Traefik): X-Real-IP или последний адрес X-Forwarded-For;
  * первые значения X-Forwarded-For клиент может подделать.
  */
 export function clientIp(req: Request): string {
-  return req.headers.get("x-real-ip")?.trim() || (req.headers.get("x-forwarded-for") ?? "").split(",").pop()?.trim() || "?";
+  return clientIpFromHeaders(req.headers);
+}
+
+/** То же для серверных компонентов (headers() из next/headers). */
+export function clientIpFromHeaders(h: Headers): string {
+  return h.get("x-real-ip")?.trim() || (h.get("x-forwarded-for") ?? "").split(",").pop()?.trim() || "?";
 }

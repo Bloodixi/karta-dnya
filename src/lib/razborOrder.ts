@@ -10,6 +10,7 @@ import { issueReceipt } from "./razborReceipt";
 import { mailBuyer } from "./razborMail";
 import type { RazborInput } from "./razbor";
 import { SITE } from "./site";
+import { sharedRateLimit } from "./rateLimit";
 
 export const PAY_COOKIE = "razbor_pay";
 
@@ -165,13 +166,24 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
   return order;
 }
 
+/**
+ * Лимит на живую проверку заказа по IP — общий для /api/razbor/status и страницы «Спасибо»: каждая проверка
+ * может обратиться к ЮKassa. Страница опрашивает раз в 2 с (≈30 запросов в минуту) — 60 с запасом.
+ */
+export const orderStateLimiter = () => sharedRateLimit("razbor-order-state", 60, 60_000);
+
 export type OrderState = { status: "unknown" | "pending" | "paid" | "canceled"; path?: string; short?: string; receipt?: string };
 
-/** Состояние заказа для страницы «Спасибо»: файл заказа, а пока он не итоговый — живой статус платежа в ЮKassa. */
-export async function orderState(orderId: string, cookiePaymentId?: string): Promise<OrderState> {
+/**
+ * Состояние заказа для страницы «Спасибо»: файл заказа, а пока он не итоговый — живой статус платежа в ЮKassa.
+ * offline — только файл заказа, без ЮKassa, чека и писем (лимит запросов исчерпан); неоплаченный — «ждём».
+ */
+export async function orderState(orderId: string, cookiePaymentId?: string, offline = false): Promise<OrderState> {
   if (!isOrderId(orderId)) return { status: "unknown" };
   let o = await getOrder(orderId);
-  if (o?.status !== "paid") {
+  if (offline) {
+    if (o?.status !== "paid") return { status: o?.status === "canceled" ? "canceled" : "pending" };
+  } else if (o?.status !== "paid") {
     let p: Payment | null = null;
     if (o?.payment_id) {
       try {
@@ -186,6 +198,6 @@ export async function orderState(orderId: string, cookiePaymentId?: string): Pro
   if (!o) return { status: "unknown" };
   if (o.status !== "paid") return { status: o.status };
   if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
-  if (o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
+  if (!offline && o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
   return { status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined };
 }

@@ -1,12 +1,11 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { isOrderId, orderState, PAY_COOKIE } from "@/lib/razborOrder";
-import { clientIp, rateLimit } from "@/lib/rateLimit";
+import { isOrderId, orderState, orderStateLimiter, PAY_COOKIE } from "@/lib/razborOrder";
+import { clientIp } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
-/** Страница «Спасибо» опрашивает раз в 2 с (≈30 запросов в минуту) — лимит с запасом. */
-const byIp = rateLimit(60, 60_000);
+const byIp = orderStateLimiter();
 const NO_STORE = { "Cache-Control": "no-store" };
 
 /** Статус заказа для опроса со страницы «Спасибо»: { status, short? }. */

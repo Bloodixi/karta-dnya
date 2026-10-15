@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { CopyLinkButton, PaymentWaiter } from "@/components/RazborClient";
-import { orderState, PAY_COOKIE } from "@/lib/razborOrder";
+import { orderState, orderStateLimiter, PAY_COOKIE } from "@/lib/razborOrder";
+import { clientIpFromHeaders } from "@/lib/rateLimit";
 import { SELLER, SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +33,9 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
   const sp = await searchParams;
   const order = (Array.isArray(sp.o) ? sp.o[0] : sp.o)?.slice(0, 64) ?? "";
   const cookiePayment = (await cookies()).get(PAY_COOKIE)?.value;
-  const state = await orderState(order, cookiePayment).catch((e) => {
+  // тот же лимит по IP, что у /api/razbor/status: сверх него — только файл заказа, без запросов к ЮKassa
+  const live = orderStateLimiter().take(clientIpFromHeaders(await headers()));
+  const state = await orderState(order, cookiePayment, !live).catch((e) => {
     console.error("razbor spasibo:", order, e);
     return { status: "unknown" as const, path: undefined, short: undefined, receipt: undefined };
   });
