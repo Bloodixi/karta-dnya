@@ -123,7 +123,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
               <input type="hidden" name="date" value={date.iso} />
               <input type="hidden" name="name" value={name} />
               <label className="grid gap-1 text-sm mt-5 max-w-sm">
-                E-mail для чека (необязательно)
+                E-mail (необязательно) — поможет восстановить ссылку на разбор
                 <input type="email" name="email" autoComplete="email" maxLength={200} placeholder="you@example.ru" className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
               </label>
               <button type="submit" className="btn mt-4">

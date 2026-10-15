@@ -9,12 +9,13 @@ export async function notifyOwner(html: string): Promise<void> {
   const chat = process.env.TELEGRAM_OWNER_CHAT;
   if (!token || !chat) return;
   try {
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chat_id: chat, text: html, parse_mode: "HTML", link_preview_options: { is_disabled: true } }),
       cache: "no-store",
     });
+    if (!res.ok) console.error("notifyOwner: Telegram", res.status, (await res.text()).slice(0, 200));
   } catch (e) {
     console.error("notifyOwner:", e);
   }
