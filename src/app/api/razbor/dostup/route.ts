@@ -28,14 +28,13 @@ function allowed(email: string, ip: string): boolean {
 export async function POST(req: Request) {
   const form = await req.formData();
   const email = String(form.get("email") ?? "").trim().toLowerCase().slice(0, 200);
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
+  // IP ставит прокси сервера (Traefik): X-Real-IP или последний адрес X-Forwarded-For; первые значения клиент может подделать
+  const ip = req.headers.get("x-real-ip")?.trim() || (req.headers.get("x-forwarded-for") ?? "").split(",").pop()?.trim() || "?";
   const done = NextResponse.redirect(new URL("/razbor?dostup=1#dostup", SITE.url), 303);
   if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(email) || !allowed(email, ip)) return done;
-  try {
-    const orders = await paidOrdersByEmail(email);
-    if (orders.length) await mailAccess(email, orders.slice(0, 20));
-  } catch (e) {
-    console.error("razbor dostup:", e);
-  }
+  // поиск и письмо — в фоне: время ответа не должно зависеть от того, были ли покупки на этот адрес
+  void paidOrdersByEmail(email)
+    .then((orders) => (orders.length ? mailAccess(email, orders.slice(0, 20)) : undefined))
+    .catch((e) => console.error("razbor dostup:", e));
   return done;
 }
