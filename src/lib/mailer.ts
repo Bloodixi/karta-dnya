@@ -4,7 +4,7 @@
  */
 import nodemailer from "nodemailer";
 
-let transport: nodemailer.Transporter | null = null;
+let transport: ReturnType<typeof nodemailer.createTransport> | null = null;
 
 export function mailReady(): boolean {
   return Boolean(process.env.SMTP_USER && process.env.SMTP_PASSWORD);
