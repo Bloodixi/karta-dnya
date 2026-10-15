@@ -51,7 +51,9 @@ export function inputFromPayment(p: Payment): RazborInput | null {
   const yr = Number(md.yr);
   const mo = Number(md.mo);
   if (!y || !m || !d || !yr || !mo) return null;
-  return { d, m, y, yr, mo, name: md.name || undefined };
+  // платежи до введения версий metadata.v не несут — это версия 1
+  const v = Number(md.v) || 1;
+  return { d, m, y, yr, mo, v, name: md.name || undefined };
 }
 
 /** Ищет платёж заказа: cookie → память процесса → платежи ЮKassa за сутки. */

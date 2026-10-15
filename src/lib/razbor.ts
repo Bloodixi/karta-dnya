@@ -10,8 +10,14 @@ export const RAZBOR = {
   price: Number(process.env.RAZBOR_PRICE || 290),
 };
 
-/** Что лежит в заказе и в ссылке на разбор. yr — год расчёта личного года, mo — месяц, с которого идёт помесячный прогноз. */
-export type RazborInput = { d: number; m: number; y: number; name?: string; yr: number; mo: number };
+/**
+ * Версия банка текстов. Записывается в заказ и ссылку: купленный разбор не меняется, когда банк переписан.
+ * Перед правкой текстов, меняющей выдачу: скопировать текущие content/data/razbor/*.json в razbor/v<N>/ и увеличить номер.
+ */
+export const RAZBOR_VERSION = 1;
+
+/** Что лежит в заказе и в ссылке на разбор. yr — год расчёта личного года, mo — месяц, с которого идёт помесячный прогноз, v — версия текстов (в старых ссылках и платежах её нет — это 1). */
+export type RazborInput = { d: number; m: number; y: number; name?: string; yr: number; mo: number; v?: number };
 
 type Destiny = { title: string; essence: string; strengths: string; shadows: string; calling: string };
 type DestinyLife = { love: string; work: string; advice: string[]; easy: number[]; hard: number[]; pairNote: string };
@@ -38,14 +44,16 @@ const paras = (text: string | undefined): Block[] =>
     .filter(Boolean)
     .map((t) => ({ kind: "p" as const, text: t }));
 
-function bank() {
+/** Банк текстов версии v: текущая — в content/data/razbor/, прежние — в razbor/v<N>/. */
+function bank(v = RAZBOR_VERSION) {
+  const dir = v >= RAZBOR_VERSION ? "razbor" : `razbor/v${v}`;
   return {
-    destiny: readJsonData<Record<string, Destiny>>("razbor/destiny.json", {}),
-    life: readJsonData<Record<string, DestinyLife>>("razbor/destiny-life.json", {}),
-    birthday: readJsonData<Record<string, string>>("razbor/birthday.json", {}),
-    py: readJsonData<Record<string, PyCell>>("razbor/pythagoras.json", {}),
-    year: readJsonData<Record<string, Year>>("razbor/year.json", {}),
-    month: readJsonData<Record<string, string>>("razbor/month.json", {}),
+    destiny: readJsonData<Record<string, Destiny>>(`${dir}/destiny.json`, {}),
+    life: readJsonData<Record<string, DestinyLife>>(`${dir}/destiny-life.json`, {}),
+    birthday: readJsonData<Record<string, string>>(`${dir}/birthday.json`, {}),
+    py: readJsonData<Record<string, PyCell>>(`${dir}/pythagoras.json`, {}),
+    year: readJsonData<Record<string, Year>>(`${dir}/year.json`, {}),
+    month: readJsonData<Record<string, string>>(`${dir}/month.json`, {}),
   };
 }
 
@@ -80,7 +88,7 @@ export const RAZBOR_TOC: { id: string; title: string }[] = [
 ];
 
 export function buildRazbor(i: RazborInput): RazborDoc {
-  const b = bank();
+  const b = bank(i.v ?? RAZBOR_VERSION);
   const n = numbers(i);
   const key = String(n.destiny.number);
   const dz = b.destiny[key];

@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { cleanName, parseDate } from "@/lib/numerology";
-import { nowMsk, RAZBOR } from "@/lib/razbor";
+import { nowMsk, RAZBOR, RAZBOR_VERSION } from "@/lib/razbor";
 import { PAY_COOKIE, rememberOrder } from "@/lib/razborOrder";
 import { saveOrder, type Order } from "@/lib/razborStore";
 import { makeToken } from "@/lib/razborToken";
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   const order = randomBytes(9).toString("base64url");
   const { yr, mo } = nowMsk();
   const draft: Order = {
-    id: order, token: makeToken({ d: birth.d, m: birth.m, y: birth.y, name: name || undefined, yr, mo }, order), date: birth.iso, name, email,
+    id: order, token: makeToken({ d: birth.d, m: birth.m, y: birth.y, name: name || undefined, yr, mo, v: RAZBOR_VERSION }, order), date: birth.iso, name, email,
     amount: RAZBOR.price, status: "pending", payment_id: "", created_at: new Date().toISOString(), paid_at: "", yr, mo,
   };
   try {
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       amount: RAZBOR.price,
       description: `${RAZBOR.title}, ${birth.iso}`,
       returnUrl: `${SITE.url}/razbor/spasibo?o=${order}`,
-      metadata: { order, date: birth.iso, name, yr: String(yr), mo: String(mo), email },
+      metadata: { order, date: birth.iso, name, yr: String(yr), mo: String(mo), v: String(RAZBOR_VERSION), email },
       email,
       method: form.get("method") === "sbp" ? "sbp" : undefined,
     });
