@@ -21,6 +21,8 @@ export type Order = {
   receipt_url?: string;
   mail_sent_at?: string; // письмо покупателю с разбором и чеком
   receipt_due?: boolean; // боевая оплата: чек и письмо обязательны (тестовые заказы — без них)
+  retry_at?: string; // последний повтор чека/письма
+  retries?: number;
 };
 
 const ID_RE = /^[\w-]{6,64}$/;

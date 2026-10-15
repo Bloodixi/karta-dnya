@@ -82,9 +82,16 @@ async function doFinishPaid(order: Order): Promise<{ order?: Order; lines: strin
   return { order: o, lines };
 }
 
+const RETRY_GAP = 5 * 60_000;
+const RETRY_MAX = 12;
+
 /** Повтор для оплаченного заказа без чека или письма (сеть ФНС или почты была недоступна). Владельцу — что получилось. */
 async function retryPaid(o: Order): Promise<Order> {
   if (!o.receipt_due || (o.receipt_uuid && (o.mail_sent_at || !o.email))) return o;
+  // статус заказа открывается без входа: повторяем не чаще раза в 5 минут и не больше 12 раз,
+  // чтобы при сбоях ФНС не наплодить чеков (ответ мог потеряться после регистрации дохода) и писем
+  if ((o.retries ?? 0) >= RETRY_MAX || (o.retry_at && Date.now() - Date.parse(o.retry_at) < RETRY_GAP)) return o;
+  o = (await patchOrder(o.id, { retry_at: new Date().toISOString(), retries: (o.retries ?? 0) + 1 })) ?? o;
   const before = { receipt: Boolean(o.receipt_uuid), mail: Boolean(o.mail_sent_at) };
   const f = await finishPaid(o);
   const after = f.order ?? o;
