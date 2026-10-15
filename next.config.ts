@@ -14,7 +14,18 @@ const SECURITY_HEADERS = [
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+  // form-action: формы сайта уходят на свой адрес; оформление оплаты отвечает 303 на confirmation_url ЮKassa
+  // (yoomoney.ru/…), а Chrome проверяет form-action по всей цепочке переадресаций — домены ЮKassa/ЮMoney нужны.
+  // script-src не задаём: инлайн-скрипты Next и Метрики потребуют nonce.
+  {
+    key: "Content-Security-Policy",
+    value: [
+      "frame-ancestors 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self' https://yoomoney.ru https://*.yoomoney.ru https://yookassa.ru https://*.yookassa.ru",
+    ].join("; "),
+  },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
 ];
