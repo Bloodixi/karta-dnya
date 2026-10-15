@@ -73,8 +73,11 @@ ${r ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:
     await patchOrder(order.id, { mail_sent_at: new Date().toISOString() });
     return { sent: true };
   } catch (e) {
-    console.error("razbor mail:", order.id, e);
-    return { error: String((e as Error).message ?? e).slice(0, 200) };
+    // в тексте ошибки SMTP бывает адрес покупателя — в лог и владельцу только код ответа
+    const err = e as { code?: string; responseCode?: number };
+    const why = [err.code, err.responseCode].filter(Boolean).join(" ") || "ошибка отправки";
+    console.error("razbor mail:", order.id, why);
+    return { error: why };
   }
 }
 
