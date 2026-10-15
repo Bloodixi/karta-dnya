@@ -24,7 +24,7 @@ export default async function Image({ params }: { params: Promise<{ time: string
         </div>
         {c && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 340, height: 340, border: `3px solid ${C.gold}`, borderRadius: 10, alignSelf: "center", background: C.bg2 }}>
-            <div style={{ display: "flex", fontFamily: "Prata", fontSize: 120, color: C.cream, lineHeight: 1 }}>{c.time}</div>
+            <div style={{ display: "flex", fontFamily: "Digits, Prata", fontSize: 120, color: C.cream, lineHeight: 1 }}>{c.time}</div>
           </div>
         )}
       </Frame>

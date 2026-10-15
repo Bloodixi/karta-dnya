@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Golos_Text, IBM_Plex_Mono, Prata } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,7 +9,9 @@ import JsonLd from "@/components/JsonLd";
 import Metrika from "@/components/Metrika";
 import { SITE, SOCIAL } from "@/lib/site";
 
-const display = Prata({ variable: "--font-display", subsets: ["latin", "cyrillic"], weight: "400" });
+const display = Prata({ variable: "--font-prata", subsets: ["latin", "cyrillic"], weight: "400" });
+// У Prata единица похожа на «l» — цифры заголовков берём из Old Standard TT (только 0–9).
+const digits = localFont({ src: "../fonts/digits.woff2", variable: "--font-digits", weight: "400", declarations: [{ prop: "unicode-range", value: "U+0030-0039" }] });
 const sans = Golos_Text({ variable: "--font-sans", subsets: ["latin", "cyrillic"], weight: ["400", "500", "600"] });
 const mono = IBM_Plex_Mono({ variable: "--font-mono", subsets: ["latin", "cyrillic"], weight: ["400", "500"] });
 
@@ -34,7 +37,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ru" className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="ru" className={`${digits.variable} ${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}` }} />
       </head>

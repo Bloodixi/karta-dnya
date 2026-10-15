@@ -64,14 +64,14 @@
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
   --color-night: var(--night);
-  --font-display: var(--font-display), Georgia, serif;
+  --font-display: var(--font-digits), var(--font-prata), Georgia, serif;
   --font-sans: var(--font-sans), system-ui, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, monospace;
 }
 
 html { scroll-behavior: smooth; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-sans), system-ui, sans-serif; line-height: 1.6; }
-h1, h2, h3, .display { font-family: var(--font-display), Georgia, serif; font-weight: 400 !important; letter-spacing: -0.01em; line-height: 1.12; text-rendering: geometricPrecision; font-synthesis: none; }
+h1, h2, h3, .display { font-family: var(--font-digits), var(--font-prata), Georgia, serif; font-weight: 400 !important; letter-spacing: -0.01em; line-height: 1.12; text-rendering: geometricPrecision; font-synthesis: none; }
 /* У Prata очень тонкие соединительные штрихи: на светлом фоне в Windows они «рвутся». Тёмный текст чуть утолщаем обводкой. */
 :root:not([data-theme="dark"]) h1, :root:not([data-theme="dark"]) h2, :root:not([data-theme="dark"]) h3, :root:not([data-theme="dark"]) .display { -webkit-text-stroke: 0.35px currentColor; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) h1, :root:not([data-theme="light"]) h2, :root:not([data-theme="light"]) h3, :root:not([data-theme="light"]) .display { -webkit-text-stroke: 0; } }
@@ -198,7 +198,7 @@ a:hover .tcard-thumb, a:focus-visible .tcard-thumb, button:hover .tcard-thumb { 
 .razbor-body .razbor-months li { margin: 0; }
 .razbor-body .razbor-list { counter-reset: tip; list-style: none; margin-left: 0; }
 .razbor-body .razbor-list > li { counter-increment: tip; position: relative; padding-left: 2.4rem; margin: 0.9rem 0; }
-.razbor-body .razbor-list > li::before { content: counter(tip); position: absolute; left: 0; top: -0.1rem; font-family: var(--font-display), Georgia, serif; font-size: 1.5rem; color: var(--accent); }
+.razbor-body .razbor-list > li::before { content: counter(tip); position: absolute; left: 0; top: -0.1rem; font-family: var(--font-digits), var(--font-prata), Georgia, serif; font-size: 1.5rem; color: var(--accent); }
 .razbor-body figure { margin-left: 0; margin-right: 0; }
 .razbor-locked li { break-inside: avoid; }
 

@@ -7,8 +7,10 @@ export const OG_SIZE = { width: 1200, height: 630 };
 
 export async function ogFonts() {
   const dir = join(process.cwd(), "src", "app", "_og");
-  const [display, sans, mono] = await Promise.all([readFile(join(dir, "prata.ttf")), readFile(join(dir, "golos-text.ttf")), readFile(join(dir, "ibm-plex-mono.ttf"))]);
+  const [digits, display, sans, mono] = await Promise.all([readFile(join(dir, "digits.ttf")), readFile(join(dir, "prata.ttf")), readFile(join(dir, "golos-text.ttf")), readFile(join(dir, "ibm-plex-mono.ttf"))]);
   return [
+    // Цифры из Old Standard TT: у Prata единица похожа на «l». Шрифт содержит только 0–9, остальное берётся из Prata.
+    { name: "Digits", data: digits, weight: 400 as const, style: "normal" as const },
     { name: "Prata", data: display, weight: 400 as const, style: "normal" as const },
     { name: "Golos", data: sans, weight: 500 as const, style: "normal" as const },
     { name: "Mono", data: mono, weight: 500 as const, style: "normal" as const },
@@ -54,7 +56,7 @@ export function Frame({ children, kicker = "karta-dnya.ru" }: { children: ReactN
       <div style={{ position: "absolute", left: 34, top: 34, width: 1132, height: 562, border: `1px solid ${C.gold}`, opacity: 0.45, borderRadius: 4, display: "flex" }} />
       <div style={{ position: "absolute", left: 64, top: 52, display: "flex", alignItems: "center", gap: 12, fontSize: 26, color: C.cream }}>
         <div style={{ display: "flex", width: 14, height: 14, background: C.gold, transform: "rotate(45deg)", marginRight: 6 }} />
-        <span style={{ fontFamily: "Prata", fontSize: 34 }}>Карта дня</span>
+        <span style={{ fontFamily: "Digits, Prata", fontSize: 34 }}>Карта дня</span>
         <span style={{ color: C.muted, fontSize: 20, marginLeft: 10, fontFamily: "Mono", textTransform: "uppercase", letterSpacing: "2px" }}>{kicker}</span>
       </div>
       <div style={{ position: "absolute", left: 64, top: 120, width: 1072, height: 454, display: "flex" }}>{children}</div>
@@ -63,7 +65,7 @@ export function Frame({ children, kicker = "karta-dnya.ru" }: { children: ReactN
 }
 
 export function Title({ children, size = 64 }: { children: ReactNode; size?: number }) {
-  return <div style={{ fontFamily: "Prata", fontSize: size, lineHeight: 1.08, color: C.ink, display: "flex" }}>{children}</div>;
+  return <div style={{ fontFamily: "Digits, Prata", fontSize: size, lineHeight: 1.08, color: C.ink, display: "flex" }}>{children}</div>;
 }
 
 export function Sub({ children }: { children: ReactNode }) {
