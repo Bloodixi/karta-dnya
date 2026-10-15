@@ -1,15 +1,26 @@
 import { NextResponse } from "next/server";
 import { applyPayment } from "@/lib/razborOrder";
 import { getPayment } from "@/lib/yookassa";
+import { isYookassaIp } from "@/lib/yookassaIp";
+import { clientIp, rateLimit } from "@/lib/rateLimit";
 
 const EVENTS = new Set(["payment.succeeded", "payment.canceled"]);
+
+/** Запасной лимит: ЮKassa шлёт уведомления по одному на событие, 60 в минуту с адреса — с большим запасом. */
+const byIp = rateLimit(60, 60_000);
 
 /**
  * HTTP-уведомления ЮKassa. Принимаем только payment.succeeded / payment.canceled, телу не доверяем:
  * статус перепроверяем GET /v3/payments/{id}. Повторные уведомления безопасны — заказ меняется и
  * владелец получает сообщение только при первом переходе статуса (razborStore.settleOrder).
+ * Принимаем только с адресов ЮKassa (X-Real-IP ставит Traefik, снаружи его не подделать) — чужие получают 403
+ * до разбора тела и без обращения к API.
  */
 export async function POST(req: Request) {
+  const ip = clientIp(req);
+  if (!isYookassaIp(ip)) return NextResponse.json({ ok: false }, { status: 403 });
+  // 429 — ЮKassa повторит уведомление позже
+  if (!byIp.take(ip)) return NextResponse.json({ ok: false }, { status: 429, headers: { "Retry-After": "60" } });
   let id = "";
   try {
     const body = await req.json().catch(() => null);
