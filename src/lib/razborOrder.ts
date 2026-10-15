@@ -20,6 +20,30 @@ export function rememberOrder(orderId: string, paymentId: string) {
   if (recent.size > 500) recent.delete(recent.keys().next().value!);
 }
 
+/** Номер заказа: randomBytes(9) в base64url — ровно 12 символов [A-Za-z0-9_-]. */
+export function isOrderId(id: string): boolean {
+  return /^[A-Za-z0-9_-]{12}$/.test(id);
+}
+
+/**
+ * Платежи ЮKassa за сутки — кэш на минуту, общий для всех запросов: опрос со страницы «Спасибо»
+ * и перебор номеров заказов не должны дёргать API на каждый запрос. Статус платежа отсюда не берём —
+ * найденный платёж перечитывается отдельно (getPayment), список нужен только чтобы найти его id.
+ */
+const RECENT_TTL = 60_000;
+let recentCache: { at: number; list: Promise<Payment[]> } | null = null;
+function cachedRecentPayments(): Promise<Payment[]> {
+  if (!recentCache || Date.now() - recentCache.at > RECENT_TTL) {
+    const list = recentPayments();
+    recentCache = { at: Date.now(), list };
+    // ошибку не кэшируем: следующий запрос попробует снова
+    list.catch(() => {
+      if (recentCache?.list === list) recentCache = null;
+    });
+  }
+  return recentCache.list;
+}
+
 export function inputFromPayment(p: Payment): RazborInput | null {
   const md = p.metadata ?? {};
   const [y, m, d] = (md.date ?? "").split("-").map(Number);
@@ -39,7 +63,10 @@ export async function findPayment(orderId: string, cookiePaymentId?: string): Pr
     } catch {}
   }
   try {
-    return (await recentPayments()).find((p) => p.metadata?.order === orderId) ?? null;
+    const found = (await cachedRecentPayments()).find((p) => p.metadata?.order === orderId);
+    if (!found) return null;
+    const p = await getPayment(found.id);
+    return p.metadata?.order === orderId ? p : null;
   } catch {
     return null;
   }
@@ -142,7 +169,7 @@ export type OrderState = { status: "unknown" | "pending" | "paid" | "canceled"; 
 
 /** Состояние заказа для страницы «Спасибо»: файл заказа, а пока он не итоговый — живой статус платежа в ЮKassa. */
 export async function orderState(orderId: string, cookiePaymentId?: string): Promise<OrderState> {
-  if (!orderId) return { status: "unknown" };
+  if (!isOrderId(orderId)) return { status: "unknown" };
   let o = await getOrder(orderId);
   if (o?.status !== "paid") {
     let p: Payment | null = null;
