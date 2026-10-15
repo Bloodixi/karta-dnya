@@ -2,22 +2,8 @@
 import { mailReady, sendMail, type Inline } from "./mailer";
 import { escapeHtml as h } from "./notify";
 import { patchOrder, type Order } from "./razborStore";
+import { qrPng, receiptView } from "./receiptView";
 import { SELLER, SITE } from "./site";
-
-/** Картинка чека: ФНС рисует её не сразу после регистрации дохода — ждём до ~40 с, иначе письмо уйдёт со ссылкой. */
-async function receiptImage(url: string): Promise<Buffer | null> {
-  for (let i = 0; i < 8; i++) {
-    try {
-      const r = await fetch(url, { cache: "no-store" });
-      if (r.ok && (r.headers.get("content-type") ?? "").startsWith("image/")) return Buffer.from(await r.arrayBuffer());
-    } catch {}
-    await new Promise((ok) => setTimeout(ok, 5000));
-  }
-  return null;
-}
-
-const msk = (iso: string) =>
-  new Date(iso).toLocaleString("ru-RU", { timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
 /** Отправляет письмо один раз на заказ (mail_sent_at). Ошибку не бросает — вернёт её текст для уведомления владельцу. */
 export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?: string }> {
@@ -26,11 +12,18 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   if (!mailReady()) return { error: "не настроена отправка писем" };
   const url = `${SITE.url}/razbor/r/${order.token}`;
   const hello = order.name ? `${order.name}, здравствуйте!` : "Здравствуйте!";
-  const img = order.receipt_url ? await receiptImage(order.receipt_url) : null;
-  const inline: Inline[] = img ? [{ cid: "receipt@karta-dnya.ru", filename: `chek-${order.receipt_uuid}.png`, content: img, contentType: "image/png" }] : [];
-  const paid = msk(order.paid_at || order.created_at);
-  const receiptText = order.receipt_url
-    ? [`Чек № ${order.receipt_uuid} от ${paid} (МСК), «Мой налог»:`, `Разбор по дате рождения — ${order.amount} ₽, безналичный расчёт.`, `Продавец: ${SELLER.name}, ИНН ${SELLER.inn}, налог на профессиональный доход.`, order.receipt_url, ""]
+  const r = receiptView(order);
+  const inline: Inline[] = r ? [{ cid: "qr@karta-dnya.ru", filename: `chek-${r.number}.png`, content: await qrPng(r.fnsUrl), contentType: "image/png" }] : [];
+  const receiptText = r
+    ? [
+        `Чек № ${r.number} от ${r.date} ${r.time} (МСК)`,
+        `Продавец: ${r.seller}, ИНН ${r.inn}, режим НО: НПД`,
+        `1. ${r.item} — ${r.amount}`,
+        `Итого: ${r.amount}, безналичный расчёт`,
+        `Чек: ${r.pageUrl}`,
+        `Проверить на сайте ФНС: ${r.fnsUrl}`,
+        "",
+      ]
     : [];
   const text = [
     hello,
@@ -50,12 +43,28 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
 <p>Спасибо за заказ. Ваш разбор по дате рождения готов:</p>
 <p><a href="${h(url)}" style="display:inline-block;padding:10px 18px;background:#5b3fa8;color:#fff;border-radius:8px;text-decoration:none">Открыть разбор</a></p>
 <p style="font-size:13px;color:#666">Ссылка: <a href="${h(url)}">${h(url)}</a></p>
-${order.receipt_url ? `<div style="margin:20px 0;padding:16px;border:1px solid #e3e3e3;border-radius:10px">
-<p style="margin:0 0 6px;font-weight:bold">Чек № ${h(order.receipt_uuid)} — «Мой налог»</p>
-<p style="margin:0 0 10px;font-size:13px;color:#555">${h(paid)} (МСК) · Разбор по дате рождения · ${h(order.amount)} ₽ · безналичный расчёт<br>Продавец: ${h(SELLER.name)}, ИНН ${h(SELLER.inn)}, налог на профессиональный доход</p>
-${img ? `<p style="margin:0 0 10px"><img src="cid:receipt@karta-dnya.ru" alt="Чек № ${h(order.receipt_uuid)}" width="320" style="max-width:100%;border:1px solid #eee"></p>` : ""}
-<p style="margin:0;font-size:13px"><a href="${h(order.receipt_url)}">Открыть чек на сайте ФНС</a></p>
-</div>` : ""}
+${r ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;width:100%;max-width:400px;border:1px solid #e5e1d8;border-radius:12px;background:#fffdf8;font-size:14px;color:#222">
+<tr><td style="padding:20px 22px">
+<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888">Кассовый чек · приход</div>
+<div style="font-size:20px;font-weight:bold;margin-top:2px">Чек № ${h(r.number)}</div>
+<div style="color:#777;margin-top:2px">${h(r.date)} · ${h(r.time)} (МСК)</div>
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin-top:14px">
+<tr><td style="padding:2px 0;color:#777">Продавец</td><td style="padding:2px 0;text-align:right">${h(r.seller)}</td></tr>
+<tr><td style="padding:2px 0;color:#777">ИНН</td><td style="padding:2px 0;text-align:right">${h(r.inn)}</td></tr>
+<tr><td style="padding:2px 0;color:#777">Режим НО</td><td style="padding:2px 0;text-align:right">НПД</td></tr>
+</table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin-top:12px;border-top:1px dashed #ccc">
+<tr><td style="padding:10px 0 2px">1. ${h(r.item)}</td><td style="padding:10px 0 2px;text-align:right;white-space:nowrap">${h(r.amount)}</td></tr>
+</table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin-top:10px;border-top:1px dashed #ccc">
+<tr><td style="padding:10px 0 0;font-size:17px;font-weight:bold">Итого</td><td style="padding:10px 0 0;text-align:right;font-size:17px;font-weight:bold">${h(r.amount)}</td></tr>
+<tr><td colspan="2" style="color:#777;padding-top:2px">Безналичный расчёт</td></tr>
+</table>
+<div style="text-align:center;margin-top:16px;border-top:1px dashed #ccc;padding-top:16px">
+<img src="cid:qr@karta-dnya.ru" width="140" height="140" alt="QR-код чека ФНС">
+<div style="font-size:13px;margin-top:6px"><a href="${h(r.pageUrl)}" style="color:#5b3fa8">Открыть чек</a> · <a href="${h(r.fnsUrl)}" style="color:#777">проверить на сайте ФНС</a></div>
+</div>
+</td></tr></table>` : ""}
 <p>Заказ ${h(order.id)}, ${h(order.amount)} ₽.<br>Если ссылка не открывается или остались вопросы — просто ответьте на это письмо.</p>
 <p style="font-size:12px;color:#888">${h(SITE.name)} · <a href="${h(SITE.url)}">${h(SITE.url.replace(/^https?:\/\//, ""))}</a><br>Продавец: ${h(SELLER.name)}, ИНН ${h(SELLER.inn)}</p>
 </div>`;

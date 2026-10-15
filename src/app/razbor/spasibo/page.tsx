@@ -54,7 +54,7 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
           </div>
           {state.receipt ? (
             <p className="mt-4 text-sm text-muted">
-              Чек об оплате: <a href={state.receipt} target="_blank" rel="noopener" className="underline hover:text-ink">открыть в «Мой налог»</a>
+              Чек об оплате: <Link href={state.receipt} className="underline hover:text-ink">открыть чек</Link>
             </p>
           ) : null}
           <Stuck order={order} />

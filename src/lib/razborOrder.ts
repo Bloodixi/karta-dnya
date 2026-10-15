@@ -76,7 +76,7 @@ async function doFinishPaid(order: Order): Promise<{ order?: Order; lines: strin
   const o = r.receipt ?? order;
   const m = await mailBuyer(o);
   const lines = [
-    o.receipt_url ? `<a href="${h(o.receipt_url)}">Чек «Мой налог»</a>` : `<b>⚠️ Чек не пробит</b> (${h(r.error)}) — сайт повторит при следующем открытии заказа`,
+    o.receipt_url ? `<a href="${h(`${SITE.url}/razbor/chek/${o.id}`)}">Чек «Мой налог»</a> · <a href="${h(o.receipt_url)}">ФНС</a>` : `<b>⚠️ Чек не пробит</b> (${h(r.error)}) — сайт повторит при следующем открытии заказа`,
     m.sent ? `✉️ Письмо отправлено на ${h(o.email)}` : `<b>⚠️ Письмо не отправлено</b> (${h(m.error)})`,
   ];
   return { order: o, lines };
@@ -160,5 +160,5 @@ export async function orderState(orderId: string, cookiePaymentId?: string): Pro
   if (o.status !== "paid") return { status: o.status };
   if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
   if (o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
-  return { status: "paid", path: `/razbor/r/${o.token}`, receipt: o.receipt_url };
+  return { status: "paid", path: `/razbor/r/${o.token}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined };
 }
