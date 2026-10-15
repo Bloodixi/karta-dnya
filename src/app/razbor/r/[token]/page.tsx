@@ -5,6 +5,7 @@ import RazborView from "@/components/RazborView";
 import { CopyLinkButton, PrintButton } from "@/components/RazborClient";
 import { buildRazbor, RAZBOR } from "@/lib/razbor";
 import { readToken } from "@/lib/razborToken";
+import { getOrder } from "@/lib/razborStore";
 import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +20,11 @@ export default async function RazborResultPage({ params }: PageProps<"/razbor/r/
   const { token } = await params;
   const input = readToken(decodeURIComponent(token));
   if (!input) notFound();
+  // в новых ссылках есть номер заказа: после возврата или отмены ссылка закрыта (старые ссылки номера не содержат)
+  if (input.order) {
+    const order = await getOrder(input.order);
+    if (order && (order.status === "refunded" || order.status === "canceled")) notFound();
+  }
   const doc = buildRazbor(input);
 
   return (

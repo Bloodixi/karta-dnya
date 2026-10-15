@@ -79,7 +79,7 @@ export function orderFromPayment(p: Payment): Order | null {
   const i = inputFromPayment(p);
   if (!i || !md.order) return null;
   return {
-    id: md.order, token: makeToken(i), date: md.date, name: md.name ?? "", email: md.email ?? "", amount: Number(p.amount.value),
+    id: md.order, token: makeToken(i, md.order), date: md.date, name: md.name ?? "", email: md.email ?? "", amount: Number(p.amount.value),
     status: "pending", payment_id: p.id, created_at: p.created_at, paid_at: "", yr: i.yr, mo: i.mo,
   };
 }
@@ -100,6 +100,8 @@ function finishPaid(order: Order): Promise<{ order?: Order; lines: string[] }> {
 
 async function doFinishPaid(order: Order): Promise<{ order?: Order; lines: string[] }> {
   order = (await patchOrder(order.id, { receipt_due: true })) ?? { ...order, receipt_due: true };
+  // возврат мог прийти раньше: по возвращённому заказу чек не пробиваем и письмо со ссылкой не шлём
+  if (order.status !== "paid") return { order, lines: [`<b>Заказ уже не оплачен (${h(order.status)})</b> — чек и письмо не отправлялись`] };
   const r = await issueReceipt(order);
   const o = r.receipt ?? order;
   const m = await mailBuyer(o);
@@ -120,6 +122,7 @@ async function retryPaid(o: Order): Promise<Order> {
   // чтобы при сбоях ФНС не наплодить чеков (ответ мог потеряться после регистрации дохода) и писем
   if ((o.retries ?? 0) >= RETRY_MAX || (o.retry_at && Date.now() - Date.parse(o.retry_at) < RETRY_GAP)) return o;
   o = (await patchOrder(o.id, { retry_at: new Date().toISOString(), retries: (o.retries ?? 0) + 1 })) ?? o;
+  if (o.status !== "paid") return o; // возврат между чтением и повтором
   const before = { receipt: Boolean(o.receipt_uuid), mail: Boolean(o.mail_sent_at) };
   const f = await finishPaid(o);
   const after = f.order ?? o;
@@ -263,5 +266,6 @@ export async function orderState(orderId: string, cookiePaymentId?: string, offl
   if (o.status !== "paid") return { status: o.status };
   if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
   if (!offline && o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
+  if (o.status !== "paid") return { status: o.status }; // возврат мог прийти, пока шла проверка
   return { status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined };
 }

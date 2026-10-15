@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   const order = randomBytes(9).toString("base64url");
   const { yr, mo } = nowMsk();
   const draft: Order = {
-    id: order, token: makeToken({ d: birth.d, m: birth.m, y: birth.y, name: name || undefined, yr, mo }), date: birth.iso, name, email,
+    id: order, token: makeToken({ d: birth.d, m: birth.m, y: birth.y, name: name || undefined, yr, mo }, order), date: birth.iso, name, email,
     amount: RAZBOR.price, status: "pending", payment_id: "", created_at: new Date().toISOString(), paid_at: "", yr, mo,
   };
   try {
