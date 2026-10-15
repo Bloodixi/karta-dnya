@@ -8,7 +8,7 @@ import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
 import { mailBuyer } from "./razborMail";
-import type { RazborInput } from "./razbor";
+import { RAZBOR, type RazborInput } from "./razbor";
 import { SITE } from "./site";
 import { sharedRateLimit } from "./rateLimit";
 
@@ -130,6 +130,38 @@ async function retryPaid(o: Order): Promise<Order> {
   return fresh;
 }
 
+/** Предупреждения о несовпадении суммы для заказов без файла — в памяти процесса, чтобы не повторять на каждый опрос. */
+const mismatchWarned = new Set<string>();
+
+/**
+ * Оплата должна быть в рублях и не меньше цены заказа (из файла; без файла — текущая цена разбора).
+ * Иначе заказ не отмечается оплаченным, владелец получает одно предупреждение в Telegram.
+ */
+async function amountMismatch(id: string, p: Payment): Promise<boolean> {
+  const o = await getOrder(id);
+  const price = o?.amount || RAZBOR.price;
+  const value = Number(p.amount?.value);
+  if (p.amount?.currency === "RUB" && Number.isFinite(value) && value >= price) return false;
+  const warned = o ? Boolean(o.mismatch_at) : mismatchWarned.has(id);
+  if (!warned) {
+    if (o) await patchOrder(id, { mismatch_at: new Date().toISOString() });
+    else {
+      mismatchWarned.add(id);
+      if (mismatchWarned.size > 500) mismatchWarned.delete(mismatchWarned.values().next().value!);
+    }
+    await notifyPayment(
+      [
+        `<b>⚠️ Оплата не сошлась с заказом</b>${p.test ? " · тест" : ""}`,
+        `Пришло: ${h(p.amount?.value)} ${h(p.amount?.currency)}, ожидалось не меньше ${h(price)} RUB.`,
+        "Заказ не открыт. Проверь платёж в кабинете ЮKassa.",
+        `<i>Заказ ${h(id)} · платёж ${h(p.id)}</i>`,
+      ].join("\n"),
+    );
+  }
+  console.error("razbor: сумма не сошлась", id, p.id, p.amount);
+  return true;
+}
+
 /**
  * Сверяет заказ с уже перепроверенным в API платежом и, если статус стал итоговым, записывает его.
  * Уведомление владельцу уходит один раз — при первом переходе в paid (вебхук или страница «Спасибо», кто раньше).
@@ -138,6 +170,7 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
   const id = p.metadata?.order;
   if (!id) return null;
   if (p.status !== "succeeded" && p.status !== "canceled") return (await getOrder(id)) ?? orderFromPayment(p);
+  if (p.status === "succeeded" && (await amountMismatch(id, p))) return (await getOrder(id)) ?? orderFromPayment(p);
   const { order, changed } = await settleOrder(id, p.status === "succeeded" ? "paid" : "canceled", () => orderFromPayment(p), p.id);
   if (changed && order) {
     const test = p.test ? " · тест" : "";
