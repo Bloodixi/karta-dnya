@@ -34,7 +34,7 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
   const cookiePayment = (await cookies()).get(PAY_COOKIE)?.value;
   const state = await orderState(order, cookiePayment).catch((e) => {
     console.error("razbor spasibo:", order, e);
-    return { status: "unknown" as const, path: undefined };
+    return { status: "unknown" as const, path: undefined, receipt: undefined };
   });
   const canceled = state.status === "canceled";
   const waiting = Boolean(order) && (state.status === "pending" || state.status === "unknown");
@@ -52,6 +52,11 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
             <Link href={state.path} className="btn">Открыть разбор</Link>
             <CopyLinkButton url={state.path} />
           </div>
+          {state.receipt ? (
+            <p className="mt-4 text-sm text-muted">
+              Чек об оплате: <a href={state.receipt} target="_blank" rel="noopener" className="underline hover:text-ink">открыть в «Мой налог»</a>
+            </p>
+          ) : null}
           <Stuck order={order} />
         </div>
       </div>

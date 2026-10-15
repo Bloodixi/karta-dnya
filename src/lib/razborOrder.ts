@@ -6,6 +6,7 @@ import { getPayment, recentPayments, type Payment } from "./yookassa";
 import { getOrder, settleOrder, type Order } from "./razborStore";
 import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeToken } from "./razborToken";
+import { issueReceipt } from "./razborReceipt";
 import type { RazborInput } from "./razbor";
 import { SITE } from "./site";
 
@@ -67,6 +68,13 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
     const test = p.test ? " · тест" : "";
     if (order.status === "paid") {
       const url = `${SITE.url}/razbor/r/${order.token}`;
+      // тестовый магазин чек в налоговую не пробивает
+      const r = p.test ? {} : await issueReceipt(order);
+      const receipt = r.receipt?.receipt_url
+        ? `<a href="${h(r.receipt.receipt_url)}">Чек «Мой налог»</a>`
+        : r.error
+          ? `<b>⚠️ Чек не пробит</b> (${h(r.error)}) — оформи вручную в «Мой налог»`
+          : "";
       await notifyPayment(
         [
           `<b>💳 Оплачен разбор — ${h(p.amount.value)} ₽</b>${test}`,
@@ -74,6 +82,7 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
           `Дата рождения: ${h(order.date)}${order.name ? `\nИмя: ${h(order.name)}` : ""}${order.email ? `\nE-mail: ${h(order.email)}` : ""}`,
           "",
           `<a href="${h(url)}">Открыть разбор</a>`,
+          ...(receipt ? [receipt] : []),
           `<i>Заказ ${h(order.id)} · платёж ${h(p.id)}</i>`,
         ].join("\n"),
       );
@@ -87,7 +96,7 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
   return order;
 }
 
-export type OrderState = { status: "unknown" | "pending" | "paid" | "canceled"; path?: string };
+export type OrderState = { status: "unknown" | "pending" | "paid" | "canceled"; path?: string; receipt?: string };
 
 /** Состояние заказа для страницы «Спасибо»: файл заказа, а пока он не итоговый — живой статус платежа в ЮKassa. */
 export async function orderState(orderId: string, cookiePaymentId?: string): Promise<OrderState> {
@@ -106,5 +115,7 @@ export async function orderState(orderId: string, cookiePaymentId?: string): Pro
     if (p && p.metadata?.order === orderId) o = (await applyPayment(p)) ?? o;
   }
   if (!o) return { status: "unknown" };
-  return o.status === "paid" ? { status: "paid", path: `/razbor/r/${o.token}` } : { status: o.status };
+  if (o.status !== "paid") return { status: o.status };
+  if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
+  return { status: "paid", path: `/razbor/r/${o.token}`, receipt: o.receipt_url };
 }

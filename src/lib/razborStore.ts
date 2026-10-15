@@ -17,6 +17,8 @@ export type Order = {
   paid_at: string;
   yr: number; // год расчёта личного года
   mo: number; // месяц, с которого идёт помесячный прогноз
+  receipt_uuid?: string; // чек «Мой налог»
+  receipt_url?: string;
 };
 
 const ID_RE = /^[\w-]{6,64}$/;
@@ -69,5 +71,16 @@ export function settleOrder(id: string, status: Exclude<OrderStatus, "pending">,
     const next: Order = { ...o, status, payment_id: paymentId || o.payment_id, paid_at: status === "paid" ? new Date().toISOString() : o.paid_at };
     await saveOrder(next);
     return { order: next, changed: true };
+  });
+}
+
+/** Дописывает поля в заказ (по очереди с settleOrder). */
+export function patchOrder(id: string, patch: Partial<Order>): Promise<Order | null> {
+  return serial(id, async () => {
+    const o = await getOrder(id);
+    if (!o) return null;
+    const next = { ...o, ...patch };
+    await saveOrder(next);
+    return next;
   });
 }
