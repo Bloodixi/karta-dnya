@@ -10,7 +10,7 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   if (order.mail_sent_at) return { sent: true };
   if (!order.email) return { error: "покупатель не указал e-mail" };
   if (!mailReady()) return { error: "не настроена отправка писем" };
-  const url = `${SITE.url}/razbor/r/${order.token}`;
+  const url = `${SITE.url}/r/${order.id}`;
   const hello = order.name ? `${order.name}, здравствуйте!` : "Здравствуйте!";
   const r = receiptView(order);
   const inline: Inline[] = r ? [{ cid: "qr@karta-dnya.ru", filename: `chek-${r.number}.png`, content: await qrPng(r.fnsUrl), contentType: "image/png" }] : [];

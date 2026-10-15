@@ -34,13 +34,13 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
   const cookiePayment = (await cookies()).get(PAY_COOKIE)?.value;
   const state = await orderState(order, cookiePayment).catch((e) => {
     console.error("razbor spasibo:", order, e);
-    return { status: "unknown" as const, path: undefined, receipt: undefined };
+    return { status: "unknown" as const, path: undefined, short: undefined, receipt: undefined };
   });
   const canceled = state.status === "canceled";
   const waiting = Boolean(order) && (state.status === "pending" || state.status === "unknown");
 
   if (state.status === "paid" && state.path) {
-    const url = `${SITE.url}${state.path}`;
+    const url = `${SITE.url}${state.short ?? state.path}`;
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <div className="card p-6 md:p-8">
@@ -50,7 +50,7 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
           <p className="mt-3 font-medium">Сохрани эту ссылку: разбор открывается по ней на любом устройстве и в любой момент. Копию ссылки и чек об оплате мы отправили на e-mail, указанный при оплате.</p>
           <div className="mt-5 flex flex-wrap gap-2">
             <Link href={state.path} className="btn">Открыть разбор</Link>
-            <CopyLinkButton url={state.path} />
+            <CopyLinkButton url={state.short ?? state.path} />
           </div>
           {state.receipt ? (
             <p className="mt-4 text-sm text-muted">

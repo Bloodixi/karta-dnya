@@ -130,9 +130,15 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
                 E-mail — пришлём сюда ссылку на разбор и чек
                 <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" aria-invalid={err === "email" || undefined} className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
               </label>
-              <button type="submit" className="btn mt-4">
-                Получить полный разбор за {RAZBOR.price} ₽
-              </button>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="submit" name="method" value="sbp" className="btn">
+                  Оплатить {RAZBOR.price} ₽ по СБП
+                </button>
+                <button type="submit" name="method" value="" className="btn btn-ghost">
+                  Картой или другим способом
+                </button>
+              </div>
+              <p className="text-xs text-muted mt-2">СБП — оплата по QR-коду или в приложении банка, без ввода карты.</p>
               <p className="text-xs text-muted mt-3 max-w-md">
                 Нажимая кнопку, ты принимаешь условия <Link href="/oferta" className="underline">оферты</Link>. Оплата через ЮKassa. Разбор носит развлекательный и ознакомительный характер.
               </p>

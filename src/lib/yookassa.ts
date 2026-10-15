@@ -28,13 +28,15 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 /** idempotenceKey — номер заказа: повтор того же запроса (сеть, двойной клик) не создаст второй платёж. */
-export function createPayment(opts: { amount: number; description: string; returnUrl: string; metadata: Record<string, string>; email?: string; idempotenceKey: string }): Promise<Payment> {
+/** method — способ, выбранный на сайте: «sbp» ведёт сразу на QR-код СБП, без выбора на странице ЮKassa. */
+export function createPayment(opts: { amount: number; description: string; returnUrl: string; metadata: Record<string, string>; email?: string; idempotenceKey: string; method?: "sbp" }): Promise<Payment> {
   const body: Record<string, unknown> = {
     amount: { value: opts.amount.toFixed(2), currency: "RUB" },
     capture: true,
     confirmation: { type: "redirect", return_url: opts.returnUrl },
     description: opts.description.slice(0, 128),
     metadata: opts.metadata,
+    ...(opts.method ? { payment_method_data: { type: opts.method } } : {}),
   };
   // Чек по 54-ФЗ передаём только при YOOKASSA_RECEIPT=1 — если в магазине включены чеки ЮKassa.
   // В тестовом магазине чеки выключены; у самозанятого чек в «Мой налог» формирует сама ЮKassa.

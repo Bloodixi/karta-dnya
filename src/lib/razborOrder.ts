@@ -114,7 +114,7 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
   if (changed && order) {
     const test = p.test ? " · тест" : "";
     if (order.status === "paid") {
-      const url = `${SITE.url}/razbor/r/${order.token}`;
+      const url = `${SITE.url}/r/${order.id}`;
       // тестовый магазин чек в налоговую не пробивает и письма не шлёт
       const f = p.test ? { lines: [] } : await finishPaid(order);
       await notifyPayment(
@@ -138,7 +138,7 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
   return order;
 }
 
-export type OrderState = { status: "unknown" | "pending" | "paid" | "canceled"; path?: string; receipt?: string };
+export type OrderState = { status: "unknown" | "pending" | "paid" | "canceled"; path?: string; short?: string; receipt?: string };
 
 /** Состояние заказа для страницы «Спасибо»: файл заказа, а пока он не итоговый — живой статус платежа в ЮKassa. */
 export async function orderState(orderId: string, cookiePaymentId?: string): Promise<OrderState> {
@@ -160,5 +160,5 @@ export async function orderState(orderId: string, cookiePaymentId?: string): Pro
   if (o.status !== "paid") return { status: o.status };
   if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
   if (o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
-  return { status: "paid", path: `/razbor/r/${o.token}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined };
+  return { status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined };
 }

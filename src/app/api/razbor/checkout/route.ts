@@ -36,6 +36,7 @@ export async function POST(req: Request) {
       returnUrl: `${SITE.url}/razbor/spasibo?o=${order}`,
       metadata: { order, date: birth.iso, name, yr: String(yr), mo: String(mo), email },
       email,
+      method: form.get("method") === "sbp" ? "sbp" : undefined,
     });
     const url = p.confirmation?.confirmation_url;
     if (!url) throw new Error("нет confirmation_url");
