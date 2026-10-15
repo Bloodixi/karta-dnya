@@ -1,5 +1,5 @@
 /** Заказы разбора: JSON-файлы <RAZBOR_DATA_DIR>/orders/<id>.json на постоянном томе Coolify (/data). Только сервер. */
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 export type OrderStatus = "pending" | "paid" | "canceled";
@@ -87,4 +87,21 @@ export function patchOrder(id: string, patch: Partial<Order>): Promise<Order | n
     await saveOrder(next);
     return next;
   });
+}
+
+/** Оплаченные заказы по e-mail покупателя (для «Потеряли ссылку?»). Заказов немного — читаем каталог целиком. */
+export async function paidOrdersByEmail(email: string): Promise<Order[]> {
+  const want = email.trim().toLowerCase();
+  let names: string[] = [];
+  try {
+    names = (await readdir(dir())).filter((n) => n.endsWith(".json"));
+  } catch {
+    return [];
+  }
+  const out: Order[] = [];
+  for (const n of names) {
+    const o = await getOrder(n.slice(0, -5));
+    if (o?.status === "paid" && o.email.toLowerCase() === want) out.push(o);
+  }
+  return out.sort((a, b) => b.paid_at.localeCompare(a.paid_at));
 }

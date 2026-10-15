@@ -77,3 +77,30 @@ ${r ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:
     return { error: String((e as Error).message ?? e).slice(0, 200) };
   }
 }
+
+/** «Потеряли ссылку?»: все оплаченные разборы на этот e-mail одним письмом. */
+export async function mailAccess(email: string, orders: Order[]): Promise<void> {
+  const rows = orders.map((o) => ({
+    url: `${SITE.url}/r/${o.id}`,
+    chek: o.receipt_uuid ? `${SITE.url}/razbor/chek/${o.id}` : "",
+    title: `Разбор${o.name ? ` для ${o.name}` : ""}, дата рождения ${o.date.split("-").reverse().join(".")}`,
+  }));
+  const text = [
+    "Здравствуйте!",
+    "",
+    "Вы запросили ссылки на свои разборы на сайте «Карта дня»:",
+    "",
+    ...rows.flatMap((r) => [r.title, r.url, ...(r.chek ? [`Чек: ${r.chek}`] : []), ""]),
+    "Если вы не запрашивали это письмо — просто не обращайте на него внимания.",
+    "",
+    `${SITE.name} · ${SITE.url}`,
+  ].join("\n");
+  const html = `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222;max-width:560px">
+<p>Здравствуйте!</p>
+<p>Вы запросили ссылки на свои разборы на сайте «Карта дня»:</p>
+${rows.map((r) => `<p style="margin:14px 0"><b>${h(r.title)}</b><br><a href="${h(r.url)}">${h(r.url)}</a>${r.chek ? `<br><span style="font-size:13px">Чек: <a href="${h(r.chek)}">${h(r.chek)}</a></span>` : ""}</p>`).join("\n")}
+<p style="font-size:13px;color:#777">Если вы не запрашивали это письмо — просто не обращайте на него внимания.</p>
+<p style="font-size:12px;color:#888">${h(SITE.name)} · <a href="${h(SITE.url)}">${h(SITE.url.replace(/^https?:\/\//, ""))}</a></p>
+</div>`;
+  await sendMail({ to: email, subject: "Ссылки на ваши разборы — Карта дня", text, html });
+}

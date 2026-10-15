@@ -189,6 +189,23 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
         </p>
       </section>
 
+      <section id="dostup" className="mt-10 max-w-3xl scroll-mt-24">
+        <div className="card p-6">
+          <h2 className="text-xl">Потеряли ссылку на разбор?</h2>
+          {one(sp.dostup) ? (
+            <p role="status" className="mt-3">Если на этот адрес были оплаченные разборы, мы отправили ссылки на них. Проверь почту, в том числе папку «Спам».</p>
+          ) : (
+            <form method="post" action="/api/razbor/dostup" className="mt-3 flex flex-wrap items-end gap-2">
+              <label className="grid gap-1 text-sm min-w-0 flex-1 max-w-sm">
+                E-mail, указанный при оплате
+                <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
+              </label>
+              <button type="submit" className="btn btn-ghost">Прислать ссылки</button>
+            </form>
+          )}
+        </div>
+      </section>
+
       <Faq items={FAQ} />
 
       <JsonLd
