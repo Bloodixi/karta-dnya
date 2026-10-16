@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import RazborBooklet from "@/components/RazborBooklet";
 import { readToken } from "@/lib/razborToken";
 import { getOrder } from "@/lib/razborStore";
+import { giftFor } from "@/lib/razborGift";
 import { bookletData, bookletStyle } from "@/lib/razborBookletData";
 import { SITE } from "@/lib/site";
 
@@ -22,5 +23,7 @@ export default async function RazborShortBookletPage({ params, searchParams }: P
   if (!order || !input) notFound();
   const data = await bookletData(input, `${SITE.url}/r/${order.id}`);
   const style = bookletStyle((await searchParams).style);
-  return <RazborBooklet {...data} initialStyle={style} backHref={`/r/${order.id}`} />;
+  // подарок: на посвящении — подпись и пожелание дарителя (без адресов и дат отправки)
+  const g = await giftFor(order);
+  return <RazborBooklet {...data} initialStyle={style} backHref={`/r/${order.id}`} gift={g ? { from: g.from, ...(g.wish ? { wish: g.wish } : {}) } : null} />;
 }
