@@ -30,6 +30,8 @@ const SIGN_NAMES: Record<SignSlug, string> = {
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
+type ErrField = "date" | "time" | "city" | null;
+
 type Loaded = { natal: typeof import("@/lib/astro/natal"); texts: NatalTexts };
 let loadedPromise: Promise<Loaded> | null = null;
 function loadEngine(): Promise<Loaded> {
@@ -56,6 +58,7 @@ export default function NatalCalc({ refs }: { refs: NatalRefs }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [errField, setErrField] = useState<ErrField>(null);
   const [result, setResult] = useState<{ chart: NatalChart; texts: NatalTexts; natal: Loaded["natal"]; city: IndexedCity } | null>(null);
   const [copied, setCopied] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -63,6 +66,7 @@ export default function NatalCalc({ refs }: { refs: NatalRefs }) {
   const compute = useCallback(async (d: string, t: string | null, c: IndexedCity, scroll: boolean) => {
     setBusy(true);
     setError("");
+    setErrField(null);
     try {
       const { natal, texts } = await loadEngine();
       const chart = natal.natalChart({ date: d, time: t, lat: c.lat, lon: c.lon, tz: c.tz });
@@ -100,9 +104,17 @@ export default function NatalCalc({ refs }: { refs: NatalRefs }) {
     });
   }, [compute]);
 
+  /** Ошибка у конкретного поля: текст под полем, aria-invalid, прокрутка к полю (на телефоне кнопка у нижней панели). */
+  function fail(field: Exclude<ErrField, null>, msg: string) {
+    setError(msg);
+    setErrField(field);
+    setTimeout(() => document.getElementById(`natal-${field}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 30);
+  }
+
   async function onCityInput(v: string) {
     setCityQuery(v);
     setCity(null);
+    if (errField === "city") { setError(""); setErrField(null); }
     const idx = await loadCities();
     const list = searchCities(idx, v, 8);
     setHints(list);
@@ -122,11 +134,11 @@ export default function NatalCalc({ refs }: { refs: NatalRefs }) {
     const [y, m, d] = date.split("-").map(Number);
     const dt = new Date(Date.UTC(y, m - 1, d));
     if (!y || y < 1800 || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d || date > todayIso()) {
-      setError("Введите настоящую дату рождения.");
+      fail("date", "Введите настоящую дату рождения.");
       return;
     }
     if (!noTime && !/^\d{1,2}:\d{2}$/.test(time)) {
-      setError("Введите время рождения или отметьте «Не знаю время».");
+      fail("time", "Введите время рождения или отметьте «Не знаю время».");
       return;
     }
     let chosen = city;
@@ -136,7 +148,7 @@ export default function NatalCalc({ refs }: { refs: NatalRefs }) {
       if (chosen) pickCity(chosen);
     }
     if (!chosen) {
-      setError("Выберите город из списка подсказок: начните вводить название.");
+      fail("city", "Выберите город из списка подсказок: начните вводить название.");
       return;
     }
     await compute(date, noTime ? null : time, chosen, true);
@@ -155,17 +167,21 @@ export default function NatalCalc({ refs }: { refs: NatalRefs }) {
   return (
     <div>
       <form onSubmit={onSubmit} className="card p-6 grid gap-4 sm:grid-cols-2" noValidate>
-        <label className="grid gap-1 text-sm">
-          Дата рождения
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required min="1800-01-01" max={todayIso()} className="border border-line rounded-lg px-3 py-2 bg-surface" />
-        </label>
+        <div className="grid gap-1 text-sm content-start">
+          <label className="grid gap-1">
+            Дата рождения
+            <input id="natal-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required min="1800-01-01" max={todayIso()} aria-invalid={errField === "date" || undefined} aria-describedby={errField === "date" ? "natal-error" : undefined} className={`border rounded-lg px-3 py-2 bg-surface ${errField === "date" ? "border-danger" : "border-line"}`} />
+          </label>
+          {errField === "date" && <FieldError msg={error} />}
+        </div>
         <div className="grid gap-1 text-sm">
           <label className="grid gap-1">
             Время рождения
-            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} disabled={noTime} className="border border-line rounded-lg px-3 py-2 bg-surface disabled:opacity-50" />
+            <input id="natal-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} disabled={noTime} aria-invalid={errField === "time" || undefined} aria-describedby={errField === "time" ? "natal-error" : undefined} className={`border rounded-lg px-3 py-2 bg-surface disabled:opacity-50 ${errField === "time" ? "border-danger" : "border-line"}`} />
           </label>
-          <label className="flex items-center gap-2 text-muted">
-            <input type="checkbox" checked={noTime} onChange={(e) => setNoTime(e.target.checked)} className="accent-accent" />
+          {errField === "time" && <FieldError msg={error} />}
+          <label className="flex min-h-11 items-center gap-2 text-muted cursor-pointer">
+            <input type="checkbox" checked={noTime} onChange={(e) => { setNoTime(e.target.checked); if (e.target.checked && errField === "time") { setError(""); setErrField(null); } }} className="accent-accent size-5 shrink-0" />
             Не знаю время рождения
           </label>
         </div>
@@ -184,7 +200,9 @@ export default function NatalCalc({ refs }: { refs: NatalRefs }) {
             aria-expanded={open}
             aria-controls="natal-city-list"
             aria-autocomplete="list"
-            className="border border-line rounded-lg px-3 py-2 bg-surface"
+            aria-invalid={errField === "city" || undefined}
+            aria-describedby={errField === "city" ? "natal-error" : undefined}
+            className={`border rounded-lg px-3 py-2 bg-surface ${errField === "city" ? "border-danger" : "border-line"}`}
           />
           {open && (
             <ul id="natal-city-list" role="listbox" className="card absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-auto p-1 shadow-lg">
@@ -197,17 +215,22 @@ export default function NatalCalc({ refs }: { refs: NatalRefs }) {
               ))}
             </ul>
           )}
+          {errField === "city" && <FieldError msg={error} />}
           {city && <p className="text-xs text-muted">Координаты {city.lat.toFixed(2)}, {city.lon.toFixed(2)} · часовой пояс {city.tz}</p>}
         </div>
         <div className="sm:col-span-2 flex flex-wrap items-center gap-3">
           <button type="submit" className="btn" disabled={busy}>{busy ? "Считаем…" : "Рассчитать"}</button>
-          {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
+          {error && !errField && <p className="text-sm text-danger" role="alert">{error}</p>}
         </div>
       </form>
 
       {result && <Result {...result} refs={refs} onShare={share} copied={copied} anchor={resultRef} />}
     </div>
   );
+}
+
+function FieldError({ msg }: { msg: string }) {
+  return <p id="natal-error" className="text-sm text-danger" role="alert">{msg}</p>;
 }
 
 /* ------------------------------------------------------------------ результат */
@@ -257,7 +280,7 @@ function Result({ chart, texts, natal, city, refs, onShare, copied, anchor }: {
           <NatalWheel chart={chart} className="w-full h-auto" />
           <p className="text-xs text-muted mt-2 px-1">Линии в центре — аспекты: сплошные лавандовые — трины и секстили, пунктирные — квадраты и оппозиции.</p>
         </div>
-        <div className="card p-4 overflow-x-auto">
+        <div className="card p-3 sm:p-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-muted">
@@ -265,7 +288,7 @@ function Result({ chart, texts, natal, city, refs, onShare, copied, anchor }: {
                 <th className="py-1.5 pr-2 font-normal">Знак</th>
                 <th className="py-1.5 pr-2 font-normal">Градус</th>
                 {chart.houses && <th className="py-1.5 pr-2 font-normal">Дом</th>}
-                <th className="py-1.5 font-normal">Движение</th>
+                <th className="py-1.5 font-normal hidden sm:table-cell">Движение</th>
               </tr>
             </thead>
             <tbody>
@@ -273,9 +296,9 @@ function Result({ chart, texts, natal, city, refs, onShare, copied, anchor }: {
                 <tr key={p.body} className="border-t border-line">
                   <td className="py-1.5 pr-2"><span className="zglyph !text-base align-middle mr-1.5" aria-hidden="true">{PLANET_GLYPH[p.body]}</span>{planet(p.body)?.name}</td>
                   <td className="py-1.5 pr-2"><span className="zglyph !text-base align-middle mr-1.5" aria-hidden="true">{SIGN_GLYPHS[p.signIndex]}</span>{SIGN_NAMES[p.sign]}</td>
-                  <td className="py-1.5 pr-2 whitespace-nowrap">{natal.formatDegree(p.lon)}{p.body === "moon" && chart.moonApprox ? " ±6°" : ""}</td>
+                  <td className="py-1.5 pr-2 whitespace-nowrap">{natal.formatDegree(p.lon)}{p.body === "moon" && chart.moonApprox ? " ±6°" : ""}{p.retrograde && p.body !== "sun" && p.body !== "moon" && <><span className="sm:hidden ml-1 text-accent-text" title="ретроградное" aria-hidden="true">℞</span><span className="sr-only sm:hidden"> ретроградное</span></>}</td>
                   {chart.houses && <td className="py-1.5 pr-2">{p.house}</td>}
-                  <td className="py-1.5 text-muted">{p.body === "sun" || p.body === "moon" ? "—" : p.retrograde ? "ретроградное" : "директное"}</td>
+                  <td className="py-1.5 text-muted hidden sm:table-cell">{p.body === "sun" || p.body === "moon" ? "—" : p.retrograde ? "ретроградное" : "директное"}</td>
                 </tr>
               ))}
               {chart.houses && (
@@ -285,14 +308,14 @@ function Result({ chart, texts, natal, city, refs, onShare, copied, anchor }: {
                     <td className="py-1.5 pr-2">{SIGN_NAMES[natal.signOfLon(chart.houses.asc)]}</td>
                     <td className="py-1.5 pr-2">{natal.formatDegree(chart.houses.asc)}</td>
                     <td className="py-1.5 pr-2">1</td>
-                    <td />
+                    <td className="hidden sm:table-cell" />
                   </tr>
                   <tr className="border-t border-line">
                     <td className="py-1.5 pr-2">Середина неба (MC)</td>
                     <td className="py-1.5 pr-2">{SIGN_NAMES[natal.signOfLon(chart.houses.mc)]}</td>
                     <td className="py-1.5 pr-2">{natal.formatDegree(chart.houses.mc)}</td>
                     <td className="py-1.5 pr-2">10</td>
-                    <td />
+                    <td className="hidden sm:table-cell" />
                   </tr>
                 </>
               )}
@@ -363,10 +386,10 @@ function Result({ chart, texts, natal, city, refs, onShare, copied, anchor }: {
       <section className="mt-10 card p-5">
         <h2 className="text-xl mb-2">Что посмотреть дальше</h2>
         <ul className="grid gap-1 text-sm">
-          <li><Link className="text-accent underline" href={`/goroskop/${sun.sign}`}>Гороскоп для знака {SIGN_NAMES[sun.sign]} на сегодня</Link></li>
-          <li><Link className="text-accent underline" href="/sovmestimost">Совместимость знаков зодиака</Link></li>
-          <li><Link className="text-accent underline" href="/chislo-sudby">Число судьбы по той же дате рождения</Link></li>
-          <li><Link className="text-accent underline" href="/lunnyy-kalendar">Лунный календарь</Link></li>
+          <li><Link className="text-accent-text underline" href={`/goroskop/${sun.sign}`}>Гороскоп для знака {SIGN_NAMES[sun.sign]} на сегодня</Link></li>
+          <li><Link className="text-accent-text underline" href="/sovmestimost">Совместимость знаков зодиака</Link></li>
+          <li><Link className="text-accent-text underline" href="/chislo-sudby">Число судьбы по той же дате рождения</Link></li>
+          <li><Link className="text-accent-text underline" href="/lunnyy-kalendar">Лунный календарь</Link></li>
         </ul>
       </section>
     </div>

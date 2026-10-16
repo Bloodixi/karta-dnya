@@ -19,8 +19,8 @@ export default function MoonPhase({ age, size = 96, className = "", title }: { a
           <stop offset="1" stopColor="#cfc3e3" />
         </radialGradient>
       </defs>
-      <circle cx="50" cy="50" r={r} fill="#242428" />
-      <circle cx="50" cy="50" r={r} fill="none" stroke="#b5ab97" strokeWidth="1" opacity="0.6" />
+      <circle cx="50" cy="50" r={r} fill="var(--moon-shadow)" />
+      <circle cx="50" cy="50" r={r} fill="none" stroke="var(--gold)" strokeWidth="1" opacity="0.9" />
       {k < 0.999 && <path d={lit} fill="url(#moon-lit)" />}
       <circle cx="36" cy="40" r="5" fill="#000" opacity="0.06" />
       <circle cx="58" cy="62" r="7" fill="#000" opacity="0.06" />

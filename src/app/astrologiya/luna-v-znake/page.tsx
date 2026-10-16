@@ -50,7 +50,7 @@ export default function MoonInSignPage() {
       <div className="card p-6 mt-6 grid gap-6 md:grid-cols-[160px_1fr] items-center">
         <div className="text-center">
           <MoonPhase age={s.moon.age} size={140} className="mx-auto" title={phase.name} />
-          <p className="text-sm text-muted mt-2">освещённость {s.moon.illumination}%</p>
+          <p className="text-sm text-muted mt-2">освещённость {Math.round(s.moon.illumination)}%</p>
         </div>
         <div>
           <p className="mono">сейчас</p>
@@ -62,17 +62,29 @@ export default function MoonInSignPage() {
           </p>
           <p className="mt-3">{current?.meaning ?? data.signs[moon.sign]?.moonText}</p>
           <p className="mt-3 text-sm">
-            <Link href={`/astrologiya/luna-v-znake/${moon.sign}`} className="text-accent underline">Подробнее о Луне {inSignRu(moon.sign)}</Link>
+            <Link href={`/astrologiya/luna-v-znake/${moon.sign}`} className="text-accent-text underline">Подробнее о Луне {inSignRu(moon.sign)}</Link>
             {" · "}
-            <Link href="/lunnyy-kalendar" className="text-accent underline">Лунный день и фаза</Link>
+            <Link href="/lunnyy-kalendar" className="text-accent-text underline">Лунный день и фаза</Link>
           </p>
-          <p className="mono-text mt-3 normal-case">Рассчитано на {formatDateRu(key)}, 12:00 МСК · <Link href="/astrologiya/kak-my-schitaem" className="text-accent underline">как мы считаем</Link></p>
+          <p className="mono-text mt-3 normal-case">Рассчитано на {formatDateRu(key)}, 12:00 МСК · <Link href="/astrologiya/kak-my-schitaem" className="text-accent-text underline">как мы считаем</Link></p>
         </div>
       </div>
 
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Переходы Луны по знакам на месяц</h2>
-        <div className="prose overflow-x-auto" style={{ maxWidth: "none" }}>
+        {/* Телефон: список вместо таблицы — четыре столбца в 358 px не помещаются. */}
+        <ul className="sm:hidden grid gap-2">
+          {list.map((e) => (
+            <li key={e.date} className="card p-3">
+              <p className="font-medium">
+                <span className="whitespace-nowrap">{mskDate(e.date)} · {mskTime(e.date)}</span> →{" "}
+                <Link href={`/astrologiya/luna-v-znake/${e.sign}`} className="text-accent-text underline">{intoSignRu(e.sign)}</Link>
+              </p>
+              <p className="text-sm text-muted mt-1">{data.signs[e.sign]?.moonText}</p>
+            </li>
+          ))}
+        </ul>
+        <div className="prose overflow-x-auto hidden sm:block" style={{ maxWidth: "none" }}>
           <table style={{ display: "table" }}>
             <thead><tr><th>Дата (МСК)</th><th>Время</th><th>Луна переходит</th><th>Фон</th></tr></thead>
             <tbody>

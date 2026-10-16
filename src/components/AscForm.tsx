@@ -16,6 +16,12 @@ function loadCities(): Promise<IndexedCity[]> {
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
+type ErrField = "date" | "time" | "city" | null;
+
+function FieldError({ msg }: { msg: string }) {
+  return <p id="asc-error" className="text-sm text-danger" role="alert">{msg}</p>;
+}
+
 export default function AscForm({ initial }: { initial?: { date?: string; time?: string; city?: string; citySlug?: string } }) {
   const router = useRouter();
   const [date, setDate] = useState(initial?.date ?? "");
@@ -25,10 +31,19 @@ export default function AscForm({ initial }: { initial?: { date?: string; time?:
   const [hints, setHints] = useState<IndexedCity[]>([]);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
+  const [errField, setErrField] = useState<ErrField>(null);
+
+  /** Ошибка у конкретного поля: текст под полем, aria-invalid, прокрутка к полю. */
+  function fail(field: Exclude<ErrField, null>, msg: string) {
+    setError(msg);
+    setErrField(field);
+    setTimeout(() => document.getElementById(`asc-${field}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 30);
+  }
 
   async function onCityInput(v: string) {
     setCityQuery(v);
     setCitySlug("");
+    if (errField === "city") { setError(""); setErrField(null); }
     const idx = await loadCities();
     const list = searchCities(idx, v, 8);
     setHints(list);
@@ -47,11 +62,11 @@ export default function AscForm({ initial }: { initial?: { date?: string; time?:
     const [y, m, d] = date.split("-").map(Number);
     const dt = new Date(Date.UTC(y, m - 1, d));
     if (!y || y < 1800 || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d || date > todayIso()) {
-      setError("Введите настоящую дату рождения.");
+      fail("date", "Введите настоящую дату рождения.");
       return;
     }
     if (!/^\d{1,2}:\d{2}$/.test(time)) {
-      setError("Введите время рождения: без него восходящий знак не определить.");
+      fail("time", "Введите время рождения: без него восходящий знак не определить.");
       return;
     }
     let slug = citySlug;
@@ -61,23 +76,30 @@ export default function AscForm({ initial }: { initial?: { date?: string; time?:
       if (found) { pickCity(found); slug = found.slug; }
     }
     if (!slug) {
-      setError("Выберите город из списка подсказок: начните вводить название.");
+      fail("city", "Выберите город из списка подсказок: начните вводить название.");
       return;
     }
     setError("");
+    setErrField(null);
     router.push(`${ASC_PATH}?${new URLSearchParams({ d: date, t: time, c: slug }).toString()}`);
   }
 
   return (
     <form method="get" action={ASC_PATH} onSubmit={onSubmit} className="card p-6 grid gap-4 sm:grid-cols-2" noValidate>
-      <label className="grid gap-1 text-sm">
-        Дата рождения
-        <input type="date" name="d" value={date} onChange={(e) => setDate(e.target.value)} required min="1800-01-01" max={todayIso()} className="border border-line rounded-lg px-3 py-2 bg-surface" />
-      </label>
-      <label className="grid gap-1 text-sm">
-        Время рождения
-        <input type="time" name="t" value={time} onChange={(e) => setTime(e.target.value)} required className="border border-line rounded-lg px-3 py-2 bg-surface" />
-      </label>
+      <div className="grid gap-1 text-sm content-start">
+        <label className="grid gap-1">
+          Дата рождения
+          <input id="asc-date" type="date" name="d" value={date} onChange={(e) => setDate(e.target.value)} required min="1800-01-01" max={todayIso()} aria-invalid={errField === "date" || undefined} aria-describedby={errField === "date" ? "asc-error" : undefined} className={`border rounded-lg px-3 py-2 bg-surface ${errField === "date" ? "border-danger" : "border-line"}`} />
+        </label>
+        {errField === "date" && <FieldError msg={error} />}
+      </div>
+      <div className="grid gap-1 text-sm content-start">
+        <label className="grid gap-1">
+          Время рождения
+          <input id="asc-time" type="time" name="t" value={time} onChange={(e) => setTime(e.target.value)} required aria-invalid={errField === "time" || undefined} aria-describedby={errField === "time" ? "asc-error" : undefined} className={`border rounded-lg px-3 py-2 bg-surface ${errField === "time" ? "border-danger" : "border-line"}`} />
+        </label>
+        {errField === "time" && <FieldError msg={error} />}
+      </div>
       <div className="relative grid gap-1 text-sm sm:col-span-2">
         <label htmlFor="asc-city">Город рождения</label>
         <input
@@ -95,7 +117,9 @@ export default function AscForm({ initial }: { initial?: { date?: string; time?:
           aria-controls="asc-city-list"
           aria-autocomplete="list"
           required
-          className="border border-line rounded-lg px-3 py-2 bg-surface"
+          aria-invalid={errField === "city" || undefined}
+          aria-describedby={errField === "city" ? "asc-error" : undefined}
+          className={`border rounded-lg px-3 py-2 bg-surface ${errField === "city" ? "border-danger" : "border-line"}`}
         />
         {open && (
           <ul id="asc-city-list" role="listbox" className="card absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-auto p-1 shadow-lg">
@@ -108,10 +132,10 @@ export default function AscForm({ initial }: { initial?: { date?: string; time?:
             ))}
           </ul>
         )}
+        {errField === "city" && <FieldError msg={error} />}
       </div>
-      <div className="sm:col-span-2 flex flex-wrap items-center gap-3">
+      <div className="sm:col-span-2">
         <button type="submit" className="btn">Узнать восходящий знак</button>
-        {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
       </div>
     </form>
   );
