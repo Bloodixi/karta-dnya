@@ -20,7 +20,7 @@ export const RAZBOR = {
  * Версия банка текстов. Записывается в заказ и ссылку: купленный разбор не меняется, когда банк переписан.
  * Перед правкой текстов, меняющей выдачу: скопировать текущие content/data/razbor/*.json в razbor/v<N>/ и увеличить номер.
  */
-export const RAZBOR_VERSION = 5;
+export const RAZBOR_VERSION = 6;
 
 /** Что лежит в заказе и в ссылке на разбор. yr — год расчёта личного года, mo — месяц, с которого идёт помесячный прогноз, v — версия текстов (в старых ссылках и платежах её нет — это 1). */
 export type RazborInput = { d: number; m: number; y: number; name?: string; yr: number; mo: number; v?: number };
