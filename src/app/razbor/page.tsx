@@ -6,7 +6,7 @@ import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import { DateField, FormError, TextField } from "@/components/NumerologyFields";
 import RazborView from "@/components/RazborView";
-import { RazborCheckoutForm, RazborGoal } from "@/components/RazborClient";
+import { RazborCheckoutForm, RazborGoal, RazborStickyCta } from "@/components/RazborClient";
 import { cleanName, parseDate } from "@/lib/numerology";
 import { buildTeaser, nowMsk, RAZBOR, RAZBOR_TOC } from "@/lib/razbor";
 import { pageTitle, SELLER, SITE } from "@/lib/site";
@@ -46,6 +46,81 @@ function LockIcon() {
   );
 }
 
+/** «1 месяц», «3 месяца», «9 месяцев». */
+function months(n: number): string {
+  const a = n % 10;
+  const b = n % 100;
+  if (a === 1 && b !== 11) return `${n} месяц`;
+  if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return `${n} месяца`;
+  return `${n} месяцев`;
+}
+
+/** Сколько месяцев прогноза закрыто: новое поле тизера `months_hidden`; пока его нет — 9 (бесплатно видно 3 из 12). */
+function hiddenMonths(teaser: object): number {
+  const v = "months_hidden" in teaser ? teaser.months_hidden : undefined;
+  return typeof v === "number" && v >= 0 ? v : 9;
+}
+
+/** Размытые строки прогноза вместо закрытых месяцев: видно, что текст есть, но прочитать нельзя. */
+const BLUR_ROWS = [
+  { n: 4, t: "Месяц для порядка и долгих дел: проще закончить начатое, чем браться за новое, и это хорошее время для планов." },
+  { n: 7, t: "Тише и глубже обычного: больше пользы от чтения, отдыха и разговоров с собой, чем от громких решений." },
+  { n: 2, t: "Тон договорённостей и мягких шагов: помогают терпение, внимание к близким и готовность подождать ответа." },
+];
+
+function HiddenMonths({ count }: { count: number }) {
+  return (
+    <div className="relative mt-2 max-w-3xl overflow-hidden">
+      <ol aria-hidden="true" className="select-none pointer-events-none blur-[5px] border-t border-line">
+        {BLUR_ROWS.map((r) => (
+          <li key={r.n} className="grid grid-cols-[3rem_1fr] gap-x-4 py-4 border-b border-line">
+            <span className="display text-3xl text-accent leading-none pt-1">{r.n}</span>
+            <div>
+              <p className="mono">Следующий месяц</p>
+              <p className="mt-1">{r.t}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <div className="absolute inset-0 grid place-items-center p-4">
+        <p className="card px-5 py-3 text-center">
+          <span className="display text-xl">Ещё {months(count)} прогноза</span>
+          <span className="block text-sm text-muted mt-1">открываются в полном разборе</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/** Объём, гарантия и пример — сразу под ценой. */
+function TrustList() {
+  return (
+    <ul className="mt-4 grid gap-1.5 text-sm">
+      <li>{RAZBOR_TOC.length} разделов · около 30 тысяч знаков · прогноз на 12 месяцев</li>
+      <li>
+        Не открылся разбор — вернём деньги.{" "}
+        <Link href="/vozvrat" className="text-accent underline">Условия возврата</Link>
+      </li>
+      <li>
+        <Link href={`${PATH}/primer`} className="text-accent underline">Посмотреть пример полного разбора</Link>
+      </li>
+    </ul>
+  );
+}
+
+/** Кто составлял: отдельного автора-нумеролога в authors.json нет, поэтому — редакция и ссылки на калькуляторы с той же методикой. */
+function WhoWrote() {
+  return (
+    <div className="mt-6 border-t border-line pt-4 text-sm text-muted">
+      <p className="mono !text-ink">Кто составлял</p>
+      <p className="mt-1">
+        Тексты разбора написала редакция «{SITE.name}» по классической пифагорейской нумерологии. Числа считаются по тем же правилам, что в калькуляторах{" "}
+        <Link href="/chislo-sudby" className="underline">числа судьбы</Link> и <Link href="/kvadrat-pifagora" className="underline">квадрата Пифагора</Link>, а расчёт каждого числа показан в самом разборе.
+      </p>
+    </div>
+  );
+}
+
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 export default async function RazborPage({ searchParams }: PageProps<"/razbor">) {
@@ -77,14 +152,19 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
       </div>
 
       {teaser && date && (
-        <section id="razbor-teaser" className="mt-10 scroll-mt-24">
+        <section id="razbor-teaser" className="mt-10 scroll-mt-24 max-md:pb-16">
           <RazborGoal counter={counter} goal="razbor_teaser" />
           <div className="ornament mb-2">
             <h2 className="text-2xl">
               Бесплатная часть{teaser.who ? ` · ${teaser.who}` : ""} · {teaser.date}
             </h2>
           </div>
+          <p className="max-w-3xl text-sm text-muted mb-4">
+            Ниже — бесплатная часть. Полный разбор из {RAZBOR_TOC.length} разделов стоит {RAZBOR.price} ₽:{" "}
+            <a href="#oplata" className="text-accent underline">перейти к оплате</a>
+          </p>
           <RazborView sections={teaser.sections} toc={false} />
+          {hiddenMonths(teaser) > 0 && <HiddenMonths count={hiddenMonths(teaser)} />}
 
           <div className="card p-5 mt-8 max-w-3xl razbor-locked">
             <p className="mono mb-3">Ещё {teaser.locked.length} разделов в полном разборе</p>
@@ -96,6 +176,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
               ))}
             </ul>
           </div>
+          <RazborStickyCta price={RAZBOR.price} />
         </section>
       )}
 
@@ -104,6 +185,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           <p className="mono">Полный разбор</p>
           <p className="display text-4xl mt-2">{RAZBOR.price} ₽</p>
           <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF.</p>
+          <TrustList />
 
           {err === "email" && (
             <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">Укажи e-mail — на него придут ссылка на разбор и чек об оплате.</p>
@@ -148,6 +230,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
               <a href="#forma" className="btn">Ввести дату рождения</a>
             </p>
           )}
+          <WhoWrote />
         </div>
       </section>
 
@@ -159,6 +242,9 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
               <li key={t.id}>{t.title}</li>
             ))}
           </ol>
+          <p className="mt-4">
+            <Link href={`${PATH}/primer`} className="text-accent underline">Посмотреть пример полного разбора</Link>
+          </p>
         </div>
         <div className="grid gap-8 content-start">
           <div>
