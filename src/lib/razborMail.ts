@@ -7,6 +7,7 @@ import { PRODUCTS, productOf } from "./razborProducts";
 import { getOrder, patchGift, patchOrder, type Order } from "./razborStore";
 import { readToken } from "./razborToken";
 import { bookletStyle } from "./razborBookletData";
+import { genitive } from "./razborBooklet";
 import { fetchBookletPdf, pdfFileName } from "./razborPdf";
 import { qrPng, receiptView } from "./receiptView";
 import { SELLER, SITE } from "./site";
@@ -107,19 +108,21 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   const links = extraLinks(order);
   // в подарке имя — получателя, в детском разборе — ребёнка, в совместимости — одного из пары: обращаемся без имени
   const hello = name && !gift && !(pm && order.product !== "pack") ? `${name}, здравствуй!` : "Здравствуй!";
+  // имя получателя в родительном («для Ольги»); не уверены в склонении — фраза без имени
+  const gen = name ? genitive(name) : null;
+  const forName = gen ? ` для ${gen}` : "";
   const subject = (order.test ? "[ТЕСТ] " : "") + (pm?.subject ?? (gift
-    ? `Подарочный разбор${name ? ` для ${name}` : ""} готов`
+    ? (gen ? `Подарочный разбор для ${gen} готов` : name ? `Подарочный разбор готов: ${name}` : "Подарочный разбор готов")
     : name ? `${name}, твой разбор по дате рождения готов` : "Твой разбор по дате рождения готов"));
-  const who = name || "получателя";
-  const intro = pm?.intro ?? (gift ? `Спасибо за заказ. Это подарок для ${who}: разбор по дате рождения готов и открывается по ссылке` : "Спасибо за заказ. Твой разбор по дате рождения готов и открывается по ссылке");
+  const intro = pm?.intro ?? (gift ? `Спасибо за заказ. Это подарок${gen ? ` для ${gen}` : ""}: разбор по дате рождения готов и открывается по ссылке` : "Спасибо за заказ. Твой разбор по дате рождения готов и открывается по ссылке");
   const keep = gift ? "Ссылка бессрочная — сохрани письмо." : "Ссылка твоя навсегда — сохрани письмо.";
   const delivery = !gift
     ? ""
     : gift.to_email
       ? gift.send_at
-        ? `${ru(gift.send_at)} письмо с подарком уйдёт ${name || "получателю"} на ${gift.to_email}. До этого дня ссылку видишь только ты.`
-        : `Письмо с подарком мы отправляем ${name || "получателю"} на ${gift.to_email} вместе с этим письмом.`
-      : `Письмо получателю мы не отправляем: передай ссылку ${name ? `${name} ` : ""}сам(а) — так, как тебе удобно.`;
+        ? `${ru(gift.send_at)} письмо с подарком${forName} уйдёт на ${gift.to_email}. До этого дня ссылку видишь только ты.`
+        : `Письмо с подарком${forName} мы отправляем на ${gift.to_email} вместе с этим письмом.`
+      : "Письмо получателю мы не отправляем: передай ссылку сам(а) — так, как тебе удобно.";
   const mainTitle = pm?.mainTitle ?? (gift ? "Главное из разбора" : "Главное о тебе");
   const main = pm && order.product !== "pack" ? pm.main : razborHighlights(order.token);
   // PDF-буклет есть только у разбора (и пакета, где первый документ — разбор); совместимость и детский — без вложения
@@ -280,6 +283,9 @@ async function doMailGift(id: string): Promise<{ sent?: boolean; error?: string 
   const name = cleanName(order.name || "");
   const from = cleanName(gift.from);
   const wish = gift.wish?.trim() ?? "";
+  // «от Вити», «по просьбе Вити»; несколько слов или незнакомое имя — без родительного
+  const fromGen = genitive(from);
+  const wishTitle = fromGen ? `Пожелание от ${fromGen}` : `Пожелание — ${from}`;
   const hello = name ? `${name}, привет!` : "Привет!";
   // тестовый магазин: письмо уходит, чтобы путь можно было прогнать, но с пометкой в теме
   const subject = `${order.test ? "[ТЕСТ] " : ""}${name ? `${name}, ` : ""}${from} дарит тебе нумерологический разбор`;
@@ -291,7 +297,7 @@ async function doMailGift(id: string): Promise<{ sent?: boolean; error?: string 
     "",
     lead,
     "",
-    ...(wish ? [`Пожелание от ${from}:`, wish, ""] : []),
+    ...(wish ? [`${wishTitle}:`, wish, ""] : []),
     "Разбор открывается по ссылке:",
     url,
     "",
@@ -300,7 +306,7 @@ async function doMailGift(id: string): Promise<{ sent?: boolean; error?: string 
     pdfText(booklet),
     "",
     ...(main.length ? ["Главное о тебе:", ...main.map((m) => `— ${m}`), "", "Остальное — в разборе по ссылке выше.", ""] : []),
-    `Письмо отправлено по просьбе ${from}: подарок оформлен на сайте «${SITE.name}». Если оно пришло по ошибке — просто не обращай на него внимания.`,
+    `Письмо отправлено по просьбе ${fromGen ?? `дарителя (${from})`}: подарок оформлен на сайте «${SITE.name}». Если оно пришло по ошибке — просто не обращай на него внимания.`,
     "",
     `${SITE.name} · ${SITE.url}`,
   ].join("\n");
@@ -310,7 +316,7 @@ async function doMailGift(id: string): Promise<{ sent?: boolean; error?: string 
 <tr><td style="padding:0 0 12px"><p style="margin:0">${h(lead)}</p></td></tr>
 ${wish ? `<tr><td style="padding:4px 0 14px">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fffdf8;border:1px solid #e5e1d8;border-radius:12px"><tr><td style="padding:16px 20px;font-family:Arial,sans-serif;font-size:15px;line-height:1.55;color:#222">
-<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5b3fa8;font-weight:bold">Пожелание от ${h(from)}</div>
+<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5b3fa8;font-weight:bold">${h(wishTitle)}</div>
 <p style="margin:8px 0 0;font-style:italic">${wishHtml(wish)}</p>
 </td></tr></table>
 </td></tr>` : ""}
@@ -319,7 +325,7 @@ ${wish ? `<tr><td style="padding:4px 0 14px">
 <tr><td style="padding:0 0 12px;font-size:14px;font-weight:bold">Ссылка твоя навсегда — сохрани письмо.</td></tr>
 ${pdfHtml(booklet)}
 ${highlightsHtml("Главное о тебе", main)}
-<tr><td style="padding:12px 0 8px;font-size:13px;color:#666">Письмо отправлено по просьбе ${h(from)}: подарок оформлен на сайте «${h(SITE.name)}». Если оно пришло по ошибке — просто не обращай на него внимания.</td></tr>
+<tr><td style="padding:12px 0 8px;font-size:13px;color:#666">Письмо отправлено по просьбе ${h(fromGen ?? `дарителя (${from})`)}: подарок оформлен на сайте «${h(SITE.name)}». Если оно пришло по ошибке — просто не обращай на него внимания.</td></tr>
 <tr><td style="padding:8px 0;font-size:12px;color:#888">${h(SITE.name)} · <a href="${h(SITE.url)}" style="color:#888">${h(SITE.url.replace(/^https?:\/\//, ""))}</a></td></tr>
 </table>
 </td></tr></table>`;
@@ -340,7 +346,7 @@ export async function mailAccess(email: string, orders: Order[], gifts: Order[] 
     ...orders.flatMap((o) => {
       const chek = o.receipt_uuid ? `${SITE.url}/razbor/chek/${o.id}` : "";
       const product = productOf(o.product);
-      if (product === "razbor") return [{ url: `${SITE.url}/r/${o.id}`, chek, title: `Разбор${o.name ? ` для ${cleanName(o.name)}` : ""}, дата рождения ${ru(o.date)}` }];
+      if (product === "razbor") return [{ url: `${SITE.url}/r/${o.id}`, chek, title: `Разбор${o.name ? (genitive(cleanName(o.name)) ? ` для ${genitive(cleanName(o.name))}` : `: ${cleanName(o.name)}`) : ""}, дата рождения ${ru(o.date)}` }];
       const dates = o.date2 ? `${ru(o.date)} и ${ru(o.date2)}` : ru(o.date);
       if (product === "pack")
         return [
