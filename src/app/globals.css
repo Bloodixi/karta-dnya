@@ -19,6 +19,13 @@
   --night-ink: #ece9f1;
   --night-muted: #a5a3ad;
   --night-line: #333338;
+  /* Текстовые и смысловые цвета: ≥4.5:1 на bg и surface (расчёт — в коммите пакета A). */
+  --accent-text: #6a5889;
+  --danger: #b42318;
+  --yes: #2e6b3f;
+  --no: #a3322a;
+  --maybe: #7a5a1e;
+  --moon-shadow: #cfcbd6;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -34,6 +41,12 @@
     --accent-ink: #1b1b1f;
     --gold: #b5ab97;
     --gold-soft: #2c2a2e;
+    --accent-text: #b3a2cc;
+    --danger: #f19a8f;
+    --yes: #8fcf9c;
+    --no: #f19a8f;
+    --maybe: #d9c49a;
+    --moon-shadow: #3a3840;
     }
 }
 :root[data-theme="dark"] {
@@ -49,6 +62,12 @@
     --accent-ink: #1b1b1f;
     --gold: #b5ab97;
     --gold-soft: #2c2a2e;
+    --accent-text: #b3a2cc;
+    --danger: #f19a8f;
+    --yes: #8fcf9c;
+    --no: #f19a8f;
+    --maybe: #d9c49a;
+    --moon-shadow: #3a3840;
   }
 
 @theme inline {
@@ -61,6 +80,12 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-accent-ink: var(--accent-ink);
+  --color-accent-text: var(--accent-text);
+  --color-danger: var(--danger);
+  --color-yes: var(--yes);
+  --color-no: var(--no);
+  --color-maybe: var(--maybe);
+  --color-moon-shadow: var(--moon-shadow);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
   --color-night: var(--night);
@@ -70,6 +95,17 @@
 }
 
 html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Общий фокус с клавиатуры. В слое base, чтобы утилиты (focus:outline-none и т. п.) могли его переопределить. */
+@layer base {
+  :where(a, button, summary, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .night :where(a, button, summary, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible { outline-color: var(--accent-soft); }
+}
+main:focus { outline: none; }
+/* Ссылка «Перейти к содержимому»: видна только при фокусе с клавиатуры. */
+.skip-link { position: absolute; left: 0.75rem; top: 0.75rem; z-index: 100; padding: 0.6rem 1rem; background: var(--ink); color: var(--bg); font-size: 0.9rem; border-radius: 2px; transform: translateY(-200%); }
+.skip-link:focus { transform: none; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-sans), system-ui, sans-serif; line-height: 1.6; }
 h1, h2, h3, .display { font-family: var(--font-digits), var(--font-prata), Georgia, serif; font-weight: 400 !important; letter-spacing: -0.01em; line-height: 1.12; text-rendering: geometricPrecision; font-synthesis: none; }
 /* У Prata очень тонкие соединительные штрихи: на светлом фоне в Windows они «рвутся». Тёмный текст чуть утолщаем обводкой. */
@@ -79,17 +115,20 @@ h1, h2, h3, .display { font-family: var(--font-digits), var(--font-prata), Georg
 h3, .display.text-xl, .display.text-lg { -webkit-text-stroke: 0.25px currentColor; }
 .mono { font-family: var(--font-mono), ui-monospace, monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .mono-text { font-family: var(--font-mono), ui-monospace, monospace; font-size: 0.8rem; color: var(--muted); }
+.night .mono, .night .mono-text { color: var(--night-muted); }
 
 /* ---------- текст статей ---------- */
-.prose { max-width: 72ch; font-size: 1.06rem; }
+.prose { font-size: 1.06rem; }
+/* Ширина строки ~70 знаков кириллицы. В слое components: max-w-* и style={{maxWidth}} на месте вызова её перекрывают. */
+@layer components { .prose { max-width: 40rem; } }
 .prose h2 { font-size: 1.6rem; margin: 2rem 0 0.75rem; line-height: 1.25; }
 .prose h3 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }
 .prose p { margin: 0.8rem 0; }
 .prose ul, .prose ol { margin: 0.8rem 0 0.8rem 1.4rem; }
 .prose ul { list-style: disc; } .prose ol { list-style: decimal; }
 .prose li { margin: 0.3rem 0; }
-.prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in oklab, var(--accent) 40%, transparent); }
-.prose a:hover { text-decoration-color: var(--accent); }
+.prose a { color: var(--accent-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in oklab, var(--accent-text) 40%, transparent); }
+.prose a:hover { text-decoration-color: var(--accent-text); }
 .prose blockquote { border-left: 2px solid var(--gold); padding-left: 1rem; color: var(--muted); margin: 1rem 0; font-style: italic; }
 .prose table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--line); padding: 0.45rem 0.7rem; text-align: left; vertical-align: top; }
@@ -117,10 +156,15 @@ h3, .display.text-xl, .display.text-lg { -webkit-text-stroke: 0.25px currentColo
 .card-hover { transition: transform 0.2s ease, border-color 0.2s ease; }
 .card-hover:hover { transform: translateY(-3px); border-color: var(--gold); }
 .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.1rem; border-radius: 2px; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); font-family: var(--font-mono), monospace; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
-.btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn-ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
-.btn-ghost:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+/* Наведение только там, где оно есть: на телефоне :hover залипает после касания. */
+@media (hover: hover) {
+  .btn:hover, .btn-ghost:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+}
+/* Крупная основная кнопка (оплата, главный призыв). */
+.btn-lg { font-size: 0.875rem; letter-spacing: 0.04em; padding: 0.95rem 1.5rem; min-height: 3rem; justify-content: center; }
 .chip { display: inline-flex; align-items: center; gap: 0.35rem; font-family: var(--font-mono), monospace; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.6rem; border-radius: 2px; border: 1px solid var(--line); color: var(--muted); background: transparent; }
+a.chip { min-height: 2.5rem; }
 .stars { color: var(--gold); letter-spacing: 0.08em; }
 .hero-glow { background: transparent; }
 .rule { height: 1px; background: var(--line); }
@@ -130,6 +174,8 @@ h3, .display.text-xl, .display.text-lg { -webkit-text-stroke: 0.25px currentColo
 .tcard-inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
 .tcard.is-down .tcard-inner { transform: rotateY(180deg); }
 .tcard-face, .tcard-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 10px; overflow: hidden; border: 1px solid var(--gold); background: var(--night); box-shadow: 0 30px 50px -30px rgba(10, 10, 20, 0.7); }
+/* Пока картинка грузится, лицо карты — светлая подложка (в тёмной теме gold-soft и так тёмный), а не чёрная плашка. */
+.tcard-face { background: var(--gold-soft); }
 .tcard-back { transform: rotateY(180deg); }
 .tcard-face img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .tcard.flip-in .tcard-inner { animation: tcard-flip 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) var(--flip-delay, 0.1s) both; }
@@ -145,9 +191,9 @@ a:hover .tcard-thumb, a:focus-visible .tcard-thumb, button:hover .tcard-thumb { 
 .night .text-muted { color: var(--night-muted); }
 .night .chip { border-color: var(--night-line); color: var(--night-muted); }
 .night .btn { background: var(--night-ink); border-color: var(--night-ink); color: var(--night); }
-.night .btn:hover { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--night); }
+@media (hover: hover) { .night .btn:hover { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--night); } }
 .night .btn-ghost { background: transparent; color: var(--night-ink); border-color: rgba(236, 233, 241, 0.5); }
-.night .btn-ghost:hover { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--night); }
+@media (hover: hover) { .night .btn-ghost:hover { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--night); } }
 .night-edge { height: 10px; background: var(--bg); margin-top: -10px; position: relative; z-index: 1; -webkit-mask: radial-gradient(5px at 50% 0, transparent 96%, #000) 50% / 12px 100% repeat-x; mask: radial-gradient(5px at 50% 0, transparent 96%, #000) 50% / 12px 100% repeat-x; }
 .starfield { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.6; }
 .twinkle { animation: twinkle 4.5s ease-in-out infinite; }
@@ -162,11 +208,24 @@ a:hover .tcard-thumb, a:focus-visible .tcard-thumb, button:hover .tcard-thumb { 
 .icon-badge { display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 2px; color: var(--accent); background: transparent; border: 1px solid var(--line); }
 .card-hover:hover .icon-badge { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
 .frame-gold { border: 1px solid var(--line); box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px color-mix(in oklab, var(--gold) 45%, transparent); }
-.ornament { display: flex; align-items: baseline; gap: 1rem; }
+.ornament { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 1rem; row-gap: 0.25rem; }
+.ornament .mono { white-space: nowrap; }
 .ornament::before, .ornament::after { content: none; }
 .grid-lines { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
-.grid-lines > * { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.grid-lines > * { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 0 -1px -1px 0; } /* крайние линии уходят под рамку — без двойной линии справа и снизу */
 .zglyph { font-family: "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols", serif; color: var(--accent); font-size: 1.9rem; line-height: 1; }
+
+/* Тёмная тема: золотая рамка заметнее, светлые фото не слепят. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .frame-gold { box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px color-mix(in oklab, var(--gold) 80%, transparent); }
+  :root:not([data-theme="light"]) .stone-img { filter: brightness(0.82) contrast(1.05); background: var(--night); }
+  :root:not([data-theme="light"]) .article-cover { filter: brightness(0.8) saturate(0.9); transition: filter 0.2s ease; }
+  :root:not([data-theme="light"]) a:hover .article-cover { filter: none; }
+}
+:root[data-theme="dark"] .frame-gold { box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px color-mix(in oklab, var(--gold) 80%, transparent); }
+:root[data-theme="dark"] .stone-img { filter: brightness(0.82) contrast(1.05); background: var(--night); }
+:root[data-theme="dark"] .article-cover { filter: brightness(0.8) saturate(0.9); transition: filter 0.2s ease; }
+:root[data-theme="dark"] a:hover .article-cover { filter: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .tcard-inner { transition: none; }
@@ -204,7 +263,7 @@ a:hover .tcard-thumb, a:focus-visible .tcard-thumb, button:hover .tcard-thumb { 
 
 @media print {
   @page { margin: 16mm 14mm; }
-  html:root:not([data-print]) { color-scheme: light; --bg: #fff; --surface: #fff; --sunk: #f4f4f4; --ink: #111; --muted: #444; --line: #ccc; --accent: #4f3f70; }
+  html:root:not([data-print]) { color-scheme: light; --bg: #fff; --surface: #fff; --sunk: #f4f4f4; --ink: #111; --muted: #444; --line: #ccc; --accent: #4f3f70; --accent-text: #4f3f70; }
   html, body { background: #fff !important; color: #111 !important; }
   body { padding-bottom: 0 !important; }
   body > header, body > footer, body > nav, .no-print, .razbor-toc { display: none !important; }
