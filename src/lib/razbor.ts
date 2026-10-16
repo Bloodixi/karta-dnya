@@ -1,7 +1,7 @@
 /** Платный «Нумерологический разбор по дате рождения»: сборка документа из банка текстов content/data/razbor/*.json.
  *  Детерминированно: одна и та же дата и год расчёта дают один и тот же текст. */
 import { readJsonData } from "./content";
-import { birthdayNumber, destinyNumber, digitsSum, personalMonth, personalYear, toCore } from "./numerology";
+import { birthdayNumber, destinyNumber, digitsSum, personalMonth, personalYear, reduceNumber, reduceSimple, toCore } from "./numerology";
 import { pythagoras } from "./pythagoras";
 
 export const RAZBOR = {
@@ -14,7 +14,7 @@ export const RAZBOR = {
  * Версия банка текстов. Записывается в заказ и ссылку: купленный разбор не меняется, когда банк переписан.
  * Перед правкой текстов, меняющей выдачу: скопировать текущие content/data/razbor/*.json в razbor/v<N>/ и увеличить номер.
  */
-export const RAZBOR_VERSION = 2;
+export const RAZBOR_VERSION = 3;
 
 /** Что лежит в заказе и в ссылке на разбор. yr — год расчёта личного года, mo — месяц, с которого идёт помесячный прогноз, v — версия текстов (в старых ссылках и платежах её нет — это 1). */
 export type RazborInput = { d: number; m: number; y: number; name?: string; yr: number; mo: number; v?: number };
@@ -24,6 +24,8 @@ type DestinyLife = { love: string; work: string; advice: string[]; easy: number[
 type PyCell = { title: string; intro: string; levels: string[] };
 type Year = { title: string; theme: string; first: string; second: string; advice: string };
 /** Фразы «Сведения» (с версии 2): по числу судьбы, дню рождения, самой сильной и пустой ячейке квадрата. */
+/** Пики жизни (с версии 3): число периода и смысл позиции периода. */
+type Pinnacles = { pinnacle: Record<string, { title: string; text: string; short: string }>; stage: Record<string, string> };
 type Svod = { destiny: Record<string, string>; birthday: Record<string, string>; strong: Record<string, string>; weak: Record<string, string>; noweak: string };
 
 export type Block =
@@ -60,6 +62,11 @@ function bank(v = RAZBOR_VERSION) {
     monthYear: readJsonData<Record<string, string>>(`${dir}/month-year.json`, {}),
     svodYear: readJsonData<Record<string, string>>(`${dir}/svod-year.json`, {}),
     svod: readJsonData<Svod | null>(`${dir}/svod.json`, null),
+    /** С версии 3: пики жизни и возрастные абзацы («год.группа», «судьба.группа»). */
+    pinnacles: readJsonData<Pinnacles | null>(`${dir}/pinnacle.json`, null),
+    yearAge: readJsonData<Record<string, string>>(`${dir}/year-age.json`, {}),
+    loveAge: readJsonData<Record<string, string>>(`${dir}/love-age.json`, {}),
+    workAge: readJsonData<Record<string, string>>(`${dir}/work-age.json`, {}),
   };
 }
 
@@ -73,13 +80,40 @@ function numbers(i: RazborInput) {
   const birthday = birthdayNumber(i.d);
   const py = personalYear(i.d, i.m, i.yr);
   const pyNext = personalYear(i.d, i.m, i.yr + 1);
-  return { destiny, birthday, py, pyNext, square: pythagoras(i.d, i.m, i.y) };
+  return { destiny, birthday, py, pyNext, square: pythagoras(i.d, i.m, i.y), age: ageAt(i), pinnacles: pinnacles(i.d, i.m, i.y, destiny.number) };
+}
+
+/** Полных лет на месяц расчёта (день рождения внутри месяца считаем прошедшим). */
+export function ageAt(i: RazborInput): number {
+  return i.yr - i.y - (i.m > i.mo ? 1 : 0);
+}
+
+/** Возрастная группа для возрастных абзацев. */
+export type AgeBand = "young" | "build" | "mature" | "senior";
+export const ageBand = (age: number): AgeBand => (age < 25 ? "young" : age < 40 ? "build" : age < 60 ? "mature" : "senior");
+const years = (n: number) => `${n} ${plural(n, "год", "года", "лет")}`;
+
+/** Четыре пика жизни: первый до (36 − число судьбы) лет, второй и третий по 9 лет, четвёртый — дальше. 11 сохраняется. */
+export function pinnacles(d: number, m: number, y: number, destiny: number) {
+  const M = reduceSimple(m), D = reduceSimple(d), Y = reduceSimple(digitsSum(y));
+  const p1 = reduceNumber(M + D), p2 = reduceNumber(D + Y), p3 = reduceNumber(reduceSimple(p1) + reduceSimple(p2)), p4 = reduceNumber(M + Y);
+  const e1 = 36 - toCore(destiny);
+  return {
+    parts: { M, D, Y },
+    list: [
+      { n: 1, number: p1, from: 0, to: e1, calc: `месяц ${M} + день ${D}` },
+      { n: 2, number: p2, from: e1, to: e1 + 9, calc: `день ${D} + год ${Y}` },
+      { n: 3, number: p3, from: e1 + 9, to: e1 + 18, calc: `первый ${p1} + второй ${p2}` },
+      { n: 4, number: p4, from: e1 + 18, to: null as number | null, calc: `месяц ${M} + год ${Y}` },
+    ],
+  };
 }
 
 /** Порядок и названия разделов полного разбора — для оглавления в тизере и на лендинге. */
 export const RAZBOR_TOC: { id: string; title: string }[] = [
   { id: "chisla", title: "Твои числа" },
   { id: "svod", title: "Сведение: как числа работают вместе" },
+  { id: "period", title: "Твой период жизни" },
   { id: "sut", title: "Число судьбы: суть" },
   { id: "sily", title: "Сильные стороны" },
   { id: "teni", title: "Тени и ловушки" },
@@ -123,6 +157,8 @@ function squareFocus(counts: Record<number, number>) {
   return { strong: DIGITS.find((d) => counts[d] === max)!, weak: DIGITS.filter((d) => !counts[d]).slice(0, 2) };
 }
 
+const v3 = (i: RazborInput) => (i.v ?? RAZBOR_VERSION) >= 3;
+
 /** «Как посчитано»: все числа разбора с расчётом. */
 function calcBlocks(i: RazborInput, n: Nums): Block[] {
   const bd = digitsSum(i.d);
@@ -140,10 +176,35 @@ function calcBlocks(i: RazborInput, n: Nums): Block[] {
         `**Число дня рождения** — день месяца: ${birthday}.`,
         `**Личный год ${i.yr}** — день и месяц рождения плюс год расчёта, каждое свёрнуто до одной цифры: ${n.py.steps.join(" → ")}. Следующий, ${i.yr + 1}, — ${n.pyNext.steps.join(" → ")}.`,
         `**Личный месяц** — личный год плюс номер календарного месяца: например, ${MONTHS[i.mo - 1]} ${i.yr} — ${n.py.number} + ${i.mo} = ${raw}${raw > 9 ? ` → ${pm}` : ""}.`,
+        ...(n.age >= 0 && v3(i) ? [`**Период жизни** — четыре «пика» по дате рождения: первый длится до ${36 - toCore(n.destiny.number)} ${(36 - toCore(n.destiny.number)) % 10 === 1 ? "года" : "лет"} (36 минус число судьбы), второй и третий — по 9 лет, четвёртый — дальше. Числа: ${n.pinnacles.list.map((p) => `${p.calc} → ${p.number}`).join("; ")}.`] : []),
         `**Квадрат Пифагора** — цифры даты ${n.square.digits.join(" ")}. Первое рабочее число — их сумма, ${w1}; второе — сумма его цифр, ${w2}; третье — первое минус удвоенная первая цифра даты: ${w1} − ${2 * f} = ${w3}; четвёртое — сумма цифр третьего, ${w4}. В квадрат раскладываются все цифры даты и рабочих чисел.`,
       ],
     },
   ];
+}
+
+/** «Твой период жизни»: в каком из четырёх пиков человек сейчас и что дальше. */
+function periodSection(i: RazborInput, n: Nums, P: Pinnacles): Section {
+  const list = n.pinnacles.list, curIdx = list.findIndex((p) => p.to === null || n.age < p.to), cur = list[curIdx], next = list[curIdx + 1];
+  const t = P.pinnacle[String(cur.number)], nt = next ? P.pinnacle[String(next.number)] : null;
+  /** «с 31 года», «до 44 лет»: родительный падеж после «с/до». */
+  const gen = (x: number) => `${x} ${x % 10 === 1 && x % 100 !== 11 ? "года" : "лет"}`;
+  const span = (p: (typeof list)[number]) => (p.to === null ? `с ${gen(p.from)}` : p.from === 0 ? `до ${gen(p.to)}` : `с ${p.from} до ${gen(p.to)}`);
+  const who = i.name ? `${i.name}, тебе` : "Тебе";
+  return {
+    id: "period",
+    title: `Твой период жизни: ${cur.number} — ${t?.title ?? ""}`,
+    subtitle: `${cur.n}-й из четырёх периодов, ${span(cur)}`,
+    blocks: [
+      {
+        kind: "facts",
+        items: list.map((p) => ({ label: `${p.n}-й период`, value: String(p.number), hint: `${span(p)}${p === cur ? " · сейчас" : ""}` })),
+      },
+      { kind: "p", text: `**${who} ${years(n.age)}.** ${P.stage[String(cur.n)] ?? ""}` },
+      ...paras(t?.text),
+      ...(next && nt ? [{ kind: "p" as const, text: `**Дальше: ${span(next)} — период числа ${next.number}, «${nt.title}».** ${nt.short}` }] : []),
+    ],
+  };
 }
 
 /** «Сведение»: характер по числу судьбы и дню рождения, опора и пробел квадрата, число судьбы в текущем личном году. */
@@ -169,6 +230,7 @@ export function buildRazbor(i: RazborInput): RazborDoc {
   /** Сведение, расчёты, памятка и 81 текст месяцев — с версии 2; старые заказы собираются как раньше. */
   const v2 = v >= 2;
   const n = numbers(i);
+  const band = ageBand(n.age);
   const key = String(n.destiny.number);
   const dz = b.destiny[key];
   const life = b.life[key];
@@ -207,6 +269,7 @@ export function buildRazbor(i: RazborInput): RazborDoc {
       ],
     },
     ...(v2 && b.svod ? [svodSection(i, n, b.svod, b.svodYear[`${key}.${n.py.number}`])] : []),
+    ...(v >= 3 && b.pinnacles && n.age >= 0 ? [periodSection(i, n, b.pinnacles)] : []),
     { id: "sut", title: `Число судьбы ${n.destiny.number}: ${dz?.title ?? ""}`, blocks: paras(dz?.essence) },
     { id: "sily", title: "Сильные стороны", blocks: paras(dz?.strengths) },
     { id: "teni", title: "Тени и ловушки", subtitle: "Что мешает, когда сил мало", blocks: paras(dz?.shadows) },
@@ -236,6 +299,7 @@ export function buildRazbor(i: RazborInput): RazborDoc {
       title: "Любовь и отношения",
       blocks: [
         ...paras(life?.love),
+        ...(v >= 3 ? lead(`Сейчас, в ${years(n.age)}.`, b.loveAge[`${key}.${band}`]) : []),
         ...paras(life?.pairNote),
         {
           kind: "facts",
@@ -246,16 +310,17 @@ export function buildRazbor(i: RazborInput): RazborDoc {
         },
       ],
     },
-    { id: "rabota", title: "Работа и дело", blocks: paras(life?.work) },
+    { id: "rabota", title: "Работа и дело", blocks: [...paras(life?.work), ...(v >= 3 ? lead(`Сейчас, в ${years(n.age)}.`, b.workAge[`${key}.${band}`]) : [])] },
     {
       id: "god",
       title: `Личный год ${i.yr}: ${n.py.number} — ${yr?.title ?? ""}`,
-      blocks: [...paras(yr?.theme), { kind: "p", text: `**Первое полугодие.** ${yr?.first ?? ""}` }, { kind: "p", text: `**Второе полугодие.** ${yr?.second ?? ""}` }, { kind: "p", text: `**Совет года.** ${yr?.advice ?? ""}` }],
+      blocks: [...paras(yr?.theme), ...(v >= 3 ? lead("В твоём возрасте.", b.yearAge[`${n.py.number}.${band}`]) : []), { kind: "p", text: `**Первое полугодие.** ${yr?.first ?? ""}` }, { kind: "p", text: `**Второе полугодие.** ${yr?.second ?? ""}` }, { kind: "p", text: `**Совет года.** ${yr?.advice ?? ""}` }],
     },
     { id: "mesyacy", title: "Прогноз на 12 месяцев", subtitle: "Личный месяц — тон, в котором проще действовать", blocks: [{ kind: "months", items: months }] },
     { id: "sledgod", title: `Следующий год ${i.yr + 1}: ${n.pyNext.number} — ${yrNext?.title ?? ""}`, blocks: [
         ...paras(yrNext?.theme),
         ...(v2 ? lead("Как это ложится на твоё число.", b.svodYear[`${key}.${n.pyNext.number}`]) : []),
+        ...(v >= 3 && ageBand(n.age + 1) !== band ? lead("В новом возрасте.", b.yearAge[`${n.pyNext.number}.${ageBand(n.age + 1)}`]) : []),
         { kind: "p", text: `**Совет года.** ${yrNext?.advice ?? ""}` },
       ],
     },
@@ -275,6 +340,7 @@ export function buildRazbor(i: RazborInput): RazborDoc {
           items: [
             `**Число судьбы ${n.destiny.number}** — ${dz?.title ?? ""}. Опора по квадрату — ${(b.py[String(strong)]?.title ?? "").toLowerCase()}${weak.length ? `; развивать — ${weak.map((d) => (b.py[String(d)]?.title ?? "").toLowerCase()).join(", ")}` : ""}.`,
             `**${i.yr}: ${yr?.title ?? ""}.** ${firstSentence(yr?.advice ?? "")}`,
+            ...(v >= 3 && b.pinnacles ? (() => { const c = n.pinnacles.list.find((p) => p.to === null || n.age < p.to)!; return [`**Период жизни — ${c.number}, «${b.pinnacles.pinnacle[String(c.number)]?.title ?? ""}»**${c.to === null ? "." : `, до ${c.to} ${c.to % 10 === 1 && c.to % 100 !== 11 ? "года" : "лет"}.`}`]; })() : []),
             ...groups.map((g) => `**${g.label}:** ${g.months.join(", ")}.`),
             `**Главный совет.** ${life?.advice?.[0] ?? ""}`,
           ],

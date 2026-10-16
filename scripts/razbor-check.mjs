@@ -5,6 +5,7 @@ const DIR = new URL("../content/data/razbor/", import.meta.url);
 const N12 = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "11", "22", "33"];
 const N9 = N12.slice(0, 9);
 const N31 = Array.from({ length: 31 }, (_, i) => String(i + 1));
+const BANDS = ["young", "build", "mature", "senior"];
 const pairs = (a, b) => a.flatMap((x) => b.map((y) => `${x}.${y}`));
 const BANNED = /(\bИИ\b|нейросет|искусственн\w* интеллект|гарантир|порч|проклят|диагноз|вылеч|разбогате)/i;
 
@@ -17,6 +18,10 @@ const spec = {
   "month.json": { keys: N9, string: [280, 480] },
   "month-year.json": { keys: pairs(N9, N9), string: [450, 750] },
   "svod-year.json": { keys: pairs(N12, N9), string: [600, 900] },
+  "year-age.json": { keys: pairs(N9, BANDS), string: [300, 500] },
+  "love-age.json": { keys: pairs(N12, BANDS), string: [300, 450] },
+  "work-age.json": { keys: pairs(N12, BANDS), string: [300, 450] },
+  "pinnacle.json": { nested: { pinnacle: { keys: [...N9, "11"], fields: { title: [5, 40], text: [600, 900], short: [140, 240] } } }, groups: { stage: ["1", "2", "3", "4"] }, string: [250, 450] },
   "svod.json": { groups: { destiny: N12, birthday: N31, strong: N9, weak: N9 }, single: ["noweak"], string: [160, 320] },
 };
 
@@ -37,6 +42,9 @@ for (const [file, sp] of Object.entries(spec)) {
   if (!existsSync(url)) { err(`${file}: нет файла`); continue; }
   let data;
   try { data = JSON.parse(readFileSync(url, "utf8")); } catch (e) { err(`${file}: не JSON — ${e.message}`); continue; }
+  for (const [g, ns] of Object.entries(sp.nested ?? {})) {
+    for (const k of ns.keys) for (const [f, lim] of Object.entries(ns.fields)) checkText(`${file}.${g}[${k}].${f}`, data[g]?.[k]?.[f], lim);
+  }
   for (const [g, keys] of Object.entries(sp.groups ?? {})) {
     for (const k of keys) checkText(`${file}.${g}[${k}]`, data[g]?.[k], sp.string);
   }
