@@ -96,8 +96,11 @@ export const COMPAT_TOC: { id: string; title: string }[] = [
   { id: "sovety", title: "Три совета" },
 ];
 
-/** Подписи двух людей: имя или «Первый»/«Второй» (имена в заказе обязательны, в бесплатной части — нет). */
-export const compatNames = (i: CompatInput) => ({ A: i.a.name || "Первый", B: i.b.name || "Второй" });
+/** Подписи двух людей: имя или «Партнёр» (имена в заказе обязательны, в бесплатной части — нет). */
+export const compatNames = (i: CompatInput) => ({
+  A: i.a.name || (i.b.name ? "Партнёр" : "Партнёр 1"),
+  B: i.b.name || (i.a.name ? "Партнёр" : "Партнёр 2"),
+});
 
 function numbers(i: CompatInput) {
   return {

@@ -1,20 +1,10 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
+import { cronAuthorized } from "@/lib/cronAuth";
 import { escapeHtml as h, notifyPayment } from "@/lib/notify";
 import { dueGifts } from "@/lib/razborGift";
 import { mailGift } from "@/lib/razborMail";
 
 export const dynamic = "force-dynamic";
-
-/** Секрет из заголовка X-Cron-Secret (или Authorization: Bearer …) сравниваем по хешу — без утечки длины и времени. */
-function authorized(req: Request): boolean {
-  const want = process.env.RAZBOR_CRON_SECRET;
-  if (!want || want.length < 16) return false;
-  const got = req.headers.get("x-cron-secret") ?? req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  const a = createHash("sha256").update(want).digest();
-  const b = createHash("sha256").update(got).digest();
-  return timingSafeEqual(a, b);
-}
 
 /** Один проход за раз: два одновременных вызова не пошлют письма дважды (внутри mailGift — своя защита по заказу). */
 let running: Promise<{ due: number; sent: number; failed: number }> | null = null;
@@ -43,7 +33,7 @@ async function run() {
  * В ответе только счётчики — без адресов и имён.
  */
 export async function POST(req: Request) {
-  if (!authorized(req)) return NextResponse.json({ ok: false }, { status: 403 });
+  if (!cronAuthorized(req)) return NextResponse.json({ ok: false }, { status: 403 });
   try {
     running ??= run().finally(() => {
       running = null;

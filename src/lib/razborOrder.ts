@@ -3,11 +3,11 @@
  * дубликат данных — в metadata платежа: по нему заказ восстанавливается, если файла нет. Только сервер.
  */
 import { getPayment, recentPayments, type Payment, type Refund } from "./yookassa";
-import { getOrder, patchOrder, refundOrder, settleOrder, type Order } from "./razborStore";
+import { getOrder, listOrders, patchOrder, refundOrder, settleOrder, type Order } from "./razborStore";
 import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeChildToken, makeCompatToken, makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
-import { mailBuyer, mailGift } from "./razborMail";
+import { mailBuyer, mailGift, mailReceipt } from "./razborMail";
 import { giftDue, giftFromMetadata, maskEmail } from "./razborGift";
 import type { RazborInput } from "./razbor";
 import { compatUpsellPath, PRODUCTS, productOf } from "./razborProducts";
@@ -180,8 +180,22 @@ const RETRY_GAP = 5 * 60_000;
 const RETRY_MAX = 12;
 
 /** Повтор для оплаченного заказа без чека или письма (сеть ФНС или почты была недоступна). Владельцу — что получилось. */
+/** Чек и письмо доделаны (чек «под вопросом» автоматически не повторяется). */
+const finished = (o: Order) => (Boolean(o.receipt_uuid) || Boolean(o.receipt_unsure)) && (Boolean(o.mail_sent_at) || !o.email);
+
 async function retryPaid(o: Order): Promise<Order> {
-  if (!o.receipt_due || (o.receipt_uuid && (o.mail_sent_at || !o.email))) return o;
+  if (!o.receipt_due || finished(o)) return o;
+  if ((o.retries ?? 0) >= RETRY_MAX && !o.stuck_at) {
+    o = (await patchOrder(o.id, { stuck_at: new Date().toISOString() })) ?? o;
+    await notifyPayment(
+      [
+        `<b>⚠️ Заказ ${h(o.id)}: после ${RETRY_MAX} попыток не сделано</b>`,
+        `${o.receipt_uuid ? "" : o.receipt_unsure ? "чек под вопросом (проверь в «Мой налог») · " : "чек не пробит · "}${o.mail_sent_at || !o.email ? "" : "письмо не отправлено"}`,
+        "Сделай вручную и проверь логи сайта.",
+      ].join("\n"),
+    ).catch(() => {});
+    return o;
+  }
   // статус заказа открывается без входа: повторяем не чаще раза в 5 минут и не больше 12 раз,
   // чтобы при сбоях ФНС не наплодить чеков (ответ мог потеряться после регистрации дохода) и писем
   if ((o.retries ?? 0) >= RETRY_MAX || (o.retry_at && Date.now() - Date.parse(o.retry_at) < RETRY_GAP)) return o;
@@ -191,10 +205,31 @@ async function retryPaid(o: Order): Promise<Order> {
   const f = await finishPaid(o);
   const after = f.order ?? o;
   const fresh = (await getOrder(o.id)) ?? after;
-  if ((!before.receipt && fresh.receipt_uuid) || (!before.mail && fresh.mail_sent_at)) {
-    await notifyPayment([`<b>↻ Заказ ${h(o.id)} доделан</b>`, ...f.lines].join("\n"), true);
+  const lines = [...f.lines];
+  // письмо ушло раньше без чека — чек отдельным письмом (покупатель должен его получить)
+  if (before.mail && !before.receipt && fresh.receipt_uuid && fresh.email && !fresh.receipt_mail_at) {
+    const m = await mailReceipt(fresh);
+    lines.push(m.sent ? "🧾 Чек отправлен покупателю отдельным письмом" : `<b>⚠️ Письмо с чеком не отправлено</b> (${h(m.error)})`);
   }
-  return fresh;
+  if ((!before.receipt && fresh.receipt_uuid) || (!before.mail && fresh.mail_sent_at)) {
+    await notifyPayment([`<b>↻ Заказ ${h(o.id)} доделан</b>`, ...lines].join("\n"), true);
+  }
+  return (await getOrder(o.id)) ?? fresh;
+}
+
+/**
+ * Фоновый повтор (таймер на VPS раз в 15 минут): оплаченные боевые заказы за 3 дня, у которых нет чека или письма —
+ * покупатель мог закрыть «Спасибо», а сайт перезапуститься до чека. Те же паузы и лимит, что у повтора со страницы.
+ */
+export async function retryStuck(): Promise<{ checked: number; done: number }> {
+  const since = Date.now() - 3 * 86400_000;
+  const stuck = await listOrders((o) => o.status === "paid" && Boolean(o.receipt_due) && !finished(o) && !o.stuck_at && Date.parse(o.paid_at) > since);
+  let done = 0;
+  for (const o of stuck) {
+    const r = await retryPaid(o).catch((e) => (console.error("razbor retry:", o.id, e instanceof Error ? e.message : "error"), o));
+    if (finished(r)) done++;
+  }
+  return { checked: stuck.length, done };
 }
 
 /** Предупреждения о несовпадении суммы для заказов без файла — в памяти процесса, чтобы не повторять на каждый опрос. */
@@ -238,7 +273,8 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
   if (!id) return null;
   if (p.status !== "succeeded" && p.status !== "canceled") return (await getOrder(id)) ?? orderFromPayment(p);
   if (p.status === "succeeded" && (await amountMismatch(id, p))) return (await getOrder(id)) ?? orderFromPayment(p);
-  const { order, changed } = await settleOrder(id, p.status === "succeeded" ? "paid" : "canceled", () => orderFromPayment(p), p.id);
+  // receipt_due — вместе с переходом в paid: если процесс упадёт до чека и письма, повтор (retryStuck) их доделает
+  const { order, changed } = await settleOrder(id, p.status === "succeeded" ? "paid" : "canceled", () => orderFromPayment(p), p.id, p.test ? { test: true } : { receipt_due: true });
   if (changed && order) {
     const test = p.test ? " · тест" : "";
     if (order.status === "paid") {

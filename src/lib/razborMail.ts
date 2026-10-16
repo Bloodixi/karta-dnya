@@ -211,6 +211,49 @@ ${r ? `<tr><td style="padding:8px 0"><table role="presentation" cellpadding="0" 
   }
 }
 
+/**
+ * Чек отдельным письмом — когда основное письмо ушло раньше, чем «Мой налог» пробил чек (повтор после сбоя ФНС).
+ * Один раз на заказ (receipt_mail_at). Ошибку не бросает.
+ */
+export async function mailReceipt(order: Order): Promise<{ sent?: boolean; error?: string }> {
+  if (order.receipt_mail_at) return { sent: true };
+  const r = receiptView(order);
+  if (!r || !order.email) return { error: "нет чека или адреса" };
+  if (!mailReady()) return { error: "не настроена отправка писем" };
+  const text = [
+    "Здравствуй!",
+    "",
+    `Отправляем чек по заказу ${order.id}: он пробился чуть позже письма со ссылкой.`,
+    "",
+    `Чек № ${r.number} от ${r.date} ${r.time} (МСК)`,
+    `Продавец: ${r.seller}, ИНН ${r.inn}, режим НО: НПД`,
+    `1. ${r.item} — ${r.amount}`,
+    `Итого: ${r.amount}, безналичный расчёт`,
+    `Чек: ${r.pageUrl}`,
+    `Проверить на сайте ФНС: ${r.fnsUrl}`,
+    "",
+    `Твой разбор: ${SITE.url}/r/${order.id}`,
+    "",
+    `${SITE.name} · ${SITE.url}`,
+  ].join("\n");
+  const html = `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222;max-width:560px">
+<p>Здравствуй!</p><p>Отправляем чек по заказу ${h(order.id)}: он пробился чуть позже письма со ссылкой.</p>
+<p><b>Чек № ${h(r.number)}</b> от ${h(r.date)} ${h(r.time)} (МСК)<br>Продавец: ${h(r.seller)}, ИНН ${h(r.inn)}, НПД<br>1. ${h(r.item)} — ${h(r.amount)}<br><b>Итого: ${h(r.amount)}</b>, безналичный расчёт</p>
+<p><img src="cid:qr@karta-dnya.ru" width="140" height="140" alt="QR-код чека ФНС"></p>
+<p><a href="${h(r.pageUrl)}" style="color:#5b3fa8">Открыть чек</a> · <a href="${h(r.fnsUrl)}" style="color:#777">проверить на сайте ФНС</a></p>
+<p style="font-size:12px;color:#888">${h(SITE.name)} · ${h(SITE.url.replace(/^https?:\/\//, ""))}<br>Продавец: ${h(SELLER.name)}, ИНН ${h(SELLER.inn)}</p></div>`;
+  try {
+    const inline: Inline[] = [{ cid: "qr@karta-dnya.ru", filename: `chek-${r.number}.png`, content: await qrPng(r.fnsUrl), contentType: "image/png" }];
+    await sendMail({ to: order.email, subject: `Чек по заказу ${order.id}`, text, html, inline });
+    await patchOrder(order.id, { receipt_mail_at: new Date().toISOString() });
+    return { sent: true };
+  } catch (e) {
+    const why = smtpWhy(e);
+    console.error("razbor receipt mail:", order.id, why);
+    return { error: why };
+  }
+}
+
 /** Письмо получателю подарка уходит один раз: вебхук, страница «Спасибо» и ежедневный запуск не пошлют его дважды. */
 const giftSending = new Map<string, Promise<{ sent?: boolean; error?: string }>>();
 

@@ -1,5 +1,5 @@
 /** Чек «Мой налог» за оплаченный разбор. Только сервер. */
-import { createReceipt, nalogReady } from "./moyNalog";
+import { createReceipt, nalogReady, ReceiptUnsure } from "./moyNalog";
 import { PRODUCTS, productOf } from "./razborProducts";
 import { patchOrder, type Order } from "./razborStore";
 
@@ -12,12 +12,17 @@ export const RECEIPT_SERVICE = PRODUCTS.razbor.receipt;
  */
 export async function issueReceipt(order: Order): Promise<{ receipt?: Order; error?: string }> {
   if (order.receipt_uuid) return { receipt: order };
+  if (order.receipt_unsure) return { error: "ответ ФНС не дошёл — проверь в «Мой налог», есть ли чек; сайт его не повторяет" };
   if (!nalogReady()) return { error: "не настроен вход в «Мой налог»" };
   try {
     const r = await createReceipt({ name: PRODUCTS[productOf(order.product)].receipt, amount: order.amount, operationTime: new Date(order.paid_at || Date.now()) });
     return { receipt: (await patchOrder(order.id, { receipt_uuid: r.uuid, receipt_url: r.url })) ?? { ...order, receipt_uuid: r.uuid, receipt_url: r.url } };
   } catch (e) {
     console.error("razbor receipt:", order.id, e);
+    if (e instanceof ReceiptUnsure) {
+      await patchOrder(order.id, { receipt_unsure: true }).catch(() => {});
+      return { error: "ответ ФНС не дошёл — проверь в «Мой налог», есть ли чек; сайт его не повторяет" };
+    }
     return { error: String((e as Error).message ?? e).slice(0, 200) };
   }
 }

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { NextRequest } from "next/server";
-import { readToken } from "@/lib/razborToken";
+import { readToken, tokenParam } from "@/lib/razborToken";
 import { getOrder } from "@/lib/razborStore";
 import { bookletStyle } from "@/lib/razborBookletData";
 import { fetchBookletPdf, pdfFileName, pdfResponse, pdfWaitResponse } from "@/lib/razborPdf";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 /** Готовый PDF буклета по длинной ссылке: доступ — как у /razbor/r/<токен>/buklet, PDF собирает сервис на VPS. */
 export async function GET(req: NextRequest, ctx: RouteContext<"/razbor/r/[token]/buklet/pdf">) {
-  const token = decodeURIComponent((await ctx.params).token);
+  const token = tokenParam((await ctx.params).token);
   const input = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token) ? readToken(token) : null;
   if (!input) notFound();
   const order = input.order ? await getOrder(input.order) : null;

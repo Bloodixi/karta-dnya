@@ -162,6 +162,7 @@
  "src/app/api/razbor/dostup/route.ts": "2026-10-16",
  "src/app/api/razbor/gift-send/route.ts": "2026-10-16",
  "src/app/api/razbor/status/route.ts": "2026-10-15",
+ "src/app/api/razbor/test/route.ts": "2026-10-16",
  "src/app/api/razbor/webhook/route.ts": "2026-10-15",
  "src/app/api/today/route.ts": "2026-10-07",
  "src/app/apple-icon.png": "2026-10-13",
@@ -291,6 +292,7 @@
  "src/lib/razborProducts.ts": "2026-10-16",
  "src/lib/razborReceipt.ts": "2026-10-16",
  "src/lib/razborStore.ts": "2026-10-16",
+ "src/lib/razborTest.ts": "2026-10-16",
  "src/lib/razborToken.ts": "2026-10-16",
  "src/lib/receiptView.ts": "2026-10-16",
  "src/lib/ruCount.ts": "2026-10-16",
@@ -298,6 +300,6 @@
  "src/lib/site.ts": "2026-10-14",
  "src/lib/sitemap.ts": "2026-10-16",
  "src/lib/stones.ts": "2026-10-07",
- "src/lib/yookassa.ts": "2026-10-15",
+ "src/lib/yookassa.ts": "2026-10-16",
  "src/lib/yookassaIp.ts": "2026-10-15"
 }

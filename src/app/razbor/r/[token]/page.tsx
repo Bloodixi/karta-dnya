@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import RazborResult, { PackLink } from "@/components/RazborResult";
 import { giftFor } from "@/lib/razborGift";
 import { buildDoc, DOC_PAGE, productOf } from "@/lib/razborProducts";
-import { readDocToken } from "@/lib/razborToken";
+import { readDocToken, tokenParam } from "@/lib/razborToken";
 import { getOrder } from "@/lib/razborStore";
 
 export const dynamic = "force-dynamic";
@@ -11,14 +11,14 @@ export const dynamic = "force-dynamic";
 const ROBOTS = { index: false, follow: false };
 
 export async function generateMetadata({ params }: PageProps<"/razbor/r/[token]">): Promise<Metadata> {
-  const t = readDocToken(decodeURIComponent((await params).token));
+  const t = readDocToken(tokenParam((await params).token));
   const page = DOC_PAGE[t?.p ?? "razbor"];
   return { title: page.title, description: page.description, robots: ROBOTS };
 }
 
 export default async function RazborResultPage({ params }: PageProps<"/razbor/r/[token]">) {
   const { token } = await params;
-  const t = readDocToken(decodeURIComponent(token));
+  const t = readDocToken(tokenParam(token));
   if (!t) notFound();
   // в новых ссылках есть номер заказа: после возврата или отмены ссылка закрыта (старые ссылки номера не содержат)
   const order = t.order ? await getOrder(t.order) : null;

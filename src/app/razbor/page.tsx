@@ -7,7 +7,7 @@ import JsonLd from "@/components/JsonLd";
 import { DateField, FormError, TextField } from "@/components/NumerologyFields";
 import RazborView from "@/components/RazborView";
 import { RazborCheckoutForm, RazborGiftFields, RazborGoal, RazborStickyCta } from "@/components/RazborClient";
-import { cleanName, parseDate } from "@/lib/numerology";
+import { cleanName, parseDate, personalMonth, personalYear } from "@/lib/numerology";
 import { ageAt, buildTeaser, nowMsk, RAZBOR, RAZBOR_TOC } from "@/lib/razbor";
 import { compatReady } from "@/lib/razborCompat";
 import { packAddon, PRODUCTS } from "@/lib/razborProducts";
@@ -79,14 +79,20 @@ const BLUR_ROWS = [
   { n: 2, t: "Тон договорённостей и мягких шагов: помогают терпение, внимание к близким и готовность подождать ответа." },
 ];
 
-/** `labels` — подписи закрытых месяцев по порядку (первые три после открытых). */
-function HiddenMonths({ count, labels }: { count: number; labels: string[] }) {
+/** Личное число месяца `add` месяцев спустя — чтобы под размытием стояли настоящие числа, а не пример. */
+function monthNumber(d: number, m: number, yr: number, mo: number, add: number): number {
+  const k = mo - 1 + add;
+  return personalMonth(personalYear(d, m, yr + Math.floor(k / 12)).number, (k % 12) + 1);
+}
+
+/** `labels` и `numbers` — подписи и личные числа закрытых месяцев по порядку (первые три после открытых). */
+function HiddenMonths({ count, labels, numbers }: { count: number; labels: string[]; numbers: number[] }) {
   return (
     <div className="relative mt-2 max-w-3xl overflow-hidden">
       <ol aria-hidden="true" className="select-none pointer-events-none blur-[5px] border-t border-line">
         {BLUR_ROWS.map((r, i) => (
-          <li key={r.n} className="grid grid-cols-[3rem_1fr] gap-x-4 py-4 border-b border-line">
-            <span className="display text-3xl text-accent leading-none pt-1">{r.n}</span>
+          <li key={i} className="grid grid-cols-[3rem_1fr] gap-x-4 py-4 border-b border-line">
+            <span className="display text-3xl text-accent leading-none pt-1">{numbers[i] ?? r.n}</span>
             <div>
               <p className="mono">{labels[i] ?? "Следующий месяц"}</p>
               <p className="mt-1">{r.t}</p>
@@ -205,7 +211,11 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           ) : null}
           <RazborView sections={teaser.sections} toc={false} />
           {hiddenMonths(teaser) > 0 && (
-            <HiddenMonths count={hiddenMonths(teaser)} labels={BLUR_ROWS.map((_, i) => monthLabel(now.yr, now.mo, 12 - hiddenMonths(teaser) + i))} />
+            <HiddenMonths
+              count={hiddenMonths(teaser)}
+              labels={BLUR_ROWS.map((_, i) => monthLabel(now.yr, now.mo, 12 - hiddenMonths(teaser) + i))}
+              numbers={date ? BLUR_ROWS.map((_, i) => monthNumber(date.d, date.m, now.yr, now.mo, 12 - hiddenMonths(teaser) + i)) : []}
+            />
           )}
 
           <div className="card p-5 mt-8 max-w-3xl razbor-locked">

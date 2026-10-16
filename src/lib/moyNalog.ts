@@ -34,10 +34,17 @@ async function saveRefreshToken(t: string): Promise<void> {
   await rename(`${f}.tmp`, f);
 }
 
+/**
+ * Ответ на регистрацию дохода не дошёл (таймаут, сеть, 5xx): чек мог пробиться. Автоповтор в этом случае
+ * запрещён — иначе второй чек на ту же оплату; владелец проверяет в «Мой налог» вручную.
+ */
+export class ReceiptUnsure extends Error {}
+
 async function post<T>(p: string, body: unknown, token?: string): Promise<T> {
   const res = await fetch(API + p, {
     method: "POST",
     cache: "no-store",
+    signal: AbortSignal.timeout(20_000),
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
@@ -78,7 +85,7 @@ export function receiptUrl(uuid: string): string {
 /** Регистрирует доход от физлица (безнал) и возвращает чек. operationTime — момент оплаты. */
 export async function createReceipt(o: { name: string; amount: number; operationTime: Date }): Promise<Receipt> {
   const t = await accessToken();
-  const d = await post<{ approvedReceiptUuid: string }>(
+  const d = await income(
     "/v1/income",
     {
       paymentType: "WIRE",
@@ -92,6 +99,17 @@ export async function createReceipt(o: { name: string; amount: number; operation
     t,
   );
   return { uuid: d.approvedReceiptUuid, url: receiptUrl(d.approvedReceiptUuid) };
+}
+
+/** POST регистрации дохода: отказ 4xx — чека точно нет, всё остальное — ReceiptUnsure. */
+async function income(p: string, body: unknown, token: string): Promise<{ approvedReceiptUuid: string }> {
+  try {
+    return await post<{ approvedReceiptUuid: string }>(p, body, token);
+  } catch (e) {
+    const m = String((e as Error).message ?? e);
+    if (/: 4\d\d /.test(m)) throw e;
+    throw new ReceiptUnsure(m);
+  }
 }
 
 /** Аннулирует чек: при возврате денег (refund) или если чек пробит по ошибке (mistake). */

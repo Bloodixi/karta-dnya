@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import RazborBooklet from "@/components/RazborBooklet";
-import { readToken } from "@/lib/razborToken";
+import { readToken, tokenParam } from "@/lib/razborToken";
 import { getOrder } from "@/lib/razborStore";
 import { giftFor } from "@/lib/razborGift";
 import { bookletData, bookletStyle } from "@/lib/razborBookletData";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 /** Печатный буклет A5 по длинной ссылке на разбор: доступ проверяется так же, как у /razbor/r/<токен>. */
 export default async function RazborBookletPage({ params, searchParams }: PageProps<"/razbor/r/[token]/buklet">) {
   const { token } = await params;
-  const input = readToken(decodeURIComponent(token));
+  const input = readToken(tokenParam(token));
   if (!input) notFound();
   // после возврата или отмены ссылка закрыта (старые ссылки номера заказа не содержат)
   const order = input.order ? await getOrder(input.order) : null;

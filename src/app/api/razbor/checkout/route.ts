@@ -8,7 +8,7 @@ import { COMPAT_VERSION, compatReady } from "@/lib/razborCompat";
 import { PAY_COOKIE, rememberOrder } from "@/lib/razborOrder";
 import { cleanEmail, giftMetadata, giftYm, parseGift } from "@/lib/razborGift";
 import { PRODUCTS, type Product } from "@/lib/razborProducts";
-import { saveOrder, type Gift, type Order } from "@/lib/razborStore";
+import { patchOrder, saveOrder, type Gift, type Order } from "@/lib/razborStore";
 import { makeChildToken, makeCompatToken, makeToken } from "@/lib/razborToken";
 import { createPayment, yookassaReady } from "@/lib/yookassa";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
@@ -151,7 +151,8 @@ export async function POST(req: Request) {
     const url = p.confirmation?.confirmation_url;
     if (!url) throw new Error("нет confirmation_url");
     rememberOrder(order, p.id);
-    await saveOrder({ ...draft, payment_id: p.id }).catch((e) => console.error("razbor checkout: payment_id не записан", order, e));
+    // по очереди с вебхуком; файла нет (первая запись не удалась) — пишем черновик целиком
+    await patchOrder(order, { payment_id: p.id }).then(async (o) => { if (!o) await saveOrder({ ...draft, payment_id: p.id }); }).catch((e) => console.error("razbor checkout: payment_id не записан", order, e));
     const res = NextResponse.redirect(url, 303);
     res.cookies.set(PAY_COOKIE, p.id, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 3 * 86400 });
     return res;

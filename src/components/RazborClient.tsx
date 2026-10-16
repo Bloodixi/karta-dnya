@@ -98,10 +98,13 @@ export function CopyLinkButton({ url, label = "Скопировать ссылк
 }
 
 /**
- * Ждёт подтверждения оплаты: раз в 2 с спрашивает /api/razbor/status, не дольше `max` попыток (≈60 с).
+ * Ждёт подтверждения оплаты: спрашивает /api/razbor/status сначала раз в 2 с, потом реже (5 и 15 с) — СБП и 3-D Secure
+ * подтверждаются минутами; всего `max` попыток (≈10 мин).
  * Когда статус итоговый — перерисовывает серверную страницу; по истечении времени показывает `fallback`.
  */
-export function PaymentWaiter({ order, max = 30, fallback }: { order: string; max?: number; fallback: ReactNode }) {
+const pollDelay = (n: number) => (n < 15 ? 2000 : n < 39 ? 5000 : 15000);
+
+export function PaymentWaiter({ order, max = 71, fallback }: { order: string; max?: number; fallback: ReactNode }) {
   const router = useRouter();
   const [tries, setTries] = useState(0);
   useEffect(() => {
@@ -114,7 +117,7 @@ export function PaymentWaiter({ order, max = 30, fallback }: { order: string; ma
         if (!stop && (s.status === "paid" || s.status === "canceled" || s.status === "refunded")) return router.refresh();
       } catch {}
       if (!stop) setTries((n) => n + 1);
-    }, 2000);
+    }, pollDelay(tries));
     return () => {
       stop = true;
       clearTimeout(t);

@@ -91,3 +91,12 @@ export function readToken(token: string): (RazborInput & { order?: string }) | n
   const t = readDocToken(token);
   return t?.p === "razbor" ? { ...t.input, order: t.order } : null;
 }
+
+/** Токен из сегмента адреса: битое %-кодирование — пустая строка (страница ответит 404, а не 500). */
+export function tokenParam(raw: string): string {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return "";
+  }
+}

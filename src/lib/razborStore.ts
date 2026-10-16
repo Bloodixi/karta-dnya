@@ -31,6 +31,9 @@ export type Order = {
   receipt_uuid?: string; // чек «Мой налог»
   receipt_url?: string;
   mail_sent_at?: string; // письмо покупателю с разбором и чеком
+  receipt_unsure?: boolean; // регистрация дохода без ответа: чек мог пробиться, автоповтор выключен
+  receipt_mail_at?: string; // чек, пробитый после письма, отправлен покупателю отдельным письмом
+  stuck_at?: string; // владелец предупреждён: повторы исчерпаны, чек или письмо не сделаны
   receipt_due?: boolean; // боевая оплата: чек и письмо обязательны (тестовые заказы — без них)
   test?: boolean; // оплачен в тестовом магазине: чек не пробивается, письма покупателю и получателю подарка — с [ТЕСТ]
   retry_at?: string; // последний повтор чека/письма
@@ -70,7 +73,7 @@ export async function saveOrder(o: Order): Promise<void> {
   if (!ID_RE.test(o.id)) throw new Error(`bad order id ${o.id}`);
   await mkdir(dir(), { recursive: true });
   const tmp = `${file(o.id)}.${process.pid}.${Date.now()}.tmp`;
-  await writeFile(tmp, JSON.stringify(o, null, 1));
+  await writeFile(tmp, JSON.stringify(o, null, 1), { mode: 0o600 }); // в заказе e-mail и даты рождения
   await rename(tmp, file(o.id));
 }
 
@@ -88,13 +91,13 @@ function serial<T>(id: string, fn: () => Promise<T>): Promise<T> {
  * Переводит заказ в итоговый статус. Идемпотентно: `changed` = true только при первом переходе
  * (по нему шлём уведомление). Если файла нет (том потерян, заказ из старой версии), создаёт его из `fallback`.
  */
-export function settleOrder(id: string, status: "paid" | "canceled", fallback: () => Order | null, paymentId: string): Promise<{ order: Order | null; changed: boolean }> {
+export function settleOrder(id: string, status: "paid" | "canceled", fallback: () => Order | null, paymentId: string, extra: Partial<Order> = {}): Promise<{ order: Order | null; changed: boolean }> {
   return serial(id, async () => {
     const o = (await getOrder(id)) ?? fallback();
     if (!o) return { order: null, changed: false };
     // возврат итоговый: повторное уведомление payment.succeeded не должно снова открыть заказ
     if (o.status === "paid" || o.status === "refunded" || o.status === status) return { order: o, changed: false };
-    const next: Order = { ...o, status, payment_id: paymentId || o.payment_id, paid_at: status === "paid" ? new Date().toISOString() : o.paid_at };
+    const next: Order = { ...o, ...(status === "paid" ? extra : {}), status, payment_id: paymentId || o.payment_id, paid_at: status === "paid" ? new Date().toISOString() : o.paid_at };
     await saveOrder(next);
     return { order: next, changed: true };
   });
