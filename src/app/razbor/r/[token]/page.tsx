@@ -39,6 +39,9 @@ export default async function RazborResultPage({ params }: PageProps<"/razbor/r/
           {doc.who ? <>{doc.who} · </> : null}дата рождения {doc.date}
         </p>
         <div className="no-print mt-5 flex flex-wrap gap-2">
+          <Link href={`/razbor/r/${token}/buklet`} className="btn">
+            Буклет для печати
+          </Link>
           <PrintButton />
           <CopyLinkButton />
         </div>
