@@ -5,6 +5,7 @@ const DIR = new URL("../content/data/razbor/", import.meta.url);
 const N12 = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "11", "22", "33"];
 const N9 = N12.slice(0, 9);
 const N31 = Array.from({ length: 31 }, (_, i) => String(i + 1));
+const pairs = (a, b) => a.flatMap((x) => b.map((y) => `${x}.${y}`));
 const BANNED = /(\bИИ\b|нейросет|искусственн\w* интеллект|гарантир|порч|проклят|диагноз|вылеч|разбогате)/i;
 
 const spec = {
@@ -14,6 +15,9 @@ const spec = {
   "pythagoras.json": { keys: N9, fields: { title: [5, 40], intro: [250, 450] }, arrays: { levels: [4, 350, 650] } },
   "year.json": { keys: N9, fields: { title: [5, 40], theme: [800, 1200], first: [450, 750], second: [450, 750], advice: [300, 500] } },
   "month.json": { keys: N9, string: [280, 480] },
+  "month-year.json": { keys: pairs(N9, N9), string: [450, 750] },
+  "svod-year.json": { keys: pairs(N12, N9), string: [600, 900] },
+  "svod.json": { groups: { destiny: N12, birthday: N31, strong: N9, weak: N9 }, single: ["noweak"], string: [160, 320] },
 };
 
 const only = process.argv[2];
@@ -33,7 +37,11 @@ for (const [file, sp] of Object.entries(spec)) {
   if (!existsSync(url)) { err(`${file}: нет файла`); continue; }
   let data;
   try { data = JSON.parse(readFileSync(url, "utf8")); } catch (e) { err(`${file}: не JSON — ${e.message}`); continue; }
-  for (const k of sp.keys) {
+  for (const [g, keys] of Object.entries(sp.groups ?? {})) {
+    for (const k of keys) checkText(`${file}.${g}[${k}]`, data[g]?.[k], sp.string);
+  }
+  for (const f of sp.single ?? []) checkText(`${file}.${f}`, data[f], sp.string);
+  for (const k of sp.keys ?? []) {
     const v = data[k];
     const w = `${file}[${k}]`;
     if (v === undefined) { err(`${w}: нет ключа`); continue; }
