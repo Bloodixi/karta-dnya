@@ -75,14 +75,17 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
       {a.cover && (
         <figure className="frame-gold rounded-2xl overflow-hidden bg-surface mt-6 max-w-4xl">
           {/* eslint-disable-next-line @next/next/no-img-element -- next/image без оптимизации не даёт srcset */}
-          <img src={a.cover.file} srcSet={`${a.cover.thumb} 600w, ${a.cover.file} 1200w`} sizes="(min-width: 960px) 896px, 92vw" width={1200} height={675} alt={a.title} loading="eager" fetchPriority="high" decoding="async" className="w-full h-auto block" />
+          <img src={a.cover.file} srcSet={`${a.cover.thumb} 600w, ${a.cover.file} 1200w`} sizes="(min-width: 960px) 896px, 92vw" width={1200} height={675} alt={a.title} loading="eager" fetchPriority="high" decoding="async" className="article-cover w-full h-auto block" />
         </figure>
       )}
       <div className={showToc ? "lg:grid lg:grid-cols-[minmax(0,72ch)_15rem] lg:gap-12 mt-6" : "mt-6"}>
         <div className="min-w-0">
           {showToc && (
-            <details className="toc-mobile lg:hidden card px-4 py-3 mb-4">
-              <summary className="cursor-pointer font-semibold">Содержание</summary>
+            <details className="toc-mobile group lg:hidden card px-4 py-3 mb-4">
+              <summary className="cursor-pointer font-semibold list-none flex justify-between gap-3 min-h-6">
+                <span>Содержание</span>
+                <span aria-hidden="true" className="text-muted group-open:rotate-45 transition-transform">+</span>
+              </summary>
               <TocList items={a.toc} />
             </details>
           )}
@@ -149,14 +152,15 @@ function TocList({ items }: { items: TocItem[] }) {
 function DreamPage({ slug }: { slug: string }) {
   const d = findDream(slug)!;
   const img = findDreamImage(slug);
-  const others = getDreams().filter((x) => x.slug !== slug).slice(0, 12);
+  const others = dreamNeighbours(slug, 6);
+  const article = dreamArticle(slug);
   const moodLabel = d.mood === "warning" ? "предупреждение" : d.mood === "good" ? "благоприятный знак" : "нейтральный символ";
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/sonnik", label: "Сонник" }, { href: `/sonnik/${slug}`, label: d.word }]} />
       <div className="grid gap-8 md:grid-cols-[360px_1fr] items-start">
         {img && (
-          <figure className="frame-gold rounded-2xl overflow-hidden bg-surface">
+          <figure className="frame-gold rounded overflow-hidden bg-surface">
             {/* eslint-disable-next-line @next/next/no-img-element -- next/image без оптимизации не даёт srcset */}
             <img src={img.file} srcSet={`${img.thumb} 320w, ${img.file} 640w`} sizes="(min-width: 768px) 360px, 90vw" width={640} height={480} alt={`${d.word}: иллюстрация символа сна`} loading="eager" fetchPriority="high" decoding="async" className="w-full h-auto block" />
           </figure>
@@ -182,6 +186,15 @@ function DreamPage({ slug }: { slug: string }) {
           </>
         )}
       </div>
+      {article && (
+        <Link href={`/sonnik/${article.slug}`} className="card card-hover p-5 mt-8 flex items-center justify-between gap-4 max-w-[72ch]">
+          <span>
+            <span className="mono block">Подробный разбор сна</span>
+            <span className="font-semibold text-lg leading-snug block mt-1">{article.title}</span>
+          </span>
+          <span aria-hidden="true" className="text-accent-text text-xl shrink-0">→</span>
+        </Link>
+      )}
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Другие символы</h2>
         <div className="flex flex-wrap gap-2">
@@ -195,6 +208,29 @@ function DreamPage({ slug }: { slug: string }) {
       </section>
     </article>
   );
+}
+
+/** Соседи символа по алфавиту (по `n` с каждой стороны, по кругу): на каждой странице свой набор вместо одних и тех же первых слов. */
+function dreamNeighbours(slug: string, n: number) {
+  const all = getDreams();
+  const i = all.findIndex((x) => x.slug === slug);
+  if (i < 0 || all.length < 2) return [];
+  const out: typeof all = [];
+  for (let k = -n; k <= n; k++) {
+    if (k === 0) continue;
+    const d = all[(i + k + all.length) % all.length];
+    if (d.slug !== slug && !out.some((x) => x.slug === d.slug)) out.push(d);
+  }
+  return out;
+}
+
+/** Статьи раздела «Сонник», которые подробно разбирают символ, если slug статьи не совпадает с концом slug символа. */
+const DREAM_ARTICLE_ALIASES: Record<string, string> = { pokoynik: "k-chemu-snyatsya-umershie", "umershiy-rodstvennik": "k-chemu-snyatsya-umershie" };
+
+function dreamArticle(slug: string) {
+  const articles = getArticles("sonnik");
+  const alias = DREAM_ARTICLE_ALIASES[slug];
+  return articles.find((a) => (alias ? a.slug === alias : a.slug.endsWith(`-${slug}`))) ?? null;
 }
 
 function StonePage({ slug }: { slug: string }) {

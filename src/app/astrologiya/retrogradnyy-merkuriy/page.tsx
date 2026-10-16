@@ -65,7 +65,7 @@ export default async function MercuryRetroPage() {
           {status.retrograde
             ? "Период обратного движения: перепроверяйте договорённости, документы и маршруты, возвращайтесь к отложенному."
             : "Прямое движение: обычный ритм дел, договорённостей и поездок."}
-          {" "}Рассчитано на {mskDateTime(now)} · <Link href="/astrologiya/kak-my-schitaem" className="text-accent underline">как мы считаем</Link>
+          {" "}Рассчитано на {mskDateTime(now)} · <Link href="/astrologiya/kak-my-schitaem" className="text-accent-text underline">как мы считаем</Link>
         </p>
       </section>
 
@@ -96,8 +96,24 @@ export default async function MercuryRetroPage() {
       </section>
 
       {article && (
-        <article className="mt-10">
-          <h2 className="text-2xl mb-3">{article.title}</h2>
+        <article className="mt-10" aria-label={article.title}>
+          {/* Заголовок статьи — надзаголовком, а не вторым H2 подряд с первым H2 текста. */}
+          <p className="mono mb-3">{article.title}</p>
+          {article.toc.length >= 3 && (
+            <details className="toc-mobile group card px-4 py-3 mb-6 max-w-[72ch]">
+              <summary className="cursor-pointer font-semibold list-none flex justify-between gap-3 min-h-6">
+                <span>Содержание</span>
+                <span aria-hidden="true" className="text-muted group-open:rotate-45 transition-transform">+</span>
+              </summary>
+              <ol className="mt-2 space-y-1.5 text-sm">
+                {article.toc.map((t) => (
+                  <li key={t.id}>
+                    <a href={`#${t.id}`} className="text-muted hover:text-ink leading-snug block">{t.title}</a>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
           <div className="prose" dangerouslySetInnerHTML={{ __html: article.html }} />
         </article>
       )}

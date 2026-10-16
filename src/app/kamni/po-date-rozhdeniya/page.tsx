@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import ScrollToResult from "@/components/ScrollToResult";
 import StoneDateForm from "@/components/StoneDateForm";
 import ZodiacSign from "@/components/ZodiacSign";
 import { getNumerology, getStoneImages, type Stone } from "@/lib/content";
@@ -31,7 +32,7 @@ function StoneCards({ stones, images }: { stones: Stone[]; images: ReturnType<ty
         <Link key={s.slug} href={`/kamni/${s.slug}`} className="card card-hover overflow-hidden flex flex-col">
           {images[s.slug] && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={images[s.slug].thumb} width={400} height={300} alt={`${s.name}: фото`} loading="lazy" decoding="async" className="w-full aspect-[4/3] object-cover" />
+            <img src={images[s.slug].thumb} width={400} height={300} alt={`${s.name}: фото`} loading="lazy" decoding="async" className="stone-img w-full aspect-[4/3] object-cover" />
           )}
           <span className="p-4 flex flex-col">
             <p className="font-semibold">{s.name}</p>
@@ -69,12 +70,13 @@ export default async function StoneByDatePage({ searchParams }: PageProps<"/kamn
         Результат можно сохранить или отправить ссылкой.
       </p>
       <div className="mt-6 max-w-2xl">
-        <StoneDateForm initial={date?.key ?? ""} />
-        {invalid && <p className="text-sm mt-3 text-red-600">Не удалось разобрать дату. Укажите её в формате ГГГГ-ММ-ДД, например 1990-03-14.</p>}
+        <StoneDateForm initial={date?.key ?? ""} invalid={invalid} />
+        {invalid && <p id="stone-date-error" role="alert" className="text-sm mt-3 text-danger">Не удалось разобрать дату. Укажите её в формате ГГГГ-ММ-ДД, например 1990-03-14.</p>}
       </div>
 
       {date && sign && destiny && base && (
-        <section className="mt-10" aria-labelledby="result">
+        <section id="stone-result" className="mt-10 scroll-mt-24" aria-labelledby="result">
+          <ScrollToResult key={date.key} id="stone-result" when />
           <h2 id="result" className="text-2xl">Результат для {human}</h2>
 
           <div className="card p-5 mt-4">
@@ -89,7 +91,7 @@ export default async function StoneByDatePage({ searchParams }: PageProps<"/kamn
             <h3 className="mt-5 font-semibold">Камни знака {sign.name}</h3>
             <div className="mt-3"><StoneCards stones={signStones.slice(0, 6)} images={images} /></div>
             <p className="mt-4 text-sm">
-              <Link href={`/kamni/po-znaku-zodiaka/${sign.slug}`} className="text-accent underline">Все камни для знака {sign.name}: почему подходят и как носить →</Link>
+              <Link href={`/kamni/po-znaku-zodiaka/${sign.slug}`} className="text-accent-text underline">Все камни для знака {sign.name}: почему подходят и как носить →</Link>
             </p>
           </div>
 
@@ -107,7 +109,7 @@ export default async function StoneByDatePage({ searchParams }: PageProps<"/kamn
             <h3 className="mt-5 font-semibold">Камни числа {base}</h3>
             <div className="mt-3"><StoneCards stones={numberStones} images={images} /></div>
             <p className="mt-4 text-sm">
-              <Link href="/chislo-sudby" className="text-accent underline">Подробнее о числе судьбы {destiny.number} →</Link>
+              <Link href="/chislo-sudby" className="text-accent-text underline">Подробнее о числе судьбы {destiny.number} →</Link>
             </p>
           </div>
 
@@ -115,7 +117,7 @@ export default async function StoneByDatePage({ searchParams }: PageProps<"/kamn
             <h3 className="font-semibold">Что выбрать</h3>
             {both.length > 0 ? (
               <p className="mt-2 max-w-2xl">
-                Камни, которые подходят и знаку {sign.name}, и числу {base}: {both.map((s, i) => <span key={s.slug}>{i > 0 && ", "}<Link href={`/kamni/${s.slug}`} className="text-accent underline">{s.name.toLowerCase()}</Link></span>)}.
+                Камни, которые подходят и знаку {sign.name}, и числу {base}: {both.map((s, i) => <span key={s.slug}>{i > 0 && ", "}<Link href={`/kamni/${s.slug}`} className="text-accent-text underline">{s.name.toLowerCase()}</Link></span>)}.
                 С такого пересечения удобнее всего начинать.
               </p>
             ) : (
@@ -164,9 +166,9 @@ export default async function StoneByDatePage({ searchParams }: PageProps<"/kamn
       <Faq items={FAQ} />
 
       <p className="mt-10 text-muted">
-        Смотрите также: <Link className="text-accent underline" href="/kamni/po-znaku-zodiaka">камни по знаку зодиака</Link>,{" "}
-        <Link className="text-accent underline" href="/chislo-sudby">калькулятор числа судьбы</Link>,{" "}
-        <Link className="text-accent underline" href="/goroskop">гороскоп на сегодня</Link>.
+        Смотрите также: <Link className="text-accent-text underline" href="/kamni/po-znaku-zodiaka">камни по знаку зодиака</Link>,{" "}
+        <Link className="text-accent-text underline" href="/chislo-sudby">калькулятор числа судьбы</Link>,{" "}
+        <Link className="text-accent-text underline" href="/goroskop">гороскоп на сегодня</Link>.
       </p>
     </div>
   );
