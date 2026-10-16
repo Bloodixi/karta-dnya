@@ -41,7 +41,13 @@ const multiLine = (s: string) =>
     .trim();
 
 /** Ссылки в подписи и пожелании не пропускаем: письмо уходит на чужой адрес от имени сайта. */
-const HAS_LINK = /(?:https?:\/\/|www\.|\b[a-z0-9-]{2,}\.(?:ru|com|net|org|su|io|me|info|biz|xyz|top|online|site|link|ly|cc)\b)/i;
+/**
+ * Подпись и пожелание уходят чужому человеку от имени сайта — ссылок и адресов в них быть не должно.
+ * Сначала NFKC (полноширинные точки и буквы → обычные), затем запрет: любой «схемы:», «@», IP и
+ * «слово.слово» без пробела после точки (домены любых зон, включая .рф и punycode).
+ */
+const LINKISH = [/[a-z][a-z0-9+.-]*:\/\//i, /\b(?:mailto|tel|javascript|data):/i, /@/, /\b\d{1,3}(?:\.\d{1,3}){3}\b/, /[\p{L}\p{N}-]{2,}\.(?:[\p{L}\p{N}-]{2,})/u, /\bwww\b/i];
+const HAS_LINK = { test: (v: string) => { const n = v.normalize("NFKC").replace(/[。．｡]/g, "."); return LINKISH.some((re) => re.test(n)); } };
 
 export type GiftError = "gift_name" | "gift_from" | "gift_wish" | "gift_email" | "gift_date";
 
