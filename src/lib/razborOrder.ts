@@ -236,6 +236,9 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
     if (order.status === "paid") {
       const url = `${SITE.url}/r/${order.id}`;
       const product = productOf(order.product);
+      // Чек, письмо (ждёт PDF до минуты) и уведомление владельцу — после ответа: ЮKassa ждёт ответ на уведомление
+      // недолго и при задержке шлёт его повторно. Заказ уже «paid»; повтор чека/письма защищён finishPaid и mail_sent_at.
+      void (async () => {
       // тестовый магазин чек в налоговую не пробивает и письмо покупателю не шлёт; письмо получателю подарка — с [ТЕСТ]
       const f = p.test ? await finishTest(order) : await finishPaid(order);
       await notifyPayment(
@@ -249,6 +252,7 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
           `<i>Заказ ${h(order.id)} · платёж ${h(p.id)}</i>`,
         ].join("\n"),
       );
+      })().catch((e) => console.error("razbor finish:", order.id, e instanceof Error ? e.message : "error"));
     } else if (order.status === "canceled") {
       await notifyPayment(
         `<b>✖️ Оплата отменена — ${h(p.amount.value)} ₽</b>${test}\n<i>Заказ ${h(order.id)} · платёж ${h(p.id)}</i>`,

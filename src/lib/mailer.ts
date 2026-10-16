@@ -11,8 +11,9 @@ export function mailReady(): boolean {
 }
 
 export type Inline = { cid: string; filename: string; content: Buffer; contentType: string };
+export type Attachment = { filename: string; content: Buffer; contentType: string };
 
-export async function sendMail(m: { to: string; subject: string; text: string; html: string; inline?: Inline[] }): Promise<void> {
+export async function sendMail(m: { to: string; subject: string; text: string; html: string; inline?: Inline[]; attachments?: Attachment[] }): Promise<void> {
   transport ??= nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.mail.ru",
     port: Number(process.env.SMTP_PORT) || 2525,
@@ -20,6 +21,10 @@ export async function sendMail(m: { to: string; subject: string; text: string; h
     requireTLS: true,
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
   });
-  const { inline, ...rest } = m;
-  await transport.sendMail({ from: { name: "Карта дня", address: process.env.SMTP_USER! }, ...rest, attachments: inline?.map((a) => ({ ...a, contentDisposition: "inline" as const })) });
+  const { inline, attachments, ...rest } = m;
+  await transport.sendMail({
+    from: { name: "Карта дня", address: process.env.SMTP_USER! },
+    ...rest,
+    attachments: [...(inline ?? []).map((a) => ({ ...a, contentDisposition: "inline" as const })), ...(attachments ?? []).map((a) => ({ ...a, contentDisposition: "attachment" as const }))],
+  });
 }

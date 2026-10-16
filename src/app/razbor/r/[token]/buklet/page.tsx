@@ -26,8 +26,9 @@ export default async function RazborBookletPage({ params, searchParams }: PagePr
   // QR на обложке — короткая ссылка, если заказ оплачен; иначе эта же длинная
   const online = order?.status === "paid" ? `${SITE.url}/r/${order.id}` : `${SITE.url}/razbor/r/${token}`;
   const data = await bookletData(input, online);
-  const style = bookletStyle((await searchParams).style);
+  const sp = await searchParams;
+  const style = bookletStyle(sp.style);
   // подарок: на посвящении — подпись и пожелание дарителя (без адресов и дат отправки)
   const g = order ? await giftFor(order) : null;
-  return <RazborBooklet {...data} initialStyle={style} backHref={`/razbor/r/${token}`} gift={g ? { from: g.from, ...(g.wish ? { wish: g.wish } : {}) } : null} />;
+  return <RazborBooklet {...data} initialStyle={style} print={sp.print === "1"} pdfHref={`/razbor/r/${token}/buklet/pdf`} backHref={`/razbor/r/${token}`} gift={g ? { from: g.from, ...(g.wish ? { wish: g.wish } : {}) } : null} />;
 }

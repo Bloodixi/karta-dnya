@@ -3,7 +3,7 @@ import Link from "next/link";
 import RazborGiftNote from "@/components/RazborGiftNote";
 import RazborShare from "@/components/RazborShare";
 import RazborView from "@/components/RazborView";
-import { CopyLinkButton, PrintButton } from "@/components/RazborClient";
+import { CopyLinkButton, PdfLink, PrintButton } from "@/components/RazborClient";
 import type { RazborDoc } from "@/lib/razbor";
 import type { GiftView } from "@/lib/razborGift";
 import { DOC_PAGE } from "@/lib/razborProducts";
@@ -33,7 +33,8 @@ export default function RazborResult({ kind, doc, gift, bookletHref, note, extra
               Буклет для печати
             </Link>
           ) : null}
-          <PrintButton />
+          {/* у разбора — готовый PDF буклета с сервера; у совместимости и детского — печать страницы */}
+          {bookletHref ? <PdfLink href={`${bookletHref}/pdf`} className="btn btn-ghost" /> : <PrintButton />}
           <CopyLinkButton />
         </div>
         {gift ? <RazborGiftNote gift={gift} /> : null}
