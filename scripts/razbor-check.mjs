@@ -43,6 +43,9 @@ const spec = {
   "month-destiny2.json": { keys: pairs(N12, N9), string: [90, 180] },
   "month-destiny-plan.json": { keys: N12, string: [90, 180] },
   "advice.json": { groupArrays: { cell: N9, year: N9, period: [...N9, "11"] }, array: [2, 120, 250] },
+  // Версия 6
+  "month-year2.json": { keys: pairs(N9, N9), string: [450, 750] },
+  "cell-destiny.json": { keys: pairs(N12, N9), string: [150, 280] },
   // Фаза 3: совместимость пары (ключ — базовые цифры чисел судьбы / личных годов, «a.b» при a ≤ b)
   "compat/pair.json": { soft: true, extra: [NO_TY, COMPAT_BANNED], keys: PAIRS_LE, words: { title: [2, 5] }, fields: { title: [5, 50], overall: [700, 1000], love: [450, 700], home: [450, 700], conflict: [450, 700], strength: [300, 450] }, arrays: { advice: [3, 120, 220] } },
   "compat/year-pair.json": { soft: true, extra: [NO_TY, COMPAT_BANNED], keys: PAIRS_LE, string: [300, 500] },

@@ -91,6 +91,9 @@ function bank(v = RAZBOR_VERSION) {
     monthDestiny2: readJsonData<Record<string, string>>(`${dir}/month-destiny2.json`, {}),
     monthDestinyPlan: readJsonData<Record<string, string>>(`${dir}/month-destiny-plan.json`, {}),
     advice: readJsonData<Advice | null>(`${dir}/advice.json`, null),
+    /** С версии 6: второй текст месяца (то же «год.месяц» второй раз в окне прогноза) и мостик пустой ячейки к числу судьбы («судьба.цифра»). */
+    monthYear2: readJsonData<Record<string, string>>(`${dir}/month-year2.json`, {}),
+    cellDestiny: readJsonData<Record<string, string>>(`${dir}/cell-destiny.json`, {}),
   };
 }
 
@@ -314,6 +317,8 @@ export function buildRazbor(i: RazborInput): RazborDoc {
   const v4 = v >= 4;
   /** С версии 5: «Для тебя» без повторов и без «запускай» в плановые месяцы, без дублей опоры и совета года. */
   const v5 = v >= 5;
+  /** С версии 6: повтор месяца — второй текст вместо копии; пустая ячейка квадрата — с мостиком к числу судьбы. */
+  const v6 = v >= 6;
   const n = numbers(i);
   const band = ageBand(n.age);
   const key = String(n.destiny.number);
@@ -328,12 +333,16 @@ export function buildRazbor(i: RazborInput): RazborDoc {
   /** Личный год каждого месяца прогноза — для категорий памятки. */
   const monthYears: number[] = [];
   const seenPm: Record<number, number> = {};
+  const seenKey = new Set<string>();
   for (let k = 0; k < 12; k++) {
     const mIdx = (i.mo - 1 + k) % 12;
     const year = i.yr + Math.floor((i.mo - 1 + k) / 12);
     const pyN = year === i.yr ? n.py.number : n.pyNext.number;
     const pm = personalMonth(pyN, mIdx + 1);
-    let text = (v2 && b.monthYear[`${pyN}.${pm}`]) || b.month[String(pm)] || "";
+    const ym = `${pyN}.${pm}`;
+    const twice = v6 && seenKey.has(ym);
+    seenKey.add(ym);
+    let text = (twice && b.monthYear2[ym]) || (v2 && b.monthYear[ym]) || b.month[String(pm)] || "";
     const plan = v5 && b.monthCat[`${pyN}.${pm}`] === "plan" ? b.monthDestinyPlan[key] : undefined;
     const again = v5 && (seenPm[pm] = (seenPm[pm] ?? 0) + 1) > 1 ? b.monthDestiny2[`${key}.${pm}`] : undefined;
     const forYou = v4 ? plan || again || b.monthDestiny[`${key}.${pm}`] : undefined;
@@ -406,7 +415,8 @@ export function buildRazbor(i: RazborInput): RazborDoc {
           const head = v4
             ? `${cell.title} — ${c ? `${countDigits(d, c)} (${String(d).repeat(c)})` : "ни одной цифры"}.`
             : `${cell.title} — ${c ? `${String(d).repeat(c)} (${c} ${plural(c, "цифра", "цифры", "цифр")})` : "ячейка пустая"}.`;
-          return [{ kind: "p", text: `**${head}** ${cell.levels[pyLevels(c)] ?? ""}` }];
+          const bridge = v6 && !c ? b.cellDestiny[`${key}.${d}`] : undefined;
+          return [{ kind: "p", text: `**${head}** ${cell.levels[pyLevels(c)] ?? ""}` }, ...(bridge ? [{ kind: "p" as const, text: bridge }] : [])];
         }),
       ],
     },
