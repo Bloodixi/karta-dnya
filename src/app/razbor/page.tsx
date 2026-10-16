@@ -6,6 +6,8 @@ import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import { DateField, FormError, TextField } from "@/components/NumerologyFields";
 import RazborView from "@/components/RazborView";
+import RazborWhoWrote, { RazborPriceAside } from "@/components/RazborWhoWrote";
+import ScrollToResult from "@/components/ScrollToResult";
 import { RazborCheckoutForm, RazborGiftFields, RazborGoal, RazborStickyCta } from "@/components/RazborClient";
 import { cleanName, parseDate, personalMonth, personalYear } from "@/lib/numerology";
 import { ageAt, buildTeaser, nowMsk, RAZBOR, RAZBOR_TOC } from "@/lib/razbor";
@@ -14,7 +16,6 @@ import { packAddon, PRODUCTS } from "@/lib/razborProducts";
 import { GIFT_DAYS_MAX, todayMsk } from "@/lib/razborGift";
 import { countWords, plural } from "@/lib/ruCount";
 import { pageTitle, SELLER, SITE } from "@/lib/site";
-import { horoscopeAuthor } from "@/lib/authors";
 import { paidCount, publicReviews } from "@/lib/razborReview";
 
 const PATH = "/razbor";
@@ -123,10 +124,10 @@ function TrustList({ count }: { count: number }) {
       <li>{RAZBOR_TOC.length} разделов · около 30 тысяч знаков · прогноз на 12 месяцев</li>
       <li>
         Не открылся разбор — вернём деньги.{" "}
-        <Link href="/vozvrat" className="text-accent underline">Условия возврата</Link>
+        <Link href="/vozvrat" className="text-accent-text underline">Условия возврата</Link>
       </li>
       <li>
-        <Link href={`${PATH}/primer`} className="text-accent underline">Посмотреть пример полного разбора</Link>
+        <Link href={`${PATH}/primer`} className="text-accent-text underline">Посмотреть пример полного разбора</Link>
       </li>
     </ul>
   );
@@ -149,29 +150,6 @@ function Reviews() {
         ))}
       </ul>
     </section>
-  );
-}
-
-/** Кто составлял: автор гороскопов вместе с редакцией (решение владельца 17.10.2026; стаж в нумерологии не приписываем). */
-function WhoWrote() {
-  const a = horoscopeAuthor();
-  return (
-    <div className="mt-6 border-t border-line pt-4 text-sm text-muted">
-      <p className="mono !text-ink">Кто составлял</p>
-      {a ? (
-        <div className="flex items-center gap-3 mt-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={a.photo} alt={a.name} width={48} height={48} loading="lazy" className="w-12 h-12 rounded-full object-cover shrink-0" />
-          <p>
-            Тексты разбора подготовила <Link href={`/avtory/${a.slug}`} className="underline text-ink">{a.name}</Link>, автор гороскопов «{SITE.name}», вместе с редакцией.
-          </p>
-        </div>
-      ) : null}
-      <p className="mt-2">
-        Основа — классическая пифагорейская нумерология. Числа считаются по тем же правилам, что в калькуляторах{" "}
-        <Link href="/chislo-sudby" className="underline">числа судьбы</Link> и <Link href="/kvadrat-pifagora" className="underline">квадрата Пифагора</Link>, а расчёт каждого числа показан в самом разборе.
-      </p>
-    </div>
   );
 }
 
@@ -214,176 +192,196 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
       <p className="text-muted mt-3 max-w-2xl text-lg">
         Твои числа одним связным текстом: характер, сильные стороны, призвание, квадрат Пифагора, любовь и работа, личный год и прогноз на двенадцать месяцев вперёд.
       </p>
-
-      <div id="forma" className="card p-6 mt-6 max-w-3xl scroll-mt-24">
-        <Form action={PATH} className="flex flex-wrap gap-3 items-end">
-          {isGift ? <input type="hidden" name="g" value="1" /> : null}
-          <DateField name="d" label={isGift ? "Дата рождения получателя" : "Дата рождения"} defaultValue={date?.iso ?? (typeof sp.d === "string" ? sp.d : "")} />
-          <TextField name="n" label={isGift ? "Имя получателя (необязательно)" : "Имя (необязательно)"} defaultValue={name} placeholder="Например, Анна" />
-          <button type="submit" className="btn">Посмотреть бесплатно</button>
-        </Form>
-        <FormError text={invalid ? "Проверь дату: нужна настоящая дата рождения, например 17.05.1990." : undefined} />
-        <p className="text-xs text-muted mt-3">Бесплатная часть откроется сразу, без регистрации.</p>
-      </div>
-
-      {teaser && date && (
-        <section id="razbor-teaser" className="mt-10 scroll-mt-24 max-md:pb-16">
-          <RazborGoal counter={counter} goal="razbor_teaser" />
-          <div className="ornament mb-2">
-            <h2 className="text-2xl">
-              Бесплатная часть{teaser.who ? ` · ${teaser.who}` : ""} · {teaser.date}
-            </h2>
-          </div>
-          <p className="max-w-3xl text-sm text-muted mb-4">
-            Ниже — бесплатная часть. Полный разбор из {RAZBOR_TOC.length} разделов стоит {RAZBOR.price} ₽:{" "}
-            <a href="#oplata" className="text-accent underline">перейти к оплате</a>
-          </p>
-          {age !== null && age >= 0 && age < 14 ? (
-            <p className="max-w-3xl card p-4 mb-4 text-sm">
-              Это дата рождения ребёнка? Для ребёнка есть{" "}
-              <Link href={childHref} className="text-accent underline">детский разбор для родителя</Link>{" "}
-              — о характере, сильных сторонах и о том, как поддержать.
-            </p>
-          ) : null}
-          <RazborView sections={teaser.sections} toc={false} />
-          {hiddenMonths(teaser) > 0 && (
-            <HiddenMonths
-              count={hiddenMonths(teaser)}
-              labels={BLUR_ROWS.map((_, i) => monthLabel(now.yr, now.mo, 12 - hiddenMonths(teaser) + i))}
-              numbers={date ? BLUR_ROWS.map((_, i) => monthNumber(date.d, date.m, now.yr, now.mo, 12 - hiddenMonths(teaser) + i)) : []}
-            />
-          )}
-
-          <div className="card p-5 mt-8 max-w-3xl razbor-locked">
-            <p className="mono mb-3">Ещё {teaser.locked.length} разделов в полном разборе</p>
-            <ul className="grid gap-2 sm:grid-cols-2">
-              {teaser.locked.map((t) => (
-                <li key={t.id} className="flex items-center gap-2 text-sm">
-                  <LockIcon /> {t.title}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <RazborStickyCta price={RAZBOR.price} />
-        </section>
-      )}
-
-      <section id="oplata" className="mt-8 max-w-3xl scroll-mt-24">
-        <div className="card p-6 frame-gold">
-          <p className="mono">Полный разбор</p>
-          <p className="display text-4xl mt-2">{RAZBOR.price} ₽</p>
-          <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF. Можно оформить в подарок: с подписью, пожеланием и письмом получателю в выбранный день.</p>
-          <TrustList count={await paidCount().catch(() => 0)} />
-
-          {err === "email" && (
-            <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">Укажи e-mail — на него придут ссылка на разбор и чек об оплате.</p>
-          )}
-
-          {err && GIFT_ERRORS[err] && (
-            <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">{GIFT_ERRORS[err]}</p>
-          )}
-
-          {err === "pay" && (
-            <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">
-              Оплата временно недоступна. Попробуй чуть позже
-              {contactEmail ? (
-                <>
-                  {" "}или напиши нам: <a className="text-accent underline" href={`mailto:${contactEmail}`}>{contactEmail}</a>.
-                </>
-              ) : (
-                " или напиши нам — мы поможем."
-              )}
-            </p>
-          )}
-
-          {date ? (
-            <RazborCheckoutForm counter={counter}>
-              <input type="hidden" name="date" value={date.iso} />
-              <RazborGiftFields
-                counter={counter}
-                date={date.iso}
-                name={name}
-                today={todayMsk()}
-                maxDate={todayMsk(GIFT_DAYS_MAX)}
-                gift={isGift}
-                err={err}
-                price={RAZBOR.price}
-                pack={offerPack ? { addon: packAddon(), total: PRODUCTS.pack.price, on: one(sp.p) === "1", date2: d2?.iso, name2: cleanName(sp.n2), today: todayMsk() } : undefined}
-              />
-              <p className="text-xs text-muted mt-3 max-w-md">
-                Нажимая кнопку, ты принимаешь условия <Link href="/oferta" className="underline">оферты</Link>. Оплата через ЮKassa. Разбор носит развлекательный и ознакомительный характер.
-              </p>
-            </RazborCheckoutForm>
-          ) : (
-            <p className="mt-4">
-              <a href="#forma" className="btn">Ввести дату рождения</a>
-            </p>
-          )}
-          <WhoWrote />
-        </div>
-      </section>
-
-      <Reviews />
-
-      <section className="mt-12 grid gap-8 lg:grid-cols-2 max-w-5xl">
-        <div>
-          <h2 className="text-2xl mb-3">Что внутри</h2>
-          <ol className="grid gap-1.5 list-decimal pl-5 marker:text-muted">
-            {RAZBOR_TOC.map((t) => (
-              <li key={t.id}>{t.title}</li>
-            ))}
-          </ol>
-          <p className="mt-4">
-            <Link href={`${PATH}/primer`} className="text-accent underline">Посмотреть пример полного разбора</Link>
-          </p>
-        </div>
-        <div className="grid gap-8 content-start">
-          <div>
-            <h2 className="text-2xl mb-3">Для кого</h2>
-            <ul className="grid gap-1.5 text-muted">
-              {FOR_WHOM.map((t) => (
-                <li key={t}>— {t}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h2 className="text-2xl mb-3">Формат</h2>
-            <p className="text-muted">
-              Отдельная страница по личной ссылке: открывается на телефоне и компьютере, а кнопкой «Сохранить в PDF» её можно сохранить файлом или распечатать. Прогноз по месяцам начинается с месяца покупки, а в подарке с отложенным письмом — с месяца, когда разбор откроют.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <p className="text-xs text-muted mt-8 max-w-2xl">
-        Разбор носит развлекательный и ознакомительный характер и не является консультацией специалиста. Решения остаются за тобой.
+      <p className="chip mt-4">
+        Бесплатно — первые разделы · полный разбор {RAZBOR.price} ₽ · {RAZBOR_TOC.length} {plural(RAZBOR_TOC.length, ["раздел", "раздела", "разделов"])}
       </p>
 
-      <section className="prose mt-10">
-        <h2>Бесплатные расчёты</h2>
-        <p>
-          Отдельные числа можно посчитать бесплатно: <Link href="/chislo-sudby">число судьбы</Link>, <Link href="/kvadrat-pifagora">квадрат Пифагора</Link> и <Link href="/numerologiya/lichnyy-god">личный год</Link>. Разбор собирает их вместе и добавляет то, чего нет в калькуляторах: как числа сочетаются между собой и что из этого следует на ближайший год.
-        </p>
-      </section>
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10 lg:items-start">
+        <div className="min-w-0">
+          <div id="forma" className="card p-6 mt-6 max-w-3xl scroll-mt-24">
+            <Form action={PATH} className="grid gap-3 sm:flex sm:flex-wrap sm:items-end">
+              {isGift ? <input type="hidden" name="g" value="1" /> : null}
+              <DateField name="d" label={isGift ? "Дата рождения получателя" : "Дата рождения"} defaultValue={date?.iso ?? (typeof sp.d === "string" ? sp.d : "")} />
+              <TextField name="n" label={isGift ? "Имя получателя (необязательно)" : "Имя (необязательно)"} defaultValue={name} placeholder="Например, Анна" />
+              <button type="submit" className="btn justify-center">Посмотреть бесплатно</button>
+            </Form>
+            <FormError text={invalid ? "Проверь дату: нужна настоящая дата рождения, например 17.05.1990." : undefined} />
+            <p className="text-xs text-muted mt-3">Бесплатная часть откроется сразу, без регистрации.</p>
+          </div>
 
-      <section id="dostup" className="mt-10 max-w-3xl scroll-mt-24">
-        <div className="card p-6">
-          <h2 className="text-xl">Потеряли ссылку на разбор?</h2>
-          {one(sp.dostup) ? (
-            <p role="status" className="mt-3">Если на этот адрес были оплаченные разборы, мы отправили ссылки на них. Проверь почту, в том числе папку «Спам».</p>
-          ) : (
-            <form method="post" action="/api/razbor/dostup" className="mt-3 flex flex-wrap items-end gap-2">
-              <label className="grid gap-1 text-sm min-w-0 flex-1 max-w-sm">
-                E-mail, указанный при оплате
-                <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
-              </label>
-              <button type="submit" className="btn btn-ghost">Прислать ссылки</button>
-            </form>
+          {teaser && date && (
+            <section id="razbor-teaser" className="mt-10 scroll-mt-24">
+              <ScrollToResult key={`${date.iso}|${name}`} id="razbor-teaser" when={!err} />
+              <RazborGoal counter={counter} goal="razbor_teaser" />
+              <div className="ornament mb-2">
+                <h2 className="text-2xl">
+                  Бесплатная часть{teaser.who ? ` · ${teaser.who}` : ""} · {teaser.date}
+                </h2>
+              </div>
+              <p className="max-w-3xl text-sm text-muted mb-4">
+                Ниже — бесплатная часть. Полный разбор из {RAZBOR_TOC.length} разделов стоит {RAZBOR.price} ₽:{" "}
+                <a href="#oplata" className="text-accent-text underline">перейти к оплате</a>
+              </p>
+              {age !== null && age >= 0 && age < 14 ? (
+                <p className="max-w-3xl card p-4 mb-4 text-sm">
+                  Это дата рождения ребёнка? Для ребёнка есть{" "}
+                  <Link href={childHref} className="text-accent-text underline">детский разбор для родителя</Link>{" "}
+                  — о характере, сильных сторонах и о том, как поддержать.
+                </p>
+              ) : null}
+              <RazborView sections={teaser.sections} toc={false} />
+              {hiddenMonths(teaser) > 0 && (
+                <HiddenMonths
+                  count={hiddenMonths(teaser)}
+                  labels={BLUR_ROWS.map((_, i) => monthLabel(now.yr, now.mo, 12 - hiddenMonths(teaser) + i))}
+                  numbers={date ? BLUR_ROWS.map((_, i) => monthNumber(date.d, date.m, now.yr, now.mo, 12 - hiddenMonths(teaser) + i)) : []}
+                />
+              )}
+
+              <div className="card p-5 mt-8 max-w-3xl razbor-locked">
+                <p className="mono mb-3">Ещё {teaser.locked.length} разделов в полном разборе</p>
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {teaser.locked.map((t) => (
+                    <li key={t.id} className="flex items-center gap-2 text-sm">
+                      <LockIcon /> {t.title}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <RazborStickyCta price={RAZBOR.price} />
+            </section>
           )}
-        </div>
-      </section>
 
-      <Faq items={FAQ} />
+          <section id="oplata" className="mt-6 max-w-3xl scroll-mt-24">
+            <div className="card p-6 frame-gold">
+              <p className="mono">Полный разбор</p>
+              <p className="display text-4xl mt-2">{RAZBOR.price} ₽</p>
+              <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF. Можно оформить в подарок: с подписью, пожеланием и письмом получателю в выбранный день.</p>
+              <TrustList count={await paidCount().catch(() => 0)} />
+
+              {err === "email" && (
+                <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">Укажи e-mail — на него придут ссылка на разбор и чек об оплате.</p>
+              )}
+
+              {err && GIFT_ERRORS[err] && (
+                <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">{GIFT_ERRORS[err]}</p>
+              )}
+
+              {err === "pay" && (
+                <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">
+                  Оплата временно недоступна. Попробуй чуть позже
+                  {contactEmail ? (
+                    <>
+                      {" "}или напиши нам: <a className="text-accent-text underline" href={`mailto:${contactEmail}`}>{contactEmail}</a>.
+                    </>
+                  ) : (
+                    " или напиши нам — мы поможем."
+                  )}
+                </p>
+              )}
+
+              {date ? (
+                <RazborCheckoutForm counter={counter}>
+                  <input type="hidden" name="date" value={date.iso} />
+                  <RazborGiftFields
+                    counter={counter}
+                    date={date.iso}
+                    name={name}
+                    today={todayMsk()}
+                    maxDate={todayMsk(GIFT_DAYS_MAX)}
+                    gift={isGift}
+                    err={err}
+                    price={RAZBOR.price}
+                    pack={offerPack ? { addon: packAddon(), total: PRODUCTS.pack.price, on: one(sp.p) === "1", date2: d2?.iso, name2: cleanName(sp.n2), today: todayMsk() } : undefined}
+                  />
+                  <p className="text-xs text-muted mt-3 max-w-md">
+                    Нажимая кнопку, ты принимаешь условия <Link href="/oferta" className="underline">оферты</Link>. Оплата через ЮKassa. Разбор носит развлекательный и ознакомительный характер.
+                  </p>
+                </RazborCheckoutForm>
+              ) : (
+                <p className="mt-4">
+                  <a href="#forma" className="btn">Ввести дату рождения</a>
+                </p>
+              )}
+              <RazborWhoWrote className="lg:hidden" />
+            </div>
+          </section>
+
+          <Reviews />
+
+          <section className="mt-12 grid gap-8 lg:grid-cols-2 max-w-5xl">
+            <div>
+              <h2 className="text-2xl mb-3">Что внутри</h2>
+              <ol className="grid gap-1.5 list-decimal pl-7 marker:text-muted">
+                {RAZBOR_TOC.map((t) => (
+                  <li key={t.id}>{t.title}</li>
+                ))}
+              </ol>
+              <p className="mt-4">
+                <Link href={`${PATH}/primer`} className="text-accent-text underline">Посмотреть пример полного разбора</Link>
+              </p>
+            </div>
+            <div className="grid gap-8 content-start">
+              <div>
+                <h2 className="text-2xl mb-3">Для кого</h2>
+                <ul className="grid gap-1.5 text-muted">
+                  {FOR_WHOM.map((t) => (
+                    <li key={t}>— {t}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-2xl mb-3">Формат</h2>
+                <p className="text-muted">
+                  Отдельная страница по личной ссылке: открывается на телефоне и компьютере, а кнопкой «Сохранить в PDF» её можно сохранить файлом или распечатать. Прогноз по месяцам начинается с месяца покупки, а в подарке с отложенным письмом — с месяца, когда разбор откроют.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <p className="text-xs text-muted mt-8 max-w-2xl">
+            Разбор носит развлекательный и ознакомительный характер и не является консультацией специалиста. Решения остаются за тобой.
+          </p>
+
+          <section className="prose mt-10">
+            <h2>Бесплатные расчёты</h2>
+            <p>
+              Отдельные числа можно посчитать бесплатно: <Link href="/chislo-sudby">число судьбы</Link>, <Link href="/kvadrat-pifagora">квадрат Пифагора</Link> и <Link href="/numerologiya/lichnyy-god">личный год</Link>. Разбор собирает их вместе и добавляет то, чего нет в калькуляторах: как числа сочетаются между собой и что из этого следует на ближайший год.
+            </p>
+          </section>
+
+          <section id="dostup" className="mt-10 max-w-3xl scroll-mt-24">
+            <div className="card p-6">
+              <h2 className="text-xl">Потеряли ссылку на разбор?</h2>
+              {one(sp.dostup) ? (
+                <p role="status" className="mt-3">Если на этот адрес были оплаченные разборы, мы отправили ссылки на них. Проверь почту, в том числе папку «Спам».</p>
+              ) : (
+                <form method="post" action="/api/razbor/dostup" className="mt-3 flex flex-wrap items-end gap-2">
+                  <label className="grid gap-1 text-sm min-w-0 flex-1 max-w-sm">
+                    E-mail, указанный при оплате
+                    <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
+                  </label>
+                  <button type="submit" className="btn btn-ghost">Прислать ссылки</button>
+                </form>
+              )}
+            </div>
+          </section>
+
+          <Faq items={FAQ} />
+        </div>
+
+        <RazborPriceAside
+          title="Полный разбор"
+          price={RAZBOR.price}
+          points={[
+            `${RAZBOR_TOC.length} ${plural(RAZBOR_TOC.length, ["раздел", "раздела", "разделов"])} · около 30 тысяч знаков · прогноз на 12 месяцев`,
+            "Бесплатная часть откроется сразу, без регистрации.",
+            <Link key="primer" href={`${PATH}/primer`} className="text-accent-text underline">Посмотреть пример полного разбора</Link>,
+          ]}
+          href={date ? "#oplata" : "#forma"}
+          cta={date ? "Открыть полный разбор" : "Ввести дату рождения"}
+        />
+      </div>
 
       <JsonLd
         data={{
