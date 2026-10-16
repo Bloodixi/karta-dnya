@@ -107,3 +107,44 @@ export function PaymentWaiter({ order, max = 30, fallback }: { order: string; ma
     </p>
   );
 }
+
+/**
+ * Липкая кнопка оплаты на телефоне: видна, пока читаешь бесплатную часть (`from`), и прячется,
+ * как только блок оплаты (`to`) дошёл до экрана или остался выше. Стоит над нижней панелью TabBar.
+ */
+export function RazborStickyCta({ price, from = "razbor-teaser", to = "oplata" }: { price: number; from?: string; to?: string }) {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const start = document.getElementById(from);
+    const end = document.getElementById(to);
+    if (!start || !end) return;
+    let raf = 0;
+    const check = () => {
+      raf = 0;
+      const h = window.innerHeight;
+      // 9rem ≈ панель TabBar и сама кнопка: блок оплаты, выглянувший из-под них, уже считается видимым
+      setShow(start.getBoundingClientRect().top < h * 0.6 && end.getBoundingClientRect().top > h - 144);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [from, to]);
+  return (
+    <div
+      inert={!show}
+      className={`md:hidden no-print fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-bg/95 backdrop-blur px-4 py-2.5 transition-[opacity,transform,visibility] duration-200 ${show ? "opacity-100 translate-y-0" : "invisible opacity-0 translate-y-2"}`}
+    >
+      <a href={`#${to}`} className="btn w-full justify-center">
+        Открыть полный разбор — {price} ₽
+      </a>
+    </div>
+  );
+}

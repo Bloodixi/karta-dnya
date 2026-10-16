@@ -95,6 +95,7 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
       for (const n of getNumerology()) add(`/chislo-sudby/${n.number}`, num, "monthly", 0.7);
       add("/kvadrat-pifagora", changed(app("kvadrat-pifagora")), "monthly", 0.8);
       add("/razbor", changed(app("razbor/page.tsx"), "src/lib/razbor.ts"), "monthly", 0.8);
+      add("/razbor/primer", changed(app("razbor/primer"), "src/lib/razbor.ts", "src/components/RazborView.tsx"), "monthly", 0.6);
       const clock = changed(app("numerologiya/chisla-na-chasah"), data("clock-numbers.json"));
       add("/numerologiya/chisla-na-chasah", clock, "monthly", 0.8);
       for (const c of getClockNumbers()) add(`/numerologiya/chisla-na-chasah/${c.slug}`, clock, "monthly", 0.6);
