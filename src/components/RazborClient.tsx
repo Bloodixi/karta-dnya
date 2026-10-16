@@ -56,6 +56,24 @@ export function PrintButton() {
   );
 }
 
+/**
+ * «Скачать PDF»: обычная ссылка на …/buklet/pdf (без download — если PDF ещё не готов, откроется страница «готовится»).
+ * Сервер собирает буклет до минуты — пока ждём, кнопка подсказывает; файл скачается сам, страница останется.
+ */
+export function PdfLink({ href, className = "btn" }: { href: string; className?: string }) {
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!busy) return;
+    const t = setTimeout(() => setBusy(false), 90_000);
+    return () => clearTimeout(t);
+  }, [busy]);
+  return (
+    <a href={href} className={`${className} no-print`} rel="nofollow" aria-busy={busy} onClick={() => setBusy(true)}>
+      {busy ? "Готовлю PDF — до минуты…" : "Скачать PDF"}
+    </a>
+  );
+}
+
 /** Копирует `url` (абсолютный или путь сайта) или адрес текущей страницы. */
 export function CopyLinkButton({ url, label = "Скопировать ссылку" }: { url?: string; label?: string } = {}) {
   const [done, setDone] = useState(false);

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PdfLink } from "@/components/RazborClient";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RazborDoc } from "@/lib/razbor";
 import {
@@ -168,7 +169,11 @@ const DEADLINE_MS = 60_000;
 const removePagedStyles = () => document.querySelectorAll("style[data-pagedjs-inserted-styles]").forEach((e) => e.remove());
 
 /** Печатный буклет A5: раскладка paged.js в браузере, подгонка страниц, печать или PDF через window.print. */
-export default function RazborBooklet({ doc, questions, initialStyle, qr, backHref, gift = null }: { doc: RazborDoc; questions: BookletQuestions; initialStyle: BookletStyle; qr: string; backHref: string; gift?: BookletGift | null }) {
+/**
+ * print — страница открыта сервисом PDF (?print=1): без панели, только страницы буклета.
+ * pdfHref — готовый PDF с сервера (…/buklet/pdf), к нему добавляется выбранный стиль.
+ */
+export default function RazborBooklet({ doc, questions, initialStyle, qr, backHref, pdfHref, print = false, gift = null }: { doc: RazborDoc; questions: BookletQuestions; initialStyle: BookletStyle; qr: string; backHref: string; pdfHref: string; print?: boolean; gift?: BookletGift | null }) {
   const bookRef = useRef<HTMLDivElement>(null);
   const [style, setStyle] = useState<BookletStyle>(initialStyle);
   const [view, setView] = useState<View>("spreads");
@@ -360,14 +365,15 @@ export default function RazborBooklet({ doc, questions, initialStyle, qr, backHr
       <link rel="stylesheet" href={BOOKLET_FONTS_URL} precedence="default" />
       <style>{SCREEN_CSS + printCss(style)}</style>
 
-      <div className="buklet-bar no-print">
+      {print ? null : <div className="buklet-bar no-print">
         <div className="buklet-bar-in">
           <div className="buklet-title">
             <p className="font-semibold">Буклет для печати{doc.who ? ` · ${doc.who}` : ""}</p>
             <p className="text-sm text-muted">A5 · {doc.date}</p>
           </div>
-          <button type="button" className="btn" disabled={!ready} onClick={() => window.print()}>
-            {ready ? "Распечатать или сохранить в PDF" : failed ? "Буклет не собран" : "Собираю страницы…"}
+          <PdfLink href={`${pdfHref}?style=${style}`} />
+          <button type="button" className="btn btn-ghost" disabled={!ready} onClick={() => window.print()}>
+            {ready ? "Распечатать" : failed ? "Буклет не собран" : "Собираю страницы…"}
           </button>
           <div className="buklet-seg" role="group" aria-label="Стиль буклета">
             {(Object.keys(STYLES) as BookletStyle[]).map((st) => (
@@ -390,9 +396,9 @@ export default function RazborBooklet({ doc, questions, initialStyle, qr, backHr
           </div>
         )}
         <p className="buklet-note">
-          <b>Печать брошюрой:</b> сохрани PDF → Adobe Reader (компьютер) → Печать → Брошюра, двусторонняя, переворот по короткому краю; согни стопку пополам и скрепи степлером по сгибу; первый лист можно печатать на плотной бумаге. <Link href={backHref} className="underline">Вернуться к разбору</Link>
+          <b>Печать брошюрой:</b> скачай PDF → Adobe Reader (компьютер) → Печать → Брошюра, двусторонняя, переворот по короткому краю; согни стопку пополам и скрепи степлером по сгибу; первый лист можно печатать на плотной бумаге. <Link href={backHref} className="underline">Вернуться к разбору</Link>
         </p>
-      </div>
+      </div>}
 
       <div className="buklet-stage">
         <div ref={bookRef} className="buklet-book" />

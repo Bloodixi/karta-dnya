@@ -1,9 +1,11 @@
 /** Письмо покупателю после оплаты: ссылка на разбор, «Главное о тебе», подарок близкому и чек «Мой налог» (оферта, п. 4.3). Только сервер. */
-import { mailReady, sendMail, type Inline } from "./mailer";
+import { mailReady, sendMail, type Attachment, type Inline } from "./mailer";
 import { escapeHtml as h } from "./notify";
 import { buildRazbor } from "./razbor";
 import { getOrder, patchGift, patchOrder, type Order } from "./razborStore";
 import { readToken } from "./razborToken";
+import { bookletStyle } from "./razborBookletData";
+import { fetchBookletPdf, pdfFileName } from "./razborPdf";
 import { qrPng, receiptView } from "./receiptView";
 import { SELLER, SITE } from "./site";
 
@@ -72,6 +74,24 @@ ${main.map((m) => `<p style="margin:10px 0 0">— ${h(m)}</p>`).join("\n")}
 </td></tr>`
     : "";
 
+/**
+ * PDF буклета во вложение письма: сервис собирает его до минуты; не успел или недоступен — письмо без вложения,
+ * со ссылкой «Скачать PDF» (сервис доведёт рендер до кэша, по ссылке файл отдастся сразу).
+ */
+async function bookletAttachment(order: Order, name: string): Promise<{ pdf: Attachment | null; href: string }> {
+  const href = `${SITE.url}/r/${order.id}/buklet/pdf`;
+  const pdf = await fetchBookletPdf(`/r/${order.id}/buklet`, bookletStyle(undefined), 60_000);
+  return { pdf: pdf ? { filename: pdfFileName(name, ru(order.date)), content: pdf, contentType: "application/pdf" } : null, href };
+}
+
+/** Строка о PDF: вложение есть — сказать об этом, нет — ссылка на скачивание. */
+const pdfText = (b: { pdf: Attachment | null; href: string }) =>
+  b.pdf ? "Разбор в виде буклета A5 — в PDF во вложении: его удобно читать офлайн или распечатать." : `Разбор в виде буклета A5 в PDF: ${b.href}`;
+const pdfHtml = (b: { pdf: Attachment | null; href: string }) =>
+  b.pdf
+    ? `<tr><td style="padding:0 0 12px;font-size:14px;color:#444">Разбор в виде буклета A5 — в PDF во вложении: его удобно читать офлайн или распечатать.</td></tr>`
+    : `<tr><td style="padding:0 0 12px;font-size:14px;color:#444">Разбор в виде буклета A5: <a href="${h(b.href)}" style="color:#5b3fa8;font-weight:bold">Скачать PDF</a></td></tr>`;
+
 /** Отправляет письмо один раз на заказ (mail_sent_at). Ошибку не бросает — вернёт её текст для уведомления владельцу. */
 export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?: string }> {
   if (order.mail_sent_at) return { sent: true };
@@ -97,6 +117,7 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
       : `Письмо получателю мы не отправляем: передай ссылку ${name ? `${name} ` : ""}сам(а) — так, как тебе удобно.`;
   const mainTitle = gift ? "Главное из разбора" : "Главное о тебе";
   const main = razborHighlights(order.token);
+  const booklet = await bookletAttachment(order, name);
   const r = receiptView(order);
   const inline: Inline[] = r ? [{ cid: "qr@karta-dnya.ru", filename: `chek-${r.number}.png`, content: await qrPng(r.fnsUrl), contentType: "image/png" }] : [];
   const receiptText = r
@@ -118,6 +139,8 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
     "",
     keep,
     "",
+    pdfText(booklet),
+    "",
     ...(delivery ? [delivery, ""] : []),
     ...(main.length ? [`${mainTitle}:`, ...main.map((m) => `— ${m}`), "", "Остальное — в разборе по ссылке выше.", ""] : []),
     "Подарить разбор близкому:",
@@ -138,6 +161,7 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
 <tr><td style="padding:0 0 8px">${btn(url, "Открыть разбор", "#5b3fa8", "#ffffff")}</td></tr>
 <tr><td style="padding:0 0 4px;font-size:13px;color:#666">Ссылка: <a href="${h(url)}" style="color:#5b3fa8">${h(url)}</a></td></tr>
 <tr><td style="padding:0 0 12px;font-size:14px;font-weight:bold">${h(keep)}</td></tr>
+${pdfHtml(booklet)}
 ${delivery ? `<tr><td style="padding:0 0 12px"><p style="margin:0;border-left:3px solid #5b3fa8;padding-left:12px">${h(delivery)}</p></td></tr>` : ""}
 ${mainHtml}
 <tr><td style="padding:16px 0 8px">${btn(GIFT_URL, "Подарить разбор близкому", "#ffffff", "#5b3fa8")}</td></tr>
@@ -168,7 +192,7 @@ ${r ? `<tr><td style="padding:8px 0"><table role="presentation" cellpadding="0" 
 </table>
 </td></tr></table>`;
   try {
-    await sendMail({ to: order.email, subject, text, html, inline });
+    await sendMail({ to: order.email, subject, text, html, inline, ...(booklet.pdf ? { attachments: [booklet.pdf] } : {}) });
     await patchOrder(order.id, { mail_sent_at: new Date().toISOString() });
     return { sent: true };
   } catch (e) {
@@ -210,6 +234,7 @@ async function doMailGift(id: string): Promise<{ sent?: boolean; error?: string 
   const subject = `${order.test ? "[ТЕСТ] " : ""}${name ? `${name}, ` : ""}${from} дарит тебе нумерологический разбор`;
   const lead = `${from} дарит тебе нумерологический разбор по дате рождения — личный текст о твоих числах, характере, сильных сторонах и ближайших двенадцати месяцах.`;
   const main = razborHighlights(order.token);
+  const booklet = await bookletAttachment(order, name);
   const text = [
     hello,
     "",
@@ -219,7 +244,9 @@ async function doMailGift(id: string): Promise<{ sent?: boolean; error?: string 
     "Разбор открывается по ссылке:",
     url,
     "",
-    "Ссылка твоя навсегда — сохрани письмо. На странице разбора есть кнопка, чтобы сохранить его в PDF.",
+    "Ссылка твоя навсегда — сохрани письмо.",
+    "",
+    pdfText(booklet),
     "",
     ...(main.length ? ["Главное о тебе:", ...main.map((m) => `— ${m}`), "", "Остальное — в разборе по ссылке выше.", ""] : []),
     `Письмо отправлено по просьбе ${from}: подарок оформлен на сайте «${SITE.name}». Если оно пришло по ошибке — просто не обращай на него внимания.`,
@@ -239,13 +266,14 @@ ${wish ? `<tr><td style="padding:4px 0 14px">
 <tr><td style="padding:0 0 8px">${btn(url, "Открыть подарок", "#5b3fa8", "#ffffff")}</td></tr>
 <tr><td style="padding:0 0 4px;font-size:13px;color:#666">Ссылка: <a href="${h(url)}" style="color:#5b3fa8">${h(url)}</a></td></tr>
 <tr><td style="padding:0 0 12px;font-size:14px;font-weight:bold">Ссылка твоя навсегда — сохрани письмо.</td></tr>
+${pdfHtml(booklet)}
 ${highlightsHtml("Главное о тебе", main)}
 <tr><td style="padding:12px 0 8px;font-size:13px;color:#666">Письмо отправлено по просьбе ${h(from)}: подарок оформлен на сайте «${h(SITE.name)}». Если оно пришло по ошибке — просто не обращай на него внимания.</td></tr>
 <tr><td style="padding:8px 0;font-size:12px;color:#888">${h(SITE.name)} · <a href="${h(SITE.url)}" style="color:#888">${h(SITE.url.replace(/^https?:\/\//, ""))}</a></td></tr>
 </table>
 </td></tr></table>`;
   try {
-    await sendMail({ to: gift.to_email, subject, text, html });
+    await sendMail({ to: gift.to_email, subject, text, html, ...(booklet.pdf ? { attachments: [booklet.pdf] } : {}) });
     await patchGift(order.id, { sent_at: new Date().toISOString() });
     return { sent: true };
   } catch (e) {

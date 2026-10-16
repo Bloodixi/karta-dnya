@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import RazborGiftNote from "@/components/RazborGiftNote";
 import RazborShare from "@/components/RazborShare";
 import RazborView from "@/components/RazborView";
-import { CopyLinkButton, PrintButton } from "@/components/RazborClient";
+import { CopyLinkButton, PdfLink } from "@/components/RazborClient";
 import { buildRazbor, RAZBOR } from "@/lib/razbor";
 import { giftFor } from "@/lib/razborGift";
 import { readToken } from "@/lib/razborToken";
@@ -43,7 +43,7 @@ export default async function RazborResultPage({ params }: PageProps<"/razbor/r/
           <Link href={`/razbor/r/${token}/buklet`} className="btn">
             Буклет для печати
           </Link>
-          <PrintButton />
+          <PdfLink href={`/razbor/r/${token}/buklet/pdf`} className="btn btn-ghost" />
           <CopyLinkButton />
         </div>
         {gift ? <RazborGiftNote gift={gift} /> : null}
