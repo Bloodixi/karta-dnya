@@ -74,13 +74,14 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-line">
-        <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted">
-          © {new Date().getFullYear()} {SITE.name}. Все материалы защищены.
-          <span className="mx-2" aria-hidden="true">·</span>
+        {/* flex-wrap: каждая ссылка переносится целиком, строка не выходит за край на узком экране */}
+        <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted flex flex-wrap gap-x-2 gap-y-1">
+          <span>© {new Date().getFullYear()} {SITE.name}. Все материалы защищены.</span>
+          <span aria-hidden="true">·</span>
           <Link href="/oferta" className="hover:text-ink underline">Оферта</Link>
-          <span className="mx-2" aria-hidden="true">·</span>
+          <span aria-hidden="true">·</span>
           <Link href="/vozvrat" className="hover:text-ink underline">Возврат</Link>
-          <span className="mx-2" aria-hidden="true">·</span>
+          <span aria-hidden="true">·</span>
           <Link href="/privacy" className="hover:text-ink underline">Конфиденциальность</Link>
         </p>
       </div>
