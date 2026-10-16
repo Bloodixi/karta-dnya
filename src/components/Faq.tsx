@@ -1,10 +1,10 @@
 import type { Faq as FaqItem } from "@/lib/content";
 import JsonLd from "./JsonLd";
 
-export default function Faq({ items }: { items: FaqItem[] }) {
+export default function Faq({ items, className = "max-w-3xl" }: { items: FaqItem[]; className?: string }) {
   if (!items.length) return null;
   return (
-    <section className="mt-10">
+    <section className={`mt-10 ${className}`.trim()}>
       <h2 className="text-2xl mb-3">Частые вопросы</h2>
       <div className="grid gap-2">
         {items.map((f, i) => (

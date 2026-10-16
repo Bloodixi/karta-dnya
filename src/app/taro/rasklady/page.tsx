@@ -29,21 +29,21 @@ export default function SpreadsHubPage() {
       <h1 className="text-3xl md:text-4xl">Расклады Таро онлайн</h1>
       <div className="mt-3 max-w-3xl grid gap-3 text-lg text-muted">
         <p>Здесь собраны десять раскладов Таро, которые можно сделать онлайн бесплатно: от одной карты на короткий вопрос до годового круга из двенадцати карт. Каждый расклад открывается на своей странице с описанием позиций, порядком чтения и ответами на частые вопросы. Карты вытягиваются случайно из полной колоды Райдера–Уэйта в 78 карт, часть выпадает перевёрнутыми, и под каждой картой показано короткое значение именно для её положения.</p>
-        <p>Расклад стоит выбирать по вопросу, а не по числу карт. Когда нужен быстрый ответ, достаточно одной карты или гадания «да или нет». Если важно увидеть ситуацию во времени, подойдут три карты или «Подкова». Чувства и пару лучше рассматривать через расклады на любовь и отношения, а для серьёзного запутанного вопроса есть «Кельтский крест». Для ежедневной практики подойдут «Совет дня» и <Link href="/karta-dnya" className="text-accent underline">карта дня</Link>, а значения всех карт собраны в <Link href="/taro/karty" className="text-accent underline">каталоге карт Таро</Link>.</p>
+        <p>Расклад стоит выбирать по вопросу, а не по числу карт. Когда нужен быстрый ответ, достаточно одной карты или гадания «да или нет». Если важно увидеть ситуацию во времени, подойдут три карты или «Подкова». Чувства и пару лучше рассматривать через расклады на любовь и отношения, а для серьёзного запутанного вопроса есть «Кельтский крест». Для ежедневной практики подойдут «Совет дня» и <Link href="/karta-dnya" className="text-accent-text underline">карта дня</Link>, а значения всех карт собраны в <Link href="/taro/karty" className="text-accent-text underline">каталоге карт Таро</Link>.</p>
       </div>
 
       <section className="mt-10">
         <div className="ornament mb-4"><h2 className="text-2xl">Выберите расклад</h2><span className="mono">{spreads.length} раскладов</span></div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {spreads.map((s) => (
-            <Link key={s.slug} href={spreadHref(s)} className="card card-hover p-5 grid gap-2 content-start">
+            <Link key={s.slug} href={spreadHref(s)} className="card card-hover p-5 flex flex-col gap-2">
               <div className="flex flex-wrap gap-2">
                 <span className="chip">{count(s.positions.length)}</span>
                 <span className="chip">{s.theme}</span>
               </div>
               <h3 className="text-xl">{s.title}</h3>
               <p className="text-sm text-muted">{s.intro[0].split(". ")[0]}.</p>
-              <span className="text-accent text-sm mt-1">Разложить →</span>
+              <span className="text-accent-text text-sm mt-auto pt-2">Разложить →</span>
             </Link>
           ))}
         </div>

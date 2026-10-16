@@ -8,19 +8,25 @@ export default function Breadcrumbs({ items }: { items: Crumb[] }) {
   const all: Crumb[] = [{ href: "/", label: "Главная" }, ...items];
   return (
     <nav aria-label="Хлебные крошки" className="text-sm text-muted mb-2 md:mb-4">
-      <ol className="flex flex-wrap gap-1">
-        {all.map((c, i) => (
-          <li key={c.href} className="flex items-center gap-1">
-            {i < all.length - 1 ? (
-              <Link href={c.href} className="inline-block py-1.5 md:py-0 hover:text-ink">
-                {c.label}
-              </Link>
-            ) : (
-              <span className="text-ink">{c.label}</span>
-            )}
-            {i < all.length - 1 && <span aria-hidden="true">›</span>}
-          </li>
-        ))}
+      <ol className="flex flex-wrap items-center gap-x-1">
+        {all.map((c, i) => {
+          const last = i === all.length - 1;
+          // Длинная последняя крошка повторяет H1 под ней — на телефоне её не показываем.
+          const hideOnPhone = last && i > 1 && c.label.length > 28;
+          return (
+            // Разделитель «›» стоит перед пунктом и переносится вместе с ним — не висит в конце строки.
+            <li key={c.href} className={`${hideOnPhone ? "hidden sm:flex" : "flex"} min-w-0 items-center gap-1`}>
+              {i > 0 && <span aria-hidden="true">›</span>}
+              {last ? (
+                <span className="text-ink" aria-current="page">{c.label}</span>
+              ) : (
+                <Link href={c.href} className="inline-flex items-center min-h-10 md:min-h-0 hover:text-ink">
+                  {c.label}
+                </Link>
+              )}
+            </li>
+          );
+        })}
       </ol>
       <JsonLd
         data={{
