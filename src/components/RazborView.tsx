@@ -62,11 +62,41 @@ function BlockView({ b }: { b: Block }) {
               </span>
               <div>
                 <p className="mono !text-ink">{m.label}</p>
-                {m.text.trim() && <p className="!mt-1 !mb-0">{rich(m.text)}</p>}
+                {m.text
+                  .split(/\n{2,}/)
+                  .map((t) => t.trim())
+                  .filter(Boolean)
+                  .map((t, j) => (
+                    <p key={j} className={j ? "!mt-2 !mb-0" : "!mt-1 !mb-0"}>
+                      {rich(t)}
+                    </p>
+                  ))}
               </div>
             </li>
           ))}
         </ol>
+      );
+    case "details":
+      // На экране свёрнут; на печати <details> скрыт, а то же содержимое выводится раскрытым (закрытый <details> не печатает содержимое).
+      return (
+        <>
+          <details className="razbor-details no-print my-5 border-y border-line py-3">
+            <summary className="mono !text-ink cursor-pointer select-none">{b.summary}</summary>
+            <div className="mt-2">
+              {b.blocks.map((x, i) => (
+                <BlockView key={i} b={x} />
+              ))}
+            </div>
+          </details>
+          <div className="hidden print:block">
+            <p>
+              <strong>{b.summary}.</strong>
+            </p>
+            {b.blocks.map((x, i) => (
+              <BlockView key={i} b={x} />
+            ))}
+          </div>
+        </>
       );
   }
 }

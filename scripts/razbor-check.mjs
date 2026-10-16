@@ -7,6 +7,9 @@ const N9 = N12.slice(0, 9);
 const N31 = Array.from({ length: 31 }, (_, i) => String(i + 1));
 const BANDS = ["young", "build", "mature", "senior"];
 const pairs = (a, b) => a.flatMap((x) => b.map((y) => `${x}.${y}`));
+/** «a.b» при a ≤ b — пары базовых цифр (45 ключей). */
+const PAIRS_LE = N9.flatMap((a) => N9.filter((b) => +b >= +a).map((b) => `${a}.${b}`));
+const CATS = ["start", "plan", "bonds", "show", "work", "change", "rest"];
 const BANNED = /(\bИИ\b|нейросет|искусственн\w* интеллект|гарантир|порч|проклят|диагноз|вылеч|разбогате)/i;
 
 const spec = {
@@ -21,8 +24,15 @@ const spec = {
   "year-age.json": { keys: pairs(N9, BANDS), string: [300, 500] },
   "love-age.json": { keys: pairs(N12, BANDS), string: [300, 450] },
   "work-age.json": { keys: pairs(N12, BANDS), string: [300, 450] },
-  "pinnacle.json": { nested: { pinnacle: { keys: [...N9, "11"], fields: { title: [5, 40], text: [600, 900], short: [140, 240] } } }, groups: { stage: ["1", "2", "3", "4"] }, string: [250, 450] },
+  "pinnacle.json": { nested: { pinnacle: { keys: [...N9, "11"], fields: { title: [5, 40], text: [600, 900], short: [140, 240] } } }, groups: { stage: ["1", "2", "3", "4"] }, optional: { stage: ["4early"] }, string: [250, 450] },
   "svod.json": { groups: { destiny: N12, birthday: N31, strong: N9, weak: N9 }, single: ["noweak"], string: [160, 320] },
+  // Версия 4
+  "year-late.json": { keys: N9, fields: { rest: [400, 650], bridge: [200, 350] } },
+  "month-cat.json": { keys: pairs(N9, N9), oneOf: CATS },
+  "gist.json": { groups: { destiny: N12, year: N9, cell: N9 }, string: [60, 140] },
+  "pair.json": { keys: PAIRS_LE, string: [300, 450] },
+  "month-destiny.json": { keys: pairs(N12, N9), string: [90, 180] },
+  "advice.json": { groupArrays: { cell: N9, year: N9, period: [...N9, "11"] }, array: [2, 120, 250] },
 };
 
 const only = process.argv[2];
@@ -48,12 +58,24 @@ for (const [file, sp] of Object.entries(spec)) {
   for (const [g, keys] of Object.entries(sp.groups ?? {})) {
     for (const k of keys) checkText(`${file}.${g}[${k}]`, data[g]?.[k], sp.string);
   }
+  for (const [g, keys] of Object.entries(sp.optional ?? {})) {
+    for (const k of keys) if (data[g]?.[k] !== undefined) checkText(`${file}.${g}[${k}]`, data[g][k], sp.string);
+  }
+  for (const [g, keys] of Object.entries(sp.groupArrays ?? {})) {
+    const [count, min, max] = sp.array;
+    for (const k of keys) {
+      const a = data[g]?.[k];
+      if (!Array.isArray(a) || a.length !== count) { err(`${file}.${g}[${k}]: нужен массив из ${count}`); continue; }
+      a.forEach((s, i) => checkText(`${file}.${g}[${k}][${i}]`, s, [min, max]));
+    }
+  }
   for (const f of sp.single ?? []) checkText(`${file}.${f}`, data[f], sp.string);
   for (const k of sp.keys ?? []) {
     const v = data[k];
     const w = `${file}[${k}]`;
     if (v === undefined) { err(`${w}: нет ключа`); continue; }
     if (sp.string) { checkText(w, v, sp.string); continue; }
+    if (sp.oneOf) { if (!sp.oneOf.includes(v)) err(`${w}: «${v}» — нужно одно из ${sp.oneOf.join(", ")}`); continue; }
     for (const [f, lim] of Object.entries(sp.fields ?? {})) checkText(`${w}.${f}`, v[f], lim);
     for (const [f, [count, min, max]] of Object.entries(sp.arrays ?? {})) {
       if (!Array.isArray(v[f]) || v[f].length !== count) { err(`${w}.${f}: нужен массив из ${count}`); continue; }
