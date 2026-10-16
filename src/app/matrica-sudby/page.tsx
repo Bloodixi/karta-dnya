@@ -7,7 +7,8 @@ import JsonLd from "@/components/JsonLd";
 import MatrixDiagram from "@/components/MatrixDiagram";
 import MatrixNav from "@/components/MatrixNav";
 import RazborCta from "@/components/RazborCta";
-import { DateField, FormError, ShareLink } from "@/components/NumerologyFields";
+import { DateField, FormError, ShareLink, dateErrorText } from "@/components/NumerologyFields";
+import ScrollToResult from "@/components/ScrollToResult";
 import { formatDate, parseDate } from "@/lib/numerology";
 import { POSITIONS, calcMatrix, findMatrixArcana, getMatrixArcana } from "@/lib/matrix";
 import { SITE } from "@/lib/site";
@@ -40,13 +41,13 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
     const m = calcMatrix(date.d, date.m, date.y);
     const main = findMatrixArcana(m.e);
     result = (
-      <section className="mt-8" id="rezultat">
+      <section className="mt-8 scroll-mt-24" id="rezultat">
         <div className="ornament mb-4">
           <h2 className="text-2xl">Матрица судьбы {formatDate(date)}</h2>
           <span className="mono">центр: аркан {m.e}</span>
         </div>
-        <div className="grid gap-6 md:grid-cols-[320px_1fr] items-start">
-          <div className="card p-4">
+        <div className="grid gap-6 md:grid-cols-[minmax(0,380px)_1fr] items-start">
+          <div className="card p-4 md:sticky md:top-24 self-start">
             <MatrixDiagram m={m} label={`Матрица судьбы ${formatDate(date)}: A ${m.a}, B ${m.b}, C ${m.c}, D ${m.d}, центр ${m.e}`} />
             <ol className="text-xs text-muted mt-3 grid gap-1">{m.steps.map((s) => <li key={s}>{s}</li>)}</ol>
           </div>
@@ -92,13 +93,14 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
 
       <div className="card p-6 mt-6 max-w-3xl">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
-          <DateField name="d" label="Дата рождения" defaultValue={date?.iso ?? (typeof raw === "string" ? raw : "")} />
-          <button type="submit" className="btn">Рассчитать матрицу</button>
+          <DateField name="d" label="Дата рождения" defaultValue={date?.iso ?? (typeof raw === "string" ? raw : "")} invalid={invalid} />
+          <button type="submit" className="btn min-h-11">Рассчитать матрицу</button>
         </Form>
-        <FormError text={invalid ? "Введите дату рождения полностью, например 14.03.1987." : undefined} />
+        <FormError text={invalid ? dateErrorText(raw, "Введите дату рождения полностью, например 14.03.1987.") : undefined} />
       </div>
 
       {result}
+      <ScrollToResult key={date?.iso ?? ""} id="rezultat" when={!!date} />
 
       <RazborCta from="matrica-sudby" date={date?.iso} />
 
@@ -117,7 +119,7 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {arcana.map((a) => (
             <Link key={a.n} href={`/matrica-sudby/arkany/${a.n}`} className="card card-hover px-3 py-2 block">
-              <span className="display text-xl text-accent">{a.n}</span> <span className="text-sm">{a.name}</span>
+              <span className="display text-xl text-accent-text">{a.n}</span> <span className="text-sm">{a.name}</span>
             </Link>
           ))}
         </div>

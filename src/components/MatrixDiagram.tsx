@@ -10,7 +10,7 @@ export default function MatrixDiagram({ m, label }: { m: Matrix; label: string }
     { k: "E", v: m.e, x: 150, y: 150 },
   ];
   return (
-    <svg viewBox="0 0 300 300" role="img" aria-label={label} className="w-full max-w-xs mx-auto">
+    <svg viewBox="0 0 300 300" role="img" aria-label={label} className="w-full max-w-sm mx-auto">
       <g fill="none" stroke="var(--line, currentColor)" strokeWidth="1.5" opacity="0.7">
         <rect x="50" y="50" width="200" height="200" />
         <polygon points="150,50 250,150 150,250 50,150" />
@@ -21,7 +21,8 @@ export default function MatrixDiagram({ m, label }: { m: Matrix; label: string }
         <g key={p.k}>
           <circle cx={p.x} cy={p.y} r={p.k === "E" ? 30 : 24} fill="var(--surface, #fff)" stroke="var(--accent, currentColor)" strokeWidth={p.k === "E" ? 2.5 : 1.5} />
           <text x={p.x} y={p.y + 6} textAnchor="middle" fontSize={p.k === "E" ? 20 : 17} fill="var(--ink, currentColor)" fontWeight="600">{p.v}</text>
-          <text x={p.x + (p.k === "C" ? 0 : p.k === "A" ? 0 : 0)} y={p.k === "B" ? p.y - 30 : p.k === "D" ? p.y + 42 : p.k === "E" ? p.y + 46 : p.y - 30} textAnchor="middle" fontSize="12" fill="var(--muted, currentColor)">{p.k}</text>
+          {/* Подложка цвета карточки под буквой: подпись не лежит на линиях схемы. */}
+          <text x={p.x} y={p.k === "B" ? p.y - 30 : p.k === "D" ? p.y + 42 : p.k === "E" ? p.y + 47 : p.y - 30} textAnchor="middle" fontSize="12" fill="var(--muted, currentColor)" stroke="var(--surface, #fff)" strokeWidth="5" strokeLinejoin="round" paintOrder="stroke">{p.k}</text>
         </g>
       ))}
     </svg>

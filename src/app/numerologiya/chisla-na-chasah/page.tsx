@@ -17,13 +17,22 @@ const FAQ = [
   { q: "Считаются ли цифры на телефоне, а не на настенных часах?", a: "Да, источник не важен. Важен момент, когда вы случайно заметили время, а не искали его специально." },
 ];
 
+/** Классы последней плитки: если она одна в ряду (3 / 4 / 6 колонок), растягиваем её на весь ряд, без пустых клеток. */
+function lastSpan(n: number): string {
+  return [
+    n % 3 === 1 ? "col-span-3" : "",
+    n % 4 === 1 ? "sm:col-span-4" : "sm:col-span-1",
+    n % 6 === 1 ? "md:col-span-6" : "md:col-span-1",
+  ].join(" ");
+}
+
 function Grid({ items }: { items: ClockNumber[] }) {
   return (
     <div className="grid-lines grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6">
-      {items.map((c) => (
-        <Link key={c.slug} href={`/numerologiya/chisla-na-chasah/${c.slug}`} className="p-3 sm:p-4 text-center hover:bg-surface transition-colors">
+      {items.map((c, i) => (
+        <Link key={c.slug} href={`/numerologiya/chisla-na-chasah/${c.slug}`} className={`p-3 sm:p-4 text-center hover:bg-surface transition-colors ${i === items.length - 1 && items.length > 1 ? lastSpan(items.length) : ""}`}>
           <span className="display text-2xl block">{c.time}</span>
-          <span className="text-xs text-muted break-words">{c.title}</span>
+          <span className="block text-xs text-muted leading-snug hyphens-auto">{c.title}</span>
         </Link>
       ))}
     </div>
