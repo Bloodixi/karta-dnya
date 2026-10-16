@@ -60,6 +60,25 @@ function measure(book: HTMLElement): Measure {
   return out;
 }
 
+/**
+ * paged.js 0.4.3 (UMD, global Paged) из статики сайта: npm-сборка ломается в Turbopack («s.call is not a function»).
+ * Файл public/vendor/paged-0.4.3.js — копия unpkg.com/pagedjs@0.4.3/dist/paged.js, sha384 VrggD9Mk…FHUrI.
+ */
+type PagedGlobal = { Previewer: new () => { preview: (content: Node, styles: Record<string, string>[], to: HTMLElement) => Promise<{ total: number }> } };
+function loadPaged(): Promise<PagedGlobal> {
+  const w = window as unknown as { Paged?: PagedGlobal };
+  if (w.Paged) return Promise.resolve(w.Paged);
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "/vendor/paged-0.4.3.js";
+    s.integrity = "sha384-VrggD9MksqQ3Idi2YIpgdXj83Sqfn/THOJuJFf2ENcgxdDxR0Tp6Ls87wlyFHUrI";
+    s.crossOrigin = "anonymous";
+    s.onload = () => (w.Paged ? resolve(w.Paged) : reject(new Error("paged.js не загрузился")));
+    s.onerror = () => reject(new Error("paged.js не загрузился"));
+    document.head.appendChild(s);
+  });
+}
+
 const removePagedStyles = () => document.querySelectorAll("style[data-pagedjs-inserted-styles]").forEach((e) => e.remove());
 
 /** Печатный буклет A5: раскладка paged.js в браузере, подгонка страниц, печать или PDF через window.print. */
@@ -92,7 +111,7 @@ export default function RazborBooklet({ doc, questions, initialStyle, qr, backHr
     if (!book) return;
     let cancelled = false;
     (async () => {
-      const { Previewer } = await import("pagedjs");
+      const { Previewer } = await loadPaged();
       await Promise.all(BOOKLET_FONT_FAMILIES.map((f) => document.fonts.load(`16px "${f}"`, "Ааz1").catch(() => [])));
       const css = bookCss(style, doc.who);
       const layout = async (plan: BookletPlan) => {
@@ -277,5 +296,8 @@ body { padding-bottom: 0 !important; }
   .buklet-stage { padding: 0; overflow: visible; }
   .buklet-book .pagedjs_pages { zoom: 1 !important; }
   .buklet-book .pagedjs_page { box-shadow: none !important; margin: 0 !important; }
+  /* без разрыва после задней обложки — иначе в PDF лишняя пустая страница и число страниц не кратно 4 */
+  .buklet-book .pagedjs_page:last-child { break-after: avoid !important; page-break-after: avoid !important; }
+  .buklet-book .pagedjs_pages { display: block !important; }
 }
 `;
