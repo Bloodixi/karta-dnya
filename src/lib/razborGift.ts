@@ -26,12 +26,15 @@ export function cleanEmail(v: unknown): string {
   return s.length <= 254 && EMAIL_RE.test(s) ? s : "";
 }
 
+/** NFKC и без невидимых форматирующих символов (мягкий перенос, нулевой пробел, BOM…): храним ровно то, что проверили. */
+const norm = (s: string) => s.normalize("NFKC").replace(/\p{Cf}+/gu, "").replace(/[。．｡]/g, ".");
+
 /** Однострочный текст: без управляющих символов, пробелы схлопнуты. */
-const oneLine = (s: string) => s.replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, " ").replace(/\s+/g, " ").trim();
+const oneLine = (s: string) => norm(s).replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, " ").replace(/\s+/g, " ").trim();
 
 /** Пожелание: переводы строк сохраняем (не больше одной пустой строки подряд), прочие управляющие символы — в пробел. */
 const multiLine = (s: string) =>
-  s
+  norm(s)
     .replace(/\r\n?/g, "\n")
     .replace(/[\u0000-\u0009\u000b-\u001f\u007f-\u009f\u2028\u2029]+/g, " ")
     .split("\n")
@@ -40,14 +43,13 @@ const multiLine = (s: string) =>
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
-/** Ссылки в подписи и пожелании не пропускаем: письмо уходит на чужой адрес от имени сайта. */
 /**
  * Подпись и пожелание уходят чужому человеку от имени сайта — ссылок и адресов в них быть не должно.
  * Сначала NFKC (полноширинные точки и буквы → обычные), затем запрет: любой «схемы:», «@», IP и
  * «слово.слово» без пробела после точки (домены любых зон, включая .рф и punycode).
  */
-const LINKISH = [/[a-z][a-z0-9+.-]*:\/\//i, /\b(?:mailto|tel|javascript|data):/i, /@/, /\b\d{1,3}(?:\.\d{1,3}){3}\b/, /[\p{L}\p{N}-]{2,}\.(?:[\p{L}\p{N}-]{2,})/u, /\bwww\b/i];
-const HAS_LINK = { test: (v: string) => { const n = v.normalize("NFKC").replace(/[。．｡]/g, "."); return LINKISH.some((re) => re.test(n)); } };
+const LINKISH = [/[a-z][a-z0-9+.-]*:\/\//i, /\b(?:mailto|tel|javascript|data):/i, /@/, /\b\d{1,3}(?:\.\d{1,3}){3}\b/, /[\p{L}\p{N}-]+\.[\p{L}\p{N}-]{2,}/u, /\bwww\b/i];
+const HAS_LINK = { test: (v: string) => LINKISH.some((re) => re.test(norm(v))) };
 
 export type GiftError = "gift_name" | "gift_from" | "gift_wish" | "gift_email" | "gift_date";
 
