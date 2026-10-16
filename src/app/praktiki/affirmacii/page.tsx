@@ -3,9 +3,10 @@ import Link from "next/link";
 import AffirmationOfDay from "@/components/AffirmationOfDay";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import HubHeader from "@/components/HubHeader";
 import JsonLd from "@/components/JsonLd";
 import { AFFIRM_PATH, getAffirmationTopics } from "@/lib/affirmations";
-import { pageTitle, SITE } from "@/lib/site";
+import { pageTitle, SECTIONS, SITE } from "@/lib/site";
 
 export const revalidate = 1800;
 
@@ -29,11 +30,16 @@ export default function AffirmationsHub() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/praktiki", label: "Практики" }, { href: AFFIRM_PATH, label: "Аффирмации" }]} />
-      <h1 className="text-3xl md:text-4xl font-semibold">Аффирмации на каждый день</h1>
-      <p className="text-muted mt-2 max-w-2xl text-lg">
-        Короткие фразы для спокойного настроя: подборки на деньги, здоровье, любовь, успех, для женщин и на утро, а также аффирмация на сегодня.
-        Формулировки даны в женском роде; при желании замените окончания на привычные вам.
-      </p>
+      <HubHeader
+        icon={SECTIONS.praktiki.icon}
+        title="Аффирмации на каждый день"
+        lede={
+          <>
+            Короткие фразы для спокойного настроя: подборки на деньги, здоровье, любовь, успех, для женщин и на утро, а также аффирмация на сегодня.
+            Формулировки даны в женском роде; при желании замените окончания на привычные вам.
+          </>
+        }
+      />
 
       <section className="mt-8"><AffirmationOfDay /></section>
 
@@ -57,21 +63,21 @@ export default function AffirmationsHub() {
       </section>
 
       <section className="mt-12">
-        <h2 className="text-2xl mb-3">Подборки аффирмаций по темам</h2>
+        <h2 className="text-[1.6rem] mb-3">Подборки аффирмаций по темам</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {topics.map((t) => (
             <Link key={t.slug} href={`${AFFIRM_PATH}/${t.slug}`} className="card card-hover p-5 flex flex-col">
               <span className="chip self-start">{t.items.length} фраз</span>
               <p className="font-display text-xl mt-3">{t.h1}</p>
               <p className="text-sm text-muted mt-2">{t.short}</p>
-              <span className="mt-auto pt-4 text-sm text-accent">Открыть подборку →</span>
+              <span className="mt-auto pt-4 text-sm text-accent-text">Открыть подборку →</span>
             </Link>
           ))}
           <Link href={`${AFFIRM_PATH}/dnya`} className="card card-hover p-5 flex flex-col">
             <span className="chip self-start">каждый день новая</span>
             <p className="font-display text-xl mt-3">Аффирмация дня</p>
             <p className="text-sm text-muted mt-2">Одна фраза на сегодня для всех, обновляется в полночь по Москве.</p>
-            <span className="mt-auto pt-4 text-sm text-accent">Прочитать на сегодня →</span>
+            <span className="mt-auto pt-4 text-sm text-accent-text">Прочитать на сегодня →</span>
           </Link>
         </div>
       </section>

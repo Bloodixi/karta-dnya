@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 export type DreamItem = { slug: string; word: string; short: string; thumb?: string };
 
@@ -36,9 +36,9 @@ function DreamCard({ d }: { d: DreamItem }) {
     <Link href={`/sonnik/${d.slug}`} className="card card-hover p-3 flex gap-3 items-center">
       {d.thumb && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={d.thumb} width={96} height={72} alt="" loading="lazy" decoding="async" className="w-24 h-18 shrink-0 rounded-lg object-cover aspect-[4/3]" />
+        <img src={d.thumb} width={96} height={72} alt="" loading="lazy" decoding="async" className="w-24 h-18 shrink-0 rounded-sm object-cover aspect-[4/3]" />
       )}
-      <span>
+      <span className="min-w-0">
         <p className="font-semibold">{d.word}</p>
         <p className="text-sm text-muted mt-1 line-clamp-2">{d.short}</p>
       </span>
@@ -46,7 +46,13 @@ function DreamCard({ d }: { d: DreamItem }) {
   );
 }
 
-export default function DreamSearch({ items }: { items: DreamItem[] }) {
+const HINTS = ["вода", "кошка", "дорога"];
+
+/**
+ * Поиск по соннику и список символов по алфавиту. Поле поиска стоит первым, чтобы на телефоне оно было на первом экране;
+ * `intro` (например, «Популярные сны») и `listHeading` показываются между полем и алфавитом, пока не идёт поиск.
+ */
+export default function DreamSearch({ items, intro, listHeading }: { items: DreamItem[]; intro?: ReactNode; listHeading?: ReactNode }) {
   const [q, setQ] = useState("");
   const s = q.trim().toLowerCase();
   const groups = useMemo(() => groupByLetter(items), [items]);
@@ -54,20 +60,13 @@ export default function DreamSearch({ items }: { items: DreamItem[] }) {
 
   return (
     <div>
-      <nav aria-label="Символы по алфавиту" className="flex flex-wrap gap-1.5">
-        {groups.map(([letter]) => (
-          <a key={letter} href={`#${letterAnchor(letter)}`} onClick={() => setQ("")} className="chip hover:text-ink hover:border-gold min-w-9 justify-center">
-            {letter}
-          </a>
-        ))}
-      </nav>
       <input
         type="search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="К чему снится… например, змея"
         aria-label="Поиск по соннику"
-        className="w-full max-w-xl border border-line rounded-full px-5 py-3 bg-surface mt-5"
+        className="w-full max-w-xl border border-line rounded-sm px-4 py-3 bg-surface focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
       />
       <p className="mono mt-3" aria-live="polite">
         {s ? `Найдено: ${found.length}` : `Символов: ${items.length} · букв: ${groups.length}`}
@@ -79,20 +78,40 @@ export default function DreamSearch({ items }: { items: DreamItem[] }) {
             {found.map((d) => <DreamCard key={d.slug} d={d} />)}
           </div>
         ) : (
-          <p className="text-muted mt-4">Такого символа пока нет. Попробуйте другое слово: например, «вода», «кошка» или «дорога».</p>
+          <div className="mt-4">
+            <p className="text-muted">Такого символа пока нет. Попробуйте другое слово, например:</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {HINTS.map((h) => (
+                <button key={h} type="button" onClick={() => setQ(h)} className="chip min-h-10 hover:text-ink hover:border-gold">
+                  {h}
+                </button>
+              ))}
+            </div>
+          </div>
         )
       ) : (
-        groups.map(([letter, list]) => (
-          <section key={letter} id={letterAnchor(letter)} className="mt-10 scroll-mt-24">
-            <div className="ornament mb-3 border-b border-line pb-2">
-              <h2 className="text-3xl">{letter}</h2>
-              <span className="mono">{plural(list.length)}</span>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {list.map((d) => <DreamCard key={d.slug} d={d} />)}
-            </div>
-          </section>
-        ))
+        <>
+          {intro}
+          {listHeading}
+          <nav aria-label="Символы по алфавиту" className="flex flex-wrap gap-1.5">
+            {groups.map(([letter]) => (
+              <a key={letter} href={`#${letterAnchor(letter)}`} className="chip hover:text-ink hover:border-gold min-w-10 h-10 justify-center">
+                {letter}
+              </a>
+            ))}
+          </nav>
+          {groups.map(([letter, list]) => (
+            <section key={letter} id={letterAnchor(letter)} className="mt-10 scroll-mt-24">
+              <div className="ornament mb-3 border-b border-line pb-2">
+                <h2 className="text-3xl">{letter}</h2>
+                <span className="mono">{plural(list.length)}</span>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {list.map((d) => <DreamCard key={d.slug} d={d} />)}
+              </div>
+            </section>
+          ))}
+        </>
       )}
     </div>
   );

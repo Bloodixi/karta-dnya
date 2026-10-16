@@ -3,6 +3,7 @@ import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DreamSearch from "@/components/DreamSearch";
+import HubHeader from "@/components/HubHeader";
 import { getArticles, getDreamImages, getDreams } from "@/lib/content";
 import { SECTIONS } from "@/lib/site";
 
@@ -22,30 +23,36 @@ export default function DreamsPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/sonnik", label: "Сонник" }]} />
-      <h1 className="text-3xl md:text-4xl font-semibold">Сонник</h1>
-      <p className="text-muted mt-2 max-w-2xl">{SECTIONS.sonnik.description}</p>
+      <HubHeader icon={SECTIONS.sonnik.icon} title="Сонник" lede={SECTIONS.sonnik.description} />
 
-      {popular.length > 0 && (
-        <section className="mt-8" aria-labelledby="popular">
-          <div className="ornament mb-4"><h2 id="popular" className="text-2xl">Популярные сны</h2><span className="mono">{popular.length} символов</span></div>
-          <div className="grid-lines grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6">
-            {popular.map((d) => (
-              <Link key={d.slug} href={`/sonnik/${d.slug}`} className="p-3 hover:bg-surface transition-colors flex flex-col gap-2">
-                {images[d.slug] && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={images[d.slug].thumb} width={320} height={240} alt="" loading="lazy" decoding="async" className="w-full h-auto rounded-sm object-cover aspect-[4/3]" />
-                )}
-                <span className="font-medium text-sm leading-snug">{d.word}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="mt-10" aria-labelledby="all-dreams">
-        <div className="ornament mb-4"><h2 id="all-dreams" className="text-2xl">Все символы от А до Я</h2><span className="mono">{dreams.length} толкований</span></div>
-        {dreams.length ? <DreamSearch items={dreams.map((d) => ({ slug: d.slug, word: d.word, short: d.short, thumb: images[d.slug]?.thumb }))} /> : <p className="text-muted">Символы сонника готовятся.</p>}
-      </section>
+      <div className="mt-6">
+        {dreams.length ? (
+          <DreamSearch
+            items={dreams.map((d) => ({ slug: d.slug, word: d.word, short: d.short, thumb: images[d.slug]?.thumb }))}
+            intro={
+              popular.length > 0 && (
+                <section className="mt-8" aria-labelledby="popular">
+                  <div className="ornament mb-4"><h2 id="popular" className="text-2xl">Популярные сны</h2><span className="mono">{popular.length} символов</span></div>
+                  <div className="grid-lines grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6">
+                    {popular.map((d) => (
+                      <Link key={d.slug} href={`/sonnik/${d.slug}`} className="p-2 sm:p-3 hover:bg-surface transition-colors flex flex-col gap-2 min-w-0">
+                        {images[d.slug] && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={images[d.slug].thumb} width={320} height={240} alt="" loading="lazy" decoding="async" className="w-full h-auto rounded-sm object-cover aspect-[4/3]" />
+                        )}
+                        <span className="font-medium text-[13px] sm:text-sm leading-snug min-h-[2.6em] [overflow-wrap:anywhere] hyphens-auto">{d.word}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )
+            }
+            listHeading={<div className="ornament mt-10 mb-4"><h2 id="all-dreams" className="text-2xl">Все символы от А до Я</h2><span className="mono">{dreams.length} толкований</span></div>}
+          />
+        ) : (
+          <p className="text-muted">Символы сонника готовятся.</p>
+        )}
+      </div>
 
       {articles.length > 0 && (
         <section className="mt-12">

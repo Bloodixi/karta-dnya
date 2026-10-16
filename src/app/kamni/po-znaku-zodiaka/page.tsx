@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import HubHeader from "@/components/HubHeader";
 import JsonLd from "@/components/JsonLd";
 import ZodiacSign from "@/components/ZodiacSign";
 import { getArticles, getZodiac } from "@/lib/content";
@@ -32,20 +33,40 @@ export default function StonesByZodiacPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/kamni", label: "Камни" }, { href: PATH, label: "По знаку зодиака" }]} />
-      <h1 className="text-3xl md:text-4xl font-semibold">Камни по знаку зодиака</h1>
-      <p className="text-muted mt-2 max-w-2xl text-lg">
-        Для каждого знака традиция называет несколько камней-талисманов: они созвучны стихии, планете-управителю и характеру знака.
-        Ниже — сводная таблица на 12 знаков, подборки по стихиям и ответы на частые вопросы. Соответствия условны: выбирайте тот камень, который нравится.
-      </p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Link href="/kamni/po-date-rozhdeniya" className="btn btn-ghost">Подобрать по дате рождения</Link>
-        <Link href="/kamni" className="btn btn-ghost">Каталог камней</Link>
-        <Link href="/kamni/kamni-po-znaku-zodiaka" className="btn btn-ghost">Статья: как выбрать свой камень</Link>
-      </div>
+      <HubHeader
+        title="Камни по знаку зодиака"
+        lede={
+          <>
+            Для каждого знака традиция называет несколько камней-талисманов: они созвучны стихии, планете-управителю и характеру знака.
+            Ниже — сводная таблица на 12 знаков, подборки по стихиям и ответы на частые вопросы. Соответствия условны: выбирайте тот камень, который нравится.
+          </>
+        }
+        links={[
+          { href: "/kamni/po-date-rozhdeniya", title: "Подобрать по дате рождения" },
+          { href: "/kamni", title: "Каталог камней" },
+          { href: "/kamni/kamni-po-znaku-zodiaka", title: "Статья: как выбрать свой камень" },
+        ]}
+      />
 
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Сводная таблица: камни 12 знаков</h2>
-        <div className="prose overflow-x-auto" style={{ maxWidth: "none" }}>
+        {/* Телефон: компактный список вместо широкой таблицы. */}
+        <ul className="sm:hidden grid gap-2">
+          {zodiac.map((z) => (
+            <li key={z.slug} className="card p-3">
+              <p className="flex flex-wrap items-baseline gap-x-2">
+                <Link href={`${PATH}/${z.slug}`} className="font-semibold text-accent-text underline underline-offset-2">{z.symbol}{"\uFE0E"} {z.name}</Link>
+                <span className="text-xs text-muted whitespace-nowrap">{z.dates}</span>
+              </p>
+              <p className="text-sm mt-1">
+                {stones[z.slug].slice(0, 5).map((s, i) => (
+                  <span key={s.slug}>{i > 0 && ", "}<Link href={`/kamni/${s.slug}`} className="text-accent-text underline underline-offset-2">{s.name.toLowerCase()}</Link></span>
+                ))}
+              </p>
+            </li>
+          ))}
+        </ul>
+        <div className="prose overflow-x-auto hidden sm:block" style={{ maxWidth: "none" }}>
           <table style={{ display: "table" }}>
             <thead>
               <tr><th>Знак</th><th>Даты</th><th>Стихия</th><th>Планета</th><th>Камни-талисманы</th></tr>
@@ -92,7 +113,7 @@ export default function StonesByZodiacPage() {
                     ))}
                   </div>
                   <p className="mt-auto pt-4 text-sm">
-                    <Link href={`${PATH}/${z.slug}`} className="text-accent underline">Все камни для знака {z.name} ({stones[z.slug].length}) →</Link>
+                    <Link href={`${PATH}/${z.slug}`} className="text-accent-text underline">Все камни для знака {z.name} ({stones[z.slug].length}) →</Link>
                   </p>
                 </div>
               ))}
@@ -117,7 +138,7 @@ export default function StonesByZodiacPage() {
 
       {articles.length > 0 && (
         <p className="mt-10 text-muted">
-          Читайте также: {articles.map((a, i) => <span key={a.slug}>{i > 0 && ", "}<Link className="text-accent underline" href={`/kamni/${a.slug}`}>{a.title}</Link></span>)}.
+          Читайте также: {articles.map((a, i) => <span key={a.slug}>{i > 0 && ", "}<Link className="text-accent-text underline" href={`/kamni/${a.slug}`}>{a.title}</Link></span>)}.
         </p>
       )}
 
