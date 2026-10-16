@@ -24,12 +24,12 @@ export default function CardsPage() {
       {major.length > 0 && (
         <section className="mt-8">
           <h2 className="text-2xl mb-3">Старшие арканы</h2>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-3 gap-y-5 sm:gap-4">
             {major.map((c) => (
               <Link key={c.slug} href={`/taro/karty/${c.slug}`} className="text-center group">
                 <TarotCardView slug={c.slug} name={c.name} className="tcard-thumb" sizes="(min-width: 1024px) 130px, (min-width: 640px) 20vw, 28vw" />
-                <p className="font-semibold mt-2 text-sm group-hover:text-accent">{c.number}. {c.name}</p>
-                <p className="text-xs text-muted">{c.keywords.slice(0, 2).join(", ")}</p>
+                <p className="mt-2 text-[13px] leading-tight sm:text-sm font-semibold [overflow-wrap:anywhere] hyphens-auto group-hover:text-accent-text"><span className="mono block font-normal">{c.number}</span>{c.name}</p>
+                <p className="text-xs text-muted mt-0.5 line-clamp-2">{c.keywords.slice(0, 2).join(", ")}</p>
               </Link>
             ))}
           </div>
@@ -41,12 +41,12 @@ export default function CardsPage() {
         return (
           <section key={suit} className="mt-8">
             <h2 className="text-2xl mb-3">{list[0].suitName}</h2>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-x-3 gap-y-5 sm:gap-4">
               {list.map((c) => (
                 <Link key={c.slug} href={`/taro/karty/${c.slug}`} className="text-center group">
                   <TarotCardView slug={c.slug} name={c.name} className="tcard-thumb" sizes="(min-width: 1024px) 130px, (min-width: 640px) 20vw, 28vw" />
-                  <p className="font-semibold mt-2 text-sm group-hover:text-accent">{c.name}</p>
-                  <p className="text-xs text-muted">{c.keywords.slice(0, 2).join(", ")}</p>
+                  <p className="mt-2 text-[13px] leading-tight sm:text-sm font-semibold [overflow-wrap:anywhere] hyphens-auto group-hover:text-accent-text">{c.name}</p>
+                  <p className="text-xs text-muted mt-0.5 line-clamp-2">{c.keywords.slice(0, 2).join(", ")}</p>
                 </Link>
               ))}
             </div>

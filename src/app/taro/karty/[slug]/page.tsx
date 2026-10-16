@@ -35,13 +35,14 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/taro", label: "Таро" }, { href: "/taro/karty", label: "Значения карт" }, { href: `/taro/karty/${slug}`, label: c.name }]} />
-      <div className="grid gap-8 md:grid-cols-[240px_1fr] items-start">
-        <figure className="w-56 md:w-full md:sticky md:top-24">
+      <div className="grid gap-x-8 gap-y-5 md:gap-y-2 md:grid-cols-[240px_1fr] items-start">
+        {/* На телефоне заголовок идёт до карты, на десктопе — справа от неё. */}
+        <h1 className="text-3xl md:text-4xl font-semibold md:col-start-2 md:row-start-1">{c.name}: значение карты Таро</h1>
+        <figure className="w-40 mx-auto md:mx-0 md:w-full md:sticky md:top-24 md:col-start-1 md:row-start-1 md:row-span-2">
           <TarotCardView slug={c.slug} name={c.name} priority />
           <figcaption className="text-xs text-muted mt-3 text-center">{c.arcana === "major" ? `Старший аркан ${c.number}` : c.suitName} · колода Райдера–Уэйта, 1909</figcaption>
         </figure>
-        <div className="prose">
-          <h1 className="text-3xl md:text-4xl font-semibold !mt-0">{c.name}: значение карты Таро</h1>
+        <div className="prose md:col-start-2">
           {c.description && <p>{c.description}</p>}
           <h2>Прямое положение</h2>
           <p>{c.upright}</p>

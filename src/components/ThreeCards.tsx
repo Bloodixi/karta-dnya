@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import ScrollToResult from "./ScrollToResult";
 import TarotCardView from "./TarotCardView";
 
 type Card = { slug: string; name: string; keywords: string[]; upright: string; reversed: string; advice: string; arcana: string; suitName: string | null };
@@ -11,6 +12,7 @@ const POSITIONS = ["Прошлое", "Настоящее", "Будущее"];
 export default function ThreeCards({ cards }: { cards: Card[] }) {
   const [res, setRes] = useState<Drawn[] | null>(null);
   const [question, setQuestion] = useState("");
+  const [round, setRound] = useState(0);
   const draw = () => {
     const pool = [...cards];
     const out: Drawn[] = [];
@@ -19,6 +21,7 @@ export default function ThreeCards({ cards }: { cards: Card[] }) {
       out.push({ card: pool.splice(idx, 1)[0], reversed: Math.random() < 0.3 });
     }
     setRes(out);
+    setRound((n) => n + 1);
   };
   return (
     <div className="card p-6">
@@ -38,22 +41,31 @@ export default function ThreeCards({ cards }: { cards: Card[] }) {
         </div>
       )}
       {res && (
-        <div className="mt-6 grid gap-5 md:grid-cols-3">
-          {res.map((d, i) => (
-            <div key={d.card.slug} className="grid gap-3">
-              <p className="chip self-start">{i + 1}. {POSITIONS[i]}</p>
-              <div className="w-40" style={{ animationDelay: `${i * 0.25}s` }}>
-                <TarotCardView key={`${d.card.slug}-${d.reversed}`} slug={d.card.slug} name={d.card.name} reversed={d.reversed} flipIn className="tcard-thumb" sizes="(min-width: 768px) 200px, 45vw" />
+        <>
+          <ScrollToResult key={round} id="three-cards-row" when />
+          <div id="three-cards-row" className="mt-6 grid grid-cols-3 gap-3 sm:gap-5 max-w-xl scroll-mt-24">
+            {res.map((d, i) => (
+              <div key={d.card.slug} className="grid gap-2 content-start text-center" style={{ ["--flip-delay" as string]: `${0.1 + i * 0.3}s` }}>
+                <TarotCardView key={`${d.card.slug}-${d.reversed}`} slug={d.card.slug} name={d.card.name} reversed={d.reversed} flipIn className="tcard-thumb w-full max-w-40 mx-auto" sizes="(min-width: 768px) 180px, 30vw" />
+                <span className="text-xs text-muted">{i + 1}. {POSITIONS[i]}</span>
+                <span className="text-sm font-semibold leading-tight [overflow-wrap:anywhere] hyphens-auto">{d.card.name}</span>
               </div>
-              <p className="font-semibold">{d.card.name}{d.reversed ? " (перевёрнутая)" : ""}</p>
-              <p className="text-sm text-muted">{d.reversed ? d.card.reversed : d.card.upright}</p>
-              <p className="text-xs"><Link href={`/taro/karty/${d.card.slug}`} className="text-accent underline">подробнее о карте</Link></p>
-            </div>
-          ))}
-          <div className="md:col-span-3 border-l-2 border-gold pl-3 italic text-sm">
-            Совет расклада: {res[2].card.advice}
+            ))}
           </div>
-        </div>
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            {res.map((d, i) => (
+              <div key={d.card.slug} className="grid gap-2 content-start">
+                <p className="chip w-fit">{i + 1}. {POSITIONS[i]}</p>
+                <p className="font-semibold">{d.card.name}{d.reversed ? " (перевёрнутая)" : ""}</p>
+                <p className="text-sm text-muted">{d.reversed ? d.card.reversed : d.card.upright}</p>
+                <p className="text-xs"><Link href={`/taro/karty/${d.card.slug}`} className="text-accent-text underline">подробнее о карте</Link></p>
+              </div>
+            ))}
+            <div className="md:col-span-3 border-l-2 border-gold pl-3 italic text-sm">
+              Совет расклада: {res[2].card.advice}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
