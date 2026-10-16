@@ -3,12 +3,13 @@ import Link from "next/link";
 import { SECTIONS, SECTION_KEYS, SITE } from "@/lib/site";
 import ThemeToggle from "./ThemeToggle";
 import MobileMenu from "./MobileMenu";
+import type { IconName } from "./Icons";
 
-const MENU_TOOLS = [
-  { href: "/karta-dnya", title: "Карта дня" },
-  { href: "/goroskop", title: "Гороскоп" },
-  { href: "/lunnyy-kalendar", title: "Лунный календарь" },
-  { href: "/sovmestimost", title: "Совместимость" },
+const MENU_TOOLS: { href: string; title: string; icon: IconName }[] = [
+  { href: "/karta-dnya", title: "Карта дня", icon: "card" },
+  { href: "/goroskop", title: "Гороскоп", icon: "sun" },
+  { href: "/lunnyy-kalendar", title: "Лунный календарь", icon: "calendar" },
+  { href: "/sovmestimost", title: "Совместимость", icon: "hearts" },
 ];
 
 export default function Header() {
