@@ -7,7 +7,8 @@ import { getOrder, patchOrder, refundOrder, settleOrder, type Order } from "./ra
 import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
-import { mailBuyer } from "./razborMail";
+import { mailBuyer, mailGift } from "./razborMail";
+import { giftDue, giftFromMetadata } from "./razborGift";
 import { RAZBOR, type RazborInput } from "./razbor";
 import { SITE } from "./site";
 import { sharedRateLimit } from "./rateLimit";
@@ -80,9 +81,11 @@ export function orderFromPayment(p: Payment): Order | null {
   const md = p.metadata ?? {};
   const i = inputFromPayment(p);
   if (!i || !md.order) return null;
+  const gift = giftFromMetadata(md);
   return {
     id: md.order, token: makeToken(i, md.order), date: md.date, name: md.name ?? "", email: md.email ?? "", amount: Number(p.amount.value),
     status: "pending", payment_id: p.id, created_at: p.created_at, paid_at: "", yr: i.yr, mo: i.mo,
+    ...(gift ? { gift } : {}),
   };
 }
 
@@ -111,7 +114,16 @@ async function doFinishPaid(order: Order): Promise<{ order?: Order; lines: strin
     o.receipt_url ? `<a href="${h(`${SITE.url}/razbor/chek/${o.id}`)}">Чек «Мой налог»</a> · <a href="${h(o.receipt_url)}">ФНС</a>` : `<b>⚠️ Чек не пробит</b> (${h(r.error)}) — сайт повторит при следующем открытии заказа`,
     m.sent ? `✉️ Письмо отправлено на ${h(o.email)}` : `<b>⚠️ Письмо не отправлено</b> (${h(m.error)})`,
   ];
-  return { order: o, lines };
+  if (o.gift) {
+    const g = o.gift;
+    let line = g.to_email ? `письмо получателю ${g.send_at ? `уйдёт ${h(g.send_at)}` : "сразу"}` : "ссылку передаст покупатель";
+    if (giftDue(o)) {
+      const s = await mailGift(o);
+      line = s.sent ? "письмо получателю отправлено" : `<b>⚠️ письмо получателю не отправлено</b> (${h(s.error)}) — повторит ежедневный запуск`;
+    }
+    lines.push(`🎁 Подарок от ${h(g.from)}: ${line}`);
+  }
+  return { order: (await getOrder(o.id)) ?? o, lines };
 }
 
 const RETRY_GAP = 5 * 60_000;

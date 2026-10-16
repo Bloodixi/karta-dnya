@@ -6,9 +6,10 @@ import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import { DateField, FormError, TextField } from "@/components/NumerologyFields";
 import RazborView from "@/components/RazborView";
-import { RazborCheckoutForm, RazborGoal, RazborStickyCta } from "@/components/RazborClient";
+import { RazborCheckoutForm, RazborGiftFields, RazborGoal, RazborStickyCta } from "@/components/RazborClient";
 import { cleanName, parseDate } from "@/lib/numerology";
 import { buildTeaser, nowMsk, RAZBOR, RAZBOR_TOC } from "@/lib/razbor";
+import { GIFT_DAYS_MAX, todayMsk } from "@/lib/razborGift";
 import { pageTitle, SELLER, SITE } from "@/lib/site";
 
 const PATH = "/razbor";
@@ -123,6 +124,15 @@ function WhoWrote() {
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
+/** Ошибки полей подарка (коды из razborGift.parseGift). */
+const GIFT_ERRORS: Record<string, string> = {
+  gift_name: "Укажи имя получателя — оно будет в разборе и в письме.",
+  gift_from: "Подпиши подарок: от кого он, до 40 знаков и без ссылок.",
+  gift_wish: "Пожелание — до 300 знаков и без ссылок.",
+  gift_email: "Проверь e-mail получателя или оставь поле пустым — тогда ссылку передашь сам(а).",
+  gift_date: "Выбери день отправки не раньше сегодняшнего и не позже чем через год.",
+};
+
 export default async function RazborPage({ searchParams }: PageProps<"/razbor">) {
   const sp = await searchParams;
   const date = parseDate(sp.d);
@@ -184,11 +194,15 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
         <div className="card p-6 frame-gold">
           <p className="mono">Полный разбор</p>
           <p className="display text-4xl mt-2">{RAZBOR.price} ₽</p>
-          <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF.</p>
+          <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF. Можно оформить в подарок: с подписью, пожеланием и письмом получателю в выбранный день.</p>
           <TrustList />
 
           {err === "email" && (
             <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">Укажи e-mail — на него придут ссылка на разбор и чек об оплате.</p>
+          )}
+
+          {err && GIFT_ERRORS[err] && (
+            <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">{GIFT_ERRORS[err]} Поля подарка нужно заполнить заново.</p>
           )}
 
           {err === "pay" && (
@@ -207,7 +221,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           {date ? (
             <RazborCheckoutForm counter={counter}>
               <input type="hidden" name="date" value={date.iso} />
-              <input type="hidden" name="name" value={name} />
+              <RazborGiftFields counter={counter} name={name} today={todayMsk()} maxDate={todayMsk(GIFT_DAYS_MAX)} gift={one(sp.g) === "1"} err={err} />
               <label className="grid gap-1 text-sm mt-5 max-w-sm">
                 E-mail — пришлём сюда ссылку на разбор и чек
                 <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" aria-invalid={err === "email" || undefined} className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />

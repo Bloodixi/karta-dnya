@@ -148,3 +148,89 @@ export function RazborStickyCta({ price, from = "razbor-teaser", to = "oplata" }
     </div>
   );
 }
+
+const FIELD = "border border-line rounded-lg px-3 py-2 bg-surface min-w-0";
+
+/**
+ * Переключатель «Себе / В подарок» в форме оплаты и поля подарка. В режиме «Себе» имя из формы бесплатной части
+ * уходит скрытым полем; в подарок — его можно поправить (это имя получателя в разборе).
+ * Лимиты совпадают с серверной проверкой (razborGift.ts): подпись 40, пожелание 300 знаков, дата — до года вперёд.
+ * Цель Метрики «razbor_gift_mode» — один раз, при первом выборе «В подарок».
+ */
+export function RazborGiftFields({ counter, name, today, maxDate, gift: initial = false, err }: { counter?: string; name: string; today: string; maxDate: string; gift?: boolean; err?: string }) {
+  const [gift, setGift] = useState(initial);
+  const [when, setWhen] = useState<"now" | "date">("now");
+  const [to, setTo] = useState("");
+  const sent = useRef(false);
+  const pick = (g: boolean) => {
+    setGift(g);
+    if (g && !sent.current) {
+      sent.current = true;
+      reachGoal(counter, "razbor_gift_mode");
+    }
+  };
+  const bad = (code: string) => (err === code ? true : undefined);
+  return (
+    <>
+      <fieldset className="mt-5">
+        <legend className="text-sm mb-2">Кому разбор</legend>
+        <div className="inline-flex rounded-lg border border-line overflow-hidden text-sm">
+          {[
+            { v: false, label: "Себе" },
+            { v: true, label: "В подарок" },
+          ].map((o) => (
+            <label key={o.label} className={`px-4 py-2 cursor-pointer has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-accent ${gift === o.v ? "bg-ink text-bg" : "bg-surface"}`}>
+              <input type="radio" name="for" value={o.v ? "gift" : "self"} checked={gift === o.v} onChange={() => pick(o.v)} className="sr-only" />
+              {o.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      {!gift ? (
+        <input type="hidden" name="name" value={name} />
+      ) : (
+        <div className="grid gap-4 mt-4 max-w-md">
+          <p className="text-sm text-muted">Разбор строится по дате рождения, введённой выше, — это должна быть дата получателя.</p>
+          <label className="grid gap-1 text-sm">
+            Как зовут получателя
+            <input type="text" name="name" required defaultValue={name} maxLength={60} placeholder="Например, Анна" aria-invalid={bad("gift_name")} className={FIELD} />
+            <span className="text-xs text-muted">Это имя будет в разборе и в письме.</span>
+          </label>
+          <label className="grid gap-1 text-sm">
+            От кого
+            <input type="text" name="gift_from" required maxLength={40} placeholder="Например, Ольга или «мама и папа»" aria-invalid={bad("gift_from")} className={FIELD} />
+            <span className="text-xs text-muted">Так подпишем подарок, до 40 знаков.</span>
+          </label>
+          <label className="grid gap-1 text-sm">
+            Пожелание (необязательно)
+            <textarea name="gift_wish" maxLength={300} rows={3} placeholder="Пара тёплых слов — их увидит получатель" aria-invalid={bad("gift_wish")} className={FIELD} />
+            <span className="text-xs text-muted">До 300 знаков, без ссылок.</span>
+          </label>
+          <label className="grid gap-1 text-sm">
+            E-mail получателя (необязательно)
+            <input type="email" name="gift_to" maxLength={200} autoComplete="off" placeholder="friend@example.ru" value={to} onChange={(e) => setTo(e.target.value)} aria-invalid={bad("gift_email")} className={FIELD} />
+            <span className="text-xs text-muted">Оставь пустым — ссылка придёт только тебе, и ты передашь её сам(а).</span>
+          </label>
+          {to.trim() && (
+            <fieldset className="grid gap-2 text-sm">
+              <legend className="mb-1">Когда отправить письмо получателю</legend>
+              <label className="flex items-center gap-2">
+                <input type="radio" name="gift_when" value="now" checked={when === "now"} onChange={() => setWhen("now")} />
+                Сразу после оплаты
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="radio" name="gift_when" value="date" checked={when === "date"} onChange={() => setWhen("date")} />
+                В выбранный день, например ко дню рождения
+              </label>
+              {when === "date" && (
+                <input type="date" name="gift_at" required min={today} max={maxDate} aria-invalid={bad("gift_date")} className={FIELD + " w-48"} />
+              )}
+              <span className="text-xs text-muted">Письмо уходит утром по Москве. Ссылка на разбор в любом случае сразу придёт тебе.</span>
+            </fieldset>
+          )}
+        </div>
+      )}
+    </>
+  );
+}

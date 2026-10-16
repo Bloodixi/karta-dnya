@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { cleanName, parseDate } from "@/lib/numerology";
 import { nowMsk, RAZBOR, RAZBOR_VERSION } from "@/lib/razbor";
 import { PAY_COOKIE, rememberOrder } from "@/lib/razborOrder";
-import { saveOrder, type Order } from "@/lib/razborStore";
+import { cleanEmail, giftMetadata, parseGift } from "@/lib/razborGift";
+import { saveOrder, type Gift, type Order } from "@/lib/razborStore";
 import { makeToken } from "@/lib/razborToken";
 import { createPayment, yookassaReady } from "@/lib/yookassa";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
@@ -27,13 +28,19 @@ export async function POST(req: Request) {
   const form = await req.formData();
   const birth = parseDate(String(form.get("date") ?? ""));
   const name = cleanName(String(form.get("name") ?? ""));
-  const emailRaw = String(form.get("email") ?? "").trim();
-  // длина адреса ограничена 254 символами (RFC 5321) — длиннее не проверяем регуляркой вовсе
-  const email = emailRaw.length <= 254 && /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(emailRaw) ? emailRaw : "";
+  const email = cleanEmail(form.get("email"));
+  const isGift = form.get("for") === "gift";
   const back = (q: string) => NextResponse.redirect(new URL(`/razbor?${q}#oplata`, SITE.url), 303);
   if (!birth) return back("err=date");
-  if (!email) return back(`d=${birth.iso}${name ? `&n=${encodeURIComponent(name)}` : ""}&err=email`);
-  if (!yookassaReady()) return back(`d=${birth.iso}&err=pay`);
+  const again = `d=${birth.iso}${name ? `&n=${encodeURIComponent(name)}` : ""}${isGift ? "&g=1" : ""}`;
+  let gift: Gift | undefined;
+  if (isGift) {
+    const g = parseGift(form, name);
+    if ("error" in g) return back(`${again}&err=${g.error}`);
+    gift = g.gift;
+  }
+  if (!email) return back(`${again}&err=email`);
+  if (!yookassaReady()) return back(`${again}&err=pay`);
   // считаем только попытки, которые дошли бы до ЮKassa: опечатка в форме лимит не тратит
   if (!byIp.take(clientIp(req))) return tooMany();
 
@@ -42,6 +49,7 @@ export async function POST(req: Request) {
   const draft: Order = {
     id: order, token: makeToken({ d: birth.d, m: birth.m, y: birth.y, name: name || undefined, yr, mo, v: RAZBOR_VERSION }, order), date: birth.iso, name, email,
     amount: RAZBOR.price, status: "pending", payment_id: "", created_at: new Date().toISOString(), paid_at: "", yr, mo,
+    ...(gift ? { gift } : {}),
   };
   try {
     // Без файла заказа оплата всё равно пройдёт: данные дублируются в metadata платежа.
@@ -49,9 +57,9 @@ export async function POST(req: Request) {
     const p = await createPayment({
       idempotenceKey: `razbor-${order}`,
       amount: RAZBOR.price,
-      description: `${RAZBOR.title}, ${birth.iso}`,
+      description: `${RAZBOR.title}${gift ? " в подарок" : ""}, ${birth.iso}`,
       returnUrl: `${SITE.url}/razbor/spasibo?o=${order}`,
-      metadata: { order, date: birth.iso, name, yr: String(yr), mo: String(mo), v: String(RAZBOR_VERSION), email },
+      metadata: { order, date: birth.iso, name, yr: String(yr), mo: String(mo), v: String(RAZBOR_VERSION), email, ...giftMetadata(gift) },
       email,
       method: form.get("method") === "sbp" ? "sbp" : undefined,
     });
@@ -64,6 +72,6 @@ export async function POST(req: Request) {
     return res;
   } catch (e) {
     console.error("razbor checkout:", e);
-    return back(`d=${birth.iso}&err=pay`);
+    return back(`${again}&err=pay`);
   }
 }

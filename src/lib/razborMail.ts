@@ -2,7 +2,7 @@
 import { mailReady, sendMail, type Inline } from "./mailer";
 import { escapeHtml as h } from "./notify";
 import { buildRazbor } from "./razbor";
-import { patchOrder, type Order } from "./razborStore";
+import { getOrder, patchOrder, type Order } from "./razborStore";
 import { readToken } from "./razborToken";
 import { qrPng, receiptView } from "./receiptView";
 import { SELLER, SITE } from "./site";
@@ -45,6 +45,33 @@ export function razborHighlights(token: string): string[] {
 
 const GIFT_URL = `${SITE.url}/razbor?utm_source=email&utm_medium=razbor&utm_campaign=gift`;
 
+/** ГГГГ-ММ-ДД → ДД.ММ.ГГГГ */
+const ru = (iso: string) => iso.split("-").reverse().join(".");
+
+/** Текст пожелания в HTML: экранирован, переводы строк — <br>. */
+const wishHtml = (t: string) => h(t).replace(/\n/g, "<br>");
+
+/** Код ошибки SMTP без текста ответа: в тексте бывает адрес получателя. */
+function smtpWhy(e: unknown): string {
+  const err = e as { code?: string; responseCode?: number };
+  return [err.code, err.responseCode].filter(Boolean).join(" ") || "ошибка отправки";
+}
+
+const btn = (href: string, label: string, bg: string, color: string) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${bg}" style="background:${bg};border-radius:8px;border:1px solid #5b3fa8"><a href="${h(href)}" target="_blank" style="display:inline-block;padding:11px 20px;font-family:Arial,sans-serif;font-size:15px;color:${color};text-decoration:none;font-weight:bold">${h(label)}</a></td></tr></table>`;
+
+/** Блок «Главное о тебе» в рамке. */
+const highlightsHtml = (title: string, main: string[]) =>
+  main.length
+    ? `<tr><td style="padding:8px 0 4px">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f6f3fb;border-radius:12px"><tr><td style="padding:18px 20px;font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222">
+<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5b3fa8;font-weight:bold">${h(title)}</div>
+${main.map((m) => `<p style="margin:10px 0 0">— ${h(m)}</p>`).join("\n")}
+<p style="margin:12px 0 0;font-size:13px;color:#666">Остальное — в разборе по ссылке выше.</p>
+</td></tr></table>
+</td></tr>`
+    : "";
+
 /** Отправляет письмо один раз на заказ (mail_sent_at). Ошибку не бросает — вернёт её текст для уведомления владельцу. */
 export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?: string }> {
   if (order.mail_sent_at) return { sent: true };
@@ -52,8 +79,23 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   if (!mailReady()) return { error: "не настроена отправка писем" };
   const url = `${SITE.url}/r/${order.id}`;
   const name = cleanName(order.name || "");
-  const hello = name ? `${name}, здравствуй!` : "Здравствуй!";
-  const subject = name ? `${name}, твой разбор по дате рождения готов` : "Твой разбор по дате рождения готов";
+  const gift = order.gift;
+  // в подарочном заказе имя — получателя, а не покупателя
+  const hello = name && !gift ? `${name}, здравствуй!` : "Здравствуй!";
+  const subject = gift
+    ? `Подарочный разбор${name ? ` для ${name}` : ""} готов`
+    : name ? `${name}, твой разбор по дате рождения готов` : "Твой разбор по дате рождения готов";
+  const who = name || "получателя";
+  const intro = gift ? `Спасибо за заказ. Это подарок для ${who}: разбор по дате рождения готов и открывается по ссылке` : "Спасибо за заказ. Твой разбор по дате рождения готов и открывается по ссылке";
+  const keep = gift ? "Ссылка бессрочная — сохрани письмо." : "Ссылка твоя навсегда — сохрани письмо.";
+  const delivery = !gift
+    ? ""
+    : gift.to_email
+      ? gift.send_at
+        ? `${ru(gift.send_at)} письмо с подарком уйдёт ${name || "получателю"} на ${gift.to_email}. До этого дня ссылку видишь только ты.`
+        : `Письмо с подарком мы отправляем ${name || "получателю"} на ${gift.to_email} вместе с этим письмом.`
+      : `Письмо получателю мы не отправляем: передай ссылку ${name ? `${name} ` : ""}сам(а) — так, как тебе удобно.`;
+  const mainTitle = gift ? "Главное из разбора" : "Главное о тебе";
   const main = razborHighlights(order.token);
   const r = receiptView(order);
   const inline: Inline[] = r ? [{ cid: "qr@karta-dnya.ru", filename: `chek-${r.number}.png`, content: await qrPng(r.fnsUrl), contentType: "image/png" }] : [];
@@ -71,12 +113,13 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   const text = [
     hello,
     "",
-    "Спасибо за заказ. Твой разбор по дате рождения готов и открывается по ссылке:",
+    `${intro}:`,
     url,
     "",
-    "Ссылка твоя навсегда — сохрани письмо.",
+    keep,
     "",
-    ...(main.length ? ["Главное о тебе:", ...main.map((m) => `— ${m}`), "", "Остальное — в разборе по ссылке выше.", ""] : []),
+    ...(delivery ? [delivery, ""] : []),
+    ...(main.length ? [`${mainTitle}:`, ...main.map((m) => `— ${m}`), "", "Остальное — в разборе по ссылке выше.", ""] : []),
     "Подарить разбор близкому:",
     GIFT_URL,
     "",
@@ -87,24 +130,15 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
     `${SITE.name} · ${SITE.url}`,
     `Продавец: ${SELLER.name}, ИНН ${SELLER.inn}`,
   ].join("\n");
-  const btn = (href: string, label: string, bg: string, color: string) =>
-    `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${bg}" style="background:${bg};border-radius:8px;border:1px solid #5b3fa8"><a href="${h(href)}" target="_blank" style="display:inline-block;padding:11px 20px;font-family:Arial,sans-serif;font-size:15px;color:${color};text-decoration:none;font-weight:bold">${h(label)}</a></td></tr></table>`;
-  const mainHtml = main.length
-    ? `<tr><td style="padding:8px 0 4px">
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f6f3fb;border-radius:12px"><tr><td style="padding:18px 20px;font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222">
-<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5b3fa8;font-weight:bold">Главное о тебе</div>
-${main.map((m) => `<p style="margin:10px 0 0">— ${h(m)}</p>`).join("\n")}
-<p style="margin:12px 0 0;font-size:13px;color:#666">Остальное — в разборе по ссылке выше.</p>
-</td></tr></table>
-</td></tr>`
-    : "";
+  const mainHtml = highlightsHtml(mainTitle, main);
   const html = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff"><tr><td align="left" style="padding:8px">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222">
 <tr><td style="padding:0 0 8px"><p style="margin:0">${h(hello)}</p></td></tr>
-<tr><td style="padding:0 0 12px"><p style="margin:0">Спасибо за заказ. Твой разбор по дате рождения готов:</p></td></tr>
+<tr><td style="padding:0 0 12px"><p style="margin:0">${h(intro)}:</p></td></tr>
 <tr><td style="padding:0 0 8px">${btn(url, "Открыть разбор", "#5b3fa8", "#ffffff")}</td></tr>
 <tr><td style="padding:0 0 4px;font-size:13px;color:#666">Ссылка: <a href="${h(url)}" style="color:#5b3fa8">${h(url)}</a></td></tr>
-<tr><td style="padding:0 0 12px;font-size:14px;font-weight:bold">Ссылка твоя навсегда — сохрани письмо.</td></tr>
+<tr><td style="padding:0 0 12px;font-size:14px;font-weight:bold">${h(keep)}</td></tr>
+${delivery ? `<tr><td style="padding:0 0 12px"><p style="margin:0;border-left:3px solid #5b3fa8;padding-left:12px">${h(delivery)}</p></td></tr>` : ""}
 ${mainHtml}
 <tr><td style="padding:16px 0 8px">${btn(GIFT_URL, "Подарить разбор близкому", "#ffffff", "#5b3fa8")}</td></tr>
 ${r ? `<tr><td style="padding:8px 0"><table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;width:100%;max-width:400px;border:1px solid #e5e1d8;border-radius:12px;background:#fffdf8;font-size:14px;color:#222">
@@ -139,9 +173,83 @@ ${r ? `<tr><td style="padding:8px 0"><table role="presentation" cellpadding="0" 
     return { sent: true };
   } catch (e) {
     // в тексте ошибки SMTP бывает адрес покупателя — в лог и владельцу только код ответа
-    const err = e as { code?: string; responseCode?: number };
-    const why = [err.code, err.responseCode].filter(Boolean).join(" ") || "ошибка отправки";
+    const why = smtpWhy(e);
     console.error("razbor mail:", order.id, why);
+    return { error: why };
+  }
+}
+
+/** Письмо получателю подарка уходит один раз: вебхук, страница «Спасибо» и ежедневный запуск не пошлют его дважды. */
+const giftSending = new Map<string, Promise<{ sent?: boolean; error?: string }>>();
+
+/**
+ * Письмо получателю подарка (gift.to_email) — один раз на заказ (gift.sent_at). Дату отправки и статус оплаты
+ * проверяет вызывающий (razborGift.giftDue). Ошибку не бросает.
+ */
+export function mailGift(order: Order): Promise<{ sent?: boolean; error?: string }> {
+  const running = giftSending.get(order.id);
+  if (running) return running;
+  const job = doMailGift(order.id).finally(() => giftSending.delete(order.id));
+  giftSending.set(order.id, job);
+  return job;
+}
+
+async function doMailGift(id: string): Promise<{ sent?: boolean; error?: string }> {
+  const order = await getOrder(id);
+  const gift = order?.gift;
+  if (!order || !gift?.to_email) return { error: "нет адреса получателя" };
+  if (gift.sent_at) return { sent: true };
+  if (order.status !== "paid") return { error: "заказ не оплачен" };
+  if (!mailReady()) return { error: "не настроена отправка писем" };
+  const url = `${SITE.url}/r/${order.id}`;
+  const name = cleanName(order.name || "");
+  const from = cleanName(gift.from);
+  const wish = gift.wish?.trim() ?? "";
+  const hello = name ? `${name}, привет!` : "Привет!";
+  const subject = `${name ? `${name}, ` : ""}${from} дарит тебе нумерологический разбор`;
+  const lead = `${from} дарит тебе нумерологический разбор по дате рождения — личный текст о твоих числах, характере, сильных сторонах и ближайших двенадцати месяцах.`;
+  const main = razborHighlights(order.token);
+  const text = [
+    hello,
+    "",
+    lead,
+    "",
+    ...(wish ? [`Пожелание от ${from}:`, wish, ""] : []),
+    "Разбор открывается по ссылке:",
+    url,
+    "",
+    "Ссылка твоя навсегда — сохрани письмо. На странице разбора есть кнопка, чтобы сохранить его в PDF.",
+    "",
+    ...(main.length ? ["Главное о тебе:", ...main.map((m) => `— ${m}`), "", "Остальное — в разборе по ссылке выше.", ""] : []),
+    `Письмо отправлено по просьбе ${from}: подарок оформлен на сайте «${SITE.name}». Если оно пришло по ошибке — просто не обращай на него внимания.`,
+    "",
+    `${SITE.name} · ${SITE.url}`,
+  ].join("\n");
+  const html = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff"><tr><td align="left" style="padding:8px">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222">
+<tr><td style="padding:0 0 8px"><p style="margin:0">${h(hello)}</p></td></tr>
+<tr><td style="padding:0 0 12px"><p style="margin:0">${h(lead)}</p></td></tr>
+${wish ? `<tr><td style="padding:4px 0 14px">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fffdf8;border:1px solid #e5e1d8;border-radius:12px"><tr><td style="padding:16px 20px;font-family:Arial,sans-serif;font-size:15px;line-height:1.55;color:#222">
+<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5b3fa8;font-weight:bold">Пожелание от ${h(from)}</div>
+<p style="margin:8px 0 0;font-style:italic">${wishHtml(wish)}</p>
+</td></tr></table>
+</td></tr>` : ""}
+<tr><td style="padding:0 0 8px">${btn(url, "Открыть подарок", "#5b3fa8", "#ffffff")}</td></tr>
+<tr><td style="padding:0 0 4px;font-size:13px;color:#666">Ссылка: <a href="${h(url)}" style="color:#5b3fa8">${h(url)}</a></td></tr>
+<tr><td style="padding:0 0 12px;font-size:14px;font-weight:bold">Ссылка твоя навсегда — сохрани письмо.</td></tr>
+${highlightsHtml("Главное о тебе", main)}
+<tr><td style="padding:12px 0 8px;font-size:13px;color:#666">Письмо отправлено по просьбе ${h(from)}: подарок оформлен на сайте «${h(SITE.name)}». Если оно пришло по ошибке — просто не обращай на него внимания.</td></tr>
+<tr><td style="padding:8px 0;font-size:12px;color:#888">${h(SITE.name)} · <a href="${h(SITE.url)}" style="color:#888">${h(SITE.url.replace(/^https?:\/\//, ""))}</a></td></tr>
+</table>
+</td></tr></table>`;
+  try {
+    await sendMail({ to: gift.to_email, subject, text, html });
+    await patchOrder(order.id, { gift: { ...gift, sent_at: new Date().toISOString() } });
+    return { sent: true };
+  } catch (e) {
+    const why = smtpWhy(e);
+    console.error("razbor gift mail:", order.id, why);
     return { error: why };
   }
 }

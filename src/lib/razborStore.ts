@@ -4,6 +4,15 @@ import path from "node:path";
 
 export type OrderStatus = "pending" | "paid" | "canceled" | "refunded";
 
+/** Подарок: кто дарит, пожелание, куда и когда отправить письмо получателю. Имя получателя — order.name. */
+export type Gift = {
+  from: string; // как подписан подарок, до 40 знаков
+  wish?: string; // пожелание, до 300 знаков
+  to_email?: string; // e-mail получателя; нет — ссылку передаёт покупатель
+  send_at?: string; // ГГГГ-ММ-ДД по Москве; нет — сразу после оплаты
+  sent_at?: string; // письмо получателю отправлено
+};
+
 export type Order = {
   id: string;
   token: string;
@@ -27,6 +36,7 @@ export type Order = {
   refund_ids?: string[]; // учтённые возвраты ЮKassa (уведомление — один раз на возврат)
   access_mail_at?: string[]; // письма «Потеряли ссылку?» за последние сутки (суточный потолок на адрес)
   mismatch_at?: string; // оплата не сошлась с заказом (валюта/сумма) — владелец уже предупреждён
+  gift?: Gift; // заказ в подарок
 };
 
 const ID_RE = /^[\w-]{6,64}$/;
@@ -113,9 +123,8 @@ export function patchOrder(id: string, patch: Partial<Order>): Promise<Order | n
   });
 }
 
-/** Оплаченные заказы по e-mail покупателя (для «Потеряли ссылку?»). Заказов немного — читаем каталог целиком. */
-export async function paidOrdersByEmail(email: string): Promise<Order[]> {
-  const want = email.trim().toLowerCase();
+/** Все заказы с тома, отобранные `keep`. Заказов немного — читаем каталог целиком. */
+export async function listOrders(keep: (o: Order) => boolean): Promise<Order[]> {
   let names: string[] = [];
   try {
     names = (await readdir(dir())).filter((n) => n.endsWith(".json"));
@@ -125,7 +134,14 @@ export async function paidOrdersByEmail(email: string): Promise<Order[]> {
   const out: Order[] = [];
   for (const n of names) {
     const o = await getOrder(n.slice(0, -5));
-    if (o?.status === "paid" && o.email.toLowerCase() === want) out.push(o);
+    if (o && keep(o)) out.push(o);
   }
+  return out;
+}
+
+/** Оплаченные заказы по e-mail покупателя (для «Потеряли ссылку?»). */
+export async function paidOrdersByEmail(email: string): Promise<Order[]> {
+  const want = email.trim().toLowerCase();
+  const out = await listOrders((o) => o.status === "paid" && o.email.toLowerCase() === want);
   return out.sort((a, b) => b.paid_at.localeCompare(a.paid_at));
 }
