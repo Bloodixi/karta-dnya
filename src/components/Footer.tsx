@@ -13,9 +13,9 @@ export default function Footer() {
             <Image src="/logo-192.png" alt="" width={24} height={24} className="rounded" /> {SITE.name}
           </p>
           <p className="text-muted mt-2 max-w-sm">{SITE.tagline}.</p>
-          <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+          <p className="mt-2 flex flex-wrap gap-x-5">
             {Object.values(SOCIAL).map((s) => (
-              <a key={s.url} href={s.url} target="_blank" rel="noopener" className="hover:text-ink underline">{s.title}</a>
+              <a key={s.url} href={s.url} target="_blank" rel="noopener" className="inline-block py-2 hover:text-ink underline">{s.title}</a>
             ))}
           </p>
           <p className="text-muted mt-3 text-xs">
@@ -30,10 +30,10 @@ export default function Footer() {
         </div>
         <div>
           <p className="mono mb-3">Разделы</p>
-          <ul className="grid gap-1 text-muted">
+          <ul className="grid grid-cols-2 gap-x-4 md:grid-cols-1 text-muted">
             {SECTION_KEYS.map((k) => (
               <li key={k}>
-                <Link href={`/${k}`} className="hover:text-ink">
+                <Link href={`/${k}`} className="block py-2 md:py-0.5 hover:text-ink">
                   {SECTIONS[k].title}
                 </Link>
               </li>
@@ -42,31 +42,31 @@ export default function Footer() {
         </div>
         <div>
           <p className="mono mb-3">Инструменты</p>
-          <ul className="grid gap-1 text-muted">
+          <ul className="grid grid-cols-2 gap-x-4 md:grid-cols-1 text-muted">
             {TOOLS.map((t) => (
               <li key={t.href}>
-                <Link href={t.href} className="hover:text-ink">
+                <Link href={t.href} className="block py-2 md:py-0.5 hover:text-ink">
                   {t.title}
                 </Link>
               </li>
             ))}
             <li>
-              <Link href="/taro/karty" className="hover:text-ink">
+              <Link href="/taro/karty" className="block py-2 md:py-0.5 hover:text-ink">
                 Значения карт Таро
               </Link>
             </li>
             <li>
-              <Link href="/razbor" className="hover:text-ink">
+              <Link href="/razbor" className="block py-2 md:py-0.5 hover:text-ink">
                 Разбор по дате рождения
               </Link>
             </li>
             <li>
-              <Link href="/sovmestimost-razbor" className="hover:text-ink">
+              <Link href="/sovmestimost-razbor" className="block py-2 md:py-0.5 hover:text-ink">
                 Совместимость пары
               </Link>
             </li>
             <li>
-              <Link href="/razbor-rebenka" className="hover:text-ink">
+              <Link href="/razbor-rebenka" className="block py-2 md:py-0.5 hover:text-ink">
                 Детский разбор
               </Link>
             </li>
@@ -75,14 +75,15 @@ export default function Footer() {
       </div>
       <div className="border-t border-line">
         {/* flex-wrap: каждая ссылка переносится целиком, строка не выходит за край на узком экране */}
-        <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted flex flex-wrap gap-x-2 gap-y-1">
-          <span>© {new Date().getFullYear()} {SITE.name}. Все материалы защищены.</span>
+        <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted flex flex-wrap items-center gap-x-2 gap-y-1">
+          {/* На телефоне копирайт — отдельной строкой, чтобы точка-разделитель не повисала в конце */}
+          <span className="basis-full sm:basis-auto">© {new Date().getFullYear()} {SITE.name}. Все материалы защищены.</span>
+          <span aria-hidden="true" className="hidden sm:inline">·</span>
+          <Link href="/oferta" className="inline-block py-2 sm:py-0 hover:text-ink underline">Оферта</Link>
           <span aria-hidden="true">·</span>
-          <Link href="/oferta" className="hover:text-ink underline">Оферта</Link>
+          <Link href="/vozvrat" className="inline-block py-2 sm:py-0 hover:text-ink underline">Возврат</Link>
           <span aria-hidden="true">·</span>
-          <Link href="/vozvrat" className="hover:text-ink underline">Возврат</Link>
-          <span aria-hidden="true">·</span>
-          <Link href="/privacy" className="hover:text-ink underline">Конфиденциальность</Link>
+          <Link href="/privacy" className="inline-block py-2 sm:py-0 hover:text-ink underline">Конфиденциальность</Link>
         </p>
       </div>
     </footer>
