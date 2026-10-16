@@ -34,6 +34,9 @@ function Bar({ label, value }: { label: string; value: number }) {
   );
 }
 
+/** Текстовый вариант глифа знака: без него телефоны рисуют цветные эмодзи. */
+const VS = "\uFE0E";
+
 export default async function PairPage({ params }: PageProps<"/sovmestimost/[pair]">) {
   const { pair } = await params;
   const p = parsePair(pair);
@@ -44,13 +47,13 @@ export default async function PairPage({ params }: PageProps<"/sovmestimost/[pai
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/sovmestimost", label: "Совместимость" }, { href: `/sovmestimost/${pair}`, label: `${p.a.name} и ${p.b.name}` }]} />
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <div className="flex shrink-0 -space-x-3">
-          <ZodiacSign symbol={p.a.symbol} element={p.a.element} slug={`pa-${p.a.slug}`} size={72} />
-          <ZodiacSign symbol={p.b.symbol} element={p.b.element} slug={`pb-${p.b.slug}`} size={72} />
+          <ZodiacSign symbol={p.a.symbol} element={p.a.element} slug={`pa-${p.a.slug}`} size={72} className="size-14 sm:size-[72px]" />
+          <ZodiacSign symbol={p.b.symbol} element={p.b.element} slug={`pb-${p.b.slug}`} size={72} className="size-14 sm:size-[72px]" />
         </div>
-        <div>
-          <h1 className="text-3xl md:text-4xl font-semibold">{p.a.name} и {p.b.name}: совместимость</h1>
+        <div className="min-w-0 [overflow-wrap:anywhere]">
+          <h1 className="text-[1.6rem] leading-tight sm:text-3xl md:text-4xl font-semibold">{p.a.name} и {p.b.name}: совместимость</h1>
           <p className="text-muted mt-1">{p.a.element} и {p.b.element} · {c.verdict}</p>
         </div>
       </div>
@@ -86,7 +89,7 @@ export default async function PairPage({ params }: PageProps<"/sovmestimost/[pai
         <h2 className="text-2xl mb-3">{p.a.name} с другими знаками</h2>
         <div className="flex flex-wrap gap-2">
           {sameA.map((b) => (
-            <Link key={b.slug} href={`/sovmestimost/${p.a.slug}-${b.slug}`} className="chip hover:text-ink">{b.symbol} {b.name} · {compatibility(p.a, b).score}%</Link>
+            <Link key={b.slug} href={`/sovmestimost/${p.a.slug}-${b.slug}`} className="chip hover:text-ink">{b.symbol}{VS} {b.name} · {compatibility(p.a, b).score}%</Link>
           ))}
         </div>
       </section>

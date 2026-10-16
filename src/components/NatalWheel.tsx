@@ -59,7 +59,7 @@ export default function NatalWheel({ chart, className = "" }: { chart: NatalChar
   const cusps = chart.houses?.cusps;
   const title = chart.houses ? "Колесо натальной карты с домами" : "Колесо натальной карты без домов (время рождения неизвестно)";
   return (
-    <svg viewBox="0 0 400 400" role="img" aria-label={title} className={className}>
+    <svg viewBox="-28 -16 456 432" role="img" aria-label={title} className={className}>
       <title>{title}</title>
       {/* кольцо знаков */}
       {SIGN_GLYPHS.map((g, i) => {
@@ -97,7 +97,7 @@ export default function NatalWheel({ chart, className = "" }: { chart: NatalChar
             const [ax, ay] = pt(asc, asc, R_OUT + 6);
             const [mx, my] = pt(chart.houses!.mc, asc, R_OUT + 6);
             return (
-              <g fontSize="8" fill="var(--ink)" fontFamily="ui-monospace, monospace" letterSpacing="0.5">
+              <g fontSize="10" fill="var(--accent-text)" fontFamily="ui-monospace, monospace" letterSpacing="0.5">
                 <text x={ax} y={ay} textAnchor="end" dominantBaseline="central">ASC</text>
                 <text x={mx} y={my} textAnchor="middle" dominantBaseline="auto">MC</text>
               </g>

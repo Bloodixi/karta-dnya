@@ -45,8 +45,8 @@ export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[s
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/goroskop", label: "Гороскоп" }, { href: `/goroskop/${sign}`, label: z.name }, { href: `/goroskop/${sign}/${period}`, label: PERIODS[pk].title }]} />
       <div className="flex items-center gap-4">
-        <ZodiacSign symbol={z.symbol} element={z.element} slug={`sign-${z.slug}`} size={84} className="shrink-0" />
-        <div>
+        <ZodiacSign symbol={z.symbol} element={z.element} slug={`sign-${z.slug}`} size={84} className="shrink-0 size-16 sm:size-[84px]" />
+        <div className="min-w-0 [overflow-wrap:anywhere]">
           <h1 className="text-3xl md:text-4xl font-semibold">{z.name}: гороскоп {PERIODS[pk].title}</h1>
           <p className="text-muted">{z.dates} · {z.element} · {z.planet}</p>
         </div>
@@ -54,13 +54,13 @@ export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[s
       <div className="mt-4"><PeriodNav current={pk} sign={z.slug} /></div>
       {h && <div className="mt-4"><HoroscopeCard h={h} /></div>}
       <p className="mt-6 text-muted">
-        <Link href={`/goroskop/${sign}`} className="text-accent underline">Характер знака {z.name} и гороскоп на сегодня</Link>
+        <Link href={`/goroskop/${sign}`} className="text-accent-text underline">Характер знака {z.name} и гороскоп на сегодня</Link>
       </p>
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Гороскоп {PERIODS[pk].title} для других знаков</h2>
         <div className="flex flex-wrap gap-2">
           {all.filter((x) => x.slug !== z.slug).map((x) => (
-            <Link key={x.slug} href={`/goroskop/${x.slug}/${period}`} className="chip hover:text-ink">{x.symbol} {x.name}</Link>
+            <Link key={x.slug} href={`/goroskop/${x.slug}/${period}`} className="chip hover:text-ink">{x.symbol}{"\uFE0E"} {x.name}</Link>
           ))}
         </div>
       </section>

@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/sovmestimost" },
 };
 
+/** Текстовый вариант глифа знака: без него телефоны рисуют цветные эмодзи. */
+const VS = "\uFE0E";
+
 export default function CompatIndex() {
   const signs = getZodiac();
   const best = signs.flatMap((a) => signs.filter((b) => a.slug < b.slug).map((b) => ({ a, b, c: compatibility(a, b) }))).sort((x, y) => y.c.score - x.c.score).slice(0, 8);
@@ -29,7 +32,7 @@ export default function CompatIndex() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {best.map(({ a, b, c }) => (
               <Link key={a.slug + b.slug} href={`/sovmestimost/${a.slug}-${b.slug}`} className="card card-hover p-4">
-                <p className="font-semibold">{a.symbol} {a.name} + {b.symbol} {b.name}</p>
+                <p className="font-semibold">{a.symbol}{VS} {a.name} + {b.symbol}{VS} {b.name}</p>
                 <p className="text-sm text-muted mt-1">{c.score}% · {c.verdict}</p>
               </Link>
             ))}
@@ -40,21 +43,25 @@ export default function CompatIndex() {
       {signs.length > 0 && (
         <section className="mt-10">
           <h2 className="text-2xl mb-3">Таблица совместимости</h2>
+          <p className="sm:hidden flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted mb-2" aria-hidden="true">
+            {signs.map((s) => <span key={s.slug} className="whitespace-nowrap">{s.symbol}{VS} {s.name}</span>)}
+          </p>
+          <div className="relative">
           <div className="overflow-x-auto card p-2">
             <table className="text-xs sm:text-sm w-full">
               <thead>
                 <tr>
                   <th className="p-1"></th>
-                  {signs.map((b) => <th key={b.slug} className="p-1 text-center" title={b.name}>{b.symbol}</th>)}
+                  {signs.map((b) => <th key={b.slug} className="p-1 text-center" title={b.name}><span aria-hidden="true">{b.symbol}{VS}</span><span className="sr-only">{b.name}</span></th>)}
                 </tr>
               </thead>
               <tbody>
                 {signs.map((a) => (
                   <tr key={a.slug}>
-                    <th className="p-1 text-left whitespace-nowrap sticky left-0 bg-surface">{a.symbol} {a.name}</th>
+                    <th className="p-1 text-left whitespace-nowrap sticky left-0 z-[1] bg-surface">{a.symbol}{VS} {a.name}</th>
                     {signs.map((b) => {
                       const c = compatibility(a, b);
-                      const bg = c.score >= 80 ? "bg-green-500/25" : c.score >= 65 ? "bg-yellow-500/25" : "bg-red-500/15";
+                      const bg = c.score >= 80 ? "bg-accent/35 font-semibold" : c.score >= 65 ? "bg-accent/15" : "bg-sunk text-muted";
                       return (
                         <td key={b.slug} className={`p-1 text-center ${bg}`}>
                           <Link href={`/sovmestimost/${a.slug}-${b.slug}`} className="block min-w-9 py-2 sm:min-w-0 sm:py-0">{c.score}</Link>
@@ -65,6 +72,9 @@ export default function CompatIndex() {
                 ))}
               </tbody>
             </table>
+          </div>
+            {/* подсказка, что таблица листается вбок */}
+            <div className="pointer-events-none absolute inset-y-px right-px w-8 rounded-r bg-linear-to-l from-surface to-transparent lg:hidden" aria-hidden="true" />
           </div>
           <p className="text-xs text-muted mt-2">Строка — первый знак, столбец — второй. Нажмите на число, чтобы открыть разбор пары.</p>
         </section>
