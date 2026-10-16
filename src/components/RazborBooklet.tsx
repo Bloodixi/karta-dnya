@@ -16,7 +16,7 @@ import {
 } from "@/lib/razborBooklet";
 
 type View = "spreads" | "single";
-type PageRow = { page: number; fill: number; freeMm: number; designed: boolean; chain: string | null; firstSid: string | null; sids: string[]; fills: string[] };
+type PageRow = { page: number; fill: number; freeMm: number; designed: boolean; chain: string | null; firstSid: string | null; sids: string[]; keepSid: string | null; fills: string[]; fh: Record<string, number>; ftop: Record<string, number> };
 type Measure = { pages: PageRow[]; chains: Record<string, PageRow[]> };
 
 /* Подгонка: после раскладки меряем последнюю страницу каждой цепочки.
@@ -44,7 +44,16 @@ function measure(book: HTMLElement): Measure {
     const tagged = area.querySelectorAll<HTMLElement>("[data-chain]");
     const chain = tagged.length ? tagged[tagged.length - 1].dataset.chain ?? null : null;
     const sids = [...area.querySelectorAll<HTMLElement>("[data-sid]")].map((e) => e.dataset.sid!);
-    const row: PageRow = { page: i + 1, fill: (bottom - r.top) / r.height, freeMm: (r.bottom - bottom) / MM, designed, chain, firstSid: sids[0] || null, sids, fills: [...area.querySelectorAll<HTMLElement>("[data-f]")].map((e) => e.dataset.f!) };
+    // заголовок раздела, с которого начинается страница: перед его разделом можно вставить заполнитель
+    const k0 = area.querySelector<HTMLElement>(".keep, .sh"), k0top = k0 ? (k0.getBoundingClientRect().top - r.top) / r.height : 1;
+    const keepSid = k0 && k0top < 0.15 ? k0.closest<HTMLElement>("[data-sid]")?.dataset.sid ?? null : null;
+    const fl = [...area.querySelectorAll<HTMLElement>("[data-f]")];
+    const row: PageRow = {
+      page: i + 1, fill: (bottom - r.top) / r.height, freeMm: (r.bottom - bottom) / MM, designed, chain, firstSid: sids[0] || null, sids, keepSid,
+      fills: fl.map((e) => e.dataset.f!),
+      fh: Object.fromEntries(fl.map((e) => [e.dataset.f!, e.getBoundingClientRect().height / MM])),
+      ftop: Object.fromEntries(fl.map((e) => [e.dataset.f!, (e.getBoundingClientRect().top - r.top) / r.height])),
+    };
     out.pages.push(row);
     if (chain && !designed) (out.chains[chain] ||= []).push(row);
   });
@@ -101,7 +110,7 @@ export default function RazborBooklet({ doc, questions, initialStyle, qr, backHr
       const tried: Record<string, boolean> = {}, ups: Record<string, number> = {}, settled: Record<string, boolean> = {};
       let flow = { total: 0 };
       let m: Measure = { pages: [], chains: {} };
-      for (let pass = 1; pass <= 10; pass++) {
+      for (let pass = 1; pass <= 14; pass++) {
         if (cancelled) return;
         setStatus(`подгоняю страницы… проход ${pass}`);
         flow = await layout(plan);
@@ -112,16 +121,19 @@ export default function RazborBooklet({ doc, questions, initialStyle, qr, backHr
           const rows = m.chains[c], last = rows[rows.length - 1], isM = c.startsWith("M");
           // дыра в середине цепочки: следующая страница начинается с заголовка раздела — вставка перед этим разделом
           for (let k = 0; k < rows.length - 1; k++) {
-            const nx = m.pages[rows[k].page], sid = nx && nx.sids.find((x) => !rows[k].sids.includes(x));
+            const nx = m.pages[rows[k].page], sid = nx && (nx.keepSid || nx.sids.find((x) => !rows[k].sids.includes(x)));
             if (rows[k].fill >= 0.75 || !sid) continue;
             if (!tried["pre:" + sid]) {
               tried["pre:" + sid] = true;
               const kk = pickFill(rows[k].freeMm - 8);
               if (kk) { plan.pre[sid] = kk; changed = true; }
-            } else if (plan.pre[sid] && !rows[k].fills.includes("pre:" + sid)) { plan.pre[sid] = smaller(plan.pre[sid]); changed = true; }
+            } else if (plan.pre[sid] && !rows[k].fills.includes("pre:" + sid)) { plan.pre[sid] = smaller(plan.pre[sid]); settled["pre:" + sid] = true; changed = true; }
+            else if (plan.pre[sid] && rows[k].fill < 0.7 && !settled["pre:" + sid] && (ups["pre:" + sid] || 0) < 2 && plan.pre[sid] !== "q3x") {
+              ups["pre:" + sid] = (ups["pre:" + sid] || 0) + 1; plan.pre[sid] = FILL_ORDER[Math.max(0, FILL_ORDER.indexOf(plan.pre[sid] as (typeof FILL_ORDER)[number]) - 1)]; changed = true;
+            }
           }
           const prev = rows[rows.length - 2];
-          if (plan.fill[c] && !settled[c + ":tail"] && prev && prev.fill < 0.7 && last.fills.includes("end:" + c) && !prev.fills.includes("end:" + c)) {
+          if (plan.fill[c] && !settled[c + ":tail"] && prev && prev.fill < 0.7 && last.fills.includes("end:" + c) && !prev.fills.includes("end:" + c) && (last.ftop["end:" + c] ?? 1) < 0.12) {
             plan.fill[c] = smaller(plan.fill[c]); settled[c] = true; changed = true;
           } else if (rows.length > 1 && last.fill < (isM ? 0.6 : 0.3)) {
             if (plan.fill[c] && !settled[c + ":tail"]) { plan.fill[c] = smaller(plan.fill[c]); settled[c] = true; changed = true; }
@@ -141,6 +153,23 @@ export default function RazborBooklet({ doc, questions, initialStyle, qr, backHr
           }
         }
         if (!changed) break;
+      }
+      // Финальная доводка: конец цепочки всё ещё недозаполнен — вставка подбирается точно по свободному месту
+      const before = JSON.stringify(plan.fill);
+      for (const c of Object.keys(m.chains)) {
+        if (c.startsWith("M")) continue;
+        const rows = m.chains[c], last = rows[rows.length - 1];
+        if (last.fill >= 0.7) continue;
+        const per = Math.floor((last.freeMm + (last.fh["end:" + c] || 0) - 8 - 14 - 3 * 9) / 3 / 7);
+        if (per >= 2) plan.fill[c] = `qfit:${Math.min(per, 9)}`;
+      }
+      if (JSON.stringify(plan.fill) !== before && !cancelled) {
+        const saved = JSON.parse(before);
+        flow = await layout(plan);
+        const m2 = measure(book);
+        if (Object.keys(m2.chains).some((c) => !c.startsWith("M") && m2.chains[c].length > (m.chains[c]?.length || 0))) {
+          plan.fill = saved; flow = await layout(plan); m = measure(book);
+        } else m = m2;
       }
       // брошюра печатается листами A4 по 4 страницы A5: дневник добирает страницы до кратного 4
       const rest = flow.total % 4;

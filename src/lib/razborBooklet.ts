@@ -289,12 +289,12 @@ export function bookHtml(D: RazborDoc, QUESTIONS: BookletQuestions | null, st: B
     <div class="cal-grid">${months.map((m) => { const [mn, yy] = m.label.split(" "); return `<div><span class="cm">${esc(mn)}</span><span class="cy">${esc(yy)}</span><b>${m.number}</b><span class="cw">${esc(MONTH_WORD[m.number])}</span></div>`; }).join("")}</div>
     <p class="cal-legend">${Object.entries(MONTH_WORD).map(([k, v]) => `<span><b>${k}</b> ${v}</span>`).join("")}</p></section>`;
 
-  // Месяцы: четыре квартала, по три месяца на странице (каждый квартал — своя цепочка, только подгонка). Абзац «Для тебя» — внутри текста месяца.
-  for (let qn = 0; qn < 4; qn++) {
-    const ms = months.slice(qn * 3, qn * 3 + 3), c = "M" + qn;
+  // Месяцы: по два на странице (каждая страница — своя цепочка, только подгонка); с абзацем «Для тебя» три уже не помещаются
+  for (let qn = 0; qn < 6; qn++) {
+    const ms = months.slice(qn * 2, qn * 2 + 2), c = "M" + qn;
     if (!ms.length) continue;
     h += `<section class="quarter" ${qn === 0 ? 'id="b-mesyacy"' : ""} ${ch_(c)}>
-      <header class="qh"><p class="eyebrow">${esc(of("Год", "Год"))} по месяцам · ${qn + 1} из 4</p><h2>${esc(QUARTER(ms))}</h2></header>
+      <header class="qh"><p class="eyebrow">${esc(of("Год", "Год"))} по месяцам · ${qn + 1} из 6</p><h2>${esc(QUARTER(ms))}</h2></header>
       ${ms.map((m) => `<article class="mo"><h4><b>${m.number}</b>${esc(m.label)} <em>${esc(MONTH_WORD[m.number])}</em></h4><div class="txt">${m.text.split(/\n{2,}/).map((p) => `<p>${rich(p)}</p>`).join("")}</div></article>`).join("")}</section>`;
   }
 
