@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import RazborShare from "@/components/RazborShare";
 import RazborView from "@/components/RazborView";
 import { CopyLinkButton, PrintButton } from "@/components/RazborClient";
 import { buildRazbor, RAZBOR } from "@/lib/razbor";
@@ -38,12 +39,14 @@ export default async function RazborShortPage({ params }: PageProps<"/r/[id]">) 
           <PrintButton />
           <CopyLinkButton />
         </div>
-        <p className="no-print text-sm text-muted mt-3">Ссылка на эту страницу пришла тебе на почту. Если она потеряется — <Link href="/razbor#dostup" className="underline">пришлём ещё раз</Link>.</p>
+        <p className="no-print text-sm text-muted mt-3">Ссылка постоянная — добавь в закладки. Она же пришла тебе на почту; если она потеряется — <Link href="/razbor#dostup" className="underline">пришлём ещё раз</Link>.</p>
       </header>
 
       <div className="mt-8">
         <RazborView sections={doc.sections} />
       </div>
+
+      <RazborShare />
 
       <footer className="mt-12 max-w-3xl border-t border-line pt-6 text-sm text-muted">
         <p>Разбор носит развлекательный и ознакомительный характер и не является консультацией специалиста. Решения остаются за тобой.</p>
