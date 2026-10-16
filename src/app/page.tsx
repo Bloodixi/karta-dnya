@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
+import { SignDates } from "@/components/HoroscopeGrid";
 import { IconBadge } from "@/components/Icons";
 import MoonPhase from "@/components/MoonPhase";
 import RazborCta from "@/components/RazborCta";
@@ -107,14 +108,25 @@ export default function Home() {
 
       <section className="mx-auto max-w-6xl px-4 pt-12">
         <div className="ornament mb-5"><h2 className="text-3xl">Инструменты</h2><span className="mono">{TOOLS.length} ежедневных</span></div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {TOOLS.map((t, i) => (
-            <Link key={t.href} href={t.href} className="card card-hover p-5 flex flex-col gap-2">
-              <span className="mono">{String(i + 1).padStart(2, "0")} · {TOOL_KIND[t.href] || "инструмент"}</span>
-              <span className="display text-xl">{t.title}</span>
-              <p className="text-sm text-muted">{t.text}</p>
-            </Link>
-          ))}
+        {/* 11 инструментов: первая плитка («Карта дня») на две колонки — сетка 2 и 4 колонки заполняется без дыр */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {TOOLS.map((t, i) => {
+            const wide = i === 0 && TOOLS.length % 2 === 1;
+            return (
+              <Link key={t.href} href={t.href} className={`card card-hover p-4 sm:p-5 flex gap-4 ${wide ? "col-span-2" : ""}`}>
+                {wide && today && (
+                  <span className="w-14 sm:w-16 shrink-0 self-center">
+                    <TarotCardView slug={today.card.slug} name={today.card.name} reversed={today.reversed} className="tcard-thumb" sizes="64px" />
+                  </span>
+                )}
+                <span className="flex flex-col gap-2 min-w-0">
+                  <span className="mono">{String(i + 1).padStart(2, "0")} · {TOOL_KIND[t.href] || "инструмент"}</span>
+                  <span className="display text-lg sm:text-xl">{t.title}</span>
+                  <span className={`text-sm text-muted ${wide ? "" : "hidden sm:block"}`}>{t.text}</span>
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -130,7 +142,7 @@ export default function Home() {
               <Link key={z.slug} href={`/goroskop/${z.slug}`} className="text-center p-4 hover:bg-surface transition-colors">
                 <span className="zglyph">{z.symbol}{"︎"}</span>
                 <b className="block font-medium mt-2 text-sm">{z.name}</b>
-                <span className="text-xs text-muted">{z.dates}</span>
+                <span className="block text-xs text-muted"><SignDates dates={z.dates} short /></span>
               </Link>
             ))}
           </div>
@@ -143,9 +155,10 @@ export default function Home() {
 
       <section className="mx-auto max-w-6xl px-4 pt-12">
         <div className="ornament mb-5"><h2 className="text-3xl">Разделы</h2><span className="mono">{SECTION_KEYS.length} темы</span></div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SECTION_KEYS.map((k) => (
-            <Link key={k} href={`/${k}`} className="card card-hover p-5 flex gap-4">
+        {/* 7 разделов: первая плитка на две колонки — 8 ячеек, ровно 4 ряда по 2 или 2 ряда по 4 */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {SECTION_KEYS.map((k, i) => (
+            <Link key={k} href={`/${k}`} className={`card card-hover p-5 flex gap-4 ${i === 0 && SECTION_KEYS.length % 2 ? "sm:col-span-2" : ""}`}>
               <IconBadge name={SECTIONS[k].icon} className="shrink-0" />
               <span>
                 <span className="display text-xl block">{SECTIONS[k].title}</span>
