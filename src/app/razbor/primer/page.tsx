@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { RazborStickyCta } from "@/components/RazborClient";
 import RazborView from "@/components/RazborView";
 import { buildRazbor, nowMsk, RAZBOR, RAZBOR_TOC, RAZBOR_VERSION } from "@/lib/razbor";
 import { countWords } from "@/lib/ruCount";
@@ -55,11 +56,12 @@ export default function RazborSamplePage() {
         </div>
       </header>
 
-      <div className="mt-8">
+      <div id="primer-body" className="mt-8">
         <RazborView sections={doc.sections} />
       </div>
+      <RazborStickyCta price={RAZBOR.price} from="primer-body" to="primer-end" label="Хочу такой же" />
 
-      <footer className="mt-12 max-w-3xl border-t border-line pt-6">
+      <footer id="primer-end" className="mt-12 max-w-3xl border-t border-line pt-6 scroll-mt-24">
         <p className="display text-2xl">Хочешь такой же разбор по своей дате?</p>
         <p className="text-muted mt-2">Бесплатная часть откроется сразу, без регистрации. Полный текст — {RAZBOR.price} ₽.</p>
         <p className="mt-4">

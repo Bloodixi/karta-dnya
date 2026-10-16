@@ -24,7 +24,7 @@ function BlockView({ b }: { b: Block }) {
       ) : null;
     case "facts":
       return (
-        <div className={`razbor-keep not-prose grid gap-3 my-5 ${b.items.length > 2 ? "grid-cols-2 md:grid-cols-4" : "grid-cols-2"}`}>
+        <div className={`razbor-keep not-prose grid gap-3 my-5 ${b.items.length === 3 ? "grid-cols-2 sm:grid-cols-3 max-sm:[&>:last-child]:col-span-2" : b.items.length > 2 ? "grid-cols-2 md:grid-cols-4" : "grid-cols-2"}`}>
           {b.items.map((f) => (
             <div key={f.label} className="card p-4">
               <p className="mono">{f.label}</p>
@@ -81,7 +81,7 @@ function BlockView({ b }: { b: Block }) {
       return (
         <>
           <details className="razbor-details no-print my-5 border-y border-line py-3">
-            <summary className="mono !text-ink cursor-pointer select-none">{b.summary}</summary>
+            <summary className="mono !text-ink cursor-pointer select-none py-3 -my-3">{b.summary}</summary>
             <div className="mt-2">
               {b.blocks.map((x, i) => (
                 <BlockView key={i} b={x} />
@@ -103,12 +103,12 @@ function BlockView({ b }: { b: Block }) {
 
 export function RazborToc({ sections }: { sections: { id: string; title: string }[] }) {
   return (
-    <nav aria-label="Оглавление разбора" className="card p-5 razbor-toc">
+    <nav aria-label="Оглавление разбора" className="card p-5 razbor-toc max-w-3xl">
       <p className="mono mb-3">Содержание</p>
-      <ol className="grid gap-1 sm:grid-cols-2 text-sm list-decimal pl-5 marker:text-muted">
+      <ol className="grid gap-x-6 sm:grid-cols-2 text-sm list-decimal pl-7 marker:text-muted">
         {sections.map((s) => (
           <li key={s.id}>
-            <a href={`#${s.id}`} className="hover:text-accent underline-offset-4 hover:underline">
+            <a href={`#${s.id}`} className="inline-block py-1.5 hover:text-accent-text underline-offset-4 hover:underline">
               {s.title}
             </a>
           </li>

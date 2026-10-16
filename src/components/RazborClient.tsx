@@ -178,11 +178,11 @@ const FIELD = "border border-line rounded-lg px-3 py-2 bg-surface min-w-0";
 export function PayButtons({ price }: { price: number }) {
   return (
     <>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button type="submit" name="method" value="sbp" className="btn">
+      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1">
+        <button type="submit" name="method" value="sbp" className="btn btn-lg max-sm:w-full">
           Оплатить {price} ₽ по СБП
         </button>
-        <button type="submit" name="method" value="" className="btn btn-ghost">
+        <button type="submit" name="method" value="" className="min-h-11 text-sm text-accent-text underline underline-offset-4 cursor-pointer max-sm:mx-auto">
           Картой или другим способом
         </button>
       </div>
@@ -305,7 +305,7 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
             { v: false, label: "Себе" },
             { v: true, label: "В подарок" },
           ].map((o) => (
-            <label key={o.label} className={`px-4 py-2 cursor-pointer has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-accent ${gift === o.v ? "bg-ink text-bg" : "bg-surface"}`}>
+            <label key={o.label} className={`px-4 py-2 min-h-11 flex items-center cursor-pointer has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-accent ${gift === o.v ? "bg-ink text-bg" : "bg-surface"}`}>
               <input type="radio" name="for" value={o.v ? "gift" : "self"} checked={gift === o.v} onChange={() => pick(o.v)} className="sr-only" />
               {o.label}
             </label>
@@ -325,17 +325,17 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
           </label>
           <label className="grid gap-1 text-sm">
             От кого
-            <input ref={fromRef} type="text" name="gift_from" required value={from} onChange={(e) => setFrom(e.target.value)} maxLength={40} placeholder="Например, Ольга или «мама и папа»" aria-invalid={bad("gift_from") ?? (fromLink || undefined)} className={FIELD} />
-            <span className={`text-xs ${fromLink ? "text-red-600" : "text-muted"}`} aria-live="polite">{fromLink ? LINK_HINT : "Так подпишем подарок, до 40 знаков."}</span>
+            <input ref={fromRef} type="text" name="gift_from" required value={from} onChange={(e) => setFrom(e.target.value)} maxLength={40} placeholder="Например, мама и папа" aria-invalid={bad("gift_from") ?? (fromLink || undefined)} className={FIELD} />
+            <span className={`text-xs ${fromLink ? "text-danger" : "text-muted"}`} aria-live="polite">{fromLink ? LINK_HINT : "Так подпишем подарок, до 40 знаков: например, «Ольга»."}</span>
           </label>
 
           <details open={open} onToggle={(e) => setOpen(e.currentTarget.open)} onInvalidCapture={() => setOpen(true)} className="text-sm">
-            <summary className="cursor-pointer text-accent underline underline-offset-2">Добавить пожелание и отправку получателю</summary>
+            <summary className="cursor-pointer text-accent-text underline underline-offset-2 py-2">Добавить пожелание и отправку получателю</summary>
             <div className="grid gap-4 mt-3">
               <label className="grid gap-1">
                 Пожелание (необязательно)
                 <textarea ref={wishRef} name="gift_wish" value={wish} onChange={(e) => setWish(e.target.value)} maxLength={300} rows={3} placeholder="Пара тёплых слов — их увидит получатель" aria-invalid={bad("gift_wish") ?? (wishLink || undefined)} className={FIELD} />
-                <span className={`text-xs ${wishLink ? "text-red-600" : "text-muted"}`} aria-live="polite">{wishLink ? LINK_HINT : "До 300 знаков, без ссылок."}</span>
+                <span className={`text-xs ${wishLink ? "text-danger" : "text-muted"}`} aria-live="polite">{wishLink ? LINK_HINT : "До 300 знаков, без ссылок."}</span>
               </label>
               <label className="grid gap-1">
                 E-mail получателя (необязательно)
@@ -363,7 +363,7 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
                     </span>
                   </fieldset>
                   <label className="flex items-start gap-2">
-                    <input type="checkbox" name="gift_ok" value="1" required checked={ok} onChange={(e) => setOk(e.target.checked)} aria-invalid={bad("gift_consent")} className="mt-1" />
+                    <input type="checkbox" name="gift_ok" value="1" required checked={ok} onChange={(e) => setOk(e.target.checked)} aria-invalid={bad("gift_consent")} className="mt-0.5 size-5 shrink-0 accent-[var(--accent)]" />
                     <span>
                       Получатель не будет против письма от сайта с моим подарком (<Link href="/oferta" className="underline">оферта, п. 5.4</Link>)
                     </span>
@@ -378,7 +378,7 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
       {offer && !gift ? (
         <div className="mt-5 rounded-lg border border-line p-4 max-w-md">
           <label className="flex items-start gap-2 text-sm cursor-pointer">
-            <input type="checkbox" name="pack" value="1" checked={pack} onChange={(e) => togglePack(e.target.checked)} className="mt-1" />
+            <input type="checkbox" name="pack" value="1" checked={pack} onChange={(e) => togglePack(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-[var(--accent)]" />
             <span>
               <strong>+ совместимость с близким за {offer.addon} ₽</strong>
               <span className="block text-muted">Отдельный текст о вашей паре по двум датам: образ пары, любовь, быт, споры, общий год и три совета.</span>
