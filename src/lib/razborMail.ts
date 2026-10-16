@@ -340,6 +340,40 @@ ${highlightsHtml("Главное о тебе", main)}
   }
 }
 
+/** Просьба об отзыве через 7 дней после оплаты (razborReview.askReviews). Один раз на заказ; ошибку не бросает. */
+export async function mailReviewAsk(order: Order, formUrl: string): Promise<{ sent?: boolean; error?: string }> {
+  if (!order.email || !mailReady()) return { error: "нет адреса или почты" };
+  const what = PRODUCTS[productOf(order.product)].short.toLowerCase();
+  const text = [
+    "Здравствуй!",
+    "",
+    `Неделю назад ты получил(а) на «${SITE.name}» ${what}. Расскажи, пожалуйста, как тебе этот текст: что совпало, что оказалось полезным, чего не хватило.`,
+    "Это займёт минуту — оценка и пара строк:",
+    formUrl,
+    "",
+    "Отзыв читаем мы сами, по нему правим тексты. На сайте его покажем, только если ты сам(а) отметишь это в форме.",
+    "",
+    `Твой документ по-прежнему открывается по ссылке: ${SITE.url}/r/${order.id}`,
+    "",
+    `${SITE.name} · ${SITE.url}`,
+  ].join("\n");
+  const html = `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222;max-width:560px">
+<p>Здравствуй!</p>
+<p>Неделю назад ты получил(а) на «${h(SITE.name)}» ${h(what)}. Расскажи, пожалуйста, как тебе этот текст: что совпало, что оказалось полезным, чего не хватило.</p>
+<p>${btn(formUrl, "Оставить отзыв", "#5b3fa8", "#ffffff")}</p>
+<p style="font-size:14px;color:#555">Отзыв читаем мы сами, по нему правим тексты. На сайте его покажем, только если ты сам(а) отметишь это в форме.</p>
+<p style="font-size:14px">Твой документ по-прежнему открывается <a href="${h(`${SITE.url}/r/${order.id}`)}" style="color:#5b3fa8">по ссылке</a>.</p>
+<p style="font-size:12px;color:#888">${h(SITE.name)} · ${h(SITE.url.replace(/^https?:\/\//, ""))}</p></div>`;
+  try {
+    await sendMail({ to: order.email, subject: "Как тебе разбор? Одна минута на отзыв", text, html });
+    return { sent: true };
+  } catch (e) {
+    const why = smtpWhy(e);
+    console.error("razbor review mail:", order.id, why);
+    return { error: why };
+  }
+}
+
 /** «Потеряли ссылку?»: все оплаченные разборы на этот e-mail одним письмом. Подаркам получателя — без чека покупателя. */
 export async function mailAccess(email: string, orders: Order[], gifts: Order[] = []): Promise<void> {
   const rows = [

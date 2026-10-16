@@ -3,11 +3,12 @@ import { cronAuthorized } from "@/lib/cronAuth";
 import { escapeHtml as h, notifyPayment } from "@/lib/notify";
 import { dueGifts } from "@/lib/razborGift";
 import { mailGift } from "@/lib/razborMail";
+import { askReviews } from "@/lib/razborReview";
 
 export const dynamic = "force-dynamic";
 
 /** Один проход за раз: два одновременных вызова не пошлют письма дважды (внутри mailGift — своя защита по заказу). */
-let running: Promise<{ due: number; sent: number; failed: number }> | null = null;
+let running: Promise<{ due: number; sent: number; failed: number; reviews: number }> | null = null;
 
 async function run() {
   const due = await dueGifts();
@@ -24,7 +25,9 @@ async function run() {
       !failed.length,
     ).catch(() => {});
   }
-  return { due: due.length, sent, failed: failed.length };
+  // заодно — просьбы об отзыве (через 7 дней после оплаты): утром, вместе с подарками
+  const reviews = await askReviews().catch((e) => (console.error("razbor reviews:", (e as Error).message), { due: 0, sent: 0 }));
+  return { due: due.length, sent, failed: failed.length, reviews: reviews.sent };
 }
 
 /**

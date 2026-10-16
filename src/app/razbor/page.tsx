@@ -14,6 +14,8 @@ import { packAddon, PRODUCTS } from "@/lib/razborProducts";
 import { GIFT_DAYS_MAX, todayMsk } from "@/lib/razborGift";
 import { countWords, plural } from "@/lib/ruCount";
 import { pageTitle, SELLER, SITE } from "@/lib/site";
+import { horoscopeAuthor } from "@/lib/authors";
+import { paidCount, publicReviews } from "@/lib/razborReview";
 
 const PATH = "/razbor";
 const DESCRIPTION =
@@ -110,10 +112,14 @@ function HiddenMonths({ count, labels, numbers }: { count: number; labels: strin
   );
 }
 
-/** Объём, гарантия и пример — сразу под ценой. */
-function TrustList() {
+/** Счётчик покупок показываем, когда разборов стало заметно много. */
+const COUNTER_MIN = 30;
+
+/** Объём, гарантия и пример — сразу под ценой; число составленных разборов — когда их не меньше COUNTER_MIN. */
+function TrustList({ count }: { count: number }) {
   return (
     <ul className="mt-4 grid gap-1.5 text-sm">
+      {count >= COUNTER_MIN ? <li>Уже {plural(count, ["составлен", "составлено", "составлено"])} {countWords(count, ["разбор", "разбора", "разборов"])}</li> : null}
       <li>{RAZBOR_TOC.length} разделов · около 30 тысяч знаков · прогноз на 12 месяцев</li>
       <li>
         Не открылся разбор — вернём деньги.{" "}
@@ -126,13 +132,43 @@ function TrustList() {
   );
 }
 
-/** Кто составлял: отдельного автора-нумеролога в authors.json нет, поэтому — редакция и ссылки на калькуляторы с той же методикой. */
+/** Отзывы покупателей — только отобранные вручную, с согласия автора (content/data/razbor/reviews.json). Пока пусто — блока нет. */
+function Reviews() {
+  const list = publicReviews().slice(0, 6);
+  if (!list.length) return null;
+  return (
+    <section className="mt-12 max-w-5xl">
+      <h2 className="text-2xl mb-4">Отзывы</h2>
+      <ul className="grid gap-4 md:grid-cols-2">
+        {list.map((r, i) => (
+          <li key={i} className="card p-5">
+            <p className="text-accent" aria-label={`Оценка ${r.stars} из 5`}>{"★".repeat(r.stars)}</p>
+            <p className="mt-2 whitespace-pre-line">{r.text}</p>
+            <p className="text-sm text-muted mt-3">{r.name}{r.product ? ` · ${r.product}` : ""}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** Кто составлял: автор гороскопов вместе с редакцией (решение владельца 17.10.2026; стаж в нумерологии не приписываем). */
 function WhoWrote() {
+  const a = horoscopeAuthor();
   return (
     <div className="mt-6 border-t border-line pt-4 text-sm text-muted">
       <p className="mono !text-ink">Кто составлял</p>
-      <p className="mt-1">
-        Тексты разбора написала редакция «{SITE.name}» по классической пифагорейской нумерологии. Числа считаются по тем же правилам, что в калькуляторах{" "}
+      {a ? (
+        <div className="flex items-center gap-3 mt-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={a.photo} alt={a.name} width={48} height={48} loading="lazy" className="w-12 h-12 rounded-full object-cover shrink-0" />
+          <p>
+            Тексты разбора подготовила <Link href={`/avtory/${a.slug}`} className="underline text-ink">{a.name}</Link>, автор гороскопов «{SITE.name}», вместе с редакцией.
+          </p>
+        </div>
+      ) : null}
+      <p className="mt-2">
+        Основа — классическая пифагорейская нумерология. Числа считаются по тем же правилам, что в калькуляторах{" "}
         <Link href="/chislo-sudby" className="underline">числа судьбы</Link> и <Link href="/kvadrat-pifagora" className="underline">квадрата Пифагора</Link>, а расчёт каждого числа показан в самом разборе.
       </p>
     </div>
@@ -237,7 +273,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           <p className="mono">Полный разбор</p>
           <p className="display text-4xl mt-2">{RAZBOR.price} ₽</p>
           <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF. Можно оформить в подарок: с подписью, пожеланием и письмом получателю в выбранный день.</p>
-          <TrustList />
+          <TrustList count={await paidCount().catch(() => 0)} />
 
           {err === "email" && (
             <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">Укажи e-mail — на него придут ссылка на разбор и чек об оплате.</p>
@@ -286,6 +322,8 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           <WhoWrote />
         </div>
       </section>
+
+      <Reviews />
 
       <section className="mt-12 grid gap-8 lg:grid-cols-2 max-w-5xl">
         <div>

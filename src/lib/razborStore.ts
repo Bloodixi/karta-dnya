@@ -15,6 +15,9 @@ export type Gift = {
   access_mail_at?: string[]; // письма «Потеряли ссылку?» на адрес получателя за последние сутки
 };
 
+/** Отзыв покупателя. На сайт попадает только вручную (content/data/razbor/reviews.json) и только при publish. */
+export type Review = { stars: number; text: string; name: string; publish: boolean; at: string };
+
 export type Order = {
   id: string;
   token: string;
@@ -31,6 +34,8 @@ export type Order = {
   receipt_uuid?: string; // чек «Мой налог»
   receipt_url?: string;
   mail_sent_at?: string; // письмо покупателю с разбором и чеком
+  review_asked_at?: string; // письмо с просьбой об отзыве отправлено (через 7 дней после оплаты)
+  review?: Review; // отзыв покупателя (один на заказ, можно обновить)
   receipt_unsure?: boolean; // регистрация дохода без ответа: чек мог пробиться, автоповтор выключен
   receipt_mail_at?: string; // чек, пробитый после письма, отправлен покупателю отдельным письмом
   stuck_at?: string; // владелец предупреждён: повторы исчерпаны, чек или письмо не сделаны
