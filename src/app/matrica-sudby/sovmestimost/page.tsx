@@ -4,6 +4,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import MatrixNav from "@/components/MatrixNav";
+import RazborCta from "@/components/RazborCta";
 import { DateField, FormError, ShareLink } from "@/components/NumerologyFields";
 import { formatDate, parseDate } from "@/lib/numerology";
 import { calcMatrix, calcPair, findMatrixArcana } from "@/lib/matrix";
@@ -116,6 +117,7 @@ export default async function PairPage({ searchParams }: PageProps<typeof PATH>)
         <FormError text={invalid ? "Введите обе даты рождения полностью." : undefined} />
       </div>
       {result}
+      <RazborCta from="matrica-sovmestimost" date={a?.iso} />
       <section className="prose mt-12">
         <h2>Как читать результат</h2>
         <p>Сначала посмотрите на центральные арканы партнёров: это главные энергии каждого. Затем на общий аркан пары, сумму центров: он показывает тему, вокруг которой строится союз. Таблица позиций помогает увидеть, где арканы поддерживают друг друга: в характере, ресурсе, талантах и жизненных уроках.</p>

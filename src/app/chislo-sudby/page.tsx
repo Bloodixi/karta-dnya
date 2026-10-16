@@ -42,7 +42,7 @@ export default function DestinyPage() {
           Подробнее: {articles.map((a, i) => <span key={a.slug}>{i > 0 && ", "}<Link className="text-accent underline" href={`/numerologiya/${a.slug}`}>{a.title}</Link></span>)}.
         </p>
       )}
-      <RazborCta />
+      <RazborCta from="chislo-sudby" />
       <NumerologyNav current="/chislo-sudby" />
     </div>
   );

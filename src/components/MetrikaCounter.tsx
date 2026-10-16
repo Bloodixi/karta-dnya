@@ -11,6 +11,18 @@ export function isPrivatePath(path: string): boolean {
 }
 
 let loaded = false;
+let counterId: number | null = null;
+
+/**
+ * Цель Метрики с публичной страницы. Счётчика может не быть (нет METRIKA_ID, личная страница, блокировщик) —
+ * тогда молча ничего.
+ */
+export function reachGoal(goal: string, params?: Record<string, string | number>) {
+  if (!counterId) return;
+  try {
+    (window as unknown as { ym?: Ym }).ym?.(counterId, "reachGoal", goal, params);
+  } catch {}
+}
 
 function load(id: number) {
   const w = window as unknown as { ym?: Ym };
@@ -22,6 +34,7 @@ function load(id: number) {
   // defer: просмотры отправляем сами (ниже), чтобы решать, какие адреса учитывать
   w.ym(id, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: false, defer: true });
   loaded = true;
+  counterId = id;
 }
 
 /**

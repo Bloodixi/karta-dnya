@@ -7,6 +7,7 @@ import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
+import RazborCta from "@/components/RazborCta";
 import StonePhoto from "@/components/StonePhoto";
 import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac, type TocItem } from "@/lib/content";
 import { pageTitle, SECTIONS, SECTION_KEYS, SITE, type SectionKey } from "@/lib/site";
@@ -96,6 +97,7 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
           </aside>
         )}
       </div>
+      {key === "numerologiya" && <RazborCta from={`statya-${slug}`} />}
       {author && <AuthorCard author={author} className="mt-10 max-w-[72ch]" />}
       <Faq items={a.faq} />
       {a.tags.length > 0 && (

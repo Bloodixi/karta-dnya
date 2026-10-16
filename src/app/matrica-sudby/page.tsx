@@ -6,6 +6,7 @@ import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import MatrixDiagram from "@/components/MatrixDiagram";
 import MatrixNav from "@/components/MatrixNav";
+import RazborCta from "@/components/RazborCta";
 import { DateField, FormError, ShareLink } from "@/components/NumerologyFields";
 import { formatDate, parseDate } from "@/lib/numerology";
 import { POSITIONS, calcMatrix, findMatrixArcana, getMatrixArcana } from "@/lib/matrix";
@@ -98,6 +99,8 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
       </div>
 
       {result}
+
+      <RazborCta from="matrica-sudby" date={date?.iso} />
 
       <section className="prose mt-12">
         <h2>Как считается матрица судьбы</h2>

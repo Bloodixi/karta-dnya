@@ -104,7 +104,7 @@ export default async function PersonalYearPage({ searchParams }: PageProps<typeo
 
       {result}
 
-      <RazborCta date={date?.iso} />
+      <RazborCta from="lichnyy-god" date={date?.iso} />
 
       <section className="mt-12">
         <div className="ornament mb-4"><h2 className="text-2xl">Девять личных лет</h2><span className="mono">значение каждого</span></div>
