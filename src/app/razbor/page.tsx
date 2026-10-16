@@ -10,6 +10,7 @@ import { RazborCheckoutForm, RazborGiftFields, RazborGoal, RazborStickyCta } fro
 import { cleanName, parseDate } from "@/lib/numerology";
 import { buildTeaser, nowMsk, RAZBOR, RAZBOR_TOC } from "@/lib/razbor";
 import { GIFT_DAYS_MAX, todayMsk } from "@/lib/razborGift";
+import { countWords, plural } from "@/lib/ruCount";
 import { pageTitle, SELLER, SITE } from "@/lib/site";
 
 const PATH = "/razbor";
@@ -23,8 +24,11 @@ export const metadata: Metadata = {
   openGraph: { title: RAZBOR.title, description: DESCRIPTION, url: PATH },
 };
 
+const SECTIONS = countWords(RAZBOR_TOC.length, ["раздел", "раздела", "разделов"]);
+
 const FAQ = [
-  { q: "Что входит в полный разбор?", a: `Шестнадцать разделов: твои числа с расчётом, сведение — как числа работают вместе, твой период жизни по возрасту, суть числа судьбы, сильные стороны и ловушки, призвание, талант дня рождения, квадрат Пифагора с расшифровкой девяти ячеек, любовь, работа, личный год, прогноз на двенадцать месяцев, следующий год, пять советов и памятка на год.` },
+  { q: "Что входит в полный разбор?", a: `${SECTIONS[0].toUpperCase()}${SECTIONS.slice(1)}: твои числа с расчётом, сведение — как числа работают вместе, твой период жизни по возрасту, суть числа судьбы, сильные стороны и ловушки, призвание, талант дня рождения, квадрат Пифагора с расшифровкой девяти ячеек, любовь, работа, личный год, прогноз на двенадцать месяцев, следующий год, пять советов и памятка на год.` },
+  { q: "Можно ли подарить разбор?", a: "Да. В форме оплаты выбери «В подарок» и укажи дату рождения и имя получателя, подпись и, если хочешь, пожелание. Ссылка на разбор и чек придут тебе, а по желанию мы отправим получателю письмо с подарком — сразу после оплаты или в выбранный день в пределах года. Если письмо отложено, прогноз по месяцам начнётся с месяца отправки." },
   { q: "Как я получу разбор?", a: "Сразу после оплаты откроется страница с разбором. Ссылка на неё твоя: её можно сохранить в закладки, открыть с телефона или сохранить разбор в PDF кнопкой на странице." },
   { q: "Можно ли вернуть деньги?", a: "Если из-за технической ошибки разбор не открылся, мы вернём оплату полностью. Напиши нам, приложив номер заказа, — ответим в течение трёх рабочих дней. Подробности на странице «Возврат»." },
   { q: "Нужно ли знать точное время рождения?", a: "Нет. Нумерологический разбор строится только по дате рождения: дню, месяцу и году. Время и место рождения не нужны." },
@@ -48,12 +52,14 @@ function LockIcon() {
 }
 
 /** «1 месяц», «3 месяца», «9 месяцев». */
-function months(n: number): string {
-  const a = n % 10;
-  const b = n % 100;
-  if (a === 1 && b !== 11) return `${n} месяц`;
-  if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return `${n} месяца`;
-  return `${n} месяцев`;
+const months = (n: number) => `${n} ${plural(n, ["месяц", "месяца", "месяцев"])}`;
+
+const MONTH_NAMES = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
+
+/** «январь 2027» для месяца `mo` (1–12) года `yr` со сдвигом на `add` месяцев. */
+function monthLabel(yr: number, mo: number, add: number): string {
+  const k = mo - 1 + add;
+  return `${MONTH_NAMES[k % 12]} ${yr + Math.floor(k / 12)}`;
 }
 
 /** Сколько месяцев прогноза закрыто: новое поле тизера `months_hidden`; пока его нет — 9 (бесплатно видно 3 из 12). */
@@ -69,15 +75,16 @@ const BLUR_ROWS = [
   { n: 2, t: "Тон договорённостей и мягких шагов: помогают терпение, внимание к близким и готовность подождать ответа." },
 ];
 
-function HiddenMonths({ count }: { count: number }) {
+/** `labels` — подписи закрытых месяцев по порядку (первые три после открытых). */
+function HiddenMonths({ count, labels }: { count: number; labels: string[] }) {
   return (
     <div className="relative mt-2 max-w-3xl overflow-hidden">
       <ol aria-hidden="true" className="select-none pointer-events-none blur-[5px] border-t border-line">
-        {BLUR_ROWS.map((r) => (
+        {BLUR_ROWS.map((r, i) => (
           <li key={r.n} className="grid grid-cols-[3rem_1fr] gap-x-4 py-4 border-b border-line">
             <span className="display text-3xl text-accent leading-none pt-1">{r.n}</span>
             <div>
-              <p className="mono">Следующий месяц</p>
+              <p className="mono">{labels[i] ?? "Следующий месяц"}</p>
               <p className="mt-1">{r.t}</p>
             </div>
           </li>
@@ -130,6 +137,7 @@ const GIFT_ERRORS: Record<string, string> = {
   gift_from: "Подпиши подарок: от кого он, до 40 знаков и без ссылок.",
   gift_wish: "Пожелание — до 300 знаков и без ссылок.",
   gift_email: "Проверь e-mail получателя или оставь поле пустым — тогда ссылку передашь сам(а).",
+  gift_consent: "Подтверди, что получатель не будет против письма, — или оставь e-mail получателя пустым и передай ссылку сам(а).",
   gift_date: "Выбери день отправки не раньше сегодняшнего и не позже чем через год.",
 };
 
@@ -140,7 +148,9 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
   const err = one(sp.err);
   const invalid = (sp.d !== undefined && !date) || err === "date";
   const counter = process.env.METRIKA_ID;
-  const teaser = date ? buildTeaser({ d: date.d, m: date.m, y: date.y, name: name || undefined, ...nowMsk() }) : null;
+  const isGift = one(sp.g) === "1";
+  const now = nowMsk();
+  const teaser = date ? buildTeaser({ d: date.d, m: date.m, y: date.y, name: name || undefined, ...now }) : null;
   const contactEmail = SELLER.email.includes("@") ? SELLER.email : null;
 
   return (
@@ -153,8 +163,9 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
 
       <div id="forma" className="card p-6 mt-6 max-w-3xl scroll-mt-24">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
-          <DateField name="d" label="Дата рождения" defaultValue={date?.iso ?? (typeof sp.d === "string" ? sp.d : "")} />
-          <TextField name="n" label="Имя (необязательно)" defaultValue={name} placeholder="Например, Анна" />
+          {isGift ? <input type="hidden" name="g" value="1" /> : null}
+          <DateField name="d" label={isGift ? "Дата рождения получателя" : "Дата рождения"} defaultValue={date?.iso ?? (typeof sp.d === "string" ? sp.d : "")} />
+          <TextField name="n" label={isGift ? "Имя получателя (необязательно)" : "Имя (необязательно)"} defaultValue={name} placeholder="Например, Анна" />
           <button type="submit" className="btn">Посмотреть бесплатно</button>
         </Form>
         <FormError text={invalid ? "Проверь дату: нужна настоящая дата рождения, например 17.05.1990." : undefined} />
@@ -174,7 +185,9 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
             <a href="#oplata" className="text-accent underline">перейти к оплате</a>
           </p>
           <RazborView sections={teaser.sections} toc={false} />
-          {hiddenMonths(teaser) > 0 && <HiddenMonths count={hiddenMonths(teaser)} />}
+          {hiddenMonths(teaser) > 0 && (
+            <HiddenMonths count={hiddenMonths(teaser)} labels={BLUR_ROWS.map((_, i) => monthLabel(now.yr, now.mo, 12 - hiddenMonths(teaser) + i))} />
+          )}
 
           <div className="card p-5 mt-8 max-w-3xl razbor-locked">
             <p className="mono mb-3">Ещё {teaser.locked.length} разделов в полном разборе</p>
@@ -202,7 +215,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           )}
 
           {err && GIFT_ERRORS[err] && (
-            <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">{GIFT_ERRORS[err]} Поля подарка нужно заполнить заново.</p>
+            <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">{GIFT_ERRORS[err]}</p>
           )}
 
           {err === "pay" && (
@@ -221,11 +234,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           {date ? (
             <RazborCheckoutForm counter={counter}>
               <input type="hidden" name="date" value={date.iso} />
-              <RazborGiftFields counter={counter} name={name} today={todayMsk()} maxDate={todayMsk(GIFT_DAYS_MAX)} gift={one(sp.g) === "1"} err={err} />
-              <label className="grid gap-1 text-sm mt-5 max-w-sm">
-                E-mail — пришлём сюда ссылку на разбор и чек
-                <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" aria-invalid={err === "email" || undefined} className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
-              </label>
+              <RazborGiftFields counter={counter} date={date.iso} name={name} today={todayMsk()} maxDate={todayMsk(GIFT_DAYS_MAX)} gift={isGift} err={err} />
               <div className="mt-4 flex flex-wrap gap-2">
                 <button type="submit" name="method" value="sbp" className="btn">
                   Оплатить {RAZBOR.price} ₽ по СБП
@@ -272,7 +281,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           <div>
             <h2 className="text-2xl mb-3">Формат</h2>
             <p className="text-muted">
-              Отдельная страница по личной ссылке: открывается на телефоне и компьютере, а кнопкой «Сохранить в PDF» её можно сохранить файлом или распечатать. Прогноз по месяцам начинается с текущего месяца.
+              Отдельная страница по личной ссылке: открывается на телефоне и компьютере, а кнопкой «Сохранить в PDF» её можно сохранить файлом или распечатать. Прогноз по месяцам начинается с месяца покупки, а в подарке с отложенным письмом — с месяца, когда разбор откроют.
             </p>
           </div>
         </div>

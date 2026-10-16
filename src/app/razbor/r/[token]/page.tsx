@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import RazborGiftNote from "@/components/RazborGiftNote";
 import RazborShare from "@/components/RazborShare";
 import RazborView from "@/components/RazborView";
 import { CopyLinkButton, PrintButton } from "@/components/RazborClient";
 import { buildRazbor, RAZBOR } from "@/lib/razbor";
+import { giftFor } from "@/lib/razborGift";
 import { readToken } from "@/lib/razborToken";
 import { getOrder } from "@/lib/razborStore";
 import { SITE } from "@/lib/site";
@@ -22,11 +24,10 @@ export default async function RazborResultPage({ params }: PageProps<"/razbor/r/
   const input = readToken(decodeURIComponent(token));
   if (!input) notFound();
   // в новых ссылках есть номер заказа: после возврата или отмены ссылка закрыта (старые ссылки номера не содержат)
-  if (input.order) {
-    const order = await getOrder(input.order);
-    if (order && (order.status === "refunded" || order.status === "canceled")) notFound();
-  }
+  const order = input.order ? await getOrder(input.order) : null;
+  if (order && (order.status === "refunded" || order.status === "canceled")) notFound();
   const doc = buildRazbor(input);
+  const gift = order ? await giftFor(order) : null;
 
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
@@ -45,7 +46,10 @@ export default async function RazborResultPage({ params }: PageProps<"/razbor/r/
           <PrintButton />
           <CopyLinkButton />
         </div>
-        <p className="no-print text-sm text-muted mt-3">Ссылка постоянная — добавь в закладки. По ней разбор откроется в любой момент и на любом устройстве.</p>
+        {gift ? <RazborGiftNote gift={gift} /> : null}
+        <p className="no-print text-sm text-muted mt-3">
+          {gift ? "Ссылка постоянная — сохрани письмо с ней или добавь эту страницу в закладки: разбор откроется в любой момент и на любом устройстве." : "Ссылка постоянная — добавь в закладки. По ней разбор откроется в любой момент и на любом устройстве."}
+        </p>
       </header>
 
       <div className="mt-8">
@@ -57,7 +61,12 @@ export default async function RazborResultPage({ params }: PageProps<"/razbor/r/
       <footer className="mt-12 max-w-3xl border-t border-line pt-6 text-sm text-muted">
         <p>Разбор носит развлекательный и ознакомительный характер и не является консультацией специалиста. Решения остаются за тобой.</p>
         <p className="no-print mt-3">
-          <Link href="/numerologiya" className="text-accent underline">Нумерология на сайте</Link> · <Link href="/vozvrat" className="text-accent underline">Если что-то пошло не так</Link>
+          <Link href="/numerologiya" className="text-accent underline">Нумерология на сайте</Link>
+          {gift ? null : (
+            <>
+              {" "}· <Link href="/vozvrat" className="text-accent underline">Если что-то пошло не так</Link>
+            </>
+          )}
         </p>
       </footer>
     </article>

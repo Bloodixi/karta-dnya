@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SOCIAL } from "@/lib/site";
 
 /** Ссылка «подарить разбор» с меткой источника: письмо (email) или страница результата (result). */
-export const giftHref = (source: "email" | "result") => `/razbor?utm_source=${source}&utm_medium=razbor&utm_campaign=gift`;
+export const giftHref = (source: "email" | "result") => `/razbor?g=1&utm_source=${source}&utm_medium=razbor&utm_campaign=gift`;
 
 /** Блок в конце оплаченного разбора: подарок близкому, канал «Карта дня», подсказка про закладки. Без счётчиков. */
 export default function RazborShare() {

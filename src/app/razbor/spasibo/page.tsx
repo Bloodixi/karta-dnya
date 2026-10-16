@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cookies, headers } from "next/headers";
 import { CopyLinkButton, PaymentWaiter } from "@/components/RazborClient";
 import RazborPaidGoal from "@/components/RazborPaidGoal";
-import { orderState, orderStateLimiter, PAY_COOKIE } from "@/lib/razborOrder";
+import { orderState, orderStateLimiter, PAY_COOKIE, type OrderState } from "@/lib/razborOrder";
 import { clientIpFromHeaders } from "@/lib/rateLimit";
 import { SELLER, SITE } from "@/lib/site";
 
@@ -30,6 +30,32 @@ function Stuck({ order }: { order: string }) {
   );
 }
 
+/** ГГГГ-ММ-ДД → ДД.ММ */
+const ddmm = (iso: string) => iso.slice(5).split("-").reverse().join(".");
+
+/** Подарок: когда и куда уйдёт письмо получателю (адрес замаскирован) или «ссылку передаёшь сам». */
+function GiftNote({ gift, link }: { gift: NonNullable<OrderState["gift"]>; link: string }) {
+  const who = gift.to ? `Получатель: ${gift.to}. ` : "";
+  return (
+    <div className="mt-5 rounded-lg border border-line bg-surface p-4">
+      <p className="mono">Подарок</p>
+      {gift.email ? (
+        <p className="mt-1">
+          {who}
+          {gift.sent ? `Письмо с подарком отправлено на ${gift.email}.` : gift.at ? `Письмо с подарком уйдёт ${ddmm(gift.at)} утром на ${gift.email}.` : `Письмо с подарком уходит сейчас на ${gift.email}.`}
+        </p>
+      ) : (
+        <>
+          <p className="mt-1">{who}Письмо получателю мы не отправляем — ссылку передаёшь сам(а).</p>
+          <div className="mt-3">
+            <CopyLinkButton url={link} label="Скопировать ссылку для получателя" />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default async function RazborThanksPage({ searchParams }: PageProps<"/razbor/spasibo">) {
   const sp = await searchParams;
   const order = (Array.isArray(sp.o) ? sp.o[0] : sp.o)?.slice(0, 64) ?? "";
@@ -52,13 +78,14 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
       <div className="mx-auto max-w-3xl px-4 py-12">
         <div className="card p-6 md:p-8">
           <h1 className="text-3xl">Оплата прошла, разбор готов</h1>
-          <p className="mt-3 text-muted">Спасибо! Твой личный разбор открывается по ссылке ниже.</p>
+          <p className="mt-3 text-muted">{state.gift ? "Спасибо! Подарочный разбор открывается по ссылке ниже." : "Спасибо! Твой личный разбор открывается по ссылке ниже."}</p>
           <p className="mt-4 break-all rounded-lg border border-line bg-surface px-3 py-2 mono-text text-sm">{url}</p>
           <p className="mt-3 font-medium">Сохрани эту ссылку: разбор открывается по ней на любом устройстве и в любой момент. Копию ссылки и чек об оплате мы отправили на e-mail, указанный при оплате.</p>
           <div className="mt-5 flex flex-wrap gap-2">
             <Link href={state.short ?? state.path} className="btn">Открыть разбор</Link>
             <CopyLinkButton url={state.short ?? state.path} />
           </div>
+          {state.gift ? <GiftNote gift={state.gift} link={state.short ?? state.path} /> : null}
           {state.receipt ? (
             <p className="mt-4 text-sm text-muted">
               Чек об оплате: <Link href={state.receipt} className="underline hover:text-ink">открыть чек</Link>

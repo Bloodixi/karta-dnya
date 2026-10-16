@@ -8,7 +8,7 @@ import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
 import { mailBuyer, mailGift } from "./razborMail";
-import { giftDue, giftFromMetadata } from "./razborGift";
+import { giftDue, giftFromMetadata, maskEmail } from "./razborGift";
 import { RAZBOR, type RazborInput } from "./razbor";
 import { SITE } from "./site";
 import { sharedRateLimit } from "./rateLimit";
@@ -126,6 +126,19 @@ async function doFinishPaid(order: Order): Promise<{ order?: Order; lines: strin
   return { order: (await getOrder(o.id)) ?? o, lines };
 }
 
+/** Оплата в тестовом магазине: отмечаем заказ тестовым и, если подарок пора отправлять, шлём письмо получателю. */
+async function finishTest(order: Order): Promise<{ lines: string[] }> {
+  const o = (await patchOrder(order.id, { test: true })) ?? { ...order, test: true };
+  const g = o.gift;
+  if (!g) return { lines: [] };
+  let line = g.to_email ? `письмо получателю ${g.send_at ? `уйдёт ${h(g.send_at)}` : "сразу"} (с пометкой [ТЕСТ])` : "ссылку передаст покупатель";
+  if (giftDue(o)) {
+    const s = await mailGift(o);
+    line = s.sent ? "письмо получателю отправлено с пометкой [ТЕСТ]" : `<b>⚠️ письмо получателю не отправлено</b> (${h(s.error)}) — повторит ежедневный запуск`;
+  }
+  return { lines: [`🎁 Подарок от ${h(g.from)}: ${line}`] };
+}
+
 const RETRY_GAP = 5 * 60_000;
 const RETRY_MAX = 12;
 
@@ -193,8 +206,8 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
     const test = p.test ? " · тест" : "";
     if (order.status === "paid") {
       const url = `${SITE.url}/r/${order.id}`;
-      // тестовый магазин чек в налоговую не пробивает и письма не шлёт
-      const f = p.test ? { lines: [] } : await finishPaid(order);
+      // тестовый магазин чек в налоговую не пробивает и письмо покупателю не шлёт; письмо получателю подарка — с [ТЕСТ]
+      const f = p.test ? await finishTest(order) : await finishPaid(order);
       await notifyPayment(
         [
           `<b>💳 Оплачен разбор — ${h(p.amount.value)} ₽</b>${test}`,
@@ -259,6 +272,8 @@ export type OrderState = {
   short?: string;
   receipt?: string;
   amount?: number; // сумма оплаты, ₽ — для цели Метрики на странице «Спасибо»
+  /** Подарок: имя получателя, замаскированный адрес и день письма (нет адреса — ссылку передаёт покупатель). */
+  gift?: { to: string; email?: string; at?: string; sent?: boolean };
 };
 
 /**
@@ -287,5 +302,7 @@ export async function orderState(orderId: string, cookiePaymentId?: string, offl
   if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
   if (!offline && o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
   if (o.status !== "paid") return { status: o.status }; // возврат мог прийти, пока шла проверка
-  return { status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined, amount: o.amount };
+  const g = o.gift;
+  const gift = g ? { to: o.name, ...(g.to_email ? { email: maskEmail(g.to_email) } : {}), ...(g.send_at ? { at: g.send_at } : {}), ...(g.sent_at ? { sent: true } : {}) } : undefined;
+  return { status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined, amount: o.amount, ...(gift ? { gift } : {}) };
 }

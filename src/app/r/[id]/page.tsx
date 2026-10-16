@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import RazborGiftNote from "@/components/RazborGiftNote";
 import RazborShare from "@/components/RazborShare";
 import RazborView from "@/components/RazborView";
 import { CopyLinkButton, PrintButton } from "@/components/RazborClient";
 import { buildRazbor, RAZBOR } from "@/lib/razbor";
+import { giftFor } from "@/lib/razborGift";
 import { readToken } from "@/lib/razborToken";
 import { getOrder } from "@/lib/razborStore";
 import { SITE } from "@/lib/site";
@@ -24,6 +26,7 @@ export default async function RazborShortPage({ params }: PageProps<"/r/[id]">) 
   const input = order?.status === "paid" ? readToken(order.token) : null;
   if (!input) notFound();
   const doc = buildRazbor(input);
+  const gift = await giftFor(order!);
 
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
@@ -42,7 +45,12 @@ export default async function RazborShortPage({ params }: PageProps<"/r/[id]">) 
           <PrintButton />
           <CopyLinkButton />
         </div>
-        <p className="no-print text-sm text-muted mt-3">Ссылка постоянная — добавь в закладки. Она же пришла тебе на почту; если она потеряется — <Link href="/razbor#dostup" className="underline">пришлём ещё раз</Link>.</p>
+        {gift ? <RazborGiftNote gift={gift} /> : null}
+        {gift ? (
+          <p className="no-print text-sm text-muted mt-3">Ссылка постоянная — сохрани письмо с ней или добавь эту страницу в закладки: разбор откроется в любой момент и на любом устройстве.</p>
+        ) : (
+          <p className="no-print text-sm text-muted mt-3">Ссылка постоянная — добавь в закладки. Она же пришла тебе на почту; если она потеряется — <Link href="/razbor#dostup" className="underline">пришлём ещё раз</Link>.</p>
+        )}
       </header>
 
       <div className="mt-8">
@@ -54,7 +62,12 @@ export default async function RazborShortPage({ params }: PageProps<"/r/[id]">) 
       <footer className="mt-12 max-w-3xl border-t border-line pt-6 text-sm text-muted">
         <p>Разбор носит развлекательный и ознакомительный характер и не является консультацией специалиста. Решения остаются за тобой.</p>
         <p className="no-print mt-3">
-          <Link href="/numerologiya" className="text-accent underline">Нумерология на сайте</Link> · <Link href="/vozvrat" className="text-accent underline">Если что-то пошло не так</Link>
+          <Link href="/numerologiya" className="text-accent underline">Нумерология на сайте</Link>
+          {gift ? null : (
+            <>
+              {" "}· <Link href="/vozvrat" className="text-accent underline">Если что-то пошло не так</Link>
+            </>
+          )}
         </p>
       </footer>
     </article>

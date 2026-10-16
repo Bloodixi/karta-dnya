@@ -2,6 +2,7 @@
  * Разбор в подарок: проверка полей формы, данные подарка для страницы результата и отложенная отправка письма
  * получателю (/api/razbor/gift-send). Только сервер.
  */
+import { giftHasLink, normGiftText as norm } from "./giftText";
 import { getOrder, listOrders, type Gift, type Order } from "./razborStore";
 import { readToken } from "./razborToken";
 
@@ -26,9 +27,6 @@ export function cleanEmail(v: unknown): string {
   return s.length <= 254 && EMAIL_RE.test(s) ? s : "";
 }
 
-/** NFKC и без невидимых форматирующих символов (мягкий перенос, нулевой пробел, BOM…): храним ровно то, что проверили. */
-const norm = (s: string) => s.normalize("NFKC").replace(/\p{Cf}+/gu, "").replace(/[。．｡]/g, ".");
-
 /** Однострочный текст: без управляющих символов, пробелы схлопнуты. */
 const oneLine = (s: string) => norm(s).replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, " ").replace(/\s+/g, " ").trim();
 
@@ -43,15 +41,9 @@ const multiLine = (s: string) =>
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
-/**
- * Подпись и пожелание уходят чужому человеку от имени сайта — ссылок и адресов в них быть не должно.
- * Сначала NFKC (полноширинные точки и буквы → обычные), затем запрет: любой «схемы:», «@», IP и
- * «слово.слово» без пробела после точки (домены любых зон, включая .рф и punycode).
- */
-const LINKISH = [/[a-z][a-z0-9+.-]*:\/\//i, /\b(?:mailto|tel|javascript|data):/i, /@/, /\b\d{1,3}(?:\.\d{1,3}){3}\b/, /[\p{L}\p{N}-]+\.[\p{L}\p{N}-]{2,}/u, /\bwww\b/i];
-const HAS_LINK = { test: (v: string) => LINKISH.some((re) => re.test(norm(v))) };
+const HAS_LINK = { test: giftHasLink };
 
-export type GiftError = "gift_name" | "gift_from" | "gift_wish" | "gift_email" | "gift_date";
+export type GiftError = "gift_name" | "gift_from" | "gift_wish" | "gift_email" | "gift_consent" | "gift_date";
 
 /**
  * Поля подарка из формы оплаты. `name` — уже очищенное имя получателя (оно же имя в разборе).
@@ -66,6 +58,8 @@ export function parseGift(form: FormData, name: string): { gift: Gift } | { erro
   const toRaw = String(form.get("gift_to") ?? "").trim();
   const to = toRaw ? cleanEmail(toRaw) : "";
   if (toRaw && !to) return { error: "gift_email" };
+  // оферта, п. 5.4: покупатель подтверждает, что получатель не против письма
+  if (to && form.get("gift_ok") !== "1") return { error: "gift_consent" };
   let sendAt: string | undefined;
   if (to && form.get("gift_when") === "date") {
     const d = String(form.get("gift_at") ?? "").trim();
@@ -75,6 +69,22 @@ export function parseGift(form: FormData, name: string): { gift: Gift } | { erro
     if (d > todayMsk()) sendAt = d;
   }
   return { gift: { from, ...(wish ? { wish } : {}), ...(to ? { to_email: to } : {}), ...(sendAt ? { send_at: sendAt } : {}) } };
+}
+
+/**
+ * Месяц, с которого считается прогноз: для отложенного подарка — месяц и год отправки письма (дата уже по Москве),
+ * иначе — `now` (текущий месяц по Москве).
+ */
+export function giftYm(g: Gift | undefined, now: { yr: number; mo: number }): { yr: number; mo: number } {
+  const m = g?.send_at?.match(/^(\d{4})-(\d{2})-\d{2}$/);
+  return m ? { yr: Number(m[1]), mo: Number(m[2]) } : now;
+}
+
+/** «a***@mail.ru» — адрес для страницы «Спасибо» без полного раскрытия. */
+export function maskEmail(e: string): string {
+  const at = e.lastIndexOf("@");
+  if (at < 1) return "***";
+  return `${e[0]}***${e.slice(at)}`;
 }
 
 /** Поля подарка для metadata платежа ЮKassa (значение — до 512 знаков): по ним заказ восстанавливается без файла. */
@@ -113,10 +123,13 @@ export async function giftFor(src: Order | string): Promise<GiftView | null> {
   return view(await getOrder(id));
 }
 
-/** Пора ли слать письмо получателю: оплачен (боевой платёж), есть адрес, ещё не отправлено, дата наступила. */
+/**
+ * Пора ли слать письмо получателю: оплачен (боевой платёж или тестовый магазин — чтобы путь можно было прогнать),
+ * есть адрес, ещё не отправлено, дата наступила.
+ */
 export function giftDue(o: Order, today = todayMsk()): boolean {
   const g = o.gift;
-  return Boolean(o.status === "paid" && o.receipt_due && g?.to_email && !g.sent_at && (!g.send_at || g.send_at <= today));
+  return Boolean(o.status === "paid" && (o.receipt_due || o.test) && g?.to_email && !g.sent_at && (!g.send_at || g.send_at <= today));
 }
 
 /** Созревшие подарки (для ежедневного вызова /api/razbor/gift-send). */

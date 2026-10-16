@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RazborView from "@/components/RazborView";
-import { buildRazbor, nowMsk, RAZBOR, RAZBOR_VERSION } from "@/lib/razbor";
+import { buildRazbor, nowMsk, RAZBOR, RAZBOR_TOC, RAZBOR_VERSION } from "@/lib/razbor";
+import { countWords } from "@/lib/ruCount";
 import { pageTitle } from "@/lib/site";
 
 const PATH = "/razbor/primer";
 const TITLE = "Пример нумерологического разбора по дате рождения";
 const DESCRIPTION =
-  "Как выглядит полный нумерологический разбор: все шестнадцать разделов на примере вымышленной даты 08.06.1990 — числа, квадрат Пифагора и прогноз на год.";
+  `Как выглядит полный нумерологический разбор: все ${countWords(RAZBOR_TOC.length, ["раздел", "раздела", "разделов"])} на примере вымышленной даты 08.06.1990 — числа, квадрат Пифагора и прогноз на год.`;
 
 export const metadata: Metadata = {
   title: pageTitle(TITLE),

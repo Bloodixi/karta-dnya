@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { mailAccess } from "@/lib/razborMail";
-import { paidOrdersByEmail, patchOrder } from "@/lib/razborStore";
+import { paidGiftsByRecipient, paidOrdersByEmail, patchGift, patchOrder } from "@/lib/razborStore";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
 import { SITE } from "@/lib/site";
 
@@ -20,19 +20,25 @@ const DAY = 24 * 3600_000;
 const PER_DAY = 3;
 
 async function sendAccess(email: string): Promise<void> {
-  const orders = (await paidOrdersByEmail(email)).slice(0, 20);
-  if (!orders.length) return;
+  const bought = (await paidOrdersByEmail(email)).slice(0, 20);
+  const ids = new Set(bought.map((o) => o.id));
+  // подарки, которые уже пришли на этот адрес получателю (свои заказы покупателя не дублируем)
+  const gifts = (await paidGiftsByRecipient(email)).filter((o) => !ids.has(o.id)).slice(0, 20);
+  if (!bought.length && !gifts.length) return;
   const now = Date.now();
-  const sent = new Set(orders.flatMap((o) => o.access_mail_at ?? []).filter((t) => now - Date.parse(t) < DAY));
+  // у получателя свой счётчик в подарке заказа: письма покупателю и получателю не расходуют лимит друг друга
+  const sent = new Set([...bought.flatMap((o) => o.access_mail_at ?? []), ...gifts.flatMap((o) => o.gift?.access_mail_at ?? [])].filter((t) => now - Date.parse(t) < DAY));
   if (sent.size >= PER_DAY) return;
   // отметку ставим до отправки: сбой почты тоже расходует попытку, зато письма не уйдут сверх потолка
   const stamps = [...sent, new Date(now).toISOString()].sort().slice(-PER_DAY);
-  for (const o of orders) await patchOrder(o.id, { access_mail_at: stamps });
-  await mailAccess(email, orders);
+  for (const o of bought) await patchOrder(o.id, { access_mail_at: stamps });
+  for (const o of gifts) await patchGift(o.id, { access_mail_at: stamps });
+  await mailAccess(email, bought, gifts);
 }
 
 /**
- * «Потеряли ссылку?» — присылает ссылки на оплаченные разборы на e-mail из заказа.
+ * «Потеряли ссылку?» — присылает ссылки на оплаченные разборы на e-mail из заказа, а также на подарки,
+ * уже отправленные на этот адрес получателю.
  * Ответ всегда одинаковый, чтобы по нему нельзя было узнать, покупал ли человек что-то на сайте.
  */
 export async function POST(req: Request) {
