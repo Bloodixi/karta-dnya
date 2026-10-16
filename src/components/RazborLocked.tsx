@@ -26,7 +26,7 @@ export default function RazborLocked({ items, label }: { items: { id: string; ti
 /** Ошибка формы оплаты рядом с кнопками. */
 export function PayError({ text }: { text?: string }) {
   return text ? (
-    <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">
+    <p role="alert" className="text-sm mt-4 border-l-2 border-danger pl-3">
       {text}
     </p>
   ) : null;

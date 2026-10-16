@@ -1,12 +1,13 @@
 import type { SVGProps } from "react";
 
-export type IconName = "card" | "sun" | "hash" | "moon" | "hearts" | "sunrise" | "ball" | "calendar" | "candle" | "gem" | "star" | "rune" | "menu" | "close";
+export type IconName = "card" | "sun" | "hash" | "moon" | "sleep" | "hearts" | "sunrise" | "ball" | "calendar" | "candle" | "gem" | "star" | "rune" | "menu" | "close";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   card: (<><rect x="5" y="2.5" width="14" height="19" rx="2.5" /><path d="M12 8l1.4 2.9 3.1.4-2.3 2.2.6 3.1L12 15.1 9.2 16.6l.6-3.1-2.3-2.2 3.1-.4z" /></>),
   sun: (<><circle cx="12" cy="12" r="4" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" /></>),
   hash: (<path d="M9 3 7 21M17 3l-2 18M3 9h18M3 15h18" />),
   moon: (<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z" />),
+  sleep: (<><path d="M3 10c2.4 3.2 5.4 4.8 9 4.8s6.6-1.6 9-4.8" /><path d="M6.2 13.4 4.8 15.6M12 14.8v2.6M17.8 13.4l1.4 2.2" /><path d="M15.5 3.5h3l-3 3h3" /></>),
   hearts: (<><path d="M9.5 19s-6-4.1-6-8.3A3.3 3.3 0 0 1 9.5 8.5a3.3 3.3 0 0 1 6 2.2c0 4.2-6 8.3-6 8.3z" /><path d="M15.5 6.2A2.6 2.6 0 0 1 20 8c0 2.4-2.4 4.4-3.5 5.2" /></>),
   sunrise: (<><path d="M3 18h18M12 6V3M5.6 9.6 3.5 7.5M18.4 9.6l2.1-2.1" /><path d="M6 18a6 6 0 0 1 12 0" /></>),
   ball: (<><circle cx="12" cy="10" r="7" /><path d="M8 20h8M9 17h6" /><path d="M9 7.5a3.5 3.5 0 0 1 3-2" /></>),

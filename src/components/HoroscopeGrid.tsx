@@ -35,7 +35,7 @@ export function SignDates({ dates, short = false }: { dates: string; short?: boo
 }
 
 /** «Метка ★★★☆☆» одной строкой: заполненные звёзды акцентом, пустые — цветом линий. */
-function Score({ label, n }: { label: string; n: number }) {
+export function Score({ label, n }: { label: string; n: number }) {
   const v = Math.max(0, Math.min(5, Math.round(n)));
   return (
     <span className="whitespace-nowrap">

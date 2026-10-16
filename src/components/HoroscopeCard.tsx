@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Score } from "./HoroscopeGrid";
 import { formatDateRu, type Horoscope } from "@/lib/daily";
 
 /** Строка «Что на небе» вида «Факт: пояснение» → выделенный факт и мягкое пояснение. */
@@ -38,15 +39,15 @@ export default function HoroscopeCard({ h, title }: { h: Horoscope; title?: stri
       )}
       <div className="grid gap-4 sm:grid-cols-3 mt-5 text-sm">
         <div>
-          <p className="font-semibold">Любовь <span className="stars">{"★".repeat(h.score.love)}</span></p>
+          <p className="font-semibold"><Score label="Любовь" n={h.score.love} /></p>
           <p className="text-muted mt-1">{h.love}</p>
         </div>
         <div>
-          <p className="font-semibold">Работа и деньги <span className="stars">{"★".repeat(h.score.career)}</span></p>
+          <p className="font-semibold"><Score label="Работа и деньги" n={h.score.career} /></p>
           <p className="text-muted mt-1">{h.career}</p>
         </div>
         <div>
-          <p className="font-semibold">Самочувствие <span className="stars">{"★".repeat(h.score.energy)}</span></p>
+          <p className="font-semibold"><Score label="Самочувствие" n={h.score.energy} /></p>
           <p className="text-muted mt-1">{h.health}</p>
         </div>
       </div>

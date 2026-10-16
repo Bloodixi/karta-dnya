@@ -47,7 +47,7 @@ export default function CompatIndex() {
             {signs.map((s) => <span key={s.slug} className="whitespace-nowrap">{s.symbol}{VS} {s.name}</span>)}
           </p>
           <div className="relative">
-          <div className="overflow-x-auto card p-2">
+          <div className="relative overflow-x-auto card p-2">
             <table className="text-xs sm:text-sm w-full">
               <thead>
                 <tr>

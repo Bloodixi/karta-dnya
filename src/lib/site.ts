@@ -50,7 +50,7 @@ export const SECTIONS: Record<SectionKey, { title: string; short: string; seoTit
     title: "Сонник",
     short: "Сонник",
     emoji: "🌙",
-    icon: "moon",
+    icon: "sleep",
     description: "Толкование снов по популярным символам: к чему снится вода, змея, зубы, полёт и сотни других образов.",
   },
   praktiki: {
@@ -104,7 +104,7 @@ export const TOOLS: { href: string; title: string; text: string; emoji: string; 
   { href: "/goroskop", title: "Гороскоп на сегодня", text: "Для каждого знака: общий фон, любовь, дела, совет", emoji: "✨", icon: "sun" },
   { href: "/chislo-sudby", title: "Число судьбы", text: "Рассчитать по дате рождения за секунду", emoji: "🔢", icon: "hash" },
   { href: "/runy/runa-dnya", title: "Руна дня", text: "Одна руна Футарка на сегодня и короткая трактовка", emoji: "ᚠ", icon: "rune" },
-  { href: "/sonnik", title: "Сонник", text: "Найти символ сна и прочитать толкование", emoji: "🌙", icon: "moon" },
+  { href: "/sonnik", title: "Сонник", text: "Найти символ сна и прочитать толкование", emoji: "🌙", icon: "sleep" },
   { href: "/sovmestimost", title: "Совместимость", text: "Два знака, процент и разбор пары", emoji: "💞", icon: "hearts" },
   { href: "/goroskop/zavtra", title: "Гороскоп на завтра", text: "Чтобы подготовиться заранее", emoji: "🌅", icon: "sunrise" },
   { href: "/taro/da-net", title: "Таро да или нет", text: "Одна карта на закрытый вопрос", emoji: "🔮", icon: "ball" },

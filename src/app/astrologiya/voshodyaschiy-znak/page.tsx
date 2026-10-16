@@ -86,7 +86,7 @@ export default async function AscendantPage({ searchParams }: PageProps<"/astrol
 
       <div className="mt-6">
         <AscForm initial={formInitial} />
-        {parsed.status === "error" && <p className="text-sm mt-3 text-red-600" role="alert">{parsed.message}</p>}
+        {parsed.status === "error" && <p className="text-sm mt-3 text-danger" role="alert">{parsed.message}</p>}
       </div>
 
       {r && (
