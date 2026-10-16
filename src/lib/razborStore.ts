@@ -11,6 +11,7 @@ export type Gift = {
   to_email?: string; // e-mail получателя; нет — ссылку передаёт покупатель
   send_at?: string; // ГГГГ-ММ-ДД по Москве; нет — сразу после оплаты
   sent_at?: string; // письмо получателю отправлено
+  access_mail_at?: string[]; // письма «Потеряли ссылку?» на адрес получателя за последние сутки
 };
 
 export type Order = {
@@ -30,6 +31,7 @@ export type Order = {
   receipt_url?: string;
   mail_sent_at?: string; // письмо покупателю с разбором и чеком
   receipt_due?: boolean; // боевая оплата: чек и письмо обязательны (тестовые заказы — без них)
+  test?: boolean; // оплачен в тестовом магазине: чек не пробивается, письмо получателю подарка уходит с пометкой [ТЕСТ]
   retry_at?: string; // последний повтор чека/письма
   retries?: number;
   refunded_at?: string; // полный возврат: ссылки /r и чек закрыты
@@ -123,6 +125,17 @@ export function patchOrder(id: string, patch: Partial<Order>): Promise<Order | n
   });
 }
 
+/** Дописывает поля в подарок заказа поверх свежей записи (не затирая sent_at и остальное). */
+export function patchGift(id: string, patch: Partial<Gift>): Promise<Order | null> {
+  return serial(id, async () => {
+    const o = await getOrder(id);
+    if (!o?.gift) return o;
+    const next = { ...o, gift: { ...o.gift, ...patch } };
+    await saveOrder(next);
+    return next;
+  });
+}
+
 /** Все заказы с тома, отобранные `keep`. Заказов немного — читаем каталог целиком. */
 export async function listOrders(keep: (o: Order) => boolean): Promise<Order[]> {
   let names: string[] = [];
@@ -137,6 +150,16 @@ export async function listOrders(keep: (o: Order) => boolean): Promise<Order[]> 
     if (o && keep(o)) out.push(o);
   }
   return out;
+}
+
+/**
+ * Оплаченные подарки, уже отправленные получателю на этот адрес (для «Потеряли ссылку?»). Подарки с отправкой
+ * в будущем не выдаём: сюрприз не должен открыться раньше дня, выбранного покупателем.
+ */
+export async function paidGiftsByRecipient(email: string): Promise<Order[]> {
+  const want = email.trim().toLowerCase();
+  const out = await listOrders((o) => o.status === "paid" && Boolean(o.gift?.sent_at) && o.gift?.to_email?.toLowerCase() === want);
+  return out.sort((a, b) => b.paid_at.localeCompare(a.paid_at));
 }
 
 /** Оплаченные заказы по e-mail покупателя (для «Потеряли ссылку?»). */

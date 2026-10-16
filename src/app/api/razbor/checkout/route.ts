@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { cleanName, parseDate } from "@/lib/numerology";
 import { nowMsk, RAZBOR, RAZBOR_VERSION } from "@/lib/razbor";
 import { PAY_COOKIE, rememberOrder } from "@/lib/razborOrder";
-import { cleanEmail, giftMetadata, parseGift } from "@/lib/razborGift";
+import { cleanEmail, giftMetadata, giftYm, parseGift } from "@/lib/razborGift";
 import { saveOrder, type Gift, type Order } from "@/lib/razborStore";
 import { makeToken } from "@/lib/razborToken";
 import { createPayment, yookassaReady } from "@/lib/yookassa";
@@ -45,7 +45,8 @@ export async function POST(req: Request) {
   if (!byIp.take(clientIp(req))) return tooMany();
 
   const order = randomBytes(9).toString("base64url");
-  const { yr, mo } = nowMsk();
+  // отложенный подарок: прогноз — с месяца, когда получатель откроет письмо (его же yr/mo — в токене и metadata)
+  const { yr, mo } = giftYm(gift, nowMsk());
   const draft: Order = {
     id: order, token: makeToken({ d: birth.d, m: birth.m, y: birth.y, name: name || undefined, yr, mo, v: RAZBOR_VERSION }, order), date: birth.iso, name, email,
     amount: RAZBOR.price, status: "pending", payment_id: "", created_at: new Date().toISOString(), paid_at: "", yr, mo,

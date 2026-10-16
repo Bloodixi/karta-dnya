@@ -2,7 +2,7 @@
 import { mailReady, sendMail, type Inline } from "./mailer";
 import { escapeHtml as h } from "./notify";
 import { buildRazbor } from "./razbor";
-import { getOrder, patchOrder, type Order } from "./razborStore";
+import { getOrder, patchGift, patchOrder, type Order } from "./razborStore";
 import { readToken } from "./razborToken";
 import { qrPng, receiptView } from "./receiptView";
 import { SELLER, SITE } from "./site";
@@ -43,7 +43,7 @@ export function razborHighlights(token: string): string[] {
   }
 }
 
-const GIFT_URL = `${SITE.url}/razbor?utm_source=email&utm_medium=razbor&utm_campaign=gift`;
+const GIFT_URL = `${SITE.url}/razbor?g=1&utm_source=email&utm_medium=razbor&utm_campaign=gift`;
 
 /** ГГГГ-ММ-ДД → ДД.ММ.ГГГГ */
 const ru = (iso: string) => iso.split("-").reverse().join(".");
@@ -206,7 +206,8 @@ async function doMailGift(id: string): Promise<{ sent?: boolean; error?: string 
   const from = cleanName(gift.from);
   const wish = gift.wish?.trim() ?? "";
   const hello = name ? `${name}, привет!` : "Привет!";
-  const subject = `${name ? `${name}, ` : ""}${from} дарит тебе нумерологический разбор`;
+  // тестовый магазин: письмо уходит, чтобы путь можно было прогнать, но с пометкой в теме
+  const subject = `${order.test ? "[ТЕСТ] " : ""}${name ? `${name}, ` : ""}${from} дарит тебе нумерологический разбор`;
   const lead = `${from} дарит тебе нумерологический разбор по дате рождения — личный текст о твоих числах, характере, сильных сторонах и ближайших двенадцати месяцах.`;
   const main = razborHighlights(order.token);
   const text = [
@@ -245,7 +246,7 @@ ${highlightsHtml("Главное о тебе", main)}
 </td></tr></table>`;
   try {
     await sendMail({ to: gift.to_email, subject, text, html });
-    await patchOrder(order.id, { gift: { ...gift, sent_at: new Date().toISOString() } });
+    await patchGift(order.id, { sent_at: new Date().toISOString() });
     return { sent: true };
   } catch (e) {
     const why = smtpWhy(e);
@@ -254,13 +255,20 @@ ${highlightsHtml("Главное о тебе", main)}
   }
 }
 
-/** «Потеряли ссылку?»: все оплаченные разборы на этот e-mail одним письмом. */
-export async function mailAccess(email: string, orders: Order[]): Promise<void> {
-  const rows = orders.map((o) => ({
-    url: `${SITE.url}/r/${o.id}`,
-    chek: o.receipt_uuid ? `${SITE.url}/razbor/chek/${o.id}` : "",
-    title: `Разбор${o.name ? ` для ${o.name}` : ""}, дата рождения ${o.date.split("-").reverse().join(".")}`,
-  }));
+/** «Потеряли ссылку?»: все оплаченные разборы на этот e-mail одним письмом. Подаркам получателя — без чека покупателя. */
+export async function mailAccess(email: string, orders: Order[], gifts: Order[] = []): Promise<void> {
+  const rows = [
+    ...orders.map((o) => ({
+      url: `${SITE.url}/r/${o.id}`,
+      chek: o.receipt_uuid ? `${SITE.url}/razbor/chek/${o.id}` : "",
+      title: `Разбор${o.name ? ` для ${cleanName(o.name)}` : ""}, дата рождения ${ru(o.date)}`,
+    })),
+    ...gifts.map((o) => ({
+      url: `${SITE.url}/r/${o.id}`,
+      chek: "",
+      title: `Подарок${o.gift?.from ? ` от ${cleanName(o.gift.from)}` : ""}: разбор по дате рождения ${ru(o.date)}`,
+    })),
+  ];
   const text = [
     "Здравствуй!",
     "",
