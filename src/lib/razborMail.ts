@@ -1,9 +1,49 @@
-/** Письмо покупателю после оплаты: ссылка на разбор и чек «Мой налог» (оферта, п. 4.3). Только сервер. */
+/** Письмо покупателю после оплаты: ссылка на разбор, «Главное о тебе», подарок близкому и чек «Мой налог» (оферта, п. 4.3). Только сервер. */
 import { mailReady, sendMail, type Inline } from "./mailer";
 import { escapeHtml as h } from "./notify";
+import { buildRazbor } from "./razbor";
 import { patchOrder, type Order } from "./razborStore";
+import { readToken } from "./razborToken";
 import { qrPng, receiptView } from "./receiptView";
 import { SELLER, SITE } from "./site";
+
+/** Строки текста разбора без markdown-выделения. */
+const plain = (t: string) => t.replace(/\*\*/g, "").replace(/\s+/g, " ").trim();
+
+/** Первые n предложений абзаца. */
+const sentences = (t: string, n: number) => (plain(t).match(/[^.!?]+[.!?]+(?:\s|$)/g) ?? [plain(t)]).slice(0, n).join("").trim();
+
+/** Имя для темы и обращения: без переводов строк и управляющих символов, не длиннее 40 знаков. */
+const cleanName = (s: string) => s.replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 40);
+
+/**
+ * «Главное о тебе» — три коротких вывода из собранного разбора: список из первого блока «Сведения» (с версии 4),
+ * иначе 1–2 предложения раздела «Число судьбы: суть» и заголовок личного года. Ошибка сборки — без блока.
+ */
+export function razborHighlights(token: string): string[] {
+  try {
+    const input = readToken(token);
+    if (!input) return [];
+    const doc = buildRazbor(input);
+    const get = (id: string) => doc.sections.find((s) => s.id === id);
+    const first = get("svod")?.blocks[0];
+    if (first?.kind === "list" && first.items.length) return first.items.slice(0, 3).map(plain).filter(Boolean);
+    const out: string[] = [];
+    const sut = get("sut");
+    const p = sut?.blocks.find((b) => b.kind === "p");
+    if (sut && p?.kind === "p") {
+      const lead = sentences(p.text, 2);
+      out.push(/^Число судьбы/.test(lead) ? lead : `${plain(sut.title)}. ${lead}`);
+    }
+    const god = get("god");
+    if (god) out.push(plain(god.title));
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+const GIFT_URL = `${SITE.url}/razbor?utm_source=email&utm_medium=razbor&utm_campaign=gift`;
 
 /** Отправляет письмо один раз на заказ (mail_sent_at). Ошибку не бросает — вернёт её текст для уведомления владельцу. */
 export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?: string }> {
@@ -11,7 +51,10 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   if (!order.email) return { error: "покупатель не указал e-mail" };
   if (!mailReady()) return { error: "не настроена отправка писем" };
   const url = `${SITE.url}/r/${order.id}`;
-  const hello = order.name ? `${order.name}, здравствуйте!` : "Здравствуйте!";
+  const name = cleanName(order.name || "");
+  const hello = name ? `${name}, здравствуй!` : "Здравствуй!";
+  const subject = name ? `${name}, твой разбор по дате рождения готов` : "Твой разбор по дате рождения готов";
+  const main = razborHighlights(order.token);
   const r = receiptView(order);
   const inline: Inline[] = r ? [{ cid: "qr@karta-dnya.ru", filename: `chek-${r.number}.png`, content: await qrPng(r.fnsUrl), contentType: "image/png" }] : [];
   const receiptText = r
@@ -28,22 +71,43 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   const text = [
     hello,
     "",
-    "Спасибо за заказ. Ваш разбор по дате рождения готов и открывается по ссылке:",
+    "Спасибо за заказ. Твой разбор по дате рождения готов и открывается по ссылке:",
     url,
+    "",
+    "Ссылка твоя навсегда — сохрани письмо.",
+    "",
+    ...(main.length ? ["Главное о тебе:", ...main.map((m) => `— ${m}`), "", "Остальное — в разборе по ссылке выше.", ""] : []),
+    "Подарить разбор близкому:",
+    GIFT_URL,
     "",
     ...receiptText,
     `Заказ ${order.id}, ${order.amount} ₽.`,
-    "Если ссылка не открывается или остались вопросы — просто ответьте на это письмо.",
+    "Если ссылка не открывается или остались вопросы — просто ответь на это письмо.",
     "",
     `${SITE.name} · ${SITE.url}`,
     `Продавец: ${SELLER.name}, ИНН ${SELLER.inn}`,
   ].join("\n");
-  const html = `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222;max-width:560px">
-<p>${h(hello)}</p>
-<p>Спасибо за заказ. Ваш разбор по дате рождения готов:</p>
-<p><a href="${h(url)}" style="display:inline-block;padding:10px 18px;background:#5b3fa8;color:#fff;border-radius:8px;text-decoration:none">Открыть разбор</a></p>
-<p style="font-size:13px;color:#666">Ссылка: <a href="${h(url)}">${h(url)}</a></p>
-${r ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;width:100%;max-width:400px;border:1px solid #e5e1d8;border-radius:12px;background:#fffdf8;font-size:14px;color:#222">
+  const btn = (href: string, label: string, bg: string, color: string) =>
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${bg}" style="background:${bg};border-radius:8px;border:1px solid #5b3fa8"><a href="${h(href)}" target="_blank" style="display:inline-block;padding:11px 20px;font-family:Arial,sans-serif;font-size:15px;color:${color};text-decoration:none;font-weight:bold">${h(label)}</a></td></tr></table>`;
+  const mainHtml = main.length
+    ? `<tr><td style="padding:8px 0 4px">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f6f3fb;border-radius:12px"><tr><td style="padding:18px 20px;font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222">
+<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5b3fa8;font-weight:bold">Главное о тебе</div>
+${main.map((m) => `<p style="margin:10px 0 0">— ${h(m)}</p>`).join("\n")}
+<p style="margin:12px 0 0;font-size:13px;color:#666">Остальное — в разборе по ссылке выше.</p>
+</td></tr></table>
+</td></tr>`
+    : "";
+  const html = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff"><tr><td align="left" style="padding:8px">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222">
+<tr><td style="padding:0 0 8px"><p style="margin:0">${h(hello)}</p></td></tr>
+<tr><td style="padding:0 0 12px"><p style="margin:0">Спасибо за заказ. Твой разбор по дате рождения готов:</p></td></tr>
+<tr><td style="padding:0 0 8px">${btn(url, "Открыть разбор", "#5b3fa8", "#ffffff")}</td></tr>
+<tr><td style="padding:0 0 4px;font-size:13px;color:#666">Ссылка: <a href="${h(url)}" style="color:#5b3fa8">${h(url)}</a></td></tr>
+<tr><td style="padding:0 0 12px;font-size:14px;font-weight:bold">Ссылка твоя навсегда — сохрани письмо.</td></tr>
+${mainHtml}
+<tr><td style="padding:16px 0 8px">${btn(GIFT_URL, "Подарить разбор близкому", "#ffffff", "#5b3fa8")}</td></tr>
+${r ? `<tr><td style="padding:8px 0"><table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;width:100%;max-width:400px;border:1px solid #e5e1d8;border-radius:12px;background:#fffdf8;font-size:14px;color:#222">
 <tr><td style="padding:20px 22px">
 <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888">Кассовый чек · приход</div>
 <div style="font-size:20px;font-weight:bold;margin-top:2px">Чек № ${h(r.number)}</div>
@@ -61,15 +125,16 @@ ${r ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:
 <tr><td colspan="2" style="color:#777;padding-top:2px">Безналичный расчёт</td></tr>
 </table>
 <div style="text-align:center;margin-top:16px;border-top:1px dashed #ccc;padding-top:16px">
-<img src="cid:qr@karta-dnya.ru" width="140" height="140" alt="QR-код чека ФНС">
+<img src="cid:qr@karta-dnya.ru" width="140" height="140" alt="QR-код чека ФНС" style="display:inline-block;border:0">
 <div style="font-size:13px;margin-top:6px"><a href="${h(r.pageUrl)}" style="color:#5b3fa8">Открыть чек</a> · <a href="${h(r.fnsUrl)}" style="color:#777">проверить на сайте ФНС</a></div>
 </div>
-</td></tr></table>` : ""}
-<p>Заказ ${h(order.id)}, ${h(order.amount)} ₽.<br>Если ссылка не открывается или остались вопросы — просто ответьте на это письмо.</p>
-<p style="font-size:12px;color:#888">${h(SITE.name)} · <a href="${h(SITE.url)}">${h(SITE.url.replace(/^https?:\/\//, ""))}</a><br>Продавец: ${h(SELLER.name)}, ИНН ${h(SELLER.inn)}</p>
-</div>`;
+</td></tr></table></td></tr>` : ""}
+<tr><td style="padding:8px 0"><p style="margin:0">Заказ ${h(order.id)}, ${h(order.amount)} ₽.<br>Если ссылка не открывается или остались вопросы — просто ответь на это письмо.</p></td></tr>
+<tr><td style="padding:8px 0;font-size:12px;color:#888">${h(SITE.name)} · <a href="${h(SITE.url)}" style="color:#888">${h(SITE.url.replace(/^https?:\/\//, ""))}</a><br>Продавец: ${h(SELLER.name)}, ИНН ${h(SELLER.inn)}</td></tr>
+</table>
+</td></tr></table>`;
   try {
-    await sendMail({ to: order.email, subject: "Ваш разбор по дате рождения и чек", text, html, inline });
+    await sendMail({ to: order.email, subject, text, html, inline });
     await patchOrder(order.id, { mail_sent_at: new Date().toISOString() });
     return { sent: true };
   } catch (e) {
@@ -89,21 +154,21 @@ export async function mailAccess(email: string, orders: Order[]): Promise<void> 
     title: `Разбор${o.name ? ` для ${o.name}` : ""}, дата рождения ${o.date.split("-").reverse().join(".")}`,
   }));
   const text = [
-    "Здравствуйте!",
+    "Здравствуй!",
     "",
-    "Вы запросили ссылки на свои разборы на сайте «Карта дня»:",
+    "Ты запросил(а) ссылки на свои разборы на сайте «Карта дня»:",
     "",
     ...rows.flatMap((r) => [r.title, r.url, ...(r.chek ? [`Чек: ${r.chek}`] : []), ""]),
-    "Если вы не запрашивали это письмо — просто не обращайте на него внимания.",
+    "Если ты не запрашивал(а) это письмо — просто не обращай на него внимания.",
     "",
     `${SITE.name} · ${SITE.url}`,
   ].join("\n");
   const html = `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222;max-width:560px">
-<p>Здравствуйте!</p>
-<p>Вы запросили ссылки на свои разборы на сайте «Карта дня»:</p>
+<p>Здравствуй!</p>
+<p>Ты запросил(а) ссылки на свои разборы на сайте «Карта дня»:</p>
 ${rows.map((r) => `<p style="margin:14px 0"><b>${h(r.title)}</b><br><a href="${h(r.url)}">${h(r.url)}</a>${r.chek ? `<br><span style="font-size:13px">Чек: <a href="${h(r.chek)}">${h(r.chek)}</a></span>` : ""}</p>`).join("\n")}
-<p style="font-size:13px;color:#777">Если вы не запрашивали это письмо — просто не обращайте на него внимания.</p>
+<p style="font-size:13px;color:#777">Если ты не запрашивал(а) это письмо — просто не обращай на него внимания.</p>
 <p style="font-size:12px;color:#888">${h(SITE.name)} · <a href="${h(SITE.url)}">${h(SITE.url.replace(/^https?:\/\//, ""))}</a></p>
 </div>`;
-  await sendMail({ to: email, subject: "Ссылки на ваши разборы — Карта дня", text, html });
+  await sendMail({ to: email, subject: "Ссылки на твои разборы — Карта дня", text, html });
 }
