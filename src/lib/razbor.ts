@@ -286,7 +286,7 @@ function mainSection(i: RazborInput, n: Nums, b: ReturnType<typeof bank>): Secti
   const opora = join(g?.destiny[String(n.destiny.number)], g?.cell[String(strong)]);
   const year = g?.year[String(n.py.number)];
   const period = n.age >= 0 && b.pinnacles ? b.pinnacles.pinnacle[String(currentPinnacle(n).number)]?.short : undefined;
-  const items = [opora && `**Опора.** ${opora}`, year && `**Твой ${i.yr}.** ${year}`, period && `**Период жизни.** ${period}`].filter((x): x is string => !!x);
+  const items = [opora && `**Опора.** ${opora}`, year && `**Год ${i.yr}.** ${year}`, period && `**Период жизни.** ${period}`].filter((x): x is string => !!x);
   const [a, c] = [coreDigit(n.destiny.number), coreDigit(n.birthday.number)].sort((x, y) => x - y);
   return {
     id: "svod",
