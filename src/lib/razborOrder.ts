@@ -115,6 +115,7 @@ export function orderFromPayment(p: Payment): Order | null {
     ...(product !== "razbor" ? { product } : {}),
     ...(md.date2 ? { date2: md.date2, name2: md.name2 ?? "" } : {}),
     ...(t.token2 ? { token2: t.token2 } : {}),
+    ...(p.test ? { test: true } : {}),
   };
 }
 
@@ -155,17 +156,24 @@ async function doFinishPaid(order: Order): Promise<{ order?: Order; lines: strin
   return { order: (await getOrder(o.id)) ?? o, lines };
 }
 
-/** Оплата в тестовом магазине: отмечаем заказ тестовым и, если подарок пора отправлять, шлём письмо получателю. */
+/**
+ * Оплата в тестовом магазине: заказ отмечается тестовым, чек не пробивается. Письмо покупателю — с [ТЕСТ] в теме
+ * (проверка писем и PDF-вложения), подарок получателю — тоже с [ТЕСТ], если пора отправлять.
+ */
 async function finishTest(order: Order): Promise<{ lines: string[] }> {
-  const o = (await patchOrder(order.id, { test: true })) ?? { ...order, test: true };
+  let o = (await patchOrder(order.id, { test: true })) ?? { ...order, test: true };
+  const m = await mailBuyer(o);
+  o = (await getOrder(o.id)) ?? o;
+  const lines = [m.sent ? `✉️ Письмо [ТЕСТ] отправлено на ${h(o.email)}` : `<b>⚠️ Письмо [ТЕСТ] не отправлено</b> (${h(m.error)})`];
   const g = o.gift;
-  if (!g) return { lines: [] };
+  if (!g) return { lines };
   let line = g.to_email ? `письмо получателю ${g.send_at ? `уйдёт ${h(g.send_at)}` : "сразу"} (с пометкой [ТЕСТ])` : "ссылку передаст покупатель";
   if (giftDue(o)) {
     const s = await mailGift(o);
     line = s.sent ? "письмо получателю отправлено с пометкой [ТЕСТ]" : `<b>⚠️ письмо получателю не отправлено</b> (${h(s.error)}) — повторит ежедневный запуск`;
   }
-  return { lines: [`🎁 Подарок от ${h(g.from)}: ${line}`] };
+  lines.push(`🎁 Подарок от ${h(g.from)}: ${line}`);
+  return { lines };
 }
 
 const RETRY_GAP = 5 * 60_000;
@@ -239,7 +247,7 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
       // Чек, письмо (ждёт PDF до минуты) и уведомление владельцу — после ответа: ЮKassa ждёт ответ на уведомление
       // недолго и при задержке шлёт его повторно. Заказ уже «paid»; повтор чека/письма защищён finishPaid и mail_sent_at.
       void (async () => {
-      // тестовый магазин чек в налоговую не пробивает и письмо покупателю не шлёт; письмо получателю подарка — с [ТЕСТ]
+      // тестовый магазин чек в налоговую не пробивает; письма покупателю и получателю подарка — с [ТЕСТ]
       const f = p.test ? await finishTest(order) : await finishPaid(order);
       await notifyPayment(
         [
@@ -305,7 +313,7 @@ export type OrderState = {
   path?: string;
   short?: string;
   receipt?: string;
-  amount?: number; // сумма оплаты, ₽ — для цели Метрики на странице «Спасибо»
+  amount?: number; // сумма оплаты, ₽ — для цели Метрики на странице «Спасибо» (у тестовой оплаты нет)
   /** Подарок: имя получателя, замаскированный адрес и день письма (нет адреса — ссылку передаёт покупатель). */
   gift?: { to: string; email?: string; at?: string; sent?: boolean };
   product?: "razbor" | "compat" | "pack" | "child";
@@ -345,7 +353,7 @@ export async function orderState(orderId: string, cookiePaymentId?: string, offl
   const gift = g ? { to: o.name, ...(g.to_email ? { email: maskEmail(g.to_email) } : {}), ...(g.send_at ? { at: g.send_at } : {}), ...(g.sent_at ? { sent: true } : {}) } : undefined;
   const product = productOf(o.product);
   return {
-    status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined, amount: o.amount, ...(gift ? { gift } : {}),
+    status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined, ...(o.test ? {} : { amount: o.amount }), ...(gift ? { gift } : {}),
     product,
     ...(product === "pack" && o.token2 ? { pair: `/r/${o.id}/para` } : {}),
     ...(product === "razbor" && !g ? { upsell: compatUpsellPath(o.date) } : {}),

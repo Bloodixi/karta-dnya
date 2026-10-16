@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { cleanName, parseDate, type BirthDate } from "@/lib/numerology";
 import { ageAt, nowMsk, RAZBOR_VERSION } from "@/lib/razbor";
@@ -12,6 +13,7 @@ import { makeChildToken, makeCompatToken, makeToken } from "@/lib/razborToken";
 import { createPayment, yookassaReady } from "@/lib/yookassa";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
 import { SITE } from "@/lib/site";
+import { TEST_COOKIE, testCookieOk } from "@/lib/razborTest";
 
 /** Не больше 5 заказов за 10 минут с одного IP: каждый заказ — платёж в ЮKassa и файл на томе. */
 const byIp = rateLimit(5, 10 * 60_000);
@@ -104,7 +106,9 @@ export async function POST(req: Request) {
     product === "compat"
       ? `${info.path}?a=${a.iso}&b=${b!.iso}&na=${enc(name)}&nb=${enc(name2 ?? "")}`
       : `${info.path}?d=${a.iso}${name ? `&n=${enc(name)}` : ""}${gift ? "&g=1" : ""}${product === "pack" ? `&p=1&d2=${b!.iso}&n2=${enc(name2 ?? "")}` : ""}`;
-  if (!yookassaReady()) return redirect(`${retry}&err=pay`);
+  // тестовая покупка владельца (cookie из /api/razbor/test) — платёж в тестовом магазине
+  const test = testCookieOk((await cookies()).get(TEST_COOKIE)?.value);
+  if (!yookassaReady(test ? "test" : "live")) return redirect(`${retry}&err=pay`);
   // считаем только попытки, которые дошли бы до ЮKassa: опечатка в форме лимит не тратит
   if (!byIp.take(clientIp(req))) return tooMany(info.path);
 
@@ -122,6 +126,7 @@ export async function POST(req: Request) {
     ...(product !== "razbor" ? { product } : {}),
     ...(b ? { date2: b.iso, name2: name2 ?? "" } : {}),
     ...(product === "pack" ? { token2: pair } : {}),
+    ...(test ? { test: true } : {}),
   };
   const dates = b ? `${a.iso} и ${b.iso}` : a.iso;
   try {
@@ -130,7 +135,7 @@ export async function POST(req: Request) {
     const p = await createPayment({
       idempotenceKey: `razbor-${order}`,
       amount: info.price,
-      description: `${info.title}${gift ? " в подарок" : ""}, ${dates}`,
+      description: `${test ? "[ТЕСТ] " : ""}${info.title}${gift ? " в подарок" : ""}, ${dates}`,
       returnUrl: `${SITE.url}/razbor/spasibo?o=${order}`,
       metadata: {
         order, date: a.iso, name, yr: String(yr), mo: String(mo), v: String(v), email, ...giftMetadata(gift),
@@ -141,6 +146,7 @@ export async function POST(req: Request) {
       },
       email,
       method: form.get("method") === "sbp" ? "sbp" : undefined,
+      shop: test ? "test" : "live",
     });
     const url = p.confirmation?.confirmation_url;
     if (!url) throw new Error("нет confirmation_url");

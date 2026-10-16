@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // сторонние сборки (paged.js для буклета)
+    "public/vendor/**",
   ]),
 ]);
 
