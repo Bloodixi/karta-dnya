@@ -3,13 +3,14 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { SellerDetails, SellerDraftNotice } from "@/components/SellerNotice";
 import { RAZBOR } from "@/lib/razbor";
+import { PRODUCTS } from "@/lib/razborProducts";
 import { SELLER } from "@/lib/site";
 
 const PATH = "/vozvrat";
 
 export const metadata: Metadata = {
   title: "Возврат оплаты",
-  description: "Как вернуть оплату за нумерологический разбор на сайте «Карта дня»: когда возможен возврат, что указать в письме, сроки ответа и способ возврата денег.",
+  description: "Как вернуть оплату за нумерологический разбор или совместимость пары на сайте «Карта дня»: когда возможен возврат, что указать в письме и сроки ответа.",
   alternates: { canonical: PATH },
 };
 
@@ -19,7 +20,7 @@ export default function RefundPage() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: PATH, label: "Возврат" }]} />
       <h1 className="text-3xl md:text-4xl">Возврат оплаты</h1>
-      <p className="text-muted mt-2 max-w-2xl">Условия возврата за «{RAZBOR.title}». Полные условия покупки — в <Link href="/oferta" className="text-accent underline">публичной оферте</Link>.</p>
+      <p className="text-muted mt-2 max-w-2xl">Условия возврата за «{RAZBOR.title}», «{PRODUCTS.compat.title}» ({PRODUCTS.compat.price} ₽), пакет «Разбор + совместимость» ({PRODUCTS.pack.price} ₽) и «{PRODUCTS.child.title}» ({PRODUCTS.child.price} ₽). Полные условия покупки — в <Link href="/oferta" className="text-accent underline">публичной оферте</Link>.</p>
 
       <div className="prose mt-8">
         <SellerDraftNotice />
@@ -27,6 +28,8 @@ export default function RefundPage() {
         <h2>Когда мы возвращаем деньги</h2>
         <p>Разбор — цифровой материал, который открывается сразу после оплаты. Если из-за технической ошибки разбор не был предоставлен — страница не открылась, ссылка не пришла, оплата прошла дважды, — мы вернём уплаченную сумму полностью.</p>
         <p>Если что-то в разборе отображается неправильно, напиши нам: сначала постараемся исправить, а если не получится — вернём оплату.</p>
+
+        <p>Пакет «Разбор + совместимость» — один заказ с двумя страницами: если не открылась одна из них, сначала пришлём ссылку заново, а если не получится — вернём оплату.</p>
 
         <h2>Если разбор был подарком</h2>
         <p>Возврат по подарочному заказу оформляет тот, кто его оплатил: напиши нам с e-mail, указанного при оплате, — деньги вернутся покупателю. Получателю мы не пишем по поводу возврата и оплаты. Если письмо получателю было запланировано на будущую дату и ещё не ушло, после полного возврата оно не отправится, а ссылка на разбор закроется.</p>

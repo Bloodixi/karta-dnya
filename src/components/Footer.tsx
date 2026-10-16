@@ -60,6 +60,16 @@ export default function Footer() {
                 Разбор по дате рождения
               </Link>
             </li>
+            <li>
+              <Link href="/sovmestimost-razbor" className="hover:text-ink">
+                Совместимость пары
+              </Link>
+            </li>
+            <li>
+              <Link href="/razbor-rebenka" className="hover:text-ink">
+                Детский разбор
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

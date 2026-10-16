@@ -1,6 +1,7 @@
 /** Заказы разбора: JSON-файлы <RAZBOR_DATA_DIR>/orders/<id>.json на постоянном томе Coolify (/data). Только сервер. */
 import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { Product } from "./razborProducts";
 
 export type OrderStatus = "pending" | "paid" | "canceled" | "refunded";
 
@@ -39,6 +40,10 @@ export type Order = {
   access_mail_at?: string[]; // письма «Потеряли ссылку?» за последние сутки (суточный потолок на адрес)
   mismatch_at?: string; // оплата не сошлась с заказом (валюта/сумма) — владелец уже предупреждён
   gift?: Gift; // заказ в подарок
+  product?: Product; // что куплено; нет — обычный разбор (все заказы до фазы 3)
+  date2?: string; // совместимость и пакет: вторая дата рождения, ГГГГ-ММ-ДД
+  name2?: string; // и имя второго человека
+  token2?: string; // пакет: ссылка на совместимость (token — на разбор)
 };
 
 const ID_RE = /^[\w-]{6,64}$/;

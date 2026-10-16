@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PairPicker from "@/components/PairPicker";
+import CompatCta from "@/components/CompatCta";
 import RazborCta from "@/components/RazborCta";
 import { getZodiac } from "@/lib/content";
 import { compatibility } from "@/lib/compat";
@@ -68,7 +69,8 @@ export default function CompatIndex() {
           <p className="text-xs text-muted mt-2">Строка — первый знак, столбец — второй. Нажмите на число, чтобы открыть разбор пары.</p>
         </section>
       )}
-      <RazborCta from="sovmestimost" />
+      <CompatCta from="sovmestimost" />
+      <RazborCta from="sovmestimost" className="mt-6" />
     </div>
   );
 }

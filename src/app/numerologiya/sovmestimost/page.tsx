@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import CompatCta from "@/components/CompatCta";
 import Faq from "@/components/Faq";
 import NumerologyNav from "@/components/NumerologyNav";
 import { DateField, FormError, ShareLink } from "@/components/NumerologyFields";
@@ -142,6 +143,8 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
           </ul>
         </div>
       </section>
+
+      <CompatCta from="numerologiya-sovmestimost" a={a?.iso} b={b?.iso} />
 
       <section className="prose mt-12">
         <h2>Как считается совместимость по дате рождения</h2>

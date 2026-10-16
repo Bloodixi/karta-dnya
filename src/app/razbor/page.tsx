@@ -8,7 +8,9 @@ import { DateField, FormError, TextField } from "@/components/NumerologyFields";
 import RazborView from "@/components/RazborView";
 import { RazborCheckoutForm, RazborGiftFields, RazborGoal, RazborStickyCta } from "@/components/RazborClient";
 import { cleanName, parseDate } from "@/lib/numerology";
-import { buildTeaser, nowMsk, RAZBOR, RAZBOR_TOC } from "@/lib/razbor";
+import { ageAt, buildTeaser, nowMsk, RAZBOR, RAZBOR_TOC } from "@/lib/razbor";
+import { compatReady } from "@/lib/razborCompat";
+import { packAddon, PRODUCTS } from "@/lib/razborProducts";
 import { GIFT_DAYS_MAX, todayMsk } from "@/lib/razborGift";
 import { countWords, plural } from "@/lib/ruCount";
 import { pageTitle, SELLER, SITE } from "@/lib/site";
@@ -28,6 +30,8 @@ const SECTIONS = countWords(RAZBOR_TOC.length, ["раздел", "раздела"
 
 const FAQ = [
   { q: "Что входит в полный разбор?", a: `${SECTIONS[0].toUpperCase()}${SECTIONS.slice(1)}: твои числа с расчётом, сведение — как числа работают вместе, твой период жизни по возрасту, суть числа судьбы, сильные стороны и ловушки, призвание, талант дня рождения, квадрат Пифагора с расшифровкой девяти ячеек, любовь, работа, личный год, прогноз на двенадцать месяцев, следующий год, пять советов и памятка на год.` },
+  { q: "Можно ли добавить совместимость с близким?", a: `Да. В форме оплаты отметь «+ совместимость с близким» и укажи дату рождения и имя второго человека. Пакет «разбор + совместимость» стоит ${PRODUCTS.pack.price} ₽ вместо ${PRODUCTS.razbor.price + PRODUCTS.compat.price} ₽ по отдельности; после оплаты придут две ссылки.` },
+  { q: "Есть ли разбор для ребёнка?", a: "Да, для детей до 18 лет есть отдельный детский разбор: его читает родитель — о характере ребёнка, сильных сторонах, о том, как поддержать и на что не давить." },
   { q: "Можно ли подарить разбор?", a: "Да. В форме оплаты выбери «В подарок» и укажи дату рождения и имя получателя, подпись и, если хочешь, пожелание. Ссылка на разбор и чек придут тебе, а по желанию мы отправим получателю письмо с подарком — сразу после оплаты или в выбранный день в пределах года. Если письмо отложено, прогноз по месяцам начнётся с месяца отправки." },
   { q: "Как я получу разбор?", a: "Сразу после оплаты откроется страница с разбором. Ссылка на неё твоя: её можно сохранить в закладки, открыть с телефона или сохранить разбор в PDF кнопкой на странице." },
   { q: "Можно ли вернуть деньги?", a: "Если из-за технической ошибки разбор не открылся, мы вернём оплату полностью. Напиши нам, приложив номер заказа, — ответим в течение трёх рабочих дней. Подробности на странице «Возврат»." },
@@ -139,6 +143,9 @@ const GIFT_ERRORS: Record<string, string> = {
   gift_email: "Проверь e-mail получателя или оставь поле пустым — тогда ссылку передашь сам(а).",
   gift_consent: "Подтверди, что получатель не будет против письма, — или оставь e-mail получателя пустым и передай ссылку сам(а).",
   gift_date: "Выбери день отправки не раньше сегодняшнего и не позже чем через год.",
+  date2: "Проверь дату рождения близкого для совместимости: нужна настоящая дата, например 03.02.1988.",
+  name2: "Укажи имя близкого — оно будет в тексте совместимости.",
+  soon: "Совместимость пары скоро появится в продаже — пока можно оформить разбор без неё.",
 };
 
 export default async function RazborPage({ searchParams }: PageProps<"/razbor">) {
@@ -152,6 +159,11 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
   const now = nowMsk();
   const teaser = date ? buildTeaser({ d: date.d, m: date.m, y: date.y, name: name || undefined, ...now }) : null;
   const contactEmail = SELLER.email.includes("@") ? SELLER.email : null;
+  // младше 14 лет — подсказка о детском разборе для родителя
+  const age = date ? ageAt({ d: date.d, m: date.m, y: date.y, ...now }) : null;
+  const childHref = date ? `${PRODUCTS.child.path}?d=${date.iso}${name ? `&n=${encodeURIComponent(name)}` : ""}#teaser` : "";
+  const offerPack = compatReady();
+  const d2 = parseDate(sp.d2);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -184,6 +196,13 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
             Ниже — бесплатная часть. Полный разбор из {RAZBOR_TOC.length} разделов стоит {RAZBOR.price} ₽:{" "}
             <a href="#oplata" className="text-accent underline">перейти к оплате</a>
           </p>
+          {age !== null && age >= 0 && age < 14 ? (
+            <p className="max-w-3xl card p-4 mb-4 text-sm">
+              Это дата рождения ребёнка? Для ребёнка есть{" "}
+              <Link href={childHref} className="text-accent underline">детский разбор для родителя</Link>{" "}
+              — о характере, сильных сторонах и о том, как поддержать.
+            </p>
+          ) : null}
           <RazborView sections={teaser.sections} toc={false} />
           {hiddenMonths(teaser) > 0 && (
             <HiddenMonths count={hiddenMonths(teaser)} labels={BLUR_ROWS.map((_, i) => monthLabel(now.yr, now.mo, 12 - hiddenMonths(teaser) + i))} />
@@ -234,16 +253,17 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           {date ? (
             <RazborCheckoutForm counter={counter}>
               <input type="hidden" name="date" value={date.iso} />
-              <RazborGiftFields counter={counter} date={date.iso} name={name} today={todayMsk()} maxDate={todayMsk(GIFT_DAYS_MAX)} gift={isGift} err={err} />
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button type="submit" name="method" value="sbp" className="btn">
-                  Оплатить {RAZBOR.price} ₽ по СБП
-                </button>
-                <button type="submit" name="method" value="" className="btn btn-ghost">
-                  Картой или другим способом
-                </button>
-              </div>
-              <p className="text-xs text-muted mt-2">СБП — оплата по QR-коду или в приложении банка, без ввода карты.</p>
+              <RazborGiftFields
+                counter={counter}
+                date={date.iso}
+                name={name}
+                today={todayMsk()}
+                maxDate={todayMsk(GIFT_DAYS_MAX)}
+                gift={isGift}
+                err={err}
+                price={RAZBOR.price}
+                pack={offerPack ? { addon: packAddon(), total: PRODUCTS.pack.price, on: one(sp.p) === "1", date2: d2?.iso, name2: cleanName(sp.n2), today: todayMsk() } : undefined}
+              />
               <p className="text-xs text-muted mt-3 max-w-md">
                 Нажимая кнопку, ты принимаешь условия <Link href="/oferta" className="underline">оферты</Link>. Оплата через ЮKassa. Разбор носит развлекательный и ознакомительный характер.
               </p>

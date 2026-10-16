@@ -29,8 +29,8 @@ export function RazborGoal({ counter, goal }: { counter?: string; goal: string }
   return null;
 }
 
-/** Форма оплаты: цель «razbor_checkout_click» при отправке, обычный POST на /api/razbor/checkout. */
-export function RazborCheckoutForm({ counter, children }: { counter?: string; children: ReactNode }) {
+/** Форма оплаты: цель `goal` (по умолчанию «razbor_checkout_click») при отправке, обычный POST на /api/razbor/checkout. */
+export function RazborCheckoutForm({ counter, goal = "razbor_checkout_click", children }: { counter?: string; goal?: string; children: ReactNode }) {
   const [busy, setBusy] = useState(false);
   return (
     <form
@@ -38,7 +38,7 @@ export function RazborCheckoutForm({ counter, children }: { counter?: string; ch
       action="/api/razbor/checkout"
       aria-busy={busy}
       onSubmit={() => {
-        reachGoal(counter, "razbor_checkout_click");
+        reachGoal(counter, goal);
         setBusy(true);
       }}
       className={busy ? "opacity-70 pointer-events-none" : undefined}
@@ -114,7 +114,7 @@ export function PaymentWaiter({ order, max = 30, fallback }: { order: string; ma
  * Липкая кнопка оплаты на телефоне: видна, пока читаешь бесплатную часть (`from`), и прячется,
  * как только блок оплаты (`to`) дошёл до экрана или остался выше. Стоит над нижней панелью TabBar.
  */
-export function RazborStickyCta({ price, from = "razbor-teaser", to = "oplata" }: { price: number; from?: string; to?: string }) {
+export function RazborStickyCta({ price, from = "razbor-teaser", to = "oplata", label = "Открыть полный разбор" }: { price: number; from?: string; to?: string; label?: string }) {
   const [show, setShow] = useState(false);
   useEffect(() => {
     const start = document.getElementById(from);
@@ -145,7 +145,7 @@ export function RazborStickyCta({ price, from = "razbor-teaser", to = "oplata" }
       className={`md:hidden no-print fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-bg/95 backdrop-blur px-4 py-2.5 transition-[opacity,transform,visibility] duration-200 ${show ? "opacity-100 translate-y-0" : "invisible opacity-0 translate-y-2"}`}
     >
       <a href={`#${to}`} className="btn w-full justify-center">
-        Открыть полный разбор — {price} ₽
+        {label} — {price} ₽
       </a>
     </div>
   );
@@ -153,9 +153,29 @@ export function RazborStickyCta({ price, from = "razbor-teaser", to = "oplata" }
 
 const FIELD = "border border-line rounded-lg px-3 py-2 bg-surface min-w-0";
 
+/** Кнопки оплаты: СБП и карта (name="method" — выбор способа в ЮKassa). */
+export function PayButtons({ price }: { price: number }) {
+  return (
+    <>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button type="submit" name="method" value="sbp" className="btn">
+          Оплатить {price} ₽ по СБП
+        </button>
+        <button type="submit" name="method" value="" className="btn btn-ghost">
+          Картой или другим способом
+        </button>
+      </div>
+      <p className="text-xs text-muted mt-2">СБП — оплата по QR-коду или в приложении банка, без ввода карты.</p>
+    </>
+  );
+}
+
+/** Пакет «разбор + совместимость» в форме оплаты разбора: вторая дата и имя близкого. */
+export type PackOffer = { addon: number; total: number; on?: boolean; date2?: string; name2?: string; today: string };
+
 /** Черновик формы оплаты в sessionStorage вкладки: после ошибки сервера (?err=…) поля не приходится заполнять заново. */
 const DRAFT_KEY = "razbor-checkout";
-type Draft = { date: string; gift: boolean; name: string; from: string; wish: string; to: string; when: "now" | "date"; at: string; ok: boolean; email: string };
+type Draft = { date: string; gift: boolean; name: string; from: string; wish: string; to: string; when: "now" | "date"; at: string; ok: boolean; email: string; pack?: boolean; date2?: string; name2?: string };
 
 function readDraft(date: string): Draft | null {
   try {
@@ -175,7 +195,7 @@ const LINK_HINT = "Без ссылок и адресов: письмо уход�
  * дата — до года вперёд, согласие получателя на письмо (оферта, п. 5.4).
  * Цель Метрики «razbor_gift_mode» — один раз, при первом выборе «В подарок».
  */
-export function RazborGiftFields({ counter, date, name: initialName, today, maxDate, gift: initial = false, err }: { counter?: string; date: string; name: string; today: string; maxDate: string; gift?: boolean; err?: string }) {
+export function RazborGiftFields({ counter, date, name: initialName, today, maxDate, gift: initial = false, err, price, pack: offer }: { counter?: string; date: string; name: string; today: string; maxDate: string; gift?: boolean; err?: string; price?: number; pack?: PackOffer }) {
   const [gift, setGift] = useState(initial);
   const [name, setName] = useState(initialName);
   const [from, setFrom] = useState("");
@@ -187,6 +207,10 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
   const [email, setEmail] = useState("");
   const [open, setOpen] = useState(err === "gift_wish" || err === "gift_email" || err === "gift_consent" || err === "gift_date");
   const [ready, setReady] = useState(false);
+  const [pack, setPack] = useState(Boolean(offer?.on));
+  const [date2, setDate2] = useState(offer?.date2 ?? "");
+  const [name2, setName2] = useState(offer?.name2 ?? "");
+  const packSent = useRef(false);
   const sent = useRef(false);
   const fromRef = useRef<HTMLInputElement>(null);
   const wishRef = useRef<HTMLTextAreaElement>(null);
@@ -205,6 +229,9 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
       setAt(d.at);
       setOk(d.ok);
       setEmail(d.email);
+      if (d.pack !== undefined) setPack(d.pack);
+      if (d.date2) setDate2(d.date2);
+      if (d.name2) setName2(d.name2);
       if (d.wish || d.to) setOpen(true);
       /* eslint-enable react-hooks/set-state-in-effect */
     } else {
@@ -217,11 +244,11 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
 
   useEffect(() => {
     if (!ready) return;
-    const d: Draft = { date, gift, name, from, wish, to, when, at, ok, email };
+    const d: Draft = { date, gift, name, from, wish, to, when, at, ok, email, pack, date2, name2 };
     try {
       sessionStorage.setItem(DRAFT_KEY, JSON.stringify(d));
     } catch {}
-  }, [ready, date, gift, name, from, wish, to, when, at, ok, email]);
+  }, [ready, date, gift, name, from, wish, to, when, at, ok, email, pack, date2, name2]);
 
   const fromLink = giftHasLink(from);
   const wishLink = giftHasLink(wish);
@@ -240,6 +267,14 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
   };
   const bad = (code: string) => (err === code ? true : undefined);
   const hasTo = Boolean(to.trim());
+  const togglePack = (on: boolean) => {
+    setPack(on);
+    if (on && !packSent.current) {
+      packSent.current = true;
+      reachGoal(counter, "pack_toggle");
+    }
+  };
+  const packOn = Boolean(offer && pack && !gift);
   return (
     <>
       <fieldset className="mt-5">
@@ -319,10 +354,36 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
         </div>
       )}
 
+      {offer && !gift ? (
+        <div className="mt-5 rounded-lg border border-line p-4 max-w-md">
+          <label className="flex items-start gap-2 text-sm cursor-pointer">
+            <input type="checkbox" name="pack" value="1" checked={pack} onChange={(e) => togglePack(e.target.checked)} className="mt-1" />
+            <span>
+              <strong>+ совместимость с близким за {offer.addon} ₽</strong>
+              <span className="block text-muted">Отдельный текст о вашей паре по двум датам: образ пары, любовь, быт, споры, общий год и три совета.</span>
+            </span>
+          </label>
+          {pack ? (
+            <div className="grid gap-3 mt-3 sm:grid-cols-2">
+              <label className="grid gap-1 text-sm">
+                Дата рождения близкого
+                <input type="date" name="date2" required min="1900-01-01" max={offer.today} value={date2} onChange={(e) => setDate2(e.target.value)} aria-invalid={bad("date2")} className={FIELD} />
+              </label>
+              <label className="grid gap-1 text-sm">
+                Имя близкого
+                <input type="text" name="name2" required maxLength={60} value={name2} onChange={(e) => setName2(e.target.value)} placeholder="Например, Сергей" aria-invalid={bad("name2")} className={FIELD} />
+              </label>
+              <p className="text-xs text-muted sm:col-span-2">Пара — любая: партнёр, друг, родитель, коллега. Придут две ссылки: на разбор и на совместимость.</p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       <label className="grid gap-1 text-sm mt-5 max-w-sm">
-        {gift ? "Твой e-mail — пришлём сюда ссылку на разбор и чек" : "E-mail — пришлём сюда ссылку на разбор и чек"}
+        {gift ? "Твой e-mail — пришлём сюда ссылку на разбор и чек" : packOn ? "E-mail — пришлём сюда обе ссылки и чек" : "E-mail — пришлём сюда ссылку на разбор и чек"}
         <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={err === "email" || undefined} className={FIELD} />
       </label>
+      {price ? <PayButtons price={packOn && offer ? offer.total : price} /> : null}
     </>
   );
 }

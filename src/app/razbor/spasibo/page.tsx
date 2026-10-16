@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 import { CopyLinkButton, PaymentWaiter } from "@/components/RazborClient";
 import RazborPaidGoal from "@/components/RazborPaidGoal";
 import { orderState, orderStateLimiter, PAY_COOKIE, type OrderState } from "@/lib/razborOrder";
+import { PRODUCTS } from "@/lib/razborProducts";
 import { clientIpFromHeaders } from "@/lib/rateLimit";
 import { SELLER, SITE } from "@/lib/site";
 
@@ -70,22 +71,43 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
   const refunded = state.status === "refunded";
   const waiting = Boolean(order) && (state.status === "pending" || state.status === "unknown");
 
+  const product = "product" in state && state.product ? state.product : "razbor";
+  const back = PRODUCTS[product].path;
   if (state.status === "paid" && state.path) {
     const url = `${SITE.url}${state.short ?? state.path}`;
+    const head =
+      product === "compat"
+        ? { h1: "Оплата прошла, совместимость готова", lead: "Спасибо! Совместимость вашей пары открывается по ссылке ниже.", open: "Открыть совместимость" }
+        : product === "child"
+          ? { h1: "Оплата прошла, детский разбор готов", lead: "Спасибо! Детский разбор открывается по ссылке ниже.", open: "Открыть детский разбор" }
+          : product === "pack"
+            ? { h1: "Оплата прошла, разбор и совместимость готовы", lead: "Спасибо! В заказе два документа: разбор по дате рождения и совместимость пары — у каждого своя ссылка.", open: "Открыть разбор" }
+            : { h1: "Оплата прошла, разбор готов", lead: state.gift ? "Спасибо! Подарочный разбор открывается по ссылке ниже." : "Спасибо! Твой личный разбор открывается по ссылке ниже.", open: "Открыть разбор" };
     // цель оплаты — только если на сайте есть счётчик; отправляет скрытый iframe, сама страница без Метрики
     const goal = /^\d+$/.test(process.env.METRIKA_ID ?? "") && state.amount && state.amount > 0;
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <div className="card p-6 md:p-8">
-          <h1 className="text-3xl">Оплата прошла, разбор готов</h1>
-          <p className="mt-3 text-muted">{state.gift ? "Спасибо! Подарочный разбор открывается по ссылке ниже." : "Спасибо! Твой личный разбор открывается по ссылке ниже."}</p>
+          <h1 className="text-3xl">{head.h1}</h1>
+          <p className="mt-3 text-muted">{head.lead}</p>
           <p className="mt-4 break-all rounded-lg border border-line bg-surface px-3 py-2 mono-text text-sm">{url}</p>
-          <p className="mt-3 font-medium">Сохрани эту ссылку: разбор открывается по ней на любом устройстве и в любой момент. Копию ссылки и чек об оплате мы отправили на e-mail, указанный при оплате.</p>
+          {state.pair ? <p className="mt-2 break-all rounded-lg border border-line bg-surface px-3 py-2 mono-text text-sm">{`${SITE.url}${state.pair}`}</p> : null}
+          <p className="mt-3 font-medium">{state.pair ? "Сохрани обе ссылки: документы открываются по ним на любом устройстве и в любой момент." : "Сохрани эту ссылку: она открывается на любом устройстве и в любой момент."} {state.pair ? "Копии ссылок" : "Копию ссылки"} и чек об оплате мы отправили на e-mail, указанный при оплате.</p>
           <div className="mt-5 flex flex-wrap gap-2">
-            <Link href={state.short ?? state.path} className="btn">Открыть разбор</Link>
+            <Link href={state.short ?? state.path} className="btn">{head.open}</Link>
+            {state.pair ? <Link href={state.pair} className="btn">Открыть совместимость</Link> : null}
             <CopyLinkButton url={state.short ?? state.path} />
           </div>
           {state.gift ? <GiftNote gift={state.gift} link={state.short ?? state.path} /> : null}
+          {state.upsell ? (
+            <div className="mt-5 rounded-lg border border-line p-4">
+              <p className="mono">Для двоих</p>
+              <p className="mt-1">Совместимость с близким — {PRODUCTS.compat.price} ₽: образ вашей пары, любовь, быт, споры и общий год по двум датам рождения.</p>
+              <p className="mt-3">
+                <Link href={state.upsell} className="btn btn-ghost">Посмотреть совместимость</Link>
+              </p>
+            </div>
+          ) : null}
           {state.receipt ? (
             <p className="mt-4 text-sm text-muted">
               Чек об оплате: <Link href={state.receipt} className="underline hover:text-ink">открыть чек</Link>
@@ -112,9 +134,9 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
         ) : canceled ? (
           <>
             <h1 className="text-3xl">Оплата не прошла</h1>
-            <p className="mt-3 text-muted">Деньги не списаны. Можно попробовать ещё раз — бесплатная часть и форма оплаты ждут на странице разбора.</p>
+            <p className="mt-3 text-muted">Деньги не списаны. Можно попробовать ещё раз — бесплатная часть и форма оплаты ждут на странице заказа.</p>
             <p className="mt-5">
-              <Link href="/razbor#oplata" className="btn">Вернуться к разбору</Link>
+              <Link href={`${back}#oplata`} className="btn">Вернуться к оплате</Link>
             </p>
           </>
         ) : waiting ? (

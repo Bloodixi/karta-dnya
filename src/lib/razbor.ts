@@ -4,10 +4,16 @@ import { readJsonData } from "./content";
 import { birthdayNumber, destinyNumber, digitsSum, personalMonth, personalYear, reduceNumber, reduceSimple, toCore } from "./numerology";
 import { pythagoras } from "./pythagoras";
 
+/** Цена из переменной окружения: целое число рублей больше нуля, иначе — значение по умолчанию. */
+export function envPrice(v: string | undefined, def: number): number {
+  const n = Number(v);
+  return Number.isInteger(n) && n > 0 ? n : def;
+}
+
 export const RAZBOR = {
   title: "Нумерологический разбор по дате рождения",
   short: "Разбор по дате рождения",
-  price: Number(process.env.RAZBOR_PRICE || 290),
+  price: envPrice(process.env.RAZBOR_PRICE, 490),
 };
 
 /**

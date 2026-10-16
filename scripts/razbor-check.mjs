@@ -1,4 +1,5 @@
 // Проверка банка текстов разбора: полнота ключей и длины полей (см. content/data/razbor/README.md).
+// Банки совместимости (compat/) и детского разбора (child/) — фаза 3: пока файлов нет, это предупреждение, а не ошибка.
 import { readFileSync, existsSync } from "node:fs";
 
 const DIR = new URL("../content/data/razbor/", import.meta.url);
@@ -11,6 +12,12 @@ const pairs = (a, b) => a.flatMap((x) => b.map((y) => `${x}.${y}`));
 const PAIRS_LE = N9.flatMap((a) => N9.filter((b) => +b >= +a).map((b) => `${a}.${b}`));
 const CATS = ["start", "plan", "bonds", "show", "work", "change", "rest"];
 const BANNED = /(\bИИ\b|нейросет|искусственн\w* интеллект|гарантир|порч|проклят|диагноз|вылеч|разбогате)/i;
+const GROUPS = ["baby", "preschool", "school", "teen"];
+// Совместимость — документ про двоих: только «вы», без «ты» и без приговоров (\b в JS не работает с кириллицей)
+const NO_TY = /(?<![а-яё])(ты|тебя|тебе|тобой|твой|твоя|твоё|твое|твои|твоих|твоим|твоего|твоей)(?![а-яё])/i;
+const COMPAT_BANNED = /(несовместим|идеальн\w* пар)/i;
+// Детский разбор — бережно: без медицины, без «обязан» и сравнения с другими детьми
+const CHILD_BANNED = /(обязан|болезн|лечени|отста[её]т|других детей|остальных детей)/i;
 
 const spec = {
   "destiny.json": { keys: N12, fields: { title: [5, 40], essence: [1400, 2000], strengths: [800, 1200], shadows: [800, 1200], calling: [800, 1200] } },
@@ -35,23 +42,37 @@ const spec = {
   "month-destiny2.json": { keys: pairs(N12, N9), string: [90, 180] },
   "month-destiny-plan.json": { keys: N12, string: [90, 180] },
   "advice.json": { groupArrays: { cell: N9, year: N9, period: [...N9, "11"] }, array: [2, 120, 250] },
+  // Фаза 3: совместимость пары (ключ — базовые цифры чисел судьбы / личных годов, «a.b» при a ≤ b)
+  "compat/pair.json": { soft: true, extra: [NO_TY, COMPAT_BANNED], keys: PAIRS_LE, words: { title: [2, 5] }, fields: { title: [5, 50], overall: [700, 1000], love: [450, 700], home: [450, 700], conflict: [450, 700], strength: [300, 450] }, arrays: { advice: [3, 120, 220] } },
+  "compat/year-pair.json": { soft: true, extra: [NO_TY, COMPAT_BANNED], keys: PAIRS_LE, string: [300, 500] },
+  // Фаза 3: детский разбор для родителя
+  "child/destiny.json": { soft: true, extra: [CHILD_BANNED], keys: N12, fields: { title: [5, 50], nature: [800, 1200], strengths: [500, 800], support: [600, 900], careful: [500, 800], talents: [400, 700] } },
+  "child/age.json": { soft: true, extra: [CHILD_BANNED], keys: pairs(N9, GROUPS), optionalKeys: pairs(["11", "22", "33"], GROUPS), string: [300, 500] },
+  "child/square.json": { soft: true, extra: [CHILD_BANNED], keys: N9, fields: { title: [5, 40] }, arrays: { levels: [4, 250, 450] } },
 };
 
 const only = process.argv[2];
 let errors = 0;
+let warnings = 0;
 const err = (m) => { errors++; console.log("✗ " + m); };
+const warn = (m) => { warnings++; console.log("⚠ " + m); };
+/** Дополнительные запреты текущего файла (тон совместимости и детского разбора). */
+let extra = [];
 const checkText = (where, s, [min, max]) => {
   if (typeof s !== "string" || !s.trim()) return err(`${where}: пусто`);
   const n = s.length;
   if (n < min * 0.9 || n > max * 1.15) err(`${where}: ${n} знаков, нужно ${min}–${max}`);
-  const b = s.match(BANNED);
-  if (b) err(`${where}: запрещённое «${b[0]}»`);
+  for (const re of [BANNED, ...extra]) {
+    const b = s.match(re);
+    if (b) err(`${where}: запрещённое «${b[0]}»`);
+  }
 };
 
 for (const [file, sp] of Object.entries(spec)) {
   if (only && only !== file) continue;
   const url = new URL(file, DIR);
-  if (!existsSync(url)) { err(`${file}: нет файла`); continue; }
+  if (!existsSync(url)) { (sp.soft ? warn : err)(`${file}: нет файла${sp.soft ? " (тексты ещё пишутся — продажа закрыта, пока банка нет)" : ""}`); continue; }
+  extra = sp.extra ?? [];
   let data;
   try { data = JSON.parse(readFileSync(url, "utf8")); } catch (e) { err(`${file}: не JSON — ${e.message}`); continue; }
   for (const [g, ns] of Object.entries(sp.nested ?? {})) {
@@ -83,10 +104,16 @@ for (const [file, sp] of Object.entries(spec)) {
       if (!Array.isArray(v[f]) || v[f].length !== count) { err(`${w}.${f}: нужен массив из ${count}`); continue; }
       v[f].forEach((s, i) => checkText(`${w}.${f}[${i}]`, s, [min, max]));
     }
+    for (const [f, [lo, hi]] of Object.entries(sp.words ?? {})) {
+      const w2 = String(v[f] ?? "").trim().split(/\s+/).filter(Boolean).length;
+      if (w2 < lo || w2 > hi) err(`${w}.${f}: ${w2} слов, нужно ${lo}–${hi}`);
+    }
     for (const f of sp.nums ?? []) {
       if (!Array.isArray(v[f]) || !v[f].length || v[f].some((x) => !Number.isInteger(x) || x < 1 || x > 9)) err(`${w}.${f}: нужен массив чисел 1–9`);
     }
   }
+  for (const k of sp.optionalKeys ?? []) if (data[k] !== undefined) checkText(`${file}[${k}]`, data[k], sp.string);
 }
+if (warnings) console.log(`Предупреждений: ${warnings}`);
 console.log(errors ? `Ошибок: ${errors}` : "Банк текстов разбора в порядке.");
 process.exit(errors ? 1 : 0);

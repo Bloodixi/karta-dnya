@@ -2,6 +2,8 @@
 import { mailReady, sendMail, type Inline } from "./mailer";
 import { escapeHtml as h } from "./notify";
 import { buildRazbor } from "./razbor";
+import { extraLinks, productMail } from "./razborProductMail";
+import { PRODUCTS, productOf } from "./razborProducts";
 import { getOrder, patchGift, patchOrder, type Order } from "./razborStore";
 import { readToken } from "./razborToken";
 import { qrPng, receiptView } from "./receiptView";
@@ -80,13 +82,16 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   const url = `${SITE.url}/r/${order.id}`;
   const name = cleanName(order.name || "");
   const gift = order.gift;
-  // в подарочном заказе имя — получателя, а не покупателя
-  const hello = name && !gift ? `${name}, здравствуй!` : "Здравствуй!";
-  const subject = gift
+  // совместимость, пакет, детский разбор — свои тема, вступление и «главное»; обычный разбор — как раньше
+  const pm = productMail(order);
+  const links = extraLinks(order);
+  // в подарке имя — получателя, в детском разборе — ребёнка, в совместимости — одного из пары: обращаемся без имени
+  const hello = name && !gift && !(pm && order.product !== "pack") ? `${name}, здравствуй!` : "Здравствуй!";
+  const subject = pm?.subject ?? (gift
     ? `Подарочный разбор${name ? ` для ${name}` : ""} готов`
-    : name ? `${name}, твой разбор по дате рождения готов` : "Твой разбор по дате рождения готов";
+    : name ? `${name}, твой разбор по дате рождения готов` : "Твой разбор по дате рождения готов");
   const who = name || "получателя";
-  const intro = gift ? `Спасибо за заказ. Это подарок для ${who}: разбор по дате рождения готов и открывается по ссылке` : "Спасибо за заказ. Твой разбор по дате рождения готов и открывается по ссылке";
+  const intro = pm?.intro ?? (gift ? `Спасибо за заказ. Это подарок для ${who}: разбор по дате рождения готов и открывается по ссылке` : "Спасибо за заказ. Твой разбор по дате рождения готов и открывается по ссылке");
   const keep = gift ? "Ссылка бессрочная — сохрани письмо." : "Ссылка твоя навсегда — сохрани письмо.";
   const delivery = !gift
     ? ""
@@ -95,8 +100,8 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
         ? `${ru(gift.send_at)} письмо с подарком уйдёт ${name || "получателю"} на ${gift.to_email}. До этого дня ссылку видишь только ты.`
         : `Письмо с подарком мы отправляем ${name || "получателю"} на ${gift.to_email} вместе с этим письмом.`
       : `Письмо получателю мы не отправляем: передай ссылку ${name ? `${name} ` : ""}сам(а) — так, как тебе удобно.`;
-  const mainTitle = gift ? "Главное из разбора" : "Главное о тебе";
-  const main = razborHighlights(order.token);
+  const mainTitle = pm?.mainTitle ?? (gift ? "Главное из разбора" : "Главное о тебе");
+  const main = pm && order.product !== "pack" ? pm.main : razborHighlights(order.token);
   const r = receiptView(order);
   const inline: Inline[] = r ? [{ cid: "qr@karta-dnya.ru", filename: `chek-${r.number}.png`, content: await qrPng(r.fnsUrl), contentType: "image/png" }] : [];
   const receiptText = r
@@ -119,6 +124,7 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
     keep,
     "",
     ...(delivery ? [delivery, ""] : []),
+    ...links.flatMap((l) => [l.note, l.url, ""]),
     ...(main.length ? [`${mainTitle}:`, ...main.map((m) => `— ${m}`), "", "Остальное — в разборе по ссылке выше.", ""] : []),
     "Подарить разбор близкому:",
     GIFT_URL,
@@ -135,10 +141,11 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222">
 <tr><td style="padding:0 0 8px"><p style="margin:0">${h(hello)}</p></td></tr>
 <tr><td style="padding:0 0 12px"><p style="margin:0">${h(intro)}:</p></td></tr>
-<tr><td style="padding:0 0 8px">${btn(url, "Открыть разбор", "#5b3fa8", "#ffffff")}</td></tr>
+<tr><td style="padding:0 0 8px">${btn(url, pm?.button ?? "Открыть разбор", "#5b3fa8", "#ffffff")}</td></tr>
 <tr><td style="padding:0 0 4px;font-size:13px;color:#666">Ссылка: <a href="${h(url)}" style="color:#5b3fa8">${h(url)}</a></td></tr>
 <tr><td style="padding:0 0 12px;font-size:14px;font-weight:bold">${h(keep)}</td></tr>
 ${delivery ? `<tr><td style="padding:0 0 12px"><p style="margin:0;border-left:3px solid #5b3fa8;padding-left:12px">${h(delivery)}</p></td></tr>` : ""}
+${links.map((l) => `<tr><td style="padding:4px 0 12px"><p style="margin:0 0 8px">${h(l.note)}</p>${btn(l.url, l.label, "#ffffff", "#5b3fa8")}</td></tr>`).join("\n")}
 ${mainHtml}
 <tr><td style="padding:16px 0 8px">${btn(GIFT_URL, "Подарить разбор близкому", "#ffffff", "#5b3fa8")}</td></tr>
 ${r ? `<tr><td style="padding:8px 0"><table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;width:100%;max-width:400px;border:1px solid #e5e1d8;border-radius:12px;background:#fffdf8;font-size:14px;color:#222">
@@ -258,11 +265,18 @@ ${highlightsHtml("Главное о тебе", main)}
 /** «Потеряли ссылку?»: все оплаченные разборы на этот e-mail одним письмом. Подаркам получателя — без чека покупателя. */
 export async function mailAccess(email: string, orders: Order[], gifts: Order[] = []): Promise<void> {
   const rows = [
-    ...orders.map((o) => ({
-      url: `${SITE.url}/r/${o.id}`,
-      chek: o.receipt_uuid ? `${SITE.url}/razbor/chek/${o.id}` : "",
-      title: `Разбор${o.name ? ` для ${cleanName(o.name)}` : ""}, дата рождения ${ru(o.date)}`,
-    })),
+    ...orders.flatMap((o) => {
+      const chek = o.receipt_uuid ? `${SITE.url}/razbor/chek/${o.id}` : "";
+      const product = productOf(o.product);
+      if (product === "razbor") return [{ url: `${SITE.url}/r/${o.id}`, chek, title: `Разбор${o.name ? ` для ${cleanName(o.name)}` : ""}, дата рождения ${ru(o.date)}` }];
+      const dates = o.date2 ? `${ru(o.date)} и ${ru(o.date2)}` : ru(o.date);
+      if (product === "pack")
+        return [
+          { url: `${SITE.url}/r/${o.id}`, chek, title: `${PRODUCTS.pack.short}: разбор, дата рождения ${ru(o.date)}` },
+          ...(o.token2 ? [{ url: `${SITE.url}/r/${o.id}/para`, chek: "", title: `${PRODUCTS.pack.short}: совместимость, даты ${dates}` }] : []),
+        ];
+      return [{ url: `${SITE.url}/r/${o.id}`, chek, title: `${PRODUCTS[product].short}, ${product === "compat" ? "даты" : "дата"} рождения ${dates}` }];
+    }),
     ...gifts.map((o) => ({
       url: `${SITE.url}/r/${o.id}`,
       chek: "",

@@ -5,11 +5,12 @@
 import { getPayment, recentPayments, type Payment, type Refund } from "./yookassa";
 import { getOrder, patchOrder, refundOrder, settleOrder, type Order } from "./razborStore";
 import { escapeHtml as h, notifyPayment } from "./notify";
-import { makeToken } from "./razborToken";
+import { makeChildToken, makeCompatToken, makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
 import { mailBuyer, mailGift } from "./razborMail";
 import { giftDue, giftFromMetadata, maskEmail } from "./razborGift";
-import { RAZBOR, type RazborInput } from "./razbor";
+import type { RazborInput } from "./razbor";
+import { compatUpsellPath, PRODUCTS, productOf } from "./razborProducts";
 import { SITE } from "./site";
 import { sharedRateLimit } from "./rateLimit";
 
@@ -76,16 +77,44 @@ export async function findPayment(orderId: string, cookiePaymentId?: string): Pr
   }
 }
 
+/** Вторая дата (совместимость, пакет) из metadata: date2 ГГГГ-ММ-ДД и name2. */
+function secondFromPayment(p: Payment): { d: number; m: number; y: number; name?: string } | null {
+  const md = p.metadata ?? {};
+  const [y, m, d] = (md.date2 ?? "").split("-").map(Number);
+  return y && m && d ? { d, m, y, name: md.name2 || undefined } : null;
+}
+
+/**
+ * Ссылки заказа по продукту: token — основной документ (разбор, совместимость или детский разбор),
+ * token2 — совместимость в пакете. Совместимость без второй даты не собирается.
+ */
+function tokensFromPayment(p: Payment, i: RazborInput, order: string): { token: string; token2?: string } | null {
+  const product = productOf(p.metadata?.p);
+  if (product === "child") return { token: makeChildToken(i, order) };
+  if (product === "razbor") return { token: makeToken(i, order) };
+  const b = secondFromPayment(p);
+  if (!b) return null;
+  const a = { d: i.d, m: i.m, y: i.y, name: i.name };
+  const pair = makeCompatToken({ a, b, yr: i.yr, mo: i.mo, v: Number(p.metadata?.v2 ?? p.metadata?.v) || 1 }, order);
+  return product === "compat" ? { token: pair } : { token: makeToken(i, order), token2: pair };
+}
+
 /** Заказ из metadata платежа — когда файла заказа нет. */
 export function orderFromPayment(p: Payment): Order | null {
   const md = p.metadata ?? {};
   const i = inputFromPayment(p);
   if (!i || !md.order) return null;
+  const t = tokensFromPayment(p, i, md.order);
+  if (!t) return null;
+  const product = productOf(md.p);
   const gift = giftFromMetadata(md);
   return {
-    id: md.order, token: makeToken(i, md.order), date: md.date, name: md.name ?? "", email: md.email ?? "", amount: Number(p.amount.value),
+    id: md.order, token: t.token, date: md.date, name: md.name ?? "", email: md.email ?? "", amount: Number(p.amount.value),
     status: "pending", payment_id: p.id, created_at: p.created_at, paid_at: "", yr: i.yr, mo: i.mo,
     ...(gift ? { gift } : {}),
+    ...(product !== "razbor" ? { product } : {}),
+    ...(md.date2 ? { date2: md.date2, name2: md.name2 ?? "" } : {}),
+    ...(t.token2 ? { token2: t.token2 } : {}),
   };
 }
 
@@ -169,7 +198,7 @@ const mismatchWarned = new Set<string>();
  */
 async function amountMismatch(id: string, p: Payment): Promise<boolean> {
   const o = await getOrder(id);
-  const price = o?.amount || RAZBOR.price;
+  const price = o?.amount || PRODUCTS[productOf(p.metadata?.p)].price;
   const value = Number(p.amount?.value);
   if (p.amount?.currency === "RUB" && Number.isFinite(value) && value >= price) return false;
   const warned = o ? Boolean(o.mismatch_at) : mismatchWarned.has(id);
@@ -206,15 +235,16 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
     const test = p.test ? " · тест" : "";
     if (order.status === "paid") {
       const url = `${SITE.url}/r/${order.id}`;
+      const product = productOf(order.product);
       // тестовый магазин чек в налоговую не пробивает и письмо покупателю не шлёт; письмо получателю подарка — с [ТЕСТ]
       const f = p.test ? await finishTest(order) : await finishPaid(order);
       await notifyPayment(
         [
-          `<b>💳 Оплачен разбор — ${h(p.amount.value)} ₽</b>${test}`,
+          `<b>💳 Оплачен${product === "razbor" ? " разбор" : `о: ${h(PRODUCTS[product].short)}`} — ${h(p.amount.value)} ₽</b>${test}`,
           "",
-          `Дата рождения: ${h(order.date)}${order.name ? `\nИмя: ${h(order.name)}` : ""}${order.email ? `\nE-mail: ${h(order.email)}` : ""}`,
+          `${product === "child" ? "Дата рождения ребёнка" : "Дата рождения"}: ${h(order.date)}${order.name ? `\nИмя: ${h(order.name)}` : ""}${order.date2 ? `\nВторая дата: ${h(order.date2)}${order.name2 ? `, ${h(order.name2)}` : ""}` : ""}${order.email ? `\nE-mail: ${h(order.email)}` : ""}`,
           "",
-          `<a href="${h(url)}">Открыть разбор</a>`,
+          `<a href="${h(url)}">Открыть ${product === "compat" ? "совместимость" : "разбор"}</a>${order.token2 ? ` · <a href="${h(`${url}/para`)}">совместимость</a>` : ""}`,
           ...f.lines,
           `<i>Заказ ${h(order.id)} · платёж ${h(p.id)}</i>`,
         ].join("\n"),
@@ -274,6 +304,11 @@ export type OrderState = {
   amount?: number; // сумма оплаты, ₽ — для цели Метрики на странице «Спасибо»
   /** Подарок: имя получателя, замаскированный адрес и день письма (нет адреса — ссылку передаёт покупатель). */
   gift?: { to: string; email?: string; at?: string; sent?: boolean };
+  product?: "razbor" | "compat" | "pack" | "child";
+  /** Пакет: короткая ссылка на совместимость. */
+  pair?: string;
+  /** Допродажа после обычного разбора себе: совместимость с первой датой покупателя. */
+  upsell?: string;
 };
 
 /**
@@ -298,11 +333,17 @@ export async function orderState(orderId: string, cookiePaymentId?: string, offl
     if (p && p.metadata?.order === orderId) o = (await applyPayment(p)) ?? o;
   }
   if (!o) return { status: "unknown" };
-  if (o.status !== "paid") return { status: o.status };
+  if (o.status !== "paid") return { status: o.status, product: productOf(o.product) };
   if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
   if (!offline && o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
   if (o.status !== "paid") return { status: o.status }; // возврат мог прийти, пока шла проверка
   const g = o.gift;
   const gift = g ? { to: o.name, ...(g.to_email ? { email: maskEmail(g.to_email) } : {}), ...(g.send_at ? { at: g.send_at } : {}), ...(g.sent_at ? { sent: true } : {}) } : undefined;
-  return { status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined, amount: o.amount, ...(gift ? { gift } : {}) };
+  const product = productOf(o.product);
+  return {
+    status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined, amount: o.amount, ...(gift ? { gift } : {}),
+    product,
+    ...(product === "pack" && o.token2 ? { pair: `/r/${o.id}/para` } : {}),
+    ...(product === "razbor" && !g ? { upsell: compatUpsellPath(o.date) } : {}),
+  };
 }

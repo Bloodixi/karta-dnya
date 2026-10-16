@@ -1,5 +1,6 @@
 /** Наш вид чека «Мой налог» (страница и письмо): реквизиты из заказа, QR-код ведёт на официальный чек ФНС. Только сервер. */
 import QRCode from "qrcode";
+import { PRODUCTS, productOf } from "./razborProducts";
 import type { Order } from "./razborStore";
 import { SELLER, SITE } from "./site";
 
@@ -15,7 +16,7 @@ export type ReceiptView = {
   pageUrl: string;
 };
 
-export const RECEIPT_ITEM = "Разбор по дате рождения (karta-dnya.ru)";
+export const RECEIPT_ITEM = PRODUCTS.razbor.receipt;
 
 const rub = (n: number) => `${n.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽`;
 
@@ -29,7 +30,7 @@ export function receiptView(o: Order): ReceiptView | null {
     time: part({ hour: "2-digit", minute: "2-digit" }),
     seller: SELLER.name,
     inn: SELLER.inn,
-    item: RECEIPT_ITEM,
+    item: PRODUCTS[productOf(o.product)].receipt,
     amount: rub(o.amount),
     fnsUrl: o.receipt_url,
     pageUrl: `${SITE.url}/razbor/chek/${o.id}`,
