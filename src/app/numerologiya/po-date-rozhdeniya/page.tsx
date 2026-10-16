@@ -132,7 +132,7 @@ export default async function NumerologyByDatePage({ searchParams }: PageProps<t
 
       {result}
 
-      <RazborCta date={date?.iso} />
+      <RazborCta from="po-date-rozhdeniya" date={date?.iso} />
 
       <section className="prose mt-12">
         <h2>Что показывает нумерология по дате рождения</h2>

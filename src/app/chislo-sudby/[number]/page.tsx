@@ -106,7 +106,7 @@ export default async function DestinyNumberPage({ params }: PageProps<"/chislo-s
         </aside>
       </div>
 
-      <RazborCta />
+      <RazborCta from="chislo-sudby-znachenie" />
       <Faq items={n.faq ?? []} />
       <NumerologyNav current="/chislo-sudby" />
     </div>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
 import { IconBadge } from "@/components/Icons";
 import MoonPhase from "@/components/MoonPhase";
+import RazborCta from "@/components/RazborCta";
 import TarotCardView from "@/components/TarotCardView";
 import Subscribe from "@/components/Subscribe";
 import { getArticles, getZodiac } from "@/lib/content";
@@ -115,6 +116,10 @@ export default function Home() {
             </Link>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-12">
+        <RazborCta from="glavnaya" className="" />
       </section>
 
       {zodiac.length > 0 && (

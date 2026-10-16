@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies, headers } from "next/headers";
 import { CopyLinkButton, PaymentWaiter } from "@/components/RazborClient";
+import RazborPaidGoal from "@/components/RazborPaidGoal";
 import { orderState, orderStateLimiter, PAY_COOKIE } from "@/lib/razborOrder";
 import { clientIpFromHeaders } from "@/lib/rateLimit";
 import { SELLER, SITE } from "@/lib/site";
@@ -45,6 +46,8 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
 
   if (state.status === "paid" && state.path) {
     const url = `${SITE.url}${state.short ?? state.path}`;
+    // цель оплаты — только если на сайте есть счётчик; отправляет скрытый iframe, сама страница без Метрики
+    const goal = /^\d+$/.test(process.env.METRIKA_ID ?? "") && state.amount && state.amount > 0;
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <div className="card p-6 md:p-8">
@@ -62,6 +65,7 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
             </p>
           ) : null}
           <Stuck order={order} />
+          {goal ? <RazborPaidGoal order={order} amount={state.amount!} /> : null}
         </div>
       </div>
     );

@@ -241,7 +241,13 @@ export async function applyRefund(r: Refund): Promise<Order | null> {
   return order;
 }
 
-export type OrderState = { status: "unknown" | "pending" | "paid" | "canceled" | "refunded"; path?: string; short?: string; receipt?: string };
+export type OrderState = {
+  status: "unknown" | "pending" | "paid" | "canceled" | "refunded";
+  path?: string;
+  short?: string;
+  receipt?: string;
+  amount?: number; // сумма оплаты, ₽ — для цели Метрики на странице «Спасибо»
+};
 
 /**
  * Состояние заказа для страницы «Спасибо»: файл заказа, а пока он не итоговый — живой статус платежа в ЮKassa.
@@ -269,5 +275,5 @@ export async function orderState(orderId: string, cookiePaymentId?: string, offl
   if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
   if (!offline && o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
   if (o.status !== "paid") return { status: o.status }; // возврат мог прийти, пока шла проверка
-  return { status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined };
+  return { status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined, amount: o.amount };
 }
