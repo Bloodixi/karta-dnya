@@ -225,7 +225,9 @@ export default function RazborBooklet({ doc, questions, initialStyle, qr, backHr
       const key = planKey(backHref, style);
       const finish = (plan: BookletPlan, total: number, rough: boolean) => {
         if (!rough) savePlan(key, plan);
-        (window as unknown as { __bukletPlan?: unknown }).__bukletPlan = { plan, rough, ms: Date.now() - t0 };
+        // для проверки: недозаполненные текстовые страницы (оформленные — не в счёт)
+        const weak = measure(book).pages.filter((p) => !p.designed && p.fill < 0.7).map((p) => p.page);
+        (window as unknown as { __bukletPlan?: unknown }).__bukletPlan = { plan, rough, weak, ms: Date.now() - t0 };
         setStatus(`${STYLES[style].name}: ${total} страниц A5 · ${Math.ceil(total / 4)} листов A4${rough ? " · без полной подгонки" : ""}`);
         setReady(true);
       };
