@@ -14,7 +14,7 @@ export const RAZBOR = {
  * Версия банка текстов. Записывается в заказ и ссылку: купленный разбор не меняется, когда банк переписан.
  * Перед правкой текстов, меняющей выдачу: скопировать текущие content/data/razbor/*.json в razbor/v<N>/ и увеличить номер.
  */
-export const RAZBOR_VERSION = 4;
+export const RAZBOR_VERSION = 5;
 
 /** Что лежит в заказе и в ссылке на разбор. yr — год расчёта личного года, mo — месяц, с которого идёт помесячный прогноз, v — версия текстов (в старых ссылках и платежах её нет — это 1). */
 export type RazborInput = { d: number; m: number; y: number; name?: string; yr: number; mo: number; v?: number };
@@ -81,6 +81,9 @@ function bank(v = RAZBOR_VERSION) {
     gist: readJsonData<Gist | null>(`${dir}/gist.json`, null),
     pair: readJsonData<Record<string, string>>(`${dir}/pair.json`, {}),
     monthDestiny: readJsonData<Record<string, string>>(`${dir}/month-destiny.json`, {}),
+    /** С версии 5: второй вариант «Для тебя» (личный месяц встречается в прогнозе дважды) и фраза для месяцев «наметить, запускать позже». */
+    monthDestiny2: readJsonData<Record<string, string>>(`${dir}/month-destiny2.json`, {}),
+    monthDestinyPlan: readJsonData<Record<string, string>>(`${dir}/month-destiny-plan.json`, {}),
     advice: readJsonData<Advice | null>(`${dir}/advice.json`, null),
   };
 }
@@ -258,7 +261,7 @@ function periodSection(i: RazborInput, n: Nums, P: Pinnacles, v4 = false): Secti
 }
 
 /** «Сведение»: характер по числу судьбы и дню рождения, опора и пробел квадрата, число судьбы в текущем личном году. */
-function svodSection(i: RazborInput, n: Nums, svod: Svod, yearText: string | undefined): Section {
+function svodSection(i: RazborInput, n: Nums, svod: Svod, yearText: string | undefined, omitStrong = false): Section {
   const key = String(n.destiny.number);
   const { strong, weak } = squareFocus(n.square.counts);
   const intro = i.name ? `**${i.name}, ${fmt(i)}.**` : `**${fmt(i)}.**`;
@@ -268,7 +271,7 @@ function svodSection(i: RazborInput, n: Nums, svod: Svod, yearText: string | und
     subtitle: "Не отдельные описания, а один характер и один год",
     blocks: [
       { kind: "p", text: `${intro} ${svod.destiny[key] ?? ""} ${svod.birthday[String(i.d)] ?? ""}`.trim() },
-      { kind: "p", text: `${svod.strong[String(strong)] ?? ""} ${weak.length ? svod.weak[String(weak[0])] ?? "" : svod.noweak}`.trim() },
+      { kind: "p", text: `${omitStrong ? "" : svod.strong[String(strong)] ?? ""} ${weak.length ? svod.weak[String(weak[0])] ?? "" : svod.noweak}`.trim() },
       ...lead(`Твой ${i.yr} год.`, yearText),
     ],
   };
@@ -279,7 +282,8 @@ const coreDigit = (x: number) => reduceSimple(toCore(x));
 
 /** С версии 4: «Главное о тебе» — три строки сути, прежние абзацы сведения и «где числа спорят». */
 function mainSection(i: RazborInput, n: Nums, b: ReturnType<typeof bank>): Section {
-  const base = svodSection(i, n, b.svod!, b.svodYear[`${n.destiny.number}.${n.py.number}`]);
+  // с версии 5 опора по квадрату звучит один раз — в строке «Опора», без повтора в абзаце сведения
+  const base = svodSection(i, n, b.svod!, b.svodYear[`${n.destiny.number}.${n.py.number}`], (i.v ?? RAZBOR_VERSION) >= 5 && !!b.gist);
   const { strong } = squareFocus(n.square.counts);
   const g = b.gist;
   const join = (...xs: (string | undefined)[]) => xs.filter(Boolean).join(" ");
@@ -302,6 +306,8 @@ export function buildRazbor(i: RazborInput): RazborDoc {
   const v2 = v >= 2;
   /** С версии 4: «Главное о тебе», поздний год, категории месяцев, «Для тебя» в месяцах, советы из разных чисел, расчёт свёрнут. */
   const v4 = v >= 4;
+  /** С версии 5: «Для тебя» без повторов и без «запускай» в плановые месяцы, без дублей опоры и совета года. */
+  const v5 = v >= 5;
   const n = numbers(i);
   const band = ageBand(n.age);
   const key = String(n.destiny.number);
@@ -315,13 +321,16 @@ export function buildRazbor(i: RazborInput): RazborDoc {
   const months: { label: string; number: number; text: string }[] = [];
   /** Личный год каждого месяца прогноза — для категорий памятки. */
   const monthYears: number[] = [];
+  const seenPm: Record<number, number> = {};
   for (let k = 0; k < 12; k++) {
     const mIdx = (i.mo - 1 + k) % 12;
     const year = i.yr + Math.floor((i.mo - 1 + k) / 12);
     const pyN = year === i.yr ? n.py.number : n.pyNext.number;
     const pm = personalMonth(pyN, mIdx + 1);
     let text = (v2 && b.monthYear[`${pyN}.${pm}`]) || b.month[String(pm)] || "";
-    const forYou = v4 ? b.monthDestiny[`${key}.${pm}`] : undefined;
+    const plan = v5 && b.monthCat[`${pyN}.${pm}`] === "plan" ? b.monthDestinyPlan[key] : undefined;
+    const again = v5 && (seenPm[pm] = (seenPm[pm] ?? 0) + 1) > 1 ? b.monthDestiny2[`${key}.${pm}`] : undefined;
+    const forYou = v4 ? plan || again || b.monthDestiny[`${key}.${pm}`] : undefined;
     if (forYou) text = `${text}\n\n**Для тебя.** ${forYou}`;
     months.push({ label: `${MONTHS[mIdx]} ${year}`, number: pm, text });
     monthYears.push(pyN);
@@ -417,7 +426,7 @@ export function buildRazbor(i: RazborInput): RazborDoc {
       title: `Личный год ${i.yr}: ${n.py.number} — ${yr?.title ?? ""}`,
       blocks: [...paras(yr?.theme), ...(v >= 3 ? lead("В твоём возрасте.", b.yearAge[`${n.py.number}.${band}`]) : []), ...(late
         ? [{ kind: "p" as const, text: `**Что успеть до конца года.** ${late.rest}` }, { kind: "p" as const, text: `**Как подготовиться к ${i.yr + 1}.** ${late.bridge}` }]
-        : [{ kind: "p" as const, text: `**Первое полугодие.** ${yr?.first ?? ""}` }, { kind: "p" as const, text: `**Второе полугодие.** ${yr?.second ?? ""}` }]), { kind: "p", text: `**Совет года.** ${yr?.advice ?? ""}` }],
+        : [{ kind: "p" as const, text: `**Первое полугодие.** ${yr?.first ?? ""}` }, { kind: "p" as const, text: `**Второе полугодие.** ${yr?.second ?? ""}` }]), ...(late && v5 ? [] : [{ kind: "p" as const, text: `**Совет года.** ${yr?.advice ?? ""}` }])],
     },
     { id: "mesyacy", title: "Прогноз на 12 месяцев", subtitle: "Личный месяц — тон, в котором проще действовать", blocks: [{ kind: "months", items: months }] },
     { id: "sledgod", title: `Следующий год ${i.yr + 1}: ${n.pyNext.number} — ${yrNext?.title ?? ""}`, blocks: [
@@ -450,7 +459,7 @@ export function buildRazbor(i: RazborInput): RazborDoc {
           kind: "list",
           items: [
             `**Число судьбы ${n.destiny.number}** — ${dz?.title ?? ""}. Опора по квадрату — ${(b.py[String(strong)]?.title ?? "").toLowerCase()}${weak.length ? `; развивать — ${weak.map((d) => (b.py[String(d)]?.title ?? "").toLowerCase()).join(", ")}` : ""}.`,
-            `**${i.yr}: ${yr?.title ?? ""}.** ${yearGist ?? firstSentence(yr?.advice ?? "")}`,
+            v5 ? `**${i.yr}: ${yr?.title ?? ""}.**` : `**${i.yr}: ${yr?.title ?? ""}.** ${yearGist ?? firstSentence(yr?.advice ?? "")}`,
             ...(v >= 3 && b.pinnacles ? (() => { const c = currentPinnacle(n); return [`**Период жизни — ${c.number}, «${b.pinnacles.pinnacle[String(c.number)]?.title ?? ""}»**${c.to === null ? "." : `, до ${c.to} ${c.to % 10 === 1 && c.to % 100 !== 11 ? "года" : "лет"}.`}`]; })() : []),
             ...groups.map((g) => `**${g.label}:** ${g.months.join(", ")}.`),
             `**Главный совет.** ${life?.advice?.[0] ?? ""}`,

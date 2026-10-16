@@ -32,6 +32,8 @@ const spec = {
   "gist.json": { groups: { destiny: N12, year: N9, cell: N9 }, string: [60, 140] },
   "pair.json": { keys: PAIRS_LE, string: [300, 450] },
   "month-destiny.json": { keys: pairs(N12, N9), string: [90, 180] },
+  "month-destiny2.json": { keys: pairs(N12, N9), string: [90, 180] },
+  "month-destiny-plan.json": { keys: N12, string: [90, 180] },
   "advice.json": { groupArrays: { cell: N9, year: N9, period: [...N9, "11"] }, array: [2, 120, 250] },
 };
 
