@@ -52,10 +52,12 @@ export default function RazborPaidGoal({ order, amount }: { order: string; amoun
     if (!key) return;
     const onMessage = (e: MessageEvent) => {
       const win = frame.current?.contentWindow;
-      if (!win || e.origin !== window.location.origin || e.source !== win) return;
+      // iframe в песочнице без allow-same-origin: его источник непрозрачный («null»), скрипт Метрики не может
+      // дотянуться до этой страницы (в её адресе номер заказа). Проверяем, что сообщение от нашего iframe.
+      if (!win || e.origin !== "null" || e.source !== win) return;
       const d = e.data as { type?: string; ok?: boolean } | null;
       if (d?.type === "razbor-goal-ready") {
-        win.postMessage({ type: "razbor-paid", price: amount }, window.location.origin);
+        win.postMessage({ type: "razbor-paid", price: amount }, "*"); // только сумма, без персональных данных
       } else if (d?.type === "razbor-goal-done") {
         if (d.ok) markSent(key);
         setKey(null);
@@ -66,5 +68,5 @@ export default function RazborPaidGoal({ order, amount }: { order: string; amoun
   }, [key, amount]);
 
   if (!key) return null;
-  return <iframe ref={frame} src={FRAME} title="Служебная страница" hidden aria-hidden="true" tabIndex={-1} referrerPolicy="no-referrer" />;
+  return <iframe ref={frame} src={FRAME} title="Служебная страница" hidden aria-hidden="true" tabIndex={-1} referrerPolicy="no-referrer" sandbox="allow-scripts" />;
 }
