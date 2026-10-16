@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import ArticleCard from "@/components/ArticleCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Icon, { type IconName } from "@/components/Icons";
 import JsonLd from "@/components/JsonLd";
 import { authorJsonLd, authorYears, findAuthor, getAuthors } from "@/lib/authors";
 import { getArticles } from "@/lib/content";
@@ -24,15 +26,15 @@ export async function generateMetadata({ params }: PageProps<"/avtory/[slug]">):
   };
 }
 
-const SECTIONS_LINKS = [
-  { href: "/goroskop", title: "Гороскоп на сегодня" },
-  { href: "/goroskop/nedelya", title: "На неделю" },
-  { href: "/goroskop/god", title: "На год" },
-  { href: "/astrologiya/natalnaya-karta", title: "Натальная карта" },
-  { href: "/astrologiya/retrogradnyy-merkuriy", title: "Ретроградный Меркурий" },
-  { href: "/astrologiya/luna-v-znake", title: "Луна в знаке" },
-  { href: "/astrologiya/tranzity", title: "Транзиты дня" },
-  { href: "/lunnyy-kalendar", title: "Лунный календарь" },
+const SECTIONS_LINKS: { href: string; title: string; icon: IconName }[] = [
+  { href: "/goroskop", title: "Гороскоп на сегодня", icon: "sun" },
+  { href: "/goroskop/nedelya", title: "На неделю", icon: "calendar" },
+  { href: "/goroskop/god", title: "На год", icon: "calendar" },
+  { href: "/astrologiya/natalnaya-karta", title: "Натальная карта", icon: "star" },
+  { href: "/astrologiya/retrogradnyy-merkuriy", title: "Ретроградный Меркурий", icon: "ball" },
+  { href: "/astrologiya/luna-v-znake", title: "Луна в знаке", icon: "moon" },
+  { href: "/astrologiya/tranzity", title: "Транзиты дня", icon: "sunrise" },
+  { href: "/lunnyy-kalendar", title: "Лунный календарь", icon: "moon" },
 ];
 
 export default async function AuthorPage({ params }: PageProps<"/avtory/[slug]">) {
@@ -74,16 +76,27 @@ export default async function AuthorPage({ params }: PageProps<"/avtory/[slug]">
       </section>
 
       <section className="mt-10">
-        <h2 className="text-2xl mb-3">Материалы автора</h2>
-        <div className="flex flex-wrap gap-2">
-          {SECTIONS_LINKS.map((l) => <Link key={l.href} href={l.href} className="btn btn-ghost">{l.title}</Link>)}
-        </div>
-        {articles.length > 0 && (
-          <p className="mt-6 text-muted">
-            Статьи раздела «Астрология»: {articles.map((x, i) => <span key={x.slug}>{i > 0 && ", "}<Link className="text-accent underline" href={`/astrologiya/${x.slug}`}>{x.title}</Link></span>)}.
-          </p>
-        )}
+        <h2 className="text-2xl mb-4">Материалы автора</h2>
+        <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {SECTIONS_LINKS.map((l) => (
+            <li key={l.href}>
+              <Link href={l.href} className="card card-hover p-3 flex items-center gap-3 h-full min-h-14">
+                <Icon name={l.icon} size={20} className="shrink-0 text-accent" />
+                <span className="text-[0.95rem] leading-snug">{l.title}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
+
+      {articles.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-2xl mb-4">Статьи раздела «Астрология»</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {articles.map((x) => <ArticleCard key={x.slug} a={x} />)}
+          </div>
+        </section>
+      )}
 
       <JsonLd data={{ "@context": "https://schema.org", ...authorJsonLd(a, true), mainEntityOfPage: `${SITE.url}/avtory/${a.slug}` }} />
     </div>
