@@ -5,8 +5,11 @@ import type { Block, RazborDoc, Section } from "./razbor";
 export type BookletStyle = "obs" | "geo" | "bot";
 /** Вопросы «для себя»: по числу судьбы (destiny/love/work) и по личному году (year). */
 export type BookletQuestions = Partial<Record<"destiny" | "love" | "work" | "year", Record<string, string[]>>>;
-/** Подгонка: fit[цепочка] — шаг уменьшения кегля, fill[цепочка] — вставка в конце цепочки, pre[раздел] — вставка перед разделом, pad — страницы дневника до кратного 4. */
-export type BookletPlan = { fit: Record<string, number>; fill: Record<string, string | null>; pre: Record<string, string | null>; pad: number };
+/** Подгонка: fit[цепочка] — шаг уменьшения кегля, fill[цепочка] — вставка в конце цепочки, pre[раздел] — вставка перед разделом,
+ *  cardsLate — страница «Мои намерения» перед карточками (чтобы карточки встали на правую страницу), pad — добивка до кратного 4. */
+export type BookletPlan = { fit: Record<string, number>; fill: Record<string, string | null>; pre: Record<string, string | null>; cardsLate?: boolean; pad: number };
+/** Подарок на посвящении: только подпись и пожелание (без адресов). */
+export type BookletGift = { from: string; wish?: string };
 
 export const emptyPlan = (): BookletPlan => ({ fit: {}, fill: {}, pre: {}, pad: 0 });
 
@@ -18,6 +21,20 @@ export const STYLES: Record<BookletStyle, { name: string; ink: string; muted: st
   bot: { name: "Ботаника", ink: "#3a2f45", muted: "#74687f", accent: "#6a4c9c", gold: "#a67c3d", soft: "#efe8f6", line: "#e2d8ea",
     display: '"Playfair Display", Georgia, serif', displayWeight: 400, body: '"PT Serif", Georgia, serif', num: '"Playfair Display", Georgia, serif', script: '"Marck Script", cursive', bodySize: "9.6pt" },
 };
+/** Золото и линии для печати: на ч/б принтере светлые тона стиля пропадают, на бумаге они темнее. */
+const PRINT_TONES: Record<BookletStyle, { gold: string; line: string }> = {
+  obs: { gold: "#7a5a28", line: "#a99db6" },
+  geo: { gold: "#7d6230", line: "#a7a0b3" },
+  bot: { gold: "#77561f", line: "#ab9fb8" },
+};
+/** CSS печати — подключается вне paged.js (он разворачивает @media print в обычные правила и показал бы тёмные тона на экране). */
+export function printCss(st: BookletStyle): string {
+  const t = PRINT_TONES[st];
+  return `@media print {
+  .buklet-book section { --gold: ${t.gold} !important; --line: ${t.line} !important; }
+  .buklet-book .pagedjs_margin-bottom-center, .buklet-book .pagedjs_margin-bottom-center .pagedjs_margin-content::after { color: ${t.gold} !important; }
+}`;
+}
 export const isBookletStyle = (s: unknown): s is BookletStyle => s === "obs" || s === "geo" || s === "bot";
 
 /** Шрифты буклета (Google Fonts) — ссылка в клиентском компоненте и список семейств для ожидания загрузки. */
@@ -37,14 +54,41 @@ function rng(seed: number) {
   return () => (x = (x * 16807) % 2147483647) / 2147483647;
 }
 
-/** Родительный падеж имени для «Разбор для Анны», «Портрет Олега» (простые правила; несклоняемое остаётся как есть). */
-export const genitive = (name: string) =>
-  /[гкхжшчщ]а$/i.test(name) ? name.replace(/а$/, "и")
-  : /а$/.test(name) ? name.replace(/а$/, "ы")
-  : /[ья]$/.test(name) ? name.replace(/[ья]$/, "и").replace(/ьи$/, "я")
-  : /й$/.test(name) ? name.replace(/й$/, "я")
-  : /[бвгдзклмнпрстфхцчшщ]$/i.test(name) ? name + "а"
-  : name;
+/** Имена, которые правилами не просклонять: беглая гласная, «ь» (мужские и женские), женские на согласную — не склоняются. */
+const GENITIVE_EXCEPT: Record<string, string> = {
+  лев: "льва", пётр: "петра", петр: "петра", павел: "павла", любовь: "любови",
+  игорь: "игоря", шамиль: "шамиля", наиль: "наиля", рауль: "рауля", эмиль: "эмиля", даниэль: "даниэля", марсель: "марселя",
+  адель: "адели", нинель: "нинели", ассоль: "ассоли", рахиль: "рахили", эсфирь: "эсфири", юдифь: "юдифи", айгуль: "айгуль", гульнур: "гульнур",
+  ирэн: "ирэн", кармен: "кармен", николь: "николь", элис: "элис", рут: "рут", мэри: "мэри", катрин: "катрин", доминик: "доминик", мишель: "мишель",
+  лилиан: "лилиан", ингрид: "ингрид", астрид: "астрид", эстер: "эстер", ким: "ким",
+};
+
+/** Подогнать регистр результата под написанное имя: «ОЛЬГА» → «ОЛЬГИ», «ольга» → «ольги». */
+const caseLike = (src: string, out: string) =>
+  src === src.toUpperCase() && src.length > 1 ? out.toUpperCase() : src[0] === src[0].toUpperCase() ? out.charAt(0).toUpperCase() + out.slice(1) : out;
+
+/**
+ * Родительный падеж имени для «Разбор для Анны», «Портрет Олега». Таблица исключений + правила.
+ * null — уверенности нет (латиница, несколько слов, незнакомое на «ь»): вызывающий строит фразу без родительного.
+ */
+export function genitive(raw: string): string | null {
+  const name = raw.trim();
+  if (!/^[А-ЯЁа-яё]{2,}$/.test(name)) return null;
+  const lo = name.toLowerCase();
+  if (lo in GENITIVE_EXCEPT) return caseLike(name, GENITIVE_EXCEPT[lo]);
+  let out: string | null;
+  if (/[оеиуюэы]$/.test(lo)) out = lo; // Нелли, Марго, Злате — не склоняются
+  else if (/ия$/.test(lo)) out = lo.slice(0, -1) + "и"; // Мария, Ия, Юлия
+  else if (/я$/.test(lo)) out = lo.slice(0, -1) + "и"; // Илья, Дарья, Майя, Таня
+  else if (/[гкхжшчщ]а$/.test(lo)) out = lo.slice(0, -1) + "и"; // Ольга, Ника, Маша
+  else if (/ца$/.test(lo)) out = lo.slice(0, -1) + "ы";
+  else if (/а$/.test(lo)) out = lo.slice(0, -1) + "ы"; // Анна, Никита, Екатерина
+  else if (/[аеиоуыэюя]й$/.test(lo)) out = lo.slice(0, -1) + "я"; // Сергей, Дмитрий, Николай
+  else if (/ь$/.test(lo)) out = null; // род неизвестен: Игорь (м) / Любовь (ж) — только по таблице
+  else if (/[бвгджзклмнпрстфхцчшщ]$/.test(lo)) out = lo + "а"; // Александр, Олег, Михаил
+  else out = null;
+  return out === null ? null : caseLike(name, out);
+}
 
 /* ---------- SVG-мотивы ---------- */
 const GOLD = "var(--gold)";
@@ -140,6 +184,15 @@ function blocks(list: Block[], opts: BlockOpts = {}): string {
     .join("");
 }
 
+/** Сколько знаков в блоке — грубая мера высоты (строка A5 ≈ 60–70 знаков). */
+const blockLen = (b: Block): number =>
+  b.kind === "p" ? b.text.length
+  : b.kind === "list" ? b.items.reduce((a, x) => a + x.length + 40, 0)
+  : b.kind === "details" ? b.summary.length + b.blocks.reduce((a, x) => a + blockLen(x), 0)
+  : 200;
+/** Сколько первых блоков держать с заголовком: набираем ≥ 260 знаков (4 строки), но не больше двух блоков. */
+const keepCount = (list: Block[]) => (list.length > 1 && blockLen(list[0]) < 260 ? 2 : 1);
+
 const QUARTER = (ms: { label: string }[]) => {
   const a = ms[0].label.split(" "), b = ms[ms.length - 1].label.split(" ");
   return a[1] === b[1] ? `${a[0]} — ${b[0]} ${a[1]}` : `${a[0]} ${a[1]} — ${b[0]} ${b[1]}`;
@@ -147,15 +200,18 @@ const QUARTER = (ms: { label: string }[]) => {
 const YOU = /(^|[^а-яё])(ты|тебе|тебя|твой|твоя|твоё|твои)([^а-яё]|$)/i;
 
 /** Собранный HTML буклета. qr — готовый SVG ссылки на онлайн-версию (сервер). */
-export function bookHtml(D: RazborDoc, QUESTIONS: BookletQuestions | null, st: BookletStyle, plan: BookletPlan, qr = ""): string {
+export function bookHtml(D: RazborDoc, QUESTIONS: BookletQuestions | null, st: BookletStyle, plan: BookletPlan, qr = "", gift: BookletGift | null = null): string {
   const sec = (id: string): Section | undefined => D.sections.find((s) => s.id === id);
   const DIV = DIVIDER[st];
   const orn = `<div class="orn" aria-hidden="true"><i></i><span>${DIV}</span><i></i></div>`;
   const head = (s: { title: string; subtitle?: string }, eyebrow: string) =>
     `<header class="sh"><p class="eyebrow">${esc(eyebrow)}</p><h2>${esc(s.title)}</h2>${s.subtitle ? `<p class="subt">${esc(s.subtitle)}</p>` : ""}${orn}</header>`;
-  /** Заголовок раздела держится вместе с первым блоком: paged.js не умеет break-after: avoid. */
-  const keep = (s: { title: string; subtitle?: string }, eyebrow: string, list: Block[], cls = "", opts: BlockOpts = {}) =>
-    `<div class="keep">${head(s, eyebrow)}<div class="txt ${cls}">${blocks(list.slice(0, 1), opts)}</div></div><div class="txt ${cls}">${blocks(list.slice(1), opts)}</div>`;
+  /** Заголовок раздела держится вместе с началом текста (paged.js не умеет break-after: avoid): первый блок,
+   *  а если он короче ~4 строк (обращение «Анна, …» в одну фразу) — ещё и следующий, чтобы под заголовком внизу страницы не осталась одна строка. */
+  const keep = (s: { title: string; subtitle?: string }, eyebrow: string, list: Block[], cls = "", opts: BlockOpts = {}) => {
+    const n = keepCount(list);
+    return `<div class="keep">${head(s, eyebrow)}<div class="txt ${cls}">${blocks(list.slice(0, n), opts)}</div></div><div class="txt ${cls}">${blocks(list.slice(n), opts)}</div>`;
+  };
 
   /** Цитата для вставки: самое ёмкое предложение раздела 70–170 знаков, лучше с обращением на «ты». */
   const quoteOf = (ids: string[]) => {
@@ -176,7 +232,8 @@ export function bookHtml(D: RazborDoc, QUESTIONS: BookletQuestions | null, st: B
   const Q = QUESTIONS || {};
   const qd = Q.destiny?.[dk] || [], ql = Q.love?.[dk] || [], qw = Q.work?.[dk] || [], qy = Q.year?.[py] || [], qyN = Q.year?.[pyN] || [];
   const yr = (facts[2]?.label.match(/\d{4}/) || [String(new Date().getFullYear())])[0], yrN = String(+yr + 1);
-  const who = D.who.trim(), whoG = who ? genitive(who) : "";
+  /** whoG пуст, если имени нет или склонение сомнительно: тогда фразы строятся без родительного. */
+  const who = D.who.trim(), whoG = (who && genitive(who)) || "";
   /** «Портрет Анны» — с именем; без имени — запасной вариант. */
   const of = (base: string, alt = base) => (whoG ? `${base} ${whoG}` : alt);
   const lower = (t: string | undefined) => String(t || "").charAt(0).toLowerCase() + String(t || "").slice(1);
@@ -232,8 +289,11 @@ export function bookHtml(D: RazborDoc, QUESTIONS: BookletQuestions | null, st: B
     <p class="c-title">${esc(destiny.hint)}</p>
     <p class="c-foot">${yr} — ${yrN} · Карта дня</p></section>`;
   h += `<section class="ded">
-    <p class="d-for">${esc(of("Для", "Для тебя"))}</p>
-    <div class="d-lines"><p>от кого <span></span></p><p>с пожеланием <span></span></p><p><span></span></p><p><span></span></p><p>вручено <span class="short"></span></p></div>
+    <p class="d-for">${esc(whoG ? `Для ${whoG}` : who ? `Для тебя, ${who}` : "Для тебя")}</p>
+    ${gift?.from
+      ? `<div class="d-gift"><p class="d-lbl">от кого</p><p class="d-hand">${esc(gift.from)}</p>${gift.wish ? `<p class="d-lbl">с пожеланием</p><p class="d-hand d-wish">${esc(gift.wish).replace(/\n+/g, "<br>")}</p>` : ""}</div>
+    <div class="d-lines"><p>вручено <span class="short"></span></p></div>`
+      : `<div class="d-lines"><p>от кого <span></span></p><p>с пожеланием <span></span></p><p><span></span></p><p><span></span></p><p>вручено <span class="short"></span></p></div>`}
     <p class="d-epi">Числа ничего не решают за человека. Они подсказывают, где ему легче, а где стоит быть бережнее к себе.</p></section>`;
   h += `<section class="toc">${head({ title: "Содержание" }, of("Разбор для", "Нумерологический разбор"))}
     <ol>${toc.map(([id, t]) => `<li><a href="#b-${id}">${esc(t)}</a></li>`).join("")}</ol>
@@ -262,7 +322,8 @@ export function bookHtml(D: RazborDoc, QUESTIONS: BookletQuestions | null, st: B
   for (const id of ["sily", "teni", "prizvanie"]) {
     const s = sec(id);
     if (!s) continue;
-    h += `<div class="keep"><h3 id="b-${id}">${esc(s.title)}</h3>${s.subtitle ? `<p class="subt3">${esc(s.subtitle)}</p>` : ""}<div class="txt">${blocks(s.blocks.slice(0, 1))}</div></div><div class="txt">${blocks(s.blocks.slice(1))}</div>`;
+    const n = keepCount(s.blocks);
+    h += `<div class="keep"><h3 id="b-${id}">${esc(s.title)}</h3>${s.subtitle ? `<p class="subt3">${esc(s.subtitle)}</p>` : ""}<div class="txt">${blocks(s.blocks.slice(0, n))}</div></div><div class="txt">${blocks(s.blocks.slice(n))}</div>`;
   }
   h += `</section>`;
   const tal = sec("talant");
@@ -313,22 +374,28 @@ export function bookHtml(D: RazborDoc, QUESTIONS: BookletQuestions | null, st: B
       <div class="kcard-l">${medallion(destiny.value, st, 64)}</div>
       <div class="kcard-r"><p class="k-name">${esc([who, D.date].filter(Boolean).join(" · "))}</p><p class="k-row"><b>Судьба ${esc(destiny.value)}</b> ${esc(destiny.hint)}</p>${facts[2] ? `<p class="k-row"><b>${yr} — ${esc(py)}</b> ${esc(facts[2].hint)}</p>` : ""}${facts[3] ? `<p class="k-row"><b>${yrN} — ${esc(pyN)}</b> ${esc(facts[3].hint)}</p>` : ""}<p class="k-site">karta-dnya.ru</p></div>
     </div>`;
-  h += `<section class="cardpage"><header class="sh"><p class="eyebrow">Вырежи по пунктиру</p><h2>Карточки на год</h2><p class="subt">Одну — в кошелёк или телефонный чехол. Вторую — тому, кто подарил этот разбор, или тому, кто рядом</p>${orn}</header><div class="cards">${card}${card}</div></section>`;
+  // Оборот карточек: «рубашки» в тех же местах. Поля левой и правой страниц зеркальны, карточки по центру полосы —
+  // при двусторонней печати рубашка ложится точно на оборот своей карточки.
+  const cardBack = `<div class="kback"><div class="kb-in">${medallion(destiny.value, st, 64)}<p class="kb-site">karta-dnya.ru</p></div></div>`;
+  const cards = `<section class="cardpage"><header class="sh kh"><p class="eyebrow">Вырежи по пунктиру</p><h2>Карточки на год</h2><p class="subt">Одну — в кошелёк или телефонный чехол. Вторую — тому, кто подарил этот разбор, или тому, кто рядом</p>${orn}</header><div class="cards">${card}${card}</div></section>
+    <section class="cardback"><header class="sh kh" aria-hidden="true"><p class="eyebrow">Оборот карточек</p>${orn}</header><div class="cards">${cardBack}${cardBack}</div></section>`;
 
-  // Дневник года: намерения и трекер всегда, дальше — «что сбылось» и заметки до кратного 4
+  // Дневник года: намерения, год по месяцам и «что сбылось» — всегда; добивка до кратного 4 — письмо себе, важные даты, заметки
   const jEyebrow = esc(of("Дневник", "Дневник года"));
   const lines = (n: number) => "<i></i>".repeat(n);
-  h += `<section class="journal" id="b-dnevnik"><header class="sh"><p class="eyebrow">${jEyebrow}</p><h2>Мои намерения на ${yr}</h2>${orn}</header>
+  const intentions = `<section class="journal" id="b-dnevnik"><header class="sh"><p class="eyebrow">${jEyebrow}</p><h2>Мои намерения на год вперёд</h2>${orn}</header>
     ${["Что хочу начать", "Что пора завершить", "О ком и о чём хочу позаботиться"].map((t) => `<div class="jb"><p class="jt">${t}</p>${lines(4)}</div>`).join("")}</section>`;
+  // карточки должны стоять на правой (нечётной) странице: при необходимости «Мои намерения» идут перед ними
+  h += plan.cardsLate ? intentions + cards : cards + intentions;
   h += `<section class="journal"><header class="sh"><p class="eyebrow">${jEyebrow}</p><h2>Год по месяцам</h2><p class="subt">Раз в месяц — одна строка: что получилось</p></header>
     <table class="trk"><tbody>${months.map((m) => `<tr><td class="tm">${esc(m.label)}</td><td class="tn">${m.number}</td><td></td></tr>`).join("")}</tbody></table></section>`;
+  h += `<section class="journal"><header class="sh"><p class="eyebrow">${jEyebrow}</p><h2>Что сбылось</h2><p class="subt">Заполни через год и перечитай намерения</p>${orn}</header>
+    ${["Чем горжусь", "Что оказалось важнее, чем казалось", "С чем иду дальше"].map((t) => `<div class="jb"><p class="jt">${t}</p>${lines(4)}</div>`).join("")}</section>`;
   const extra = [
-    `<section class="journal"><header class="sh"><p class="eyebrow">${jEyebrow}</p><h2>Что сбылось</h2><p class="subt">Заполни в конце года и перечитай намерения</p>${orn}</header>
-    ${["Чем горжусь", "Что оказалось важнее, чем казалось", "С чем иду в следующий год"].map((t) => `<div class="jb"><p class="jt">${t}</p>${lines(4)}</div>`).join("")}</section>`,
     `<section class="journal"><header class="sh"><p class="eyebrow">${jEyebrow}</p><h2>Письмо себе</h2><p class="subt">Напиши сейчас, перечитай через год</p>${orn}</header><div class="nl">${lines(17)}</div></section>`,
     `<section class="journal"><header class="sh"><p class="eyebrow">${jEyebrow}</p><h2>Важные даты</h2><p class="subt">Дни рождения, события, планы</p></header><table class="trk"><tbody>${months.map((m) => `<tr><td class="tm">${esc(m.label)}</td><td></td></tr>`).join("")}</tbody></table></section>`,
   ];
-  for (let i = 0; i < plan.pad; i++) h += extra[i] || `<section class="journal"><p class="eyebrow">Заметки</p><div class="nl">${lines(19)}</div></section>`;
+  for (let i = 0; i < plan.pad; i++) h += extra[i] || `<section class="journal"><header class="sh"><p class="eyebrow">${jEyebrow}</p><h2>Заметки</h2></header><div class="nl">${lines(17)}</div></section>`;
 
   // Задняя обложка
   h += `<section class="back"><div>${medallion(DIV, st, 70)}</div>
@@ -350,8 +417,8 @@ section { --ink:${S.ink}; --muted:${S.muted}; --accent:${S.accent}; --gold:${S.g
   --f-display:${S.display}; --f-body:${S.body}; --f-num:${S.num}; --f-script:${S.script}; --dw:${S.displayWeight}; --bs:${S.bodySize}; }
 @page { size: 148mm 210mm; margin: 17mm 15mm 19mm;
   @bottom-center { content: counter(page); font-family: ${S.num}; font-size: 8pt; color: ${S.gold}; } }
-@page :left { margin-left: 15mm; margin-right: 19mm; @top-left { content: "${running}"; vertical-align: bottom; padding-bottom: 5mm; font-family: ${S.body}; font-size: 6.6pt; letter-spacing: .16em; text-transform: uppercase; color: ${S.muted}; } }
-@page :right { margin-left: 19mm; margin-right: 15mm; @top-right { content: string(part); vertical-align: bottom; padding-bottom: 5mm; font-family: ${S.body}; font-size: 6.6pt; letter-spacing: .16em; text-transform: uppercase; color: ${S.muted}; } }
+@page :left { margin-left: 15mm; margin-right: 19mm; @top-left { content: "${running}"; vertical-align: bottom; padding-bottom: 5mm; font-family: ${S.body}; font-size: 7pt; letter-spacing: .16em; text-transform: uppercase; color: ${S.muted}; } }
+@page :right { margin-left: 19mm; margin-right: 15mm; @top-right { content: string(part, first-except); vertical-align: bottom; padding-bottom: 5mm; font-family: ${S.body}; font-size: 7pt; letter-spacing: .16em; text-transform: uppercase; color: ${S.muted}; } }
 @page cover { margin: 0; @bottom-center { content: none } @top-left { content: none } @top-right { content: none } }
 @page plain { @bottom-center { content: none } @top-left { content: none } @top-right { content: none } }
 section { color: var(--ink); font-family: var(--f-body); font-size: var(--bs); line-height: 1.5; hyphens: auto; -webkit-hyphens: auto; text-align: left; }
@@ -372,7 +439,7 @@ section svg { display: inline-block; }
 .c-name { top: 129mm; font-family: var(--f-script); font-size: ${st === "bot" ? "34pt" : "30pt"}; line-height: 1.1; color: var(--ink); font-weight: ${st === "geo" ? 300 : 500}; }
 .c-date { top: ${st === "bot" ? 146 : 144}mm; font-family: var(--f-num); font-size: 11pt; letter-spacing: .2em; color: var(--accent); }
 .c-title { top: ${st === "bot" ? 153 : 151}mm; font-family: var(--f-display); font-style: ${st === "geo" ? "normal" : "italic"}; font-size: 11pt; color: var(--muted); }
-.c-foot { bottom: 15mm; top: auto; font-size: 6.8pt; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); }
+.c-foot { bottom: 15mm; top: auto; font-size: 7pt; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); }
 .ded { page: plain; display: flex; flex-direction: column; justify-content: center; min-height: 170mm; text-align: center; }
 .d-for { font-family: var(--f-script); font-size: ${st === "bot" ? "30pt" : "24pt"}; color: var(--accent); margin: 0 0 12mm !important; font-weight: ${st === "geo" ? 300 : 500}; }
 .d-lines p { display: flex; gap: 3mm; align-items: baseline; margin: 0 0 7mm; font-size: 8pt; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
@@ -380,7 +447,7 @@ section svg { display: inline-block; }
 .d-lines span.short { flex: 0 0 34mm; }
 .d-epi { margin: 14mm 8mm 0 !important; font-family: var(--f-display); font-style: italic; font-size: 10.5pt; line-height: 1.45; color: var(--muted); }
 .sh { text-align: center; margin: 2mm 0 6mm; break-after: avoid; }
-.eyebrow { margin: 0 0 1.5mm !important; font-family: var(--f-body); font-size: 6.6pt; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); }
+.eyebrow { margin: 0 0 1.5mm !important; font-family: var(--f-body); font-size: 7pt; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); }
 .sh h2, .opener h2 { margin: 0; font-family: var(--f-display); font-size: 19pt; line-height: 1.15; color: var(--ink); text-wrap: balance; }
 .subt { margin: 1.6mm 0 0 !important; font-size: 8pt; color: var(--muted); font-style: italic; }
 .orn { display: flex; align-items: center; justify-content: center; gap: 2.5mm; margin-top: 3mm; color: var(--gold); font-size: 7pt; }
@@ -401,7 +468,7 @@ h3 { margin: 6mm 0 2mm; font-family: var(--f-display); font-size: 13pt; line-hei
 .lst, .adv, .calc { list-style: decimal; }
 .calc { padding-left: 4mm; margin: 0; } .calc li { margin: 0 0 1.8mm; } .calc li::marker { color: var(--gold); font-family: var(--f-num); }
 .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm 4mm; margin: 1mm 0 3mm; padding-top: 2mm; border-top: .15mm solid var(--line); break-inside: avoid; }
-.facts .fl { display: block; font-size: 6.6pt; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.facts .fl { display: block; font-size: 7pt; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .facts .fv { font-family: var(--f-num); font-weight: 400; font-size: 12pt; color: var(--accent); }
 .gist { list-style: none; padding: 0; margin: 0 0 4mm; border-top: .3mm solid var(--gold); }
 .gist li { padding: 2.2mm 0; border-bottom: .15mm solid var(--line); font-size: 1.04em; line-height: 1.42; }
@@ -413,19 +480,19 @@ h3 { margin: 6mm 0 2mm; font-family: var(--f-display); font-size: 13pt; line-hei
 .sq div { border: 0.15mm solid var(--line); height: 19mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1mm; }
 .sq b { font-family: var(--f-num); font-weight: 400; font-size: 14pt; color: var(--accent); letter-spacing: .04em; }
 .sq .empty b { color: var(--line); }
-.sq span { font-size: 6.4pt; color: var(--muted); line-height: 1.15; margin-top: .8mm; }
+.sq span { font-size: 7pt; color: var(--muted); line-height: 1.15; margin-top: .8mm; }
 .sq-cap { text-align: center; font-size: 7pt; color: var(--muted); margin: 2mm 0 5mm !important; }
 .cal { page: plain; }
 .cal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 0.3mm solid var(--gold); border-left: 0.15mm solid var(--line); }
 .cal-grid div { border-right: 0.15mm solid var(--line); border-bottom: 0.15mm solid var(--line); padding: 2.4mm 2.6mm 2.8mm; display: grid; grid-template-columns: 1fr auto; align-items: start; min-height: 30mm; }
 .cal-grid .cm { font-family: var(--f-display); font-size: 10.5pt; text-transform: capitalize; grid-column: 1; }
-.cal-grid .cy { font-size: 6.4pt; color: var(--muted); grid-column: 2; letter-spacing: .1em; }
+.cal-grid .cy { font-size: 7pt; color: var(--muted); grid-column: 2; letter-spacing: .1em; }
 .cal-grid b { grid-column: 1 / -1; font-family: var(--f-num); font-weight: 400; font-size: 26pt; line-height: 1.05; color: var(--accent); margin-top: 1mm; }
 .cal-grid .cw { grid-column: 1 / -1; font-size: 7pt; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
 .cal-legend { display: flex; flex-wrap: wrap; gap: 1mm 4mm; justify-content: center; margin: 5mm 0 0 !important; font-size: 7pt; color: var(--muted); }
 .cal-legend b { font-family: var(--f-num); color: var(--accent); font-weight: 400; }
 .mo h4 { margin: 0 0 1.2mm; font-family: var(--f-display); font-size: 11pt; text-transform: capitalize; }
-.mo h4 em { font-style: normal; font-family: var(--f-body); font-size: 6.6pt; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-left: 2mm; }
+.mo h4 em { font-style: normal; font-family: var(--f-body); font-size: 7pt; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-left: 2mm; }
 .adv, .lst, .memo-l { padding-left: 5mm; margin: 0; } .adv li, .lst li { margin: 0 0 2.6mm; } .adv li::marker { color: var(--gold); font-family: var(--f-num); }
 .memo-l { list-style: none; padding: 0; } .memo-l li { padding: 2mm 0; font-size: 8.6pt; line-height: 1.45; border-bottom: 0.15mm solid var(--line); }
 .toc ol { list-style: none; padding: 0; margin: 2mm 6mm 0; }
@@ -433,14 +500,24 @@ h3 { margin: 6mm 0 2mm; font-family: var(--f-display); font-size: 13pt; line-hei
 .toc a { color: var(--ink); text-decoration: none; display: flex; width: 100%; font-family: var(--f-display); font-size: 10.5pt; }
 .toc a::after { content: target-counter(attr(href), page); margin-left: auto; font-family: var(--f-num); color: var(--accent); }
 .howto { margin: 5mm 6mm 0 !important; font-size: 8pt; font-style: italic; color: var(--muted); }
-.cardpage { page: plain; break-before: page; }
-.cards { display: grid; gap: 9mm; justify-items: center; margin-top: 8mm; }
+.cardpage, .cardback { page: plain; break-before: page; }
+.kh { height: 40mm; margin: 0 0 6mm; box-sizing: border-box; overflow: hidden; }
+.cardback .kh { display: flex; flex-direction: column; justify-content: flex-end; }
+.kback { width: 85mm; height: 55mm; margin: 0 auto; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 4mm; }
+.kb-in { width: 100%; height: 100%; border: 0.3mm solid var(--gold); border-radius: 2mm; outline: 0.15mm solid var(--line); outline-offset: -1.6mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5mm; background: var(--soft); }
+.kb-in .med { width: 26mm; height: 26mm; }
+.kb-site { font-size: 7pt; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+.d-gift { margin: 0 4mm 8mm; }
+.d-lbl { font-size: 8pt; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 1mm !important; }
+.d-hand { font-family: var(--f-script); font-size: ${st === "bot" ? "18pt" : "15pt"}; line-height: 1.3; color: var(--accent); margin: 0 0 6mm !important; font-weight: ${st === "geo" ? 300 : 500}; font-style: ${st === "bot" ? "normal" : "italic"}; overflow-wrap: anywhere; }
+.d-wish { font-size: ${st === "bot" ? "15pt" : "12.5pt"}; }
+.cards { display: grid; gap: 9mm; justify-items: center; margin-top: 0; }
 .kcard { width: 85mm; height: 55mm; margin: 0 auto; border: 0.3mm dashed var(--muted); display: flex; align-items: center; gap: 4mm; padding: 0 5mm; box-sizing: border-box; }
 .kcard .med { width: 27mm; height: 27mm; }
 .kcard-r p { margin: 0 0 1.2mm; font-size: 8pt; line-height: 1.3; }
 .k-name { font-family: var(--f-script); font-size: ${st === "bot" ? "16pt" : "13pt"} !important; color: var(--accent); }
 .k-row b { font-family: var(--f-num); font-weight: 400; color: var(--accent); margin-right: 1mm; }
-.k-site { font-size: 6pt !important; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-top: 1.6mm !important; }
+.k-site { font-size: 7pt !important; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-top: 1.6mm !important; }
 .notes { page: plain; }
 .nl i { display: block; height: 7.2mm; border-bottom: 0.15mm solid var(--line); }
 .back { page: plain; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 172mm; }
@@ -449,7 +526,7 @@ h3 { margin: 6mm 0 2mm; font-family: var(--f-display); font-size: 13pt; line-hei
 .qr { width: 24mm; height: 24mm; } .qr svg { display: block; width: 100%; height: 100%; } .qr svg path[stroke] { stroke: var(--ink); }
 .b-qr { font-size: 7pt; color: var(--muted); margin: 2.5mm 0 0 !important; }
 .b-site { font-size: 7.4pt; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); margin: 8mm 0 0 !important; }
-.b-legal { font-size: 6.2pt; color: var(--muted); margin: 3mm 8mm 0 !important; }
+.b-legal { font-size: 7pt; color: var(--muted); margin: 3mm 8mm 0 !important; }
 [data-fit="1"] { font-size: calc(var(--bs) - .3pt); line-height: 1.46; }
 [data-fit="2"] { font-size: calc(var(--bs) - .6pt); line-height: 1.43; }
 [data-fit="3"] { font-size: calc(var(--bs) - .9pt); line-height: 1.4; }
@@ -471,7 +548,7 @@ h3 { margin: 6mm 0 2mm; font-family: var(--f-display); font-size: 13pt; line-hei
 .fill-q i, .jb i { display: block; height: 7mm; border-bottom: .15mm solid var(--line); }
 .fill-quote { margin: 9mm 7mm 3mm; text-align: center; break-inside: avoid; }
 .fill-quote span { display: block; color: var(--gold); font-size: 9pt; margin-bottom: 2mm; }
-.fill-quote cite { display: block; margin-top: 2.4mm; font-style: normal; font-family: var(--f-body); font-size: 6.6pt; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+.fill-quote cite { display: block; margin-top: 2.4mm; font-style: normal; font-family: var(--f-body); font-size: 7pt; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
 .fill-quote p { margin: 0; font-family: var(--f-display); font-style: ${st === "geo" ? "normal" : "italic"}; font-size: 12.5pt; line-height: 1.42; color: var(--accent); text-wrap: balance; }
 .fill-orn { display: flex; align-items: center; justify-content: center; gap: 3mm; margin: 8mm 0 2mm; color: var(--gold); font-size: 9pt; }
 .fill-orn i { display: block; width: 22mm; border-top: .25mm solid var(--gold); }
@@ -483,9 +560,9 @@ h3 { margin: 6mm 0 2mm; font-family: var(--f-display); font-size: 13pt; line-hei
 .periods b { font-family: var(--f-num); font-weight: 400; font-size: 20pt; line-height: 1.05; color: var(--muted); }
 .periods .now b { color: var(--accent); font-size: 24pt; }
 .periods .now { background: var(--soft); }
-.periods span { font-size: 6.6pt; color: var(--muted); line-height: 1.25; }
+.periods span { font-size: 7pt; color: var(--muted); line-height: 1.25; }
 .periods .pl { letter-spacing: .1em; text-transform: uppercase; }
-.periods em { font-style: normal; font-size: 6.2pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+.periods em { font-style: normal; font-size: 7pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
 .jb { margin: 0 0 5mm; }
 .jt { margin: 0 0 .5mm !important; font-family: var(--f-display); font-weight: var(--dw); font-size: 11.5pt; color: var(--accent); }
 .trk { width: 100%; border-collapse: collapse; }

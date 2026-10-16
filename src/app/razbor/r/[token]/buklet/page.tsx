@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import RazborBooklet from "@/components/RazborBooklet";
 import { readToken } from "@/lib/razborToken";
 import { getOrder } from "@/lib/razborStore";
+import { giftFor } from "@/lib/razborGift";
 import { bookletData, bookletStyle } from "@/lib/razborBookletData";
 import { SITE } from "@/lib/site";
 
@@ -26,5 +27,7 @@ export default async function RazborBookletPage({ params, searchParams }: PagePr
   const online = order?.status === "paid" ? `${SITE.url}/r/${order.id}` : `${SITE.url}/razbor/r/${token}`;
   const data = await bookletData(input, online);
   const style = bookletStyle((await searchParams).style);
-  return <RazborBooklet {...data} initialStyle={style} backHref={`/razbor/r/${token}`} />;
+  // подарок: на посвящении — подпись и пожелание дарителя (без адресов и дат отправки)
+  const g = order ? await giftFor(order) : null;
+  return <RazborBooklet {...data} initialStyle={style} backHref={`/razbor/r/${token}`} gift={g ? { from: g.from, ...(g.wish ? { wish: g.wish } : {}) } : null} />;
 }
