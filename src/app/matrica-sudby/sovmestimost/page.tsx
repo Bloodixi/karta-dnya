@@ -6,7 +6,8 @@ import Faq from "@/components/Faq";
 import MatrixNav from "@/components/MatrixNav";
 import CompatCta from "@/components/CompatCta";
 import RazborCta from "@/components/RazborCta";
-import { DateField, FormError, ShareLink } from "@/components/NumerologyFields";
+import { DateField, FormError, ShareLink, dateErrorText } from "@/components/NumerologyFields";
+import ScrollToResult from "@/components/ScrollToResult";
 import { formatDate, parseDate } from "@/lib/numerology";
 import { calcMatrix, calcPair, findMatrixArcana } from "@/lib/matrix";
 import { SITE } from "@/lib/site";
@@ -41,7 +42,7 @@ export default async function PairPage({ searchParams }: PageProps<typeof PATH>)
     const x = findMatrixArcana(m1.e);
     const y = findMatrixArcana(m2.e);
     result = (
-      <section className="mt-8" id="rezultat">
+      <section className="mt-8 scroll-mt-24" id="rezultat">
         <div className="ornament mb-4">
           <h2 className="text-2xl">{formatDate(a)} и {formatDate(b)}</h2>
           <span className="mono">общий аркан пары {pair}</span>
@@ -49,9 +50,9 @@ export default async function PairPage({ searchParams }: PageProps<typeof PATH>)
         <div className="grid gap-4 md:grid-cols-3">
           <div className="card p-5">
             <p className="mono">Первый партнёр · центр</p>
-            <p className="display text-4xl mt-1"><Link href={`/matrica-sudby/arkany/${m1.e}`} className="hover:text-accent">{m1.e}</Link> <span className="text-xl text-muted">· {x?.name}</span></p>
+            <p className="display text-4xl mt-1"><Link href={`/matrica-sudby/arkany/${m1.e}`} className="inline-block min-w-11 hover:text-accent">{m1.e}</Link> <span className="text-xl text-muted">· {x?.name}</span></p>
             <p className="text-sm mt-2">{x?.short}</p>
-            <p className="text-sm mt-2"><Link href={`/matrica-sudby?d=${a.iso}`} className="text-accent underline">Вся матрица</Link></p>
+            <p className="text-sm mt-1"><Link href={`/matrica-sudby?d=${a.iso}`} className="inline-flex min-h-11 items-center text-accent-text underline">Вся матрица</Link></p>
           </div>
           <div className="card p-5 text-center">
             <p className="mono">Общий аркан пары</p>
@@ -60,22 +61,22 @@ export default async function PairPage({ searchParams }: PageProps<typeof PATH>)
           </div>
           <div className="card p-5">
             <p className="mono">Второй партнёр · центр</p>
-            <p className="display text-4xl mt-1"><Link href={`/matrica-sudby/arkany/${m2.e}`} className="hover:text-accent">{m2.e}</Link> <span className="text-xl text-muted">· {y?.name}</span></p>
+            <p className="display text-4xl mt-1"><Link href={`/matrica-sudby/arkany/${m2.e}`} className="inline-block min-w-11 hover:text-accent">{m2.e}</Link> <span className="text-xl text-muted">· {y?.name}</span></p>
             <p className="text-sm mt-2">{y?.short}</p>
-            <p className="text-sm mt-2"><Link href={`/matrica-sudby?d=${b.iso}`} className="text-accent underline">Вся матрица</Link></p>
+            <p className="text-sm mt-1"><Link href={`/matrica-sudby?d=${b.iso}`} className="inline-flex min-h-11 items-center text-accent-text underline">Вся матрица</Link></p>
           </div>
         </div>
 
         <div className="overflow-x-auto mt-6">
-          <table className="text-sm w-full min-w-[480px]">
-            <thead><tr className="text-left"><th className="p-2 mono">Позиция</th><th className="p-2 mono">Первый</th><th className="p-2 mono">Второй</th><th className="p-2 mono">Вместе</th></tr></thead>
+          <table className="text-sm w-full">
+            <thead><tr className="text-left"><th className="p-2 mono">Позиция</th><th className="px-1 py-2 sm:p-2 mono">Первый</th><th className="px-1 py-2 sm:p-2 mono">Второй</th><th className="px-1 py-2 sm:p-2 mono">Вместе</th></tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.key} className="border-t border-line">
                   <td className="p-2">{r.letter} · {r.title.split(":")[0]}</td>
-                  <td className="p-2"><Link href={`/matrica-sudby/arkany/${r.v1}`} className="text-accent underline">{r.v1}</Link></td>
-                  <td className="p-2"><Link href={`/matrica-sudby/arkany/${r.v2}`} className="text-accent underline">{r.v2}</Link></td>
-                  <td className="p-2"><Link href={`/matrica-sudby/arkany/${r.sum}`} className="text-accent underline">{r.sum}</Link></td>
+                  <td className="px-1 py-2 sm:p-2"><Link href={`/matrica-sudby/arkany/${r.v1}`} className="inline-flex min-w-11 min-h-11 items-center justify-center -my-2 text-accent-text underline tabular-nums">{r.v1}</Link></td>
+                  <td className="px-1 py-2 sm:p-2"><Link href={`/matrica-sudby/arkany/${r.v2}`} className="inline-flex min-w-11 min-h-11 items-center justify-center -my-2 text-accent-text underline tabular-nums">{r.v2}</Link></td>
+                  <td className="px-1 py-2 sm:p-2"><Link href={`/matrica-sudby/arkany/${r.sum}`} className="inline-flex min-w-11 min-h-11 items-center justify-center -my-2 text-accent-text underline tabular-nums">{r.sum}</Link></td>
                 </tr>
               ))}
             </tbody>
@@ -111,13 +112,14 @@ export default async function PairPage({ searchParams }: PageProps<typeof PATH>)
       <p className="text-muted mt-3 max-w-2xl text-lg">Введите две даты рождения. Калькулятор покажет арканы каждого, сложит их по позициям и найдёт общий аркан пары: энергию, которую вы проживаете вместе.</p>
       <div className="card p-6 mt-6 max-w-3xl">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
-          <DateField name="a" label="Ваша дата рождения" defaultValue={a?.iso ?? (typeof sp.a === "string" ? sp.a : "")} />
-          <DateField name="b" label="Дата рождения партнёра" defaultValue={b?.iso ?? (typeof sp.b === "string" ? sp.b : "")} />
-          <button type="submit" className="btn">Рассчитать</button>
+          <DateField name="a" label="Ваша дата рождения" defaultValue={a?.iso ?? (typeof sp.a === "string" ? sp.a : "")} invalid={invalid && !a} />
+          <DateField name="b" label="Дата рождения партнёра" defaultValue={b?.iso ?? (typeof sp.b === "string" ? sp.b : "")} invalid={invalid && !b} />
+          <button type="submit" className="btn min-h-11">Рассчитать</button>
         </Form>
-        <FormError text={invalid ? "Введите обе даты рождения полностью." : undefined} />
+        <FormError text={invalid ? dateErrorText(!a ? sp.a : sp.b, "Введите обе даты рождения полностью.") : undefined} />
       </div>
       {result}
+      <ScrollToResult key={`${a?.iso}-${b?.iso}`} id="rezultat" when={!!(a && b)} />
       <CompatCta from="matrica-sovmestimost" a={a?.iso} b={b?.iso} />
       <RazborCta from="matrica-sovmestimost" date={a?.iso} className="mt-6" />
       <section className="prose mt-12">

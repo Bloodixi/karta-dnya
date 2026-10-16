@@ -5,7 +5,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import NumerologyNav from "@/components/NumerologyNav";
 import RazborCta from "@/components/RazborCta";
-import { DateField, FormError, NumberField, ShareLink } from "@/components/NumerologyFields";
+import { DateField, FormError, NumberField, ShareLink, dateErrorText } from "@/components/NumerologyFields";
+import ScrollToResult from "@/components/ScrollToResult";
 import { getPersonalYears } from "@/lib/content";
 import { currentYearMsk, formatDate, parseDate, personalMonth, personalYear } from "@/lib/numerology";
 
@@ -51,7 +52,7 @@ export default async function PersonalYearPage({ searchParams }: PageProps<typeo
     const py = personalYear(date.d, date.m, year);
     const t = years.find((y) => y.number === py.number);
     result = (
-      <section className="mt-8" id="rezultat">
+      <section className="mt-8 scroll-mt-24" id="rezultat">
         <div className="ornament mb-4"><h2 className="text-2xl">{year} год для {formatDate(date)}</h2><span className="mono">личный год {py.number}</span></div>
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           <div className="card p-6">
@@ -72,7 +73,7 @@ export default async function PersonalYearPage({ searchParams }: PageProps<typeo
             <ul className="grid gap-1 text-sm">
               {MONTHS.map((m, i) => {
                 const pm = personalMonth(py.number, i + 1);
-                return <li key={m} className="flex gap-2"><span className="display text-lg w-6 text-accent">{pm}</span><span><span className="capitalize">{m}</span>: {MONTH_HINTS[pm]}</span></li>;
+                return <li key={m} className="grid grid-cols-[1.5rem_1fr] gap-x-3 items-baseline"><span className="display text-lg text-right tabular-nums text-accent-text">{pm}</span><span><span className="capitalize">{m}</span>: {MONTH_HINTS[pm]}</span></li>;
               })}
             </ul>
           </div>
@@ -95,14 +96,15 @@ export default async function PersonalYearPage({ searchParams }: PageProps<typeo
 
       <div className="card p-6 mt-6 max-w-3xl">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
-          <DateField name="d" label="Дата рождения" defaultValue={date?.iso ?? (typeof sp.d === "string" ? sp.d : "")} />
+          <DateField name="d" label="Дата рождения" defaultValue={date?.iso ?? (typeof sp.d === "string" ? sp.d : "")} invalid={invalid} />
           <NumberField name="y" label="Год" defaultValue={year} min={1900} max={now + 20} />
-          <button type="submit" className="btn">Рассчитать</button>
+          <button type="submit" className="btn min-h-11">Рассчитать</button>
         </Form>
-        <FormError text={invalid ? "Введите настоящую дату рождения." : undefined} />
+        <FormError text={invalid ? dateErrorText(sp.d, "Введите настоящую дату рождения.") : undefined} />
       </div>
 
       {result}
+      <ScrollToResult key={`${date?.iso}-${year}`} id="rezultat" when={!!date} />
 
       <RazborCta from="lichnyy-god" date={date?.iso} />
 
@@ -112,7 +114,7 @@ export default async function PersonalYearPage({ searchParams }: PageProps<typeo
           {years.map((y) => (
             <div key={y.number} className="card p-5">
               <p className="display text-3xl">{y.number} <span className="text-lg text-muted">· {y.title}</span></p>
-              <p className="text-xs text-accent mt-1">{y.theme}</p>
+              <p className="text-xs text-accent-text mt-1">{y.theme}</p>
               <p className="text-sm text-muted mt-2">{y.text[0]}</p>
             </div>
           ))}

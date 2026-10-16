@@ -5,7 +5,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import CompatCta from "@/components/CompatCta";
 import Faq from "@/components/Faq";
 import NumerologyNav from "@/components/NumerologyNav";
-import { DateField, FormError, ShareLink } from "@/components/NumerologyFields";
+import { DateField, FormError, ShareLink, dateErrorText } from "@/components/NumerologyFields";
+import ScrollToResult from "@/components/ScrollToResult";
 import { getNumerology, getNumerologyPairs } from "@/lib/content";
 import { CORE_NUMBERS, destinyNumber, formatDate, isMaster, pairKey, parseDate, toCore } from "@/lib/numerology";
 
@@ -46,7 +47,7 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
     const ta = numbers.find((n) => n.number === da.number);
     const tb = numbers.find((n) => n.number === db.number);
     result = (
-      <section className="mt-8" id="rezultat">
+      <section className="mt-8 scroll-mt-24" id="rezultat">
         <div className="ornament mb-4">
           <h2 className="text-2xl">{formatDate(a)} и {formatDate(b)}</h2>
           <span className="mono">числа {toCore(da.number)} и {toCore(db.number)}</span>
@@ -56,7 +57,7 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
             <p className="mono">Первый партнёр</p>
             <p className="display text-5xl mt-1">{da.number} {ta && <span className="text-xl text-muted">· {ta.title}</span>}</p>
             <p className="text-xs text-muted mt-1">{da.steps.join(" → ")}</p>
-            <p className="text-sm mt-3"><Link href={`/chislo-sudby/${da.number}`} className="text-accent underline">Число судьбы {destinyLabel(da.number)}</Link></p>
+            <p className="text-sm mt-3"><Link href={`/chislo-sudby/${da.number}`} className="text-accent-text underline">Число судьбы {destinyLabel(da.number)}</Link></p>
           </div>
           <div className="card p-5 text-center">
             <p className="mono">Совместимость</p>
@@ -67,7 +68,7 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
             <p className="mono">Второй партнёр</p>
             <p className="display text-5xl mt-1">{db.number} {tb && <span className="text-xl text-muted">· {tb.title}</span>}</p>
             <p className="text-xs text-muted mt-1">{db.steps.join(" → ")}</p>
-            <p className="text-sm mt-3"><Link href={`/chislo-sudby/${db.number}`} className="text-accent underline">Число судьбы {destinyLabel(db.number)}</Link></p>
+            <p className="text-sm mt-3"><Link href={`/chislo-sudby/${db.number}`} className="text-accent-text underline">Число судьбы {destinyLabel(db.number)}</Link></p>
           </div>
         </div>
         {pair && (
@@ -96,30 +97,32 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
 
       <div className="card p-6 mt-6 max-w-3xl">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
-          <DateField name="a" label="Ваша дата рождения" defaultValue={a?.iso ?? (typeof sp.a === "string" ? sp.a : "")} />
-          <DateField name="b" label="Дата рождения партнёра" defaultValue={b?.iso ?? (typeof sp.b === "string" ? sp.b : "")} />
-          <button type="submit" className="btn">Рассчитать</button>
+          <DateField name="a" label="Ваша дата рождения" defaultValue={a?.iso ?? (typeof sp.a === "string" ? sp.a : "")} invalid={invalid && !a} />
+          <DateField name="b" label="Дата рождения партнёра" defaultValue={b?.iso ?? (typeof sp.b === "string" ? sp.b : "")} invalid={invalid && !b} />
+          <button type="submit" className="btn min-h-11">Рассчитать</button>
         </Form>
-        <FormError text={invalid ? "Введите обе даты рождения полностью." : undefined} />
+        <FormError text={invalid ? dateErrorText(!a ? sp.a : sp.b, "Введите обе даты рождения полностью.") : undefined} />
       </div>
 
       {result}
+      <ScrollToResult key={`${a?.iso}-${b?.iso}`} id="rezultat" when={!!(a && b)} />
 
       <section className="mt-12">
         <div className="ornament mb-4"><h2 className="text-2xl">Таблица совместимости чисел судьбы</h2><span className="mono">9 × 9, процент</span></div>
+        {/* На телефоне 10 столбцов помещаются в 358 px за счёт мелкого шрифта; первый столбец закреплён на случай узкого экрана. */}
         <div className="overflow-x-auto">
-          <table className="text-sm min-w-[520px] w-full">
+          <table className="text-xs sm:text-sm w-full tabular-nums">
             <thead>
-              <tr><th className="p-2 text-left mono">число</th>{CORE_NUMBERS.map((n) => <th key={n} className="p-2 display text-lg">{n}</th>)}</tr>
+              <tr><th className="p-1 sm:p-2 text-left mono sticky left-0 bg-bg">число</th>{CORE_NUMBERS.map((n) => <th key={n} className="p-1 sm:p-2 display text-base sm:text-lg">{n}</th>)}</tr>
             </thead>
             <tbody>
               {CORE_NUMBERS.map((r) => (
                 <tr key={r} className="border-t border-line">
-                  <th className="p-2 text-left display text-lg">{r}</th>
+                  <th className="p-1 sm:p-2 text-left display text-base sm:text-lg sticky left-0 bg-bg">{r}</th>
                   {CORE_NUMBERS.map((c) => {
                     const p = byKey(pairKey(r, c));
                     const v = p?.percent ?? 0;
-                    return <td key={c} className={`p-2 text-center ${v >= 84 ? "text-accent font-semibold" : v < 62 ? "text-muted" : ""}`}>{v}%</td>;
+                    return <td key={c} className={`px-0.5 py-1.5 sm:p-2 text-center ${v >= 84 ? "text-accent-text font-semibold" : v < 62 ? "text-muted" : ""}`}>{v}%</td>;
                   })}
                 </tr>
               ))}
@@ -133,7 +136,7 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
         <div>
           <h2 className="text-2xl mb-3">Самые гармоничные пары</h2>
           <ul className="grid gap-2">
-            {sorted.slice(0, 8).map((p) => <li key={p.pair} className="card px-4 py-3 flex justify-between gap-3"><span>{p.pair.replace("-", " и ")} · {p.title}</span><span className="text-accent">{p.percent}%</span></li>)}
+            {sorted.slice(0, 8).map((p) => <li key={p.pair} className="card px-4 py-3 flex justify-between gap-3"><span>{p.pair.replace("-", " и ")} · {p.title}</span><span className="text-accent-text">{p.percent}%</span></li>)}
           </ul>
         </div>
         <div>

@@ -28,8 +28,8 @@ export async function generateMetadata({ params }: PageProps<"/chislo-sudby/[num
 }
 
 function NumChip({ n, current }: { n: number; current: number }) {
-  if (n === current) return <span className="chip">{n} · вы</span>;
-  return <Link href={`/chislo-sudby/${n}`} className="chip hover:text-ink">{n}</Link>;
+  if (n === current) return <span className="chip min-h-11! justify-center">{n} · вы</span>;
+  return <Link href={`/chislo-sudby/${n}`} className="chip min-w-11 min-h-11! justify-center hover:text-ink">{n}</Link>;
 }
 
 export default async function DestinyNumberPage({ params }: PageProps<"/chislo-sudby/[number]">) {
@@ -96,7 +96,7 @@ export default async function DestinyNumberPage({ params }: PageProps<"/chislo-s
           {master && (
             <div className="card p-5">
               <p className="mono mb-2">Базовое число</p>
-              <p className="text-sm">В спокойные периоды {n.number} проявляется как <Link href={`/chislo-sudby/${core}`} className="text-accent underline">число {core}</Link>. Читайте обе страницы.</p>
+              <p className="text-sm">В спокойные периоды {n.number} проявляется как <Link href={`/chislo-sudby/${core}`} className="text-accent-text underline">число {core}</Link>. Читайте обе страницы.</p>
             </div>
           )}
           <div className="card p-5">
