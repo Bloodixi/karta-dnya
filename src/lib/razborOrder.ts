@@ -11,6 +11,8 @@ import { mailBuyer, mailGift, mailReceipt } from "./razborMail";
 import { giftDue, giftFromMetadata, maskEmail } from "./razborGift";
 import type { RazborInput } from "./razbor";
 import { compatUpsellPath, PRODUCTS, productOf } from "./razborProducts";
+import { resumePath } from "./razborResume";
+import { remindAbandoned } from "./razborAbandon";
 import { SITE } from "./site";
 import { sharedRateLimit } from "./rateLimit";
 
@@ -220,8 +222,9 @@ async function retryPaid(o: Order): Promise<Order> {
 /**
  * Фоновый повтор (таймер на VPS раз в 15 минут): оплаченные боевые заказы за 3 дня, у которых нет чека или письма —
  * покупатель мог закрыть «Спасибо», а сайт перезапуститься до чека. Те же паузы и лимит, что у повтора со страницы.
+ * Затем — письма о брошенной оплате (razborAbandon).
  */
-export async function retryStuck(): Promise<{ checked: number; done: number }> {
+export async function retryStuck(): Promise<{ checked: number; done: number; abandoned: number }> {
   const since = Date.now() - 3 * 86400_000;
   const stuck = await listOrders((o) => o.status === "paid" && Boolean(o.receipt_due) && !finished(o) && !o.stuck_at && Date.parse(o.paid_at) > since);
   let done = 0;
@@ -229,7 +232,9 @@ export async function retryStuck(): Promise<{ checked: number; done: number }> {
     const r = await retryPaid(o).catch((e) => (console.error("razbor retry:", o.id, e instanceof Error ? e.message : "error"), o));
     if (finished(r)) done++;
   }
-  return { checked: stuck.length, done };
+  // письмо «Оплата не завершилась» — тем же запуском таймера
+  const abandoned = await remindAbandoned(applyPayment).catch((e) => (console.error("razbor abandon:", e instanceof Error ? e.message : "error"), 0));
+  return { checked: stuck.length, done, abandoned };
 }
 
 /** Предупреждения о несовпадении суммы для заказов без файла — в памяти процесса, чтобы не повторять на каждый опрос. */
@@ -357,6 +362,10 @@ export type OrderState = {
   pair?: string;
   /** Допродажа после обычного разбора себе: совместимость с первой датой покупателя. */
   upsell?: string;
+  /** Не оплачен: страница продукта с формой, заполненной из заказа («Вернуться к оплате»). */
+  resume?: string;
+  /** Такого заказа нет: ни файла, ни платежа в ЮKassa (или номер не похож на номер заказа). */
+  missing?: boolean;
 };
 
 /**
@@ -364,10 +373,10 @@ export type OrderState = {
  * offline — только файл заказа, без ЮKassa, чека и писем (лимит запросов исчерпан); неоплаченный — «ждём».
  */
 export async function orderState(orderId: string, cookiePaymentId?: string, offline = false): Promise<OrderState> {
-  if (!isOrderId(orderId)) return { status: "unknown" };
+  if (!isOrderId(orderId)) return { status: "unknown", missing: true };
   let o = await getOrder(orderId);
   if (offline) {
-    if (o?.status !== "paid") return { status: o?.status === "canceled" || o?.status === "refunded" ? o.status : "pending" };
+    if (o?.status !== "paid") return { status: o?.status === "canceled" || o?.status === "refunded" ? o.status : "pending", ...(o ? { product: productOf(o.product), resume: resumePath(o) } : {}) };
   } else if (o?.status !== "paid" && o?.status !== "refunded") {
     let p: Payment | null = null;
     if (o?.payment_id) {
@@ -379,9 +388,10 @@ export async function orderState(orderId: string, cookiePaymentId?: string, offl
     }
     if (!p) p = await findPayment(orderId, cookiePaymentId);
     if (p && p.metadata?.order === orderId) o = (await applyPayment(p)) ?? o;
+    if (!o && !p) return { status: "unknown", missing: true };
   }
   if (!o) return { status: "unknown" };
-  if (o.status !== "paid") return { status: o.status, product: productOf(o.product) };
+  if (o.status !== "paid") return { status: o.status, product: productOf(o.product), resume: resumePath(o) };
   if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
   if (!offline && o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
   if (o.status !== "paid") return { status: o.status }; // возврат мог прийти, пока шла проверка

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { isValidDate } from "@/lib/numerology";
 
 /**
@@ -59,6 +59,7 @@ export default function BirthDateInput({
   min = "1900-01-01",
   max,
   className,
+  onIso,
 }: {
   name: string;
   defaultValue?: string;
@@ -69,6 +70,8 @@ export default function BirthDateInput({
   /** Верхняя граница (сегодня по МСК), считается на сервере — без расхождения при гидратации. */
   max: string;
   className?: string;
+  /** Сообщает дату ГГГГ-ММ-ДД (или пусто, пока она неполная) — для черновика формы. */
+  onIso?: (iso: string) => void;
 }) {
   const [text, setText] = useState(() => toText(defaultValue));
   const [touched, setTouched] = useState(false);
@@ -111,6 +114,13 @@ export default function BirthDateInput({
   }
 
   const iso = toIso(text);
+  const report = useRef(onIso);
+  useLayoutEffect(() => {
+    report.current = onIso;
+  });
+  useEffect(() => {
+    report.current?.(iso);
+  }, [iso]);
   const showError = invalid || (touched && !!error);
   return (
     <>

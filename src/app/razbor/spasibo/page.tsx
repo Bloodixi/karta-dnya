@@ -65,14 +65,17 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
   const live = orderStateLimiter().take(clientIpFromHeaders(await headers()));
   const state = await orderState(order, cookiePayment, !live).catch((e) => {
     console.error("razbor spasibo:", order, e);
-    return { status: "unknown" as const, path: undefined, short: undefined, receipt: undefined };
+    return { status: "unknown" } as OrderState;
   });
   const canceled = state.status === "canceled";
   const refunded = state.status === "refunded";
-  const waiting = Boolean(order) && (state.status === "pending" || state.status === "unknown");
+  // номера нет, он битый или такого заказа нет ни в файлах, ни в ЮKassa — не ждём впустую
+  const missing = !order || Boolean(state.missing);
+  const waiting = !missing && (state.status === "pending" || state.status === "unknown");
 
-  const product = "product" in state && state.product ? state.product : "razbor";
-  const back = PRODUCTS[product].path;
+  const product = state.product ?? "razbor";
+  // форма продукта, заполненная из заказа: даты, имена, подарок, пакет
+  const resume = state.resume ?? `${PRODUCTS[product].path}#oplata`;
   if (state.status === "paid" && state.path) {
     const url = `${SITE.url}${state.short ?? state.path}`;
     const head =
@@ -136,7 +139,7 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
             <h1 className="text-3xl">Оплата не прошла</h1>
             <p className="mt-3 text-muted">Деньги не списаны. Можно попробовать ещё раз — бесплатная часть и форма оплаты ждут на странице заказа.</p>
             <p className="mt-5">
-              <Link href={`${back}#oplata`} className="btn">Вернуться к оплате</Link>
+              <Link href={resume} className="btn">Вернуться к оплате</Link>
             </p>
           </>
         ) : waiting ? (
@@ -144,6 +147,25 @@ export default async function RazborThanksPage({ searchParams }: PageProps<"/raz
             <h1 className="text-3xl">Ждём подтверждение оплаты</h1>
             <p className="mt-3 text-muted">Обычно это занимает несколько секунд. Как только банк подтвердит платёж, разбор откроется сам.</p>
             <PaymentWaiter order={order} fallback={<Stuck order={order} />} />
+            <p className="mt-5 text-sm text-muted">
+              Не завершили оплату? <Link href={resume} className="text-accent-text underline">Вернуться к оплате</Link>
+            </p>
+          </>
+        ) : missing ? (
+          <>
+            <h1 className="text-3xl">Заказ не найден</h1>
+            <p className="mt-3 text-muted">
+              {order ? "Не нашли заказ по этой ссылке — возможно, в адресе опечатка." : "В ссылке нет номера заказа."} Бесплатная часть и форма оплаты ждут на странице продукта.
+            </p>
+            <p className="mt-5 flex flex-wrap gap-2">
+              <Link href={`${PRODUCTS.razbor.path}#oplata`} className="btn">К разбору по дате рождения</Link>
+              <Link href={`${PRODUCTS.compat.path}#oplata`} className="btn btn-ghost">К совместимости пары</Link>
+              <Link href={`${PRODUCTS.child.path}#oplata`} className="btn btn-ghost">К детскому разбору</Link>
+            </p>
+            <p className="mt-4 text-sm text-muted">
+              Уже оплатил(а), а ссылка потерялась? Её можно запросить на e-mail внизу <Link href="/razbor#dostup" className="underline hover:text-ink">страницы разбора</Link>.
+            </p>
+            {order ? <Stuck order={order} /> : null}
           </>
         ) : (
           <>

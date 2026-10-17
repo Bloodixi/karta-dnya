@@ -33,7 +33,8 @@ export default function CompatPackFields({
   /** Первая дата формы, дд.мм.гггг — по ней личный разбор. */
   firstDate: string;
   err?: string;
-  pack?: { addon: number; total: number; on?: boolean };
+  /** full — цена личного разбора отдельно (для «вместо …»). */
+  pack?: { addon: number; total: number; full?: number; on?: boolean };
 }) {
   const [on, setOn] = useState(Boolean(offer?.on));
   const sent = useRef(false);
@@ -52,7 +53,7 @@ export default function CompatPackFields({
           <label className="flex items-start gap-2 text-sm cursor-pointer">
             <input type="checkbox" name="pack" value="1" checked={on} onChange={(e) => toggle(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-[var(--accent)]" />
             <span>
-              <strong>+ личный разбор за {offer.addon} ₽</strong>
+              <strong>+ личный разбор за {offer.addon} ₽{offer.full && offer.full > offer.addon ? ` вместо ${offer.full} ₽` : ""}</strong>
               <span className="block text-muted">
                 Разбор по дате {firstDate} — для того, кто указан первым: числа, квадрат Пифагора, личный год и прогноз на 12 месяцев.
               </span>

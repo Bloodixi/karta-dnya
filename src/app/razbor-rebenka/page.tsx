@@ -138,7 +138,7 @@ export default async function ChildRazborPage({ searchParams }: PageProps<"/razb
               {!ready ? (
                 <p className="mt-4 text-sm">Оплата детского разбора скоро откроется — тексты дописываются. Бесплатная часть уже работает.</p>
               ) : teaser && date ? (
-                <RazborCheckoutForm counter={counter} goal="child_checkout_click">
+                <RazborCheckoutForm counter={counter} goal="child_checkout_click" draft={{ key: "child", scope: date.iso, err }}>
                   <input type="hidden" name="product" value="child" />
                   <input type="hidden" name="date" value={date.iso} />
                   <label className="grid gap-1 text-sm mt-5 max-w-sm">
