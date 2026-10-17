@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
-import { DIGITS, clockDescription, clockFaq, clockSteps, clockTitle, compactTime, digitsOf, findClock, getClockNumbers, relatedClocks } from "@/lib/clock";
+import { CLOCK_KINDS, DIGITS, clockDescription, clockFaq, clockSteps, clockTitle, compactTime, digitsOf, findClock, getClockNumbers, relatedClocks } from "@/lib/clock";
 import { pageTitle } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -37,7 +37,7 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
   const { mirror, sameSum } = relatedClocks(c, all);
   const steps = clockSteps(c);
   const faq = clockFaq(c);
-  const kindWord = c.kind === "double" ? "одинаковые" : "зеркальные";
+  const kindWord = CLOCK_KINDS[c.kind].plural;
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/numerologiya/chisla-na-chasah", label: "Числа на часах" }, { href: `/numerologiya/chisla-na-chasah/${time}`, label: c.time }]} />
