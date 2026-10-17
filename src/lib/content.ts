@@ -139,7 +139,9 @@ export type NameNumberText = { number: number; title: string; text: string; soul
 export type PersonalYearText = { number: number; title: string; theme: string; text: string[]; focus: string[]; advice: string };
 export type LuckyNumberText = { number: number; title: string; text: string; hint: string };
 export type BirthdayNumberText = { number: number; title: string; text: string };
-export type Dream = { slug: string; word: string; short: string; meaning: string; variants: { when: string; means: string }[]; mood: string };
+/** Расширенный разбор символа (у главных символов сонника): общий смысл, детали сна, для женщины/мужчины, повторяющийся сон, FAQ. */
+export type DreamLong = { intro: string[]; details: { title: string; text: string }[]; forWhom?: { who: string; text: string }[]; repeat: string; faq: Faq[] };
+export type Dream = { slug: string; word: string; short: string; meaning: string; variants: { when: string; means: string }[]; mood: string; long?: DreamLong };
 export type Stone = { slug: string; name: string; color: string; chakra: string; zodiac: string[]; numbers: number[]; properties: string[]; description: string; howToUse: string; care: string };
 
 export type Rune = {

@@ -166,9 +166,29 @@ function DreamPage({ slug }: { slug: string }) {
       </div>
       <div className="prose mt-4">
         <p>{d.meaning}</p>
+        {d.long?.intro.map((t, i) => <p key={i}>{t}</p>)}
+        {d.long && (
+          <>
+            <h2>{d.word} во сне: детали и ситуации</h2>
+            {d.long.details.map((x, i) => (
+              <section key={i}>
+                <h3>{x.title}</h3>
+                <p>{x.text}</p>
+              </section>
+            ))}
+            {d.long.forWhom?.map((x, i) => (
+              <section key={i}>
+                <h2>{d.word} во сне — {x.who.toLowerCase()}</h2>
+                <p>{x.text}</p>
+              </section>
+            ))}
+            <h2>Если сон повторяется</h2>
+            <p>{d.long.repeat}</p>
+          </>
+        )}
         {d.variants.length > 0 && (
           <>
-            <h2>Варианты сна</h2>
+            <h2>{d.long ? "Коротко о вариантах" : "Варианты сна"}</h2>
             <ul>
               {d.variants.map((v, i) => (
                 <li key={i}>
@@ -188,6 +208,7 @@ function DreamPage({ slug }: { slug: string }) {
           <span aria-hidden="true" className="text-accent-text text-xl shrink-0">→</span>
         </Link>
       )}
+      {d.long && <Faq items={d.long.faq} />}
       <TelegramDaily campaign="sonnik-simvol" text="Карта дня, Луна и новые статьи о снах — каждое утро в 8:00 по Москве." />
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Другие символы</h2>
