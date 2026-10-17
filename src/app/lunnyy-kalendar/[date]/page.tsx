@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import MoonPhase from "@/components/MoonPhase";
+import RazborCta from "@/components/RazborCta";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, moonWindow, moonWindowKeys, PHASES } from "@/lib/moon";
 
@@ -63,6 +64,7 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
         <Link href="/lunnyy-kalendar" className="btn btn-ghost">Сегодня и месяц</Link>
         {next >= win.from && next <= win.to ? <Link href={`/lunnyy-kalendar/${next}`} className="btn btn-ghost">{formatDateRu(next, { day: "numeric", month: "long" })} →</Link> : <span />}
       </div>
+      <RazborCta from="lunnyy-den" />
     </div>
   );
 }

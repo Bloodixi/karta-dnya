@@ -8,6 +8,7 @@ import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
 import { SITE } from "@/lib/site";
 import HoroscopeCard from "@/components/HoroscopeCard";
 import PeriodNav from "@/components/PeriodNav";
+import RazborCta from "@/components/RazborCta";
 import ZodiacSign from "@/components/ZodiacSign";
 import { findZodiac, getZodiac } from "@/lib/content";
 import { horoscopeFor, PERIODS, PERIOD_KEYS, periodLabel, todayKey, type PeriodKey } from "@/lib/daily";
@@ -56,6 +57,7 @@ export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[s
       <p className="mt-6 text-muted">
         <Link href={`/goroskop/${sign}`} className="text-accent-text underline">Характер знака {z.name} и гороскоп на сегодня</Link>
       </p>
+      <RazborCta from="goroskop-period" />
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Гороскоп {PERIODS[pk].title} для других знаков</h2>
         <div className="flex flex-wrap gap-2">

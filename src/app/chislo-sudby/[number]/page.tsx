@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import NumerologyNav from "@/components/NumerologyNav";
-import RazborCta from "@/components/RazborCta";
+import { ScopedRazborCta } from "@/components/RazborDateScope";
 import { findNumerology, getNumerology } from "@/lib/content";
 import { isMaster, NUMBER_WORDS, toCore } from "@/lib/numerology";
 import { pageTitle } from "@/lib/site";
@@ -106,7 +106,8 @@ export default async function DestinyNumberPage({ params }: PageProps<"/chislo-s
         </aside>
       </div>
 
-      <RazborCta from="chislo-sudby-znachenie" />
+      {/* если пришли из калькулятора со ссылкой ?d=ГГГГ-ММ-ДД — разбор откроется сразу по этой дате */}
+      <ScopedRazborCta from="chislo-sudby-znachenie" />
       <Faq items={n.faq ?? []} />
       <NumerologyNav current="/chislo-sudby" />
     </div>
