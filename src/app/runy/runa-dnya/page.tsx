@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import RazborCta from "@/components/RazborCta";
 import RuneGlyph from "@/components/RuneGlyph";
 import { runeOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import type { Faq as FaqItem } from "@/lib/content";
@@ -38,34 +39,41 @@ export default function RuneOfDayPage() {
             <RuneGlyph slug={today.rune.slug} att={today.rune.att} size={220} className={`mx-auto ${today.reversed ? "rotate-180" : ""}`} />
             <p className="text-xs text-muted mt-3 text-center">{today.rune.orig} · {today.rune.keywords.slice(0, 3).join(" · ")}</p>
           </div>
-          <div className="prose">
-            <p className="chip">{today.reversed ? "перевёрнутое положение" : "прямое положение"}</p>
-            <h2>Руна {today.rune.name}</h2>
-            <p>{today.rune.about}</p>
-            <h2>Значение на сегодня</h2>
-            <p>{today.reversed && today.rune.reversed ? today.rune.reversed : today.rune.upright}</p>
-            <h2>В отношениях</h2>
-            <p>{today.rune.love}</p>
-            <h2>В делах</h2>
-            <p>{today.rune.work}</p>
-            <h2>Как прожить этот день</h2>
-            <p>{today.rune.practice}</p>
-            <h2>Совет дня</h2>
-            <blockquote>{today.rune.advice}</blockquote>
-            {tomorrow && (
-              <p className="text-sm text-muted">
-                Руна на завтра: <Link href={`/runy/${tomorrow.rune.slug}`}>{tomorrow.rune.name}</Link>{tomorrow.reversed ? " (перевёрнутая)" : ""}. Загляните завтра за толкованием.
+          <div className="min-w-0">
+            <div className="prose">
+              <p className="chip">{today.reversed ? "перевёрнутое положение" : "прямое положение"}</p>
+              <h2>Руна {today.rune.name}</h2>
+              <p>{today.rune.about}</p>
+              <h2>Значение на сегодня</h2>
+              <p>{today.reversed && today.rune.reversed ? today.rune.reversed : today.rune.upright}</p>
+              <h2>В отношениях</h2>
+              <p>{today.rune.love}</p>
+              <h2>В делах</h2>
+              <p>{today.rune.work}</p>
+              <h2>Как прожить этот день</h2>
+              <p>{today.rune.practice}</p>
+              <h2>Совет дня</h2>
+              <blockquote>{today.rune.advice}</blockquote>
+              {tomorrow && (
+                <p className="text-sm text-muted">
+                  Руна на завтра: <Link href={`/runy/${tomorrow.rune.slug}`}>{tomorrow.rune.name}</Link>{tomorrow.reversed ? " (перевёрнутая)" : ""}. Загляните завтра за толкованием.
+                </p>
+              )}
+              <p>
+                <Link href={`/runy/${today.rune.slug}`}>Подробнее о руне {today.rune.name}</Link> · <Link href="/runy">все 24 руны</Link> · <Link href="/karta-dnya">карта дня Таро</Link>
               </p>
-            )}
-            <p>
-              <Link href={`/runy/${today.rune.slug}`}>Подробнее о руне {today.rune.name}</Link> · <Link href="/runy">все 24 руны</Link> · <Link href="/karta-dnya">карта дня Таро</Link>
-            </p>
+            </div>
+            {/* приглашение к разбору и FAQ — в колонке текста, той же ширины, что и трактовка */}
+            <RazborCta from="runa-dnya" className="mt-10 max-w-[40rem]" />
+            <Faq items={FAQ} className="max-w-[40rem]" />
           </div>
         </div>
       ) : (
-        <p className="mt-6 text-muted">Руны готовятся, загляните чуть позже.</p>
+        <>
+          <p className="mt-6 text-muted">Руны готовятся, загляните чуть позже.</p>
+          <Faq items={FAQ} />
+        </>
       )}
-      <Faq items={FAQ} />
     </div>
   );
 }

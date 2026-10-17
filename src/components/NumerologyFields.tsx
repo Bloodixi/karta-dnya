@@ -1,3 +1,4 @@
+import BirthDateInput from "@/components/BirthDateInput";
 import ShareButtons from "@/components/ShareButtons";
 
 /** Поля форм нумерологии (серверные, без состояния): дата и текст. */
@@ -20,20 +21,22 @@ export function dateErrorText(raw: string | string[] | undefined, fallback: stri
 /** id текста ошибки формы: поле с aria-invalid ссылается на него через aria-describedby. */
 export const FORM_ERROR_ID = "form-error";
 
+/**
+ * Дата рождения: ввод цифрами по маске дд.мм.гггг (BirthDateInput), форма отправляет `name` как ГГГГ-ММ-ДД.
+ * Системный календарь на Android открывается на сегодняшнем дне — до нужного года долго листать.
+ */
 export function DateField({ name, label, defaultValue, required = true, invalid = false }: { name: string; label: string; defaultValue?: string; required?: boolean; invalid?: boolean }) {
   return (
     <label className={LABEL}>
       {label}
-      <input
-        type="date"
+      <BirthDateInput
         name={name}
         defaultValue={defaultValue}
         required={required}
-        min="1900-01-01"
         max={todayIso()}
-        aria-invalid={invalid || undefined}
-        aria-describedby={invalid ? FORM_ERROR_ID : undefined}
-        className={INPUT}
+        invalid={invalid}
+        describedBy={invalid ? FORM_ERROR_ID : undefined}
+        className={INPUT + " tabular-nums"}
       />
     </label>
   );

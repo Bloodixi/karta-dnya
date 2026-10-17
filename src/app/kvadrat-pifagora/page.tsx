@@ -3,7 +3,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import Pythagoras from "@/components/Pythagoras";
-import RazborCta from "@/components/RazborCta";
+import RazborDateScope, { ScopedRazborCta } from "@/components/RazborDateScope";
 
 export const metadata: Metadata = {
   title: "Квадрат Пифагора по дате рождения: рассчитать онлайн",
@@ -23,12 +23,15 @@ export default function PythagorasPage() {
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/kvadrat-pifagora", label: "Квадрат Пифагора" }]} />
       <h1 className="text-3xl md:text-4xl font-semibold">Квадрат Пифагора по дате рождения</h1>
       <p className="text-muted mt-2 max-w-2xl">Введите дату, и калькулятор построит психоматрицу: четыре рабочих числа, девять ячеек и расшифровку каждой.</p>
-      <div className="mt-6 max-w-3xl"><Pythagoras /></div>
-      <section className="prose mt-10">
-        <h2>Как считается</h2>
-        <p>Складываются все цифры даты рождения (первое рабочее число), затем цифры результата (второе). Третье число — первое минус удвоенная первая цифра дня рождения, четвёртое — сумма цифр третьего. Все цифры даты и рабочих чисел раскладываются по ячейкам от 1 до 9. Подробнее с примером в статье <Link href="/numerologiya/kvadrat-pifagora">как рассчитать и расшифровать квадрат Пифагора</Link>, а итоговое число даты смотрите в <Link href="/chislo-sudby">калькуляторе числа судьбы</Link>.</p>
-      </section>
-      <RazborCta from="kvadrat-pifagora" />
+      {/* дата из калькулятора (или ?d= в адресе) подставляется в приглашение к разбору */}
+      <RazborDateScope>
+        <div className="mt-6 max-w-3xl"><Pythagoras /></div>
+        <section className="prose mt-10">
+          <h2>Как считается</h2>
+          <p>Складываются все цифры даты рождения (первое рабочее число), затем цифры результата (второе). Третье число — первое минус удвоенная первая цифра дня рождения, четвёртое — сумма цифр третьего. Все цифры даты и рабочих чисел раскладываются по ячейкам от 1 до 9. Подробнее с примером в статье <Link href="/numerologiya/kvadrat-pifagora">как рассчитать и расшифровать квадрат Пифагора</Link>, а итоговое число даты смотрите в <Link href="/chislo-sudby">калькуляторе числа судьбы</Link>.</p>
+        </section>
+        <ScopedRazborCta from="kvadrat-pifagora" />
+      </RazborDateScope>
       <Faq items={FAQ} />
     </div>
   );

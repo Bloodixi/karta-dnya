@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import RazborCta from "@/components/RazborCta";
 import TarotCardView from "@/components/TarotCardView";
 import { findTarot, findTarotExtra, getTarot } from "@/lib/content";
 
@@ -77,6 +78,8 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
           {c.arcana === "major" && <p>Этот образ есть и в матрице судьбы: <Link href={`/matrica-sudby/arkany/${c.number === 0 ? 22 : c.number}`}>{c.number === 0 ? 22 : c.number} аркан, {c.name}</Link>.</p>}
         </div>
       </div>
+      {/* на десктопе — под колонкой текста, справа от карты */}
+      <RazborCta from="taro-karta" className="mt-10 md:ml-[272px] md:max-w-[40rem]" />
       <div className="mt-10 flex flex-wrap gap-2 justify-between text-sm">
         <Link href={`/taro/karty/${prev.slug}`} className="btn btn-ghost">← {prev.name}</Link>
         <Link href="/taro/karty" className="btn btn-ghost">Все карты</Link>
