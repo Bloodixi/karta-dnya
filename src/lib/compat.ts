@@ -109,6 +109,13 @@ export function allPairs(): { a: Zodiac; b: Zodiac; slug: string }[] {
   return out;
 }
 
+/** Адрес основной страницы пары: знаки в порядке зодиака (lev-oven → oven-lev). Зеркальные страницы ставят canonical на неё. */
+export function canonicalPairSlug(a: Zodiac, b: Zodiac): string {
+  const z = getZodiac();
+  const ia = z.findIndex((x) => x.slug === a.slug), ib = z.findIndex((x) => x.slug === b.slug);
+  return ia <= ib ? `${a.slug}-${b.slug}` : `${b.slug}-${a.slug}`;
+}
+
 export function parsePair(slug: string): { a: Zodiac; b: Zodiac } | null {
   const z = getZodiac();
   for (const a of z) {

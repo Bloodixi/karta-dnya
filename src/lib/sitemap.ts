@@ -1,5 +1,5 @@
 import { getArticles, getDreams, getNumerology, getRunes, getSpreads, getStones, getTarot, getZodiac, readJsonData } from "@/lib/content";
-import { allPairs } from "@/lib/compat";
+import { allPairs, canonicalPairSlug } from "@/lib/compat";
 import { getClockNumbers } from "@/lib/clock";
 import { PERIOD_KEYS, todayKey } from "@/lib/daily";
 import { moonWindowKeys } from "@/lib/moon";
@@ -85,7 +85,7 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
     case "sovmestimost": {
       const pairs = changed(app("sovmestimost"), "src/lib/compat.ts");
       add("/sovmestimost", pairs, "monthly", 0.8);
-      for (const pr of allPairs()) add(`/sovmestimost/${pr.slug}`, pairs, "monthly", 0.6);
+      for (const pr of allPairs()) if (pr.slug === canonicalPairSlug(pr.a, pr.b)) add(`/sovmestimost/${pr.slug}`, pairs, "monthly", 0.6); // зеркальные пары — canonical на основную
       break;
     }
     case "numerologiya": {
