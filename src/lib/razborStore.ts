@@ -222,17 +222,17 @@ export async function paidOrdersByEmail(email: string): Promise<Order[]> {
 /** Сколько хранить брошенные заказы (не оплачены или отменены): в них e-mail и даты рождения. */
 export const ABANDONED_KEEP_DAYS = 7;
 
-/** Заказ можно удалить: не оплачен (pending/canceled), не подарок, без следов оплаты и чека, старше `days` дней. */
+/** Заказ можно удалить: не оплачен (pending/canceled, в том числе подарок), без следов оплаты и чека, старше `days` дней. */
 export function isAbandoned(o: Order, now = Date.now(), days = ABANDONED_KEEP_DAYS): boolean {
   if (o.status !== "pending" && o.status !== "canceled") return false;
-  if (o.gift || o.paid_at || o.receipt_uuid || o.receipt_unsure || o.refund_ids?.length) return false;
+  if (o.paid_at || o.gift?.sent_at || o.receipt_uuid || o.receipt_unsure || o.refund_ids?.length) return false;
   const t = Date.parse(o.created_at);
   return Number.isFinite(t) && now - t > days * 86_400_000;
 }
 
 /**
- * Ежедневная чистка: удаляет файлы брошенных заказов старше 7 дней. Оплаченные, возвращённые, тестовые оплаченные
- * и подарки не трогает. Каждый файл перечитывается под очередью заказа: вебхук, пришедший в ту же секунду, не потеряется.
+ * Ежедневная чистка: удаляет файлы брошенных заказов старше 7 дней (и неоплаченных подарков тоже). Оплаченные,
+ * возвращённые и тестовые оплаченные не трогает. Каждый файл перечитывается под очередью заказа: вебхук, пришедший в ту же секунду, не потеряется.
  * Если платёж всё же пройдёт позже, заказ восстановится из metadata платежа (settleOrder с fallback).
  */
 export async function purgeAbandoned(now = Date.now()): Promise<number> {
