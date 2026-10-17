@@ -175,17 +175,17 @@ export function buildChild(i: RazborInput): RazborDoc {
   return { title: CHILD.title, who: i.name ? i.name : "", date: fmt(i), sections };
 }
 
-/** Бесплатная часть: числа ребёнка и начало раздела «Характер»; остальное — оглавлением. */
+/** Бесплатная часть: числа ребёнка, начало раздела «Характер» и целиком «Как поддержать»; остальное — оглавлением. */
 export function buildChildTeaser(i: RazborInput): RazborTeaser {
   const doc = buildChild(i);
   const get = (id: string) => doc.sections.find((s) => s.id === id)!;
   const h = get("harakter");
   const first = h.blocks.map((x) => (x.kind === "p" ? x.text : "")).join(" ");
-  const shown = new Set(["chisla", "harakter"]);
+  const shown = new Set(["chisla", "harakter", "podderzhka"]);
   return {
     who: doc.who,
     date: doc.date,
-    sections: [get("chisla"), { ...h, blocks: [{ kind: "p", text: firstSentences(first, 2) }] }],
+    sections: [get("chisla"), { ...h, blocks: [{ kind: "p", text: firstSentences(first, 2) }] }, get("podderzhka")],
     locked: CHILD_TOC.filter((t) => !shown.has(t.id)),
     months_hidden: 0,
   };

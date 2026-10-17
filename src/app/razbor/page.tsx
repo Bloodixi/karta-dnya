@@ -5,6 +5,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import { DateField, FormError, TextField } from "@/components/NumerologyFields";
+import RazborPreview from "@/components/RazborPreview";
 import RazborView from "@/components/RazborView";
 import RazborWhoWrote, { RazborPriceAside } from "@/components/RazborWhoWrote";
 import ScrollToResult from "@/components/ScrollToResult";
@@ -254,10 +255,15 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
 
           <section id="oplata" className="mt-6 max-w-3xl scroll-mt-24">
             <div className="card p-6 frame-gold">
-              <p className="mono">Полный разбор</p>
-              <p className="display text-4xl mt-2">{RAZBOR.price} ₽</p>
-              <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF. Можно оформить в подарок: с подписью, пожеланием и письмом получателю в выбранный день.</p>
-              <TrustList count={await paidCount().catch(() => 0)} />
+              <div className="flex flex-col gap-6 md:grid md:grid-cols-[minmax(0,1fr)_17rem] md:items-start">
+                <div className="min-w-0">
+                  <p className="mono">Полный разбор</p>
+                  <p className="display text-4xl mt-2">{RAZBOR.price} ₽</p>
+                  <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF. Можно оформить в подарок: с подписью, пожеланием и письмом получателю в выбранный день.</p>
+                  <TrustList count={await paidCount().catch(() => 0)} />
+                </div>
+                <RazborPreview kind="razbor" href={`${PATH}/primer`} className="max-md:order-first" />
+              </div>
 
               {err === "email" && (
                 <p role="alert" className="text-sm mt-4 border-l-2 border-accent pl-3">Укажи e-mail — на него придут ссылка на разбор и чек об оплате.</p>

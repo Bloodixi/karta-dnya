@@ -6,6 +6,7 @@ import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import { DateField, FormError, TextField } from "@/components/NumerologyFields";
 import RazborLocked, { PayError } from "@/components/RazborLocked";
+import RazborPreview from "@/components/RazborPreview";
 import RazborView from "@/components/RazborView";
 import RazborWhoWrote, { RazborPriceAside } from "@/components/RazborWhoWrote";
 import ScrollToResult from "@/components/ScrollToResult";
@@ -18,6 +19,7 @@ import { plural } from "@/lib/ruCount";
 import { pageTitle, SELLER, SITE } from "@/lib/site";
 
 const PATH = "/razbor-rebenka";
+const PRIMER = `${PATH}/primer`;
 const DESCRIPTION = `Детский нумерологический разбор по дате рождения для родителя: характер ребёнка, сильные стороны, как поддержать и на что не давить. Полный текст — ${CHILD.price} ₽.`;
 
 export const metadata: Metadata = {
@@ -110,15 +112,23 @@ export default async function ChildRazborPage({ searchParams }: PageProps<"/razb
 
           <section id="oplata" className="mt-6 max-w-3xl scroll-mt-24">
             <div className="card p-6 frame-gold">
-              <p className="mono">Полный детский разбор</p>
-              <p className="display text-4xl mt-2">{price} ₽</p>
-              <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF.</p>
-              <ul className="mt-4 grid gap-1.5 text-sm">
-                <li>{CHILD_TOC.length} разделов · характер, поддержка, занятия, возраст и пять советов родителю</li>
-                <li>
-                  Не открылся разбор — вернём деньги. <Link href="/vozvrat" className="text-accent-text underline">Условия возврата</Link>
-                </li>
-              </ul>
+              <div className="flex flex-col gap-6 md:grid md:grid-cols-[minmax(0,1fr)_17rem] md:items-start">
+                <div className="min-w-0">
+                  <p className="mono">Полный детский разбор</p>
+                  <p className="display text-4xl mt-2">{price} ₽</p>
+                  <p className="text-sm text-muted mt-2">Страница с разбором по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Разбор можно сохранить в PDF.</p>
+                  <ul className="mt-4 grid gap-1.5 text-sm">
+                    <li>{CHILD_TOC.length} разделов · характер, поддержка, занятия, возраст и пять советов родителю</li>
+                    <li>
+                      Не открылся разбор — вернём деньги. <Link href="/vozvrat" className="text-accent-text underline">Условия возврата</Link>
+                    </li>
+                    <li>
+                      <Link href={PRIMER} className="text-accent-text underline">Посмотреть пример детского разбора</Link>
+                    </li>
+                  </ul>
+                </div>
+                <RazborPreview kind="child" href={PRIMER} className="max-md:order-first" />
+              </div>
 
               <PayError text={err ? ERRORS[err] : undefined} />
               {err === "pay" && (
@@ -161,6 +171,9 @@ export default async function ChildRazborPage({ searchParams }: PageProps<"/razb
                   <li key={t.id}>{t.title}</li>
                 ))}
               </ol>
+              <p className="mt-4">
+                <Link href={PRIMER} className="text-accent-text underline">Посмотреть пример детского разбора</Link>
+              </p>
             </div>
             <div>
               <h2 className="text-2xl mb-3">Как написан</h2>
@@ -190,6 +203,7 @@ export default async function ChildRazborPage({ searchParams }: PageProps<"/razb
           points={[
             `${CHILD_TOC.length} ${plural(CHILD_TOC.length, ["раздел", "раздела", "разделов"])} · характер, поддержка, занятия, возраст и пять советов родителю`,
             "Бесплатная часть откроется сразу, без регистрации.",
+            <Link key="primer" href={PRIMER} className="text-accent-text underline">Посмотреть пример детского разбора</Link>,
           ]}
           href={ready && teaser ? "#oplata" : "#forma"}
           cta={ready && teaser ? "Открыть детский разбор" : "Ввести дату рождения ребёнка"}

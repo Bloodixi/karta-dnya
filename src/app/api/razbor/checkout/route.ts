@@ -41,11 +41,17 @@ type Parsed = {
   name2?: string;
   gift?: Gift;
   email: string;
+  /** Куда вернуть покупателя, если платёж не создался: страница формы с заполненными полями. */
+  retry: string;
 };
 
 const enc = encodeURIComponent;
 
-/** Проверка полей формы на сервере: даты, имена (cleanName — только буквы, пробел и дефис, до 60), e-mail, подарок. */
+/**
+ * Проверка полей формы на сервере: даты, имена (cleanName — только буквы, пробел и дефис, до 60), e-mail, подарок.
+ * Пакет «разбор + совместимость» (pack=1) приходит из двух форм: разбора (вторая дата — date2) и совместимости
+ * (product=compat, первая дата — личный разбор). Заказ в обоих случаях одинаковый, отличается только страница возврата.
+ */
 function parse(form: FormData): { ok: Parsed } | { back: string } {
   const kind = kindOf(form.get("product"));
   const a = parseDate(String(form.get("date") ?? ""));
@@ -56,12 +62,13 @@ function parse(form: FormData): { ok: Parsed } | { back: string } {
 
   if (kind === "compat") {
     const base = PRODUCTS.compat.path;
-    const again = `a=${a?.iso ?? ""}&b=${b?.iso ?? ""}${name ? `&na=${enc(name)}` : ""}${name2 ? `&nb=${enc(name2)}` : ""}`;
+    const pack = form.get("pack") === "1";
+    const again = `a=${a?.iso ?? ""}&b=${b?.iso ?? ""}${name ? `&na=${enc(name)}` : ""}${name2 ? `&nb=${enc(name2)}` : ""}${pack ? "&p=1" : ""}`;
     if (!a || !b) return { back: `${base}?${again}&err=date` };
     if (!name || !name2) return { back: `${base}?${again}&err=name` };
     if (!email) return { back: `${base}?${again}&err=email` };
     if (!compatReady()) return { back: `${base}?${again}&err=soon` };
-    return { ok: { product: "compat", a, name, b, name2, email } };
+    return { ok: { product: pack ? "pack" : "compat", a, name, b, name2, email, retry: `${base}?${again}` } };
   }
 
   if (kind === "child") {
@@ -72,7 +79,7 @@ function parse(form: FormData): { ok: Parsed } | { back: string } {
     if (age < 0 || age > CHILD_MAX_AGE) return { back: `${base}?${again}&err=age` };
     if (!email) return { back: `${base}?${again}&err=email` };
     if (!childReady()) return { back: `${base}?${again}&err=soon` };
-    return { ok: { product: "child", a, name, email } };
+    return { ok: { product: "child", a, name, email, retry: `${base}?${again}` } };
   }
 
   const isGift = form.get("for") === "gift";
@@ -91,7 +98,7 @@ function parse(form: FormData): { ok: Parsed } | { back: string } {
     if (!compatReady()) return { back: `/razbor?${again}&err=soon` };
   }
   if (!email) return { back: `/razbor?${again}&err=email` };
-  return { ok: { product: pack ? "pack" : "razbor", a, name, ...(pack ? { b: b!, name2 } : {}), gift, email } };
+  return { ok: { product: pack ? "pack" : "razbor", a, name, ...(pack ? { b: b!, name2 } : {}), gift, email, retry: `/razbor?${again}` } };
 }
 
 /** Формы оплаты разбора, совместимости и детского разбора: создаёт платёж ЮKassa и отправляет на страницу оплаты. */
@@ -100,17 +107,13 @@ export async function POST(req: Request) {
   const r = parse(form);
   const redirect = (path: string) => NextResponse.redirect(new URL(`${path}#oplata`, SITE.url), 303);
   if ("back" in r) return redirect(r.back);
-  const { product, a, name, b, name2, gift, email } = r.ok;
+  const { product, a, name, b, name2, gift, email, retry } = r.ok;
   const info = PRODUCTS[product];
-  const retry =
-    product === "compat"
-      ? `${info.path}?a=${a.iso}&b=${b!.iso}&na=${enc(name)}&nb=${enc(name2 ?? "")}`
-      : `${info.path}?d=${a.iso}${name ? `&n=${enc(name)}` : ""}${gift ? "&g=1" : ""}${product === "pack" ? `&p=1&d2=${b!.iso}&n2=${enc(name2 ?? "")}` : ""}`;
   // тестовая покупка владельца (cookie из /api/razbor/test) — платёж в тестовом магазине
   const test = testCookieOk((await cookies()).get(TEST_COOKIE)?.value);
   if (!yookassaReady(test ? "test" : "live")) return redirect(`${retry}&err=pay`);
   // считаем только попытки, которые дошли бы до ЮKassa: опечатка в форме лимит не тратит
-  if (!byIp.take(clientIp(req))) return tooMany(info.path);
+  if (!byIp.take(clientIp(req))) return tooMany(retry.split("?")[0]);
 
   const order = randomBytes(9).toString("base64url");
   // отложенный подарок: прогноз — с месяца, когда получатель откроет письмо (его же yr/mo — в токене и metadata)
