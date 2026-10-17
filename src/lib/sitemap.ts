@@ -2,6 +2,7 @@ import { getArticles, getDreams, getNumerology, getRunes, getSpreads, getStones,
 import { allPairs, canonicalPairSlug } from "@/lib/compat";
 import { getClockNumbers } from "@/lib/clock";
 import { PERIOD_KEYS, todayKey } from "@/lib/daily";
+import { FORECAST_YEAR } from "@/lib/horoscopeYear";
 import { moonWindowKeys } from "@/lib/moon";
 import { SITE, type SectionKey } from "@/lib/site";
 import { getAuthors } from "@/lib/authors";
@@ -56,6 +57,10 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
         daily(`/goroskop/${z.slug}`, 0.8);
         for (const p of periods) daily(`/goroskop/${z.slug}/${p}`, 0.7);
       }
+      // Подробный гороскоп на год вперёд: /goroskop/2027 и /goroskop/<знак>/2027.
+      const year = changed(app("goroskop/2027"), app("goroskop/[sign]/2027"), data(`horoscopes/god/${FORECAST_YEAR}-01-01`));
+      add(`/goroskop/${FORECAST_YEAR}`, year, "monthly", 0.8);
+      for (const z of getZodiac()) add(`/goroskop/${z.slug}/${FORECAST_YEAR}`, year, "monthly", 0.7);
       break;
     }
     case "lunnyy-kalendar": {

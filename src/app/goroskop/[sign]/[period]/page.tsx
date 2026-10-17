@@ -11,7 +11,10 @@ import PeriodNav from "@/components/PeriodNav";
 import RazborCta from "@/components/RazborCta";
 import ZodiacSign from "@/components/ZodiacSign";
 import { findZodiac, getZodiac } from "@/lib/content";
-import { horoscopeFor, PERIODS, PERIOD_KEYS, periodLabel, todayKey, type PeriodKey } from "@/lib/daily";
+import { horoscopeFor, periodKey, PERIODS, PERIOD_KEYS, todayKey, type PeriodKey } from "@/lib/daily";
+import Year2027Teaser from "@/components/Year2027";
+import { signMeta } from "@/lib/horoscopeMeta";
+import { FORECAST_YEAR } from "@/lib/horoscopeYear";
 
 export const revalidate = 1800;
 export const dynamicParams = false;
@@ -27,11 +30,9 @@ export async function generateMetadata({ params }: PageProps<"/goroskop/[sign]/[
   const z = findZodiac(sign);
   const p = PERIODS[period as PeriodKey];
   if (!z || !p) return {};
-  return {
-    title: `${z.name}: гороскоп ${p.title}`,
-    description: `Гороскоп ${p.title} для знака ${z.name}: общий фон, любовь, работа и деньги, самочувствие и совет. ${periodLabel(period as PeriodKey)}.`,
-    alternates: { canonical: `/goroskop/${sign}/${period}` },
-  };
+  // В год подробного прогноза вкладка «Год» показывает те же тексты, что /goroskop/<знак>/<год>, — канонической считаем подробную.
+  const yearPage = period === "god" && periodKey("god").startsWith(String(FORECAST_YEAR));
+  return { ...signMeta(z.name, period as PeriodKey), alternates: { canonical: yearPage ? `/goroskop/${sign}/${FORECAST_YEAR}` : `/goroskop/${sign}/${period}` } };
 }
 
 export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[sign]/[period]">) {
@@ -39,7 +40,8 @@ export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[s
   const z = findZodiac(sign);
   const pk = period as PeriodKey;
   if (!z || !PERIODS[pk] || pk === "segodnya") notFound();
-  const h = horoscopeFor(z, pk, todayKey());
+  const date = todayKey();
+  const h = horoscopeFor(z, pk, date);
   const all = getZodiac();
   const author = horoscopeAuthor();
   return (
@@ -48,12 +50,13 @@ export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[s
       <div className="flex items-center gap-4">
         <ZodiacSign symbol={z.symbol} element={z.element} slug={`sign-${z.slug}`} size={84} className="shrink-0 size-16 sm:size-[84px]" />
         <div className="min-w-0 [overflow-wrap:anywhere]">
-          <h1 className="text-3xl md:text-4xl font-semibold">{z.name}: гороскоп {PERIODS[pk].title}</h1>
+          <h1 className="text-3xl md:text-4xl font-semibold">{z.name}: гороскоп {pk === "god" ? `на ${periodKey("god", date).slice(0, 4)} год` : PERIODS[pk].title}</h1>
           <p className="text-muted">{z.dates} · {z.element} · {z.planet}</p>
         </div>
       </div>
       <div className="mt-4"><PeriodNav current={pk} sign={z.slug} /></div>
       {h && <div className="mt-4"><HoroscopeCard h={h} /></div>}
+      {pk === "god" && <Year2027Teaser sign={z.slug} name={z.name} />}
       <p className="mt-6 text-muted">
         <Link href={`/goroskop/${sign}`} className="text-accent-text underline">Характер знака {z.name} и гороскоп на сегодня</Link>
       </p>

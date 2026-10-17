@@ -11,8 +11,10 @@ import HoroscopeGrid from "@/components/HoroscopeGrid";
 import PeriodNav from "@/components/PeriodNav";
 import RazborCta from "@/components/RazborCta";
 import ZodiacSign from "@/components/ZodiacSign";
+import Year2027Teaser from "@/components/Year2027";
 import Subscribe from "@/components/Subscribe";
 import { findZodiac, getStones, getZodiac } from "@/lib/content";
+import { hubMeta, signMeta } from "@/lib/horoscopeMeta";
 import { allHoroscopes, horoscopeFor, PERIODS, PERIOD_KEYS, periodLabel, todayKey, type PeriodKey } from "@/lib/daily";
 
 export const revalidate = 1800;
@@ -27,20 +29,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/goroskop/[sign]">): Promise<Metadata> {
   const { sign } = await params;
   if (isPeriod(sign)) {
-    const t = PERIODS[sign].title;
-    return {
-      title: `Гороскоп ${t} для всех знаков зодиака`,
-      description: `Гороскоп ${t} для каждого знака зодиака: общий фон, любовь, работа и деньги, самочувствие и совет. ${periodLabel(sign)}.`,
-      alternates: { canonical: `/goroskop/${sign}` },
-    };
+    return { ...hubMeta(sign), alternates: { canonical: `/goroskop/${sign}` } };
   }
   const z = findZodiac(sign);
   if (!z) return {};
-  return {
-    title: `${z.name}: гороскоп на сегодня и характеристика знака`,
-    description: `Гороскоп для знака ${z.name} на сегодня: любовь, работа, самочувствие и совет дня. Характер, сильные стороны и совместимость ${z.name}.`,
-    alternates: { canonical: `/goroskop/${sign}` },
-  };
+  return { ...signMeta(z.name, "segodnya"), alternates: { canonical: `/goroskop/${sign}` } };
 }
 
 export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">) {
@@ -52,9 +45,10 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
     return (
       <div className="mx-auto max-w-6xl px-4 py-8">
         <Breadcrumbs items={[{ href: "/goroskop", label: "Гороскоп" }, { href: `/goroskop/${sign}`, label: PERIODS[sign].title }]} />
-        <h1 className="text-3xl md:text-4xl font-semibold">Гороскоп {PERIODS[sign].title}: {periodLabel(sign, date)}</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold">{sign === "god" ? `Гороскоп на ${periodLabel(sign, date)}` : `Гороскоп ${PERIODS[sign].title}: ${periodLabel(sign, date)}`}</h1>
         <p className="text-muted mt-2 max-w-2xl">Прогноз {PERIODS[sign].title} для каждого знака: общий фон, любовь, дела, самочувствие и совет.</p>
         <div className="mt-4"><PeriodNav current={sign} /></div>
+        {sign === "god" && <Year2027Teaser />}
         <HoroscopeGrid items={items} period={sign} />
         {author && items.some((h) => h.source === "astro") && <AuthorCard author={author} note="гороскопы ведёт" className="mt-10" />}
       </div>
@@ -78,6 +72,7 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
       </div>
       <div className="mt-4"><PeriodNav current="segodnya" sign={z.slug} /></div>
       {h && <div className="mt-4"><HoroscopeCard h={h} /></div>}
+      <Year2027Teaser sign={z.slug} name={z.name} />
 
       <section className="prose mt-10">
         <h2>Характер знака {z.name}</h2>
