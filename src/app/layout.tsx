@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import TabBar from "@/components/TabBar";
 import JsonLd from "@/components/JsonLd";
 import Metrika from "@/components/Metrika";
+import UmamiCounter from "@/components/UmamiCounter";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import IosInstallHint from "@/components/IosInstallHint";
 import { SITE, SOCIAL } from "@/lib/site";
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
         <Metrika />
+        {process.env.NODE_ENV === "production" && <UmamiCounter />}
         <ServiceWorkerRegister />
         <IosInstallHint />
       </body>

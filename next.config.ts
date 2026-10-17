@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { UMAMI_INTERNAL_URL } from "./src/lib/umami";
 
 // Префикс короткой ссылки → [utm_source, utm_medium].
 const SHORT_LINKS: Record<string, [string, string]> = {
@@ -57,6 +58,11 @@ const nextConfig: NextConfig = {
         { key: "X-Robots-Tag", value: "noindex, nofollow" },
       ],
     })),
+  ],
+  // Umami через свой домен: скрипт и приём событий проксируются во внутренний сервис (src/lib/umami.ts).
+  rewrites: async () => [
+    { source: "/u/k.js", destination: `${UMAMI_INTERNAL_URL}/k.js` },
+    { source: "/u/api/send", destination: `${UMAMI_INTERNAL_URL}/api/send` },
   ],
   // Статьи, которые поглотили отдельные страницы-инструменты: старый адрес статьи → новая страница.
   redirects: async () => [

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { umamiTrack } from "@/lib/umami";
 
 type Ym = ((id: number, action: string, ...args: unknown[]) => void) & { a?: unknown[]; l?: number };
 
@@ -14,10 +15,11 @@ let loaded = false;
 let counterId: number | null = null;
 
 /**
- * Цель Метрики с публичной страницы. Счётчика может не быть (нет METRIKA_ID, личная страница, блокировщик) —
+ * Цель Метрики (и событие Umami) с публичной страницы. Счётчика может не быть (нет METRIKA_ID, личная страница, блокировщик) —
  * тогда молча ничего.
  */
 export function reachGoal(goal: string, params?: Record<string, string | number>) {
+  umamiTrack(goal, params);
   if (!counterId) return;
   try {
     (window as unknown as { ym?: Ym }).ym?.(counterId, "reachGoal", goal, params);

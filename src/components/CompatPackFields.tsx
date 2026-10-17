@@ -3,11 +3,13 @@
 import { useRef, useState } from "react";
 import GiftModeFields from "@/components/GiftModeFields";
 import { PayButtons } from "@/components/RazborClient";
+import { umamiTrack } from "@/lib/umami";
 
 type Ym = (id: number, action: "reachGoal", goal: string) => void;
 
 /** Цель Метрики «pack_toggle» (как на /razbor); счётчика может не быть — тогда ничего. */
 function reachGoal(counter: string | undefined, goal: string) {
+  umamiTrack(goal);
   if (!counter) return;
   try {
     const ym = (window as unknown as { ym?: Ym }).ym;

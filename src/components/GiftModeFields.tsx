@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { giftHasLink } from "@/lib/giftText";
+import { umamiTrack } from "@/lib/umami";
 
 type Ym = (id: number, action: "reachGoal", goal: string) => void;
 
 function reachGoal(counter: string | undefined, goal: string) {
+  umamiTrack(goal);
   if (!counter) return;
   try {
     const ym = (window as unknown as { ym?: Ym }).ym;

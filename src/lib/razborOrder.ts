@@ -8,6 +8,7 @@ import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeChildToken, makeCompatToken, makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
 import { mailBuyer, mailGift, mailReceipt } from "./razborMail";
+import { umamiServerEvent } from "./umamiServer";
 import { certCode, giftDue, giftFromMetadata, giftTo, maskEmail } from "./razborGift";
 import type { RazborInput } from "./razbor";
 import { compatUpsellPath, PRODUCTS, productOf } from "./razborProducts";
@@ -302,6 +303,7 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
       const url = product === "cert" ? `${SITE.url}/razbor/sertifikat?c=${certCode(order.id)}` : `${SITE.url}/r/${order.id}`;
       // Чек, письмо (ждёт PDF до минуты) и уведомление владельцу — после ответа: ЮKassa ждёт ответ на уведомление
       // недолго и при задержке шлёт его повторно. Заказ уже «paid»; повтор чека/письма защищён finishPaid и mail_sent_at.
+      if (!p.test) void umamiServerEvent("razbor_paid", "/razbor/spasibo", { product, revenue: Number(p.amount.value), currency: "RUB" });
       void (async () => {
       // тестовый магазин чек в налоговую не пробивает; письма покупателю и получателю подарка — с [ТЕСТ]
       const f = p.test ? await finishTest(order) : await finishPaid(order);

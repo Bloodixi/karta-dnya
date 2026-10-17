@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import BirthDateInput from "@/components/BirthDateInput";
 import { YearlyConsent } from "@/components/GiftModeFields";
 import { giftHasLink } from "@/lib/giftText";
+import { umamiTrack } from "@/lib/umami";
 
 type Ym = (id: number, action: "reachGoal", goal: string) => void;
 
 /** Цель Яндекс.Метрики; счётчика может не быть (нет METRIKA_ID, блокировщик) — тогда молча ничего. */
 function reachGoal(counter: string | undefined, goal: string) {
+  umamiTrack(goal);
   if (!counter) return;
   try {
     const ym = (window as unknown as { ym?: Ym }).ym;
