@@ -15,10 +15,10 @@ export function nySeason(today = todayMskIso()): boolean {
   return md >= "11-01" || md <= "01-07";
 }
 
-/** Год, на который дарят прогноз: в ноябре и декабре — следующий, в январе — текущий. */
+/** Год, на который дарят прогноз: во втором полугодии — следующий (и для проверки ?ny=1 в октябре), в январе — текущий. */
 export function nyYear(today = todayMskIso()): number {
   const y = Number(today.slice(0, 4));
-  return Number(today.slice(5, 7)) >= 11 ? y + 1 : y;
+  return Number(today.slice(5, 7)) >= 7 ? y + 1 : y;
 }
 
 /** Готовые дни отправки: 31 декабря и 1 января — только те, что ещё впереди (сегодня — это «сразу»). */
