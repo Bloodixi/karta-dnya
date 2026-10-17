@@ -7,7 +7,8 @@ import { IconBadge } from "@/components/Icons";
 import MoonPhase from "@/components/MoonPhase";
 import RazborCta from "@/components/RazborCta";
 import TarotCardView from "@/components/TarotCardView";
-import Subscribe from "@/components/Subscribe";
+import TelegramDaily from "@/components/TelegramDaily";
+import TomorrowCard from "@/components/TomorrowCard";
 import { getArticles, getZodiac } from "@/lib/content";
 import { cardOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, PHASES } from "@/lib/moon";
@@ -25,7 +26,6 @@ export const metadata: Metadata = {
 export default function Home() {
   const date = todayKey();
   const today = cardOfDay(date);
-  const tomorrow = cardOfDay(shiftKey(date, 1));
   const moon = dayInfo(date);
   const articles = getArticles().slice(0, 6);
   const zodiac = getZodiac();
@@ -53,8 +53,9 @@ export default function Home() {
               <div className="tcard-float">
                 <TarotCardView slug={today.card.slug} name={today.card.name} reversed={today.reversed} flipIn priority sizes="(min-width: 768px) 240px, 208px" />
               </div>
-              <span className="mono-text text-muted group-hover:text-[#ece9f1]">
-                {today.card.name} · {today.reversed ? "перевёрнутое положение" : "прямое положение"}
+              <span className="grid gap-1">
+                <span className="display text-xl md:text-2xl leading-tight group-hover:underline underline-offset-4">{today.card.name}</span>
+                <span className="mono-text text-muted">{today.reversed ? "перевёрнутое положение" : "прямое положение"}</span>
               </span>
             </Link>
           )}
@@ -71,15 +72,7 @@ export default function Home() {
               <span className="text-sm text-muted">{moon.lunarDay}-й лунный день · освещено {moon.illumination}%</span>
             </span>
           </Link>
-          {tomorrow && (
-            <Link href={`/taro/karty/${tomorrow.card.slug}`} className="flex items-center gap-4 p-5 md:border-r border-b md:border-b-0 border-line group">
-              <span className="w-10 shrink-0"><TarotCardView slug={tomorrow.card.slug} name={tomorrow.card.name} reversed={tomorrow.reversed} className="tcard-thumb" sizes="40px" /></span>
-              <span>
-                <b className="block font-medium group-hover:text-accent">Карта на завтра: {tomorrow.card.name}</b>
-                <span className="text-sm text-muted">{tomorrow.card.keywords.slice(0, 3).join(", ")}</span>
-              </span>
-            </Link>
-          )}
+          <TomorrowCard campaign="home" variant="tile" className="md:border-r border-b md:border-b-0 border-line" />
           <Link href="/goroskop/zavtra" className="flex items-center gap-4 p-5 group">
             <span className="mono text-2xl tracking-normal text-accent">→</span>
             <span>
@@ -130,7 +123,7 @@ export default function Home() {
       )}
 
       <div className="mx-auto max-w-6xl px-4 pt-12">
-        <Subscribe campaign="home" />
+        <TelegramDaily campaign="home" text="Карта дня, настроение знаков и Луна — в 8:00 по Москве, вечером — карта на завтра. Коротко и без рекламы." className="" />
       </div>
 
       <section className="mx-auto max-w-6xl px-4 pt-12">
