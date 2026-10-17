@@ -116,6 +116,7 @@ const HOROSCOPES_DIR = path.join(process.cwd(), "content", "data", "horoscopes")
 const horoscopeFiles = new Map<string, Map<string, HoroscopeText> | null>();
 /** Дневные периоды взаимозаменяемы по ключу: «завтра» на 6-е и «сегодня» на 7-е — одна и та же дата. */
 const DAY_PERIODS: PeriodKey[] = ["segodnya", "zavtra", "vchera"];
+const TODAY_WORD = /(^|[^а-яё])сегодня/i;
 
 function readHoroscopeFile(period: PeriodKey, key: string): Map<string, HoroscopeText> | null {
   const id = `${period}/${key}`;
@@ -141,6 +142,8 @@ export function astroHoroscopeText(sign: string, period: PeriodKey, key: string)
   for (const p of order) {
     const t = readHoroscopeFile(p, key)?.get(sign);
     if (!t || !t.general || !t.love || !t.career || !t.health) continue;
+    // «Завтра» не берёт чужой дневной текст, написанный про «сегодня».
+    if (period === "zavtra" && p !== period && TODAY_WORD.test(`${t.general} ${t.love} ${t.career} ${t.health} ${t.advice}`)) continue;
     if (t.model && t.model !== "draft") return t;
     draft ??= t;
   }
