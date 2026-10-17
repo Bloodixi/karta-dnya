@@ -7,15 +7,13 @@ import remarkHtml from "remark-html";
 import type { Faq } from "./content";
 
 /**
- * Дополнительный текст к странице-инструменту или символу сонника: Markdown с frontmatter `faq`.
+ * Дополнительный текст к странице-инструменту: Markdown с frontmatter `faq`.
  * `content/tools/<name>.md` — тексты бывших статей, поглощённых инструментами (старые адреса — 301 в next.config.ts);
- * `content/data/sonnik-extra/<slug>.md` — уникальные разделы бывших статей «к чему снится X» для страницы символа.
  */
 export type ExtraText = { html: string; faq: Faq[] };
 
 const DIRS = {
   tools: path.join(process.cwd(), "content", "tools"),
-  sonnik: path.join(process.cwd(), "content", "data", "sonnik-extra"),
 } as const;
 
 export async function getExtraText(kind: keyof typeof DIRS, name: string): Promise<ExtraText | null> {
