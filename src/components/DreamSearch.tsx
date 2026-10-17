@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { reachGoal } from "./MetrikaCounter";
 
 export type DreamItem = { slug: string; word: string; short: string; thumb?: string };
 
@@ -57,6 +58,19 @@ export default function DreamSearch({ items, intro, listHeading }: { items: Drea
   const s = q.trim().toLowerCase();
   const groups = useMemo(() => groupByLetter(items), [items]);
   const found = useMemo(() => (s ? items.filter((d) => d.word.toLowerCase().includes(s) || d.short.toLowerCase().includes(s)) : items), [s, items]);
+
+  // Ненайденные запросы — в Метрику (цель sonnik_notfound): какие символы добавить в сонник.
+  // Дебаунс 1,5 с, чтобы не слать каждую букву; один и тот же запрос — один раз за визит.
+  const sentNotFound = useRef(new Set<string>());
+  const nothing = s.length >= 3 && found.length === 0;
+  useEffect(() => {
+    if (!nothing || sentNotFound.current.has(s)) return;
+    const t = setTimeout(() => {
+      sentNotFound.current.add(s);
+      reachGoal("sonnik_notfound", { q: s.slice(0, 100) });
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [nothing, s]);
 
   // Поле поиска залипает под шапкой сайта. Метка-«датчик» над полем: когда она уходит под шапку, у полосы появляется нижняя линия.
   const sentinel = useRef<HTMLDivElement>(null);
@@ -136,7 +150,8 @@ export default function DreamSearch({ items, intro, listHeading }: { items: Drea
             ))}
           </nav>
           {groups.map(([letter, list]) => (
-            <section key={letter} id={letterAnchor(letter)} className="mt-10 scroll-mt-36 md:scroll-mt-40">
+            // content-visibility: буквы ниже экрана не рисуются и не грузят миниатюры, пока до них не долистали
+            <section key={letter} id={letterAnchor(letter)} className="mt-10 scroll-mt-36 md:scroll-mt-40 [content-visibility:auto] [contain-intrinsic-size:auto_640px]">
               <div className="ornament mb-3 border-b border-line pb-2">
                 <h2 className="text-3xl">{letter}</h2>
                 <span className="mono">{plural(list.length)}</span>
