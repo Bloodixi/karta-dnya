@@ -141,7 +141,7 @@ export default async function CompatRazborPage({ searchParams }: PageProps<"/sov
               {!ready ? (
                 <p className="mt-4 text-sm">Оплата совместимости скоро откроется — тексты для всех пар дописываются. Бесплатная часть уже работает.</p>
               ) : a && b ? (
-                <RazborCheckoutForm counter={counter} goal="compat_checkout_click">
+                <RazborCheckoutForm counter={counter} goal="compat_checkout_click" draft={{ key: "compat", scope: `${a.iso}|${b.iso}`, err }}>
                   <input type="hidden" name="product" value="compat" />
                   <input type="hidden" name="date" value={a.iso} />
                   <input type="hidden" name="date2" value={b.iso} />
@@ -160,7 +160,7 @@ export default async function CompatRazborPage({ searchParams }: PageProps<"/sov
                     price={price}
                     firstDate={dmy(a.iso)}
                     err={err}
-                    pack={packAddon > 0 ? { addon: packAddon, total: PRODUCTS.pack.price, on: one(sp.p) === "1" } : undefined}
+                    pack={packAddon > 0 ? { addon: packAddon, total: PRODUCTS.pack.price, full: PRODUCTS.razbor.price, on: one(sp.p) === "1" } : undefined}
                   />
                   <p className="text-xs text-muted mt-3 max-w-md">
                     Нажимая кнопку, ты принимаешь условия <Link href="/oferta" className="underline">оферты</Link>. Оплата через ЮKassa. Совместимость носит развлекательный и ознакомительный характер.

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { giftHasLink } from "@/lib/giftText";
+import BirthDateInput from "@/components/BirthDateInput";
 
 type Ym = (id: number, action: "reachGoal", goal: string) => void;
 
@@ -29,11 +30,55 @@ export function RazborGoal({ counter, goal }: { counter?: string; goal: string }
   return null;
 }
 
-/** Форма оплаты: цель `goal` (по умолчанию «razbor_checkout_click») при отправке, обычный POST на /api/razbor/checkout. */
-export function RazborCheckoutForm({ counter, goal = "razbor_checkout_click", children }: { counter?: string; goal?: string; children: ReactNode }) {
+/**
+ * Черновик формы оплаты совместимости и детского разбора: текстовые поля и e-mail (они без состояния React) —
+ * в sessionStorage вкладки. После ошибки сервера (?err=…) возвращаем введённое, если даты те же (`scope`);
+ * без ошибки черновик стираем. У разбора свой черновик — в RazborGiftFields.
+ */
+export type CheckoutDraft = { key: string; scope: string; err?: string };
+
+/**
+ * Форма оплаты: цель `goal` (по умолчанию «razbor_checkout_click») при отправке, обычный POST на /api/razbor/checkout.
+ * После «Назад» со страницы ЮKassa браузер может вернуть страницу из bfcache вместе с «занятой» формой — снимаем busy.
+ */
+export function RazborCheckoutForm({ counter, goal = "razbor_checkout_click", draft, children }: { counter?: string; goal?: string; draft?: CheckoutDraft; children: ReactNode }) {
   const [busy, setBusy] = useState(false);
+  const ref = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setBusy(false);
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, []);
+
+  const key = draft ? `razbor-checkout-${draft.key}` : "";
+  const scope = draft?.scope ?? "";
+  const err = draft?.err ?? "";
+  useEffect(() => {
+    const form = ref.current;
+    if (!key || !form) return;
+    const fields = () => Array.from(form.elements).filter((el): el is HTMLInputElement => el instanceof HTMLInputElement && (el.type === "text" || el.type === "email") && Boolean(el.name));
+    try {
+      const d = err ? (JSON.parse(sessionStorage.getItem(key) ?? "null") as { scope: string; v: Record<string, string> } | null) : null;
+      if (d && d.scope === scope) {
+        for (const el of fields()) if (d.v[el.name]) el.value = d.v[el.name];
+      } else if (!err) sessionStorage.removeItem(key);
+    } catch {}
+    const save = () => {
+      const v: Record<string, string> = {};
+      for (const el of fields()) v[el.name] = el.value;
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ scope, v }));
+      } catch {}
+    };
+    form.addEventListener("input", save);
+    return () => form.removeEventListener("input", save);
+  }, [key, scope, err]);
+
   return (
     <form
+      ref={ref}
       method="post"
       action="/api/razbor/checkout"
       aria-busy={busy}
@@ -191,8 +236,8 @@ export function PayButtons({ price }: { price: number }) {
   );
 }
 
-/** Пакет «разбор + совместимость» в форме оплаты разбора: вторая дата и имя близкого. */
-export type PackOffer = { addon: number; total: number; on?: boolean; date2?: string; name2?: string; today: string };
+/** Пакет «разбор + совместимость» в форме оплаты разбора: вторая дата и имя близкого; full — цена совместимости отдельно. */
+export type PackOffer = { addon: number; total: number; full?: number; on?: boolean; date2?: string; name2?: string; today: string };
 
 /** Черновик формы оплаты в sessionStorage вкладки: после ошибки сервера (?err=…) поля не приходится заполнять заново. */
 const DRAFT_KEY = "razbor-checkout";
@@ -231,6 +276,8 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
   const [pack, setPack] = useState(Boolean(offer?.on));
   const [date2, setDate2] = useState(offer?.date2 ?? "");
   const [name2, setName2] = useState(offer?.name2 ?? "");
+  // поле даты близкого с маской хранит текст у себя: после черновика пересоздаём его с восстановленной датой
+  const [date2Key, setDate2Key] = useState(0);
   const packSent = useRef(false);
   const sent = useRef(false);
   const fromRef = useRef<HTMLInputElement>(null);
@@ -251,7 +298,10 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
       setOk(d.ok);
       setEmail(d.email);
       if (d.pack !== undefined) setPack(d.pack);
-      if (d.date2) setDate2(d.date2);
+      if (d.date2) {
+        setDate2(d.date2);
+        setDate2Key((k) => k + 1);
+      }
       if (d.name2) setName2(d.name2);
       if (d.wish || d.to) setOpen(true);
       /* eslint-enable react-hooks/set-state-in-effect */
@@ -380,7 +430,7 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
           <label className="flex items-start gap-2 text-sm cursor-pointer">
             <input type="checkbox" name="pack" value="1" checked={pack} onChange={(e) => togglePack(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-[var(--accent)]" />
             <span>
-              <strong>+ совместимость с близким за {offer.addon} ₽</strong>
+              <strong>+ совместимость с близким за {offer.addon} ₽{offer.full && offer.full > offer.addon ? ` вместо ${offer.full} ₽` : ""}</strong>
               <span className="block text-muted">Отдельный текст о вашей паре по двум датам: образ пары, любовь, быт, споры, общий год и три совета.</span>
             </span>
           </label>
@@ -388,7 +438,7 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
             <div className="grid gap-3 mt-3 sm:grid-cols-2">
               <label className="grid gap-1 text-sm">
                 Дата рождения близкого
-                <input type="date" name="date2" required min="1900-01-01" max={offer.today} value={date2} onChange={(e) => setDate2(e.target.value)} aria-invalid={bad("date2")} className={FIELD} />
+                <BirthDateInput key={date2Key} name="date2" defaultValue={date2} max={offer.today} onIso={setDate2} invalid={err === "date2"} className={FIELD} />
               </label>
               <label className="grid gap-1 text-sm">
                 Имя близкого

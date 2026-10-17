@@ -13,6 +13,8 @@ export default function ScrollToResult({ id, when }: { id: string; when: boolean
 
   useEffect(() => {
     if (!when || done.current) return;
+    // в адресе другой якорь (например #oplata из «Вернуться к оплате») — браузер уже прокрутил к нему
+    if (window.location.hash && window.location.hash !== `#${id}`) return;
     const el = document.getElementById(id);
     if (!el) return;
     done.current = true;

@@ -298,7 +298,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
                     gift={isGift}
                     err={err}
                     price={RAZBOR.price}
-                    pack={offerPack ? { addon: packAddon(), total: PRODUCTS.pack.price, on: one(sp.p) === "1", date2: d2?.iso, name2: cleanName(sp.n2), today: todayMsk() } : undefined}
+                    pack={offerPack ? { addon: packAddon(), total: PRODUCTS.pack.price, full: PRODUCTS.compat.price, on: one(sp.p) === "1", date2: d2?.iso, name2: cleanName(sp.n2), today: todayMsk() } : undefined}
                   />
                   <p className="text-xs text-muted mt-3 max-w-md">
                     Нажимая кнопку, ты принимаешь условия <Link href="/oferta" className="underline">оферты</Link>. Оплата через ЮKassa. Разбор носит развлекательный и ознакомительный характер.
