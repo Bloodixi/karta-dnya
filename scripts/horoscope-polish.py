@@ -33,7 +33,7 @@ BODY_RU = {"sun": "Солнце", "moon": "Луна", "mercury": "Меркури
            "jupiter": "Юпитер", "saturn": "Сатурн", "uranus": "Уран", "neptune": "Нептун", "pluto": "Плутон"}
 KIND_RU = {"ingress": "переходит в знак", "retro-start": "становится ретроградной", "retro-end": "выходит из ретроградности",
            "new-moon": "новолуние", "full-moon": "полнолуние", "first-quarter": "первая четверть Луны", "last-quarter": "последняя четверть Луны"}
-PERIOD_RU = {"segodnya": "на день", "zavtra": "на день", "vchera": "на день", "nedelya": "на неделю", "mesyats": "на месяц", "god": "на год"}
+PERIOD_RU = {"segodnya": "на день", "zavtra": "на завтра", "vchera": "на день", "nedelya": "на неделю", "mesyats": "на месяц", "god": "на год"}
 FIELDS = ("general", "love", "career", "health", "advice", "mood")
 BATCH = 4  # знаков в одном вызове модели
 
@@ -41,6 +41,9 @@ BATCH = 4  # знаков в одном вызове модели
 GENERAL_WORDS = {"day": (120, 180), "nedelya": (220, 320), "mesyats": (220, 320), "god": (220, 320)}
 SPHERE_WORDS = (40, 70)
 SLACK = 0.15  # допуск ±15 % при проверке
+
+# «Гороскоп на завтра» читают накануне: слово «сегодня» в нём — брак (так же проверяет scripts/horoscope-check.mjs при сборке).
+TODAY_RE = re.compile(r"(?<![а-яё])сегодня", re.I)
 
 MSK = timezone(timedelta(hours=3))
 
@@ -146,7 +149,10 @@ def build_prompt(drafts: list[dict], events: list[dict], period: str, key: str) 
         "не используй номера домов и астрологический жаргон без пояснения.\n"
         "- Каждому знаку — свой текст: разные зачины, разная структура, без повторяющихся формул между знаками. Не копируй черновые фразы дословно, "
         "сохраняй их смысл. Обращение на «вы». Живой русский язык без канцелярита и воды, длинное тире «—», кавычки «».\n"
-        "- health — о самочувствии, ритме и отдыхе, без диагнозов и советов по лечению; career — работа, дела и деньги без обещаний дохода.\n\n"
+        "- health — о самочувствии, ритме и отдыхе, без диагнозов и советов по лечению; career — работа, дела и деньги без обещаний дохода.\n"
+        + ("- Это гороскоп НА ЗАВТРА: его читают накануне. Пиши о завтрашнем дне — «завтра», «в этот день», «завтрашний» "
+           "или нейтрально, без привязки ко дню. Слова «сегодня» и «сегодняшний» не используй ни в одном поле.\n" if period == "zavtra" else "")
+        + "\n"
         f"Формат ответа — СТРОГО JSON-массив из {len(drafts)} объектов в том же порядке знаков, каждый с полями: "
         "sign (как во входе), general, love, career, health, advice, mood. Ничего, кроме JSON: без пояснений, без markdown-ограждений. "
         f"Перед ответом пересчитай слова в каждом поле каждого знака: general не короче {gmin}, love/career/health не короче {smin}.\n\n"
@@ -214,6 +220,8 @@ def validate(items, drafts: list[dict], period: str) -> list[str]:
                 continue
             if re.search(r"<\s*(script|iframe|img|a)\b|javascript:", v, re.I):
                 errs.append(f"{name}: разметка в поле {f}")
+            if period == "zavtra" and TODAY_RE.search(v):
+                errs.append(f"{name}: «сегодня» в гороскопе на завтра (поле {f})")
             if re.search(r"\b(ИИ|нейросет|искусственн\w+ интеллект|языков\w+ модел|алгоритм)", v, re.I):
                 errs.append(f"{name}: упоминание ИИ в поле {f}")
         g = words(it.get("general", ""))
@@ -325,7 +333,8 @@ def polish_file(path: Path, model: str, timeout: int, retries: int, force: bool)
             again = [d for d in batch if d["sign"] in bad]
             note = ("\n\nПредыдущая попытка не прошла проверку объёма: "
                     + "; ".join(f"{SIGN_RU[s_]}: {', '.join(v)}" for s_, v in bad.items())[:700]
-                    + ". Напиши заново ПОЛНЕЕ — каждое из полей love, career, health разверни до 3–4 предложений, general — до нужного объёма; верни строго JSON.")
+                    + ". Напиши заново ПОЛНЕЕ" + (" и без слова «сегодня» (это гороскоп на завтра)" if period == "zavtra" else "")
+                    + " — каждое из полей love, career, health разверни до 3–4 предложений, general — до нужного объёма; верни строго JSON.")
             g, bad, cost = polish_batch(again, events, period, key, model, timeout, note)
             out["cost_usd"] = round(out["cost_usd"] + cost, 4)
             good.update(g)

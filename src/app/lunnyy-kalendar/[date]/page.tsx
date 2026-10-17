@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import MoonPhase from "@/components/MoonPhase";
 import RazborCta from "@/components/RazborCta";
+import { readJsonData } from "@/lib/content";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, moonWindow, moonWindowKeys, PHASES } from "@/lib/moon";
 
@@ -38,6 +39,7 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
   const next = shiftKey(date, 1);
   const ld = LUNAR_DAYS[d.lunarDay];
   const ph = PHASES[d.phase];
+  const about = readJsonData<Record<string, string[]>>("lunar-days.json", {})[String(d.lunarDay)] ?? [];
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/lunnyy-kalendar", label: "Лунный календарь" }, { href: `/lunnyy-kalendar/${date}`, label: formatDateRu(date) }]} />
@@ -59,6 +61,12 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
           </div>
         </div>
       </div>
+      {about.length > 0 && (
+        <section className="prose mt-8 max-w-3xl">
+          <h2>{d.lunarDay}-й лунный день: {ld.symbol}</h2>
+          {about.map((p, i) => <p key={i}>{p}</p>)}
+        </section>
+      )}
       <div className="mt-6 flex flex-wrap gap-2 justify-between text-sm">
         {prev >= win.from && prev <= win.to ? <Link href={`/lunnyy-kalendar/${prev}`} className="btn btn-ghost">← {formatDateRu(prev, { day: "numeric", month: "long" })}</Link> : <span />}
         <Link href="/lunnyy-kalendar" className="btn btn-ghost">Сегодня и месяц</Link>

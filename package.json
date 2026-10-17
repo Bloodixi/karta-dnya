@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/lastmod.mjs",
+    "prebuild": "node scripts/lastmod.mjs && node scripts/horoscope-check.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
