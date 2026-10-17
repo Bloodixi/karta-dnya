@@ -42,7 +42,7 @@ export default function AffirmationDayPage() {
         <p>
           Днём вспоминайте фразу в коротких паузах: по дороге, перед важным делом, за чашкой чая. Вечером подумайте, в какие моменты она пригодилась.
           Если хочется углубить практику, добавьте <Link href="/praktiki/dyhatelnye-praktiki">дыхательные упражнения</Link> или <Link href="/praktiki/meditatsiya-dlya-nachinayushchih">медитацию для начинающих</Link>.
-          Нужны ориентиры на сегодня — загляните в <Link href="/karta-dnya">карту дня</Link> и <Link href="/lunnyy-kalendar">лунный календарь</Link>.
+          Нужны ориентиры на сегодня — загляните в <Link href="/karta-dnya">карту дня</Link>, <Link href="/lunnyy-kalendar">лунный календарь</Link> и <Link href="/praktiki/primety-na-segodnya">народные приметы на сегодня</Link>.
         </p>
       </section>
 

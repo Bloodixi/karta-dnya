@@ -15,7 +15,10 @@ export const metadata: Metadata = {
 
 export default function DestinyPage() {
   const numbers = getNumerology();
-  const articles = getArticles("numerologiya").slice(0, 3);
+  // Сначала статьи о самом числе судьбы (как считать вручную, чем отличаются 1–9), потом свежие статьи раздела.
+  const FIRST = ["chislo-sudby-po-date-rozhdeniya", "chislo-sudby-1-9-znachenie"];
+  const all = getArticles("numerologiya");
+  const articles = [...FIRST.map((s) => all.find((a) => a.slug === s)).filter((a) => a !== undefined), ...all.filter((a) => !FIRST.includes(a.slug))].slice(0, 3);
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/chislo-sudby", label: "Число судьбы" }]} />

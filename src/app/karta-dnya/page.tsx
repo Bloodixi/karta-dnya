@@ -60,7 +60,7 @@ export default function CardOfDayPage() {
               <p>
                 <Link href={`/taro/karty/${today.card.slug}`}>Подробнее о карте «{today.card.name}»</Link> · <Link href="/taro/karty">все 78 карт</Link> · <Link href="/taro">раздел Таро</Link>
               </p>
-              <p className="text-sm text-muted">Любите символы попроще? Посмотрите <Link href="/runy/runa-dnya">руну дня</Link> из Старшего Футарка. Прогноз для своего знака — в <Link href="/goroskop">гороскопе на сегодня</Link>.</p>
+              <p className="text-sm text-muted">Любите символы попроще? Посмотрите <Link href="/runy/runa-dnya">руну дня</Link> из Старшего Футарка. Прогноз для своего знака — в <Link href="/goroskop">гороскопе на сегодня</Link>, а народные приметы на этот день собраны в статье <Link href="/praktiki/primety-na-segodnya">приметы на сегодня</Link>.</p>
             </div>
             <TomorrowCard campaign="karta-dnya" className="mt-6" />
             <TelegramDaily campaign="karta-dnya" text="Карта дня, настроение знаков и Луна — в 8:00 по Москве. Коротко, спокойно и без рекламы." className="mt-4" />

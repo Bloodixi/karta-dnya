@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import ExtraText from "@/components/ExtraText";
 import Faq from "@/components/Faq";
 import TelegramDaily from "@/components/TelegramDaily";
 import YesNo from "@/components/YesNo";
 import { getTarot } from "@/lib/content";
+import { getExtraText, mergeFaq } from "@/lib/extra-text";
 
 export const metadata: Metadata = {
   title: "Таро да или нет: гадание онлайн на одной карте",
@@ -19,7 +21,8 @@ const FAQ = [
   { q: "Перевёрнутая карта всегда значит «нет»?", a: "Нет. Перевёрнутая сложная карта, например Башня или Дьявол, наоборот смягчает значение: препятствие уходит." },
 ];
 
-export default function YesNoPage() {
+export default async function YesNoPage() {
+  const more = await getExtraText("tools", "taro-da-net");
   const cards = getTarot().map((c) => ({ slug: c.slug, name: c.name, keywords: c.keywords, upright: c.upright, reversed: c.reversed, advice: c.advice, arcana: c.arcana, suitName: c.suitName }));
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -28,18 +31,11 @@ export default function YesNoPage() {
       <p className="text-muted mt-2 max-w-2xl">Сформулируйте закрытый вопрос, вытяните одну карту и получите ответ. Ответ строится на значении карты и её положении, объяснение прилагается.</p>
       <div className="mt-6 max-w-3xl">{cards.length ? <YesNo cards={cards} /> : <p className="text-muted">Колода готовится.</p>}</div>
       <TelegramDaily campaign="taro-da-net" text="Карта дня с толкованием — каждое утро в 8:00 по Москве. Коротко и без рекламы." className="mt-8 max-w-3xl" />
-      <section className="prose mt-10">
-        <h2>Как работает гадание «да или нет»</h2>
-        <p>Это самый короткий расклад Таро: одна карта на один закрытый вопрос. Благоприятные карты в прямом положении отвечают «да», сложные карты в прямом положении — «нет», перевёрнутые карты смягчают или ослабляют значение. Несколько карт говорят о паузе: тогда ответ «пока рано» и смысл зависит от ваших следующих шагов.</p>
-        <h2>Как задать вопрос</h2>
-        <ul>
-          <li>Один вопрос, одно действие, понятный срок: «Стоит ли покупать эту машину в этом месяце?»</li>
-          <li>Спрашивайте про себя и свои решения, а не про чужие мысли.</li>
-          <li>Не переспрашивайте сразу: первая карта честнее десятой.</li>
-        </ul>
-        <p>Если вопрос о заветной мечте, попробуйте <Link href="/taro/na-zhelanie">гадание на желание</Link>. Для более подробного ответа посмотрите <Link href="/taro/rasklad-tri-karty">расклад на три карты</Link> или прочитайте <Link href="/taro/kak-nachat-gadat-na-taro">руководство для новичков</Link>. Значения всех карт собраны в <Link href="/taro/karty">каталоге карт</Link>, а другие схемы — на странице <Link href="/taro/rasklady">все расклады Таро онлайн</Link>.</p>
+      {more && <ExtraText html={more.html} />}
+      <section className="prose mt-8">
+        <p>Для более подробного ответа посмотрите <Link href="/taro/tri-karty">расклад на три карты</Link> или прочитайте <Link href="/taro/kak-nachat-gadat-na-taro">руководство для новичков</Link>. Если вопрос о заветной мечте, попробуйте <Link href="/taro/na-zhelanie">гадание на желание</Link>. Значения всех карт собраны в <Link href="/taro/karty">каталоге карт</Link>, а другие схемы — на странице <Link href="/taro/rasklady">все расклады Таро онлайн</Link>.</p>
       </section>
-      <Faq items={FAQ} />
+      <Faq items={mergeFaq(FAQ, more?.faq)} />
     </div>
   );
 }

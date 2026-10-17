@@ -75,6 +75,18 @@ const nextConfig: NextConfig = {
       { source: `/${key}`, destination: `/?utm_source=${source}&utm_medium=${medium}`, permanent: false },
       { source: `/${key}/:path+`, destination: `/:path+?utm_source=${source}&utm_medium=${medium}`, permanent: false },
     ]),
+    // Статьи, поглощённые инструментами и страницами символов сонника (текст — content/tools и content/data/sonnik-extra).
+    { source: "/taro/taro-da-net", destination: "/taro/da-net", permanent: true },
+    { source: "/taro/starshie-arkany-taro", destination: "/taro/arkany/starshie", permanent: true },
+    { source: "/taro/rasklad-tri-karty", destination: "/taro/tri-karty", permanent: true },
+    { source: "/numerologiya/numerologicheskaya-sovmestimost", destination: "/numerologiya/sovmestimost", permanent: true },
+    { source: "/numerologiya/znachenie-chisel-na-chasah", destination: "/numerologiya/chisla-na-chasah", permanent: true },
+    { source: "/sonnik/k-chemu-snitsya-voda", destination: "/sonnik/voda", permanent: true },
+    { source: "/sonnik/k-chemu-snitsya-zmeya", destination: "/sonnik/zmeya", permanent: true },
+    { source: "/sonnik/k-chemu-snyatsya-zuby", destination: "/sonnik/zuby", permanent: true },
+    { source: "/sonnik/k-chemu-snitsya-beremennost", destination: "/sonnik/beremennost", permanent: true },
+    { source: "/sonnik/k-chemu-snitsya-byvshiy", destination: "/sonnik/byvshiy", permanent: true },
+    { source: "/sonnik/k-chemu-snyatsya-umershie", destination: "/sonnik/umershiy-rodstvennik", permanent: true },
   ],
 };
 

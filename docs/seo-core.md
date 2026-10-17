@@ -27,13 +27,13 @@
 | расклад таро на любовь | high | инструмент | /taro/rasklady/na-lyubov |
 | таро да нет | high | инструмент | /taro/da-net |
 | значение карт таро | high | инфо | /taro/karty |
-| старшие арканы таро значение | high | инфо | /taro/arkany/starshie (статья /taro/starshie-arkany-taro) |
+| старшие арканы таро значение | high | инфо | /taro/arkany/starshie (статья влита, 301) |
 | младшие арканы таро | mid | инфо | /taro/arkany/mladshie (статья /taro/mladshie-arkany-taro в плане) |
 | шут таро значение | mid | инфо | /taro/karty/shut |
 | башня таро значение | mid | инфо | /taro/karty/bashnya |
 | смерть таро значение | mid | инфо | /taro/karty/smert |
 | влюбленные таро значение | mid | инфо | /taro/karty/vlyublennye |
-| расклад на три карты | high | инфо | /taro/tri-karty (статья /taro/rasklad-tri-karty) |
+| расклад на три карты | high | инфо | /taro/tri-karty (статья влита, 301) |
 | кельтский крест расклад | mid | инфо | /taro/rasklady/keltskiy-krest |
 | как гадать на картах таро | high | инфо | /taro/kak-nachat-gadat-na-taro (есть статья) |
 | перевернутые карты таро | mid | инфо | /taro/perevernutye-karty-taro (new, в плане) |
@@ -99,13 +99,13 @@
 | сонник | very-high | инструмент | /sonnik |
 | к чему снится змея | high | инфо | /sonnik/zmeya |
 | к чему снится вода | high | инфо | /sonnik/voda |
-| к чему снятся умершие родственники | high | инфо | /sonnik/umershiy-rodstvennik (статья /sonnik/k-chemu-snyatsya-umershie) |
+| к чему снятся умершие родственники | high | инфо | /sonnik/umershiy-rodstvennik (статья влита, 301) |
 | к чему снятся зубы | high | инфо | /sonnik/zuby |
 | к чему снится беременность | mid | инфо | /sonnik/beremennost |
 | к чему снится свадьба | mid | инфо | /sonnik/svadba |
 | к чему снится кошка | mid | инфо | /sonnik/koshka |
 | к чему снится падение | mid | инфо | /sonnik/padenie |
-| к чему снится бывший | high | инфо | /sonnik/byvshiy (статья /sonnik/k-chemu-snitsya-byvshiy) |
+| к чему снится бывший | high | инфо | /sonnik/byvshiy (статья влита, 301) |
 | к чему снятся деньги | high | инфо | /sonnik/dengi |
 | сонник по алфавиту | high | инфо | /sonnik (указатель А–Я) |
 | к чему снится погоня | low | инфо | /sonnik/pogonya |
