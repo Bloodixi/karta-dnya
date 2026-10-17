@@ -55,7 +55,7 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
           <p>{c.career}</p>
           {extra && (
             <>
-              <h2>Здоровье и ресурс</h2>
+              <h2>Силы и ресурс</h2>
               <p>{extra.health}</p>
               <h2>Ответ «да или нет»</h2>
               <p><strong>{extra.yesno}.</strong> {extra.yesnoWhy} Проверить на свой вопрос: <Link href="/taro/da-net">гадание да/нет</Link>.</p>
