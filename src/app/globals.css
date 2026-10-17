@@ -9,7 +9,7 @@
   --ink: #222226;
   --muted: #605d6c;
   --line: #d6d4da;
-  --accent: #7c6a9c;
+  --accent: #6a5790; /* было #7c6a9c: 4,0 на bg; стало 5,2 на bg, 5,7 на surface */
   --accent-soft: #b3a2cc;
   --accent-ink: #ffffff;
   --gold: #a89e8c;

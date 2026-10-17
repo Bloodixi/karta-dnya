@@ -51,7 +51,8 @@ export default function Home() {
             <Link href="/karta-dnya" className="relative justify-self-center w-52 md:w-60 grid gap-3 text-center group">
               <span className="sticker absolute -left-6 top-5 z-10">карта дня</span>
               <div className="tcard-float">
-                <TarotCardView slug={today.card.slug} name={today.card.name} reversed={today.reversed} flipIn priority sizes="(min-width: 768px) 240px, 208px" />
+                {/* LCP: на телефоне sizes занижен (106px × DPR 3 ≈ 320w), чтобы бралась 1x-картинка 35 КБ, а не @2x 110 КБ. */}
+                <TarotCardView slug={today.card.slug} name={today.card.name} reversed={today.reversed} flipIn priority sizes="(min-width: 768px) 240px, 106px" />
               </div>
               <span className="mono-text text-muted group-hover:text-[#ece9f1]">
                 {today.card.name} · {today.reversed ? "перевёрнутое положение" : "прямое положение"}
