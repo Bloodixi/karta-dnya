@@ -1,6 +1,6 @@
 /** Ответ гадания «да или нет» по карте и положению. Общий для страницы (YesNo) и картинки для сторис (/api/taro-card). */
 
-const NEGATIVE = new Set(["bashnya", "smert", "dyavol", "luna", "povesheniy", "povechenny", "troyka-mechey", "desyatka-mechey", "pyaterka-pentakley", "pyaterka-kubkov", "vosmerka-kubkov", "devyatka-mechey", "pyaterka-mechey", "semerka-mechey", "vosmerka-mechey"]);
+const NEGATIVE = new Set(["bashnya", "smert", "dyavol", "luna", "poveshennyy", "troyka-mechey", "desyatka-mechey", "pyaterka-pentakley", "pyaterka-kubkov", "vosmerka-kubkov", "devyatka-mechey", "pyaterka-mechey", "semerka-mechey", "vosmerka-mechey"]);
 const NEUTRAL = new Set(["dvoyka-mechey", "semerka-pentakley", "chetvyorka-kubkov", "otshelnik", "umerennost", "koleso-fortuny", "sud", "spravedlivost"]);
 
 export type VerdictTone = "yes" | "no" | "maybe";

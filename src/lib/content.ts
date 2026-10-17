@@ -151,6 +151,10 @@ export type TarotExtra = { yesno: string; yesnoWhy: string; health: string; posi
 export const getTarot = () => readJson<TarotCard[]>("tarot.json", []);
 export const getTarotExtra = () => readJson<Record<string, TarotExtra>>("tarot-extra.json", {});
 export const findTarotExtra = (slug: string): TarotExtra | null => getTarotExtra()[slug] || null;
+/** Развёрнутые значения карт для страниц /taro/karty/<slug>; короткие поля tarot.json остаются для раскладов и виджетов. */
+export type TarotLong = { upright: string; reversed: string; love: string; loveReversed: string; career: string; advice: string; yesno: string };
+export const getTarotLong = () => readJson<Record<string, TarotLong>>("tarot-long.json", {});
+export const findTarotLong = (slug: string): TarotLong | null => getTarotLong()[slug] || null;
 export type SpreadPosition = { name: string; meaning: string };
 export type Spread = {
   slug: string; title: string; query: string; theme: string; short: string; intro: string[];

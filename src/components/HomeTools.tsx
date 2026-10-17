@@ -112,6 +112,10 @@ function liveData(date: string): Record<string, Live> {
       label: <Label what="Ответ" value={<><span className="text-yes">да</span> · <span className="text-no">нет</span> · <span className="text-maybe">может быть</span></>} />,
       visual: <span className="block w-7"><CardBack className="w-full h-auto" /></span>,
     },
+    "/taro/na-zhelanie": {
+      label: <Label what="Желание" value="1 или 3 карты" />,
+      visual: <span className="block w-7"><CardBack className="w-full h-auto" /></span>,
+    },
     "/lunnyy-kalendar": { label: <Label what={`${moon.lunarDay}-й день`} value={`${moon.illumination}%`} />, visual: <MoonPhase age={moon.age} size={44} /> },
     "/astrologiya/natalnaya-karta": mercury
       ? { label: <Label what="Меркурий" value={mercury.retro ? "ретро" : mercury.sign} />, visual: <Medallion tone="gold" glyph>{"☿︎"}</Medallion> }

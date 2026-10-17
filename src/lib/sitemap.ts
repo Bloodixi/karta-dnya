@@ -64,10 +64,11 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
     }
     case "taro": {
       hub("taro");
-      const cards = changed(app("taro/karty"), data("tarot.json"), data("tarot-extra.json"));
+      const cards = changed(app("taro/karty"), data("tarot.json"), data("tarot-extra.json"), data("tarot-long.json"));
       add("/taro/karty", cards, "monthly", 0.8);
       add("/taro/da-net", changed(app("taro/da-net")), "monthly", 0.8);
       add("/taro/tri-karty", changed(app("taro/tri-karty")), "monthly", 0.8);
+      add("/taro/na-zhelanie", changed(app("taro/na-zhelanie"), "src/lib/wish.ts"), "monthly", 0.8);
       add("/taro/arkany/starshie", changed(app("taro/arkany")), "monthly", 0.7);
       add("/taro/arkany/mladshie", changed(app("taro/arkany")), "monthly", 0.7);
       const spreads = changed(app("taro/rasklady"), data("spreads.json"));
