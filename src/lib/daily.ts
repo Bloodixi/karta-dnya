@@ -116,7 +116,8 @@ const HOROSCOPES_DIR = path.join(process.cwd(), "content", "data", "horoscopes")
 const horoscopeFiles = new Map<string, Map<string, HoroscopeText> | null>();
 /** Дневные периоды взаимозаменяемы по ключу: «завтра» на 6-е и «сегодня» на 7-е — одна и та же дата. */
 const DAY_PERIODS: PeriodKey[] = ["segodnya", "zavtra", "vchera"];
-const TODAY_WORD = /(^|[^а-яё])сегодня/i;
+/** Слова, которые привязывают дневной текст к своему периоду: такой текст нельзя показывать под другим периодом. */
+const DAY_WORDS: Partial<Record<PeriodKey, RegExp>> = { segodnya: /(^|[^а-яё])сегодня/i, zavtra: /(^|[^а-яё])завтра(?!к)/i };
 
 function readHoroscopeFile(period: PeriodKey, key: string): Map<string, HoroscopeText> | null {
   const id = `${period}/${key}`;
@@ -142,8 +143,9 @@ export function astroHoroscopeText(sign: string, period: PeriodKey, key: string)
   for (const p of order) {
     const t = readHoroscopeFile(p, key)?.get(sign);
     if (!t || !t.general || !t.love || !t.career || !t.health) continue;
-    // «Завтра» не берёт чужой дневной текст, написанный про «сегодня».
-    if (period === "zavtra" && p !== period && TODAY_WORD.test(`${t.general} ${t.love} ${t.career} ${t.health} ${t.advice}`)) continue;
+    // Чужой дневной текст «про сегодня» или «про завтра» под другим периодом не показываем
+    // (кроме «вчера» ← «сегодня»: вчерашний гороскоп — это и есть текст, написанный на тот день).
+    if (p !== period && !(period === "vchera" && p === "segodnya") && DAY_WORDS[p]?.test(`${t.general} ${t.love} ${t.career} ${t.health} ${t.advice}`)) continue;
     if (t.model && t.model !== "draft") return t;
     draft ??= t;
   }
