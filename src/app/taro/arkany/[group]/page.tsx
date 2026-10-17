@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import ExtraText from "@/components/ExtraText";
 import Faq from "@/components/Faq";
 import TarotCardView from "@/components/TarotCardView";
 import { getTarot } from "@/lib/content";
+import { getExtraText, mergeFaq } from "@/lib/extra-text";
 
 export const dynamicParams = false;
 
@@ -54,6 +56,7 @@ export default async function ArcanaPage({ params }: PageProps<"/taro/arkany/[gr
   if (!g) notFound();
   const cards = getTarot().filter(g.filter);
   const suits = ["zhezly", "kubki", "mechi", "pentakli"];
+  const more = group === "starshie" ? await getExtraText("tools", "taro-starshie-arkany") : null;
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/taro", label: "Таро" }, { href: "/taro/karty", label: "Значения карт" }, { href: `/taro/arkany/${group}`, label: g.h1 }]} />
@@ -95,7 +98,8 @@ export default async function ArcanaPage({ params }: PageProps<"/taro/arkany/[gr
       <p className="mt-8 text-muted text-sm">
         См. также: <Link href={`/taro/arkany/${group === "starshie" ? "mladshie" : "starshie"}`} className="text-accent underline">{group === "starshie" ? "младшие арканы" : "старшие арканы"}</Link>, <Link href="/taro/karty" className="text-accent underline">все 78 карт</Link>, <Link href="/karta-dnya" className="text-accent underline">карта дня</Link>.
       </p>
-      <Faq items={[...g.faq]} />
+      {more && <ExtraText html={more.html} />}
+      <Faq items={mergeFaq([...g.faq], more?.faq)} />
     </div>
   );
 }

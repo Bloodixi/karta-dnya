@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import ExtraText from "@/components/ExtraText";
 import Faq from "@/components/Faq";
+import { getExtraText, mergeFaq } from "@/lib/extra-text";
 import { DIGITS, getClockNumbers, type ClockNumber } from "@/lib/clock";
 
 export const metadata: Metadata = {
@@ -39,7 +41,8 @@ function Grid({ items }: { items: ClockNumber[] }) {
   );
 }
 
-export default function ClockHubPage() {
+export default async function ClockHubPage() {
+  const more = await getExtraText("tools", "chisla-na-chasah");
   const all = getClockNumbers();
   const doubles = all.filter((c) => c.kind === "double");
   const mirrors = all.filter((c) => c.kind === "mirror");
@@ -75,7 +78,8 @@ export default function ClockHubPage() {
           ))}
         </div>
       </section>
-      <Faq items={FAQ} />
+      {more && <ExtraText html={more.html} />}
+      <Faq items={mergeFaq(FAQ, more?.faq)} />
     </div>
   );
 }

@@ -3,11 +3,13 @@ import Form from "next/form";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import CompatCta from "@/components/CompatCta";
+import ExtraText from "@/components/ExtraText";
 import Faq from "@/components/Faq";
 import NumerologyNav from "@/components/NumerologyNav";
 import { DateField, FormError, ShareLink, dateErrorText } from "@/components/NumerologyFields";
 import ScrollToResult from "@/components/ScrollToResult";
 import { getNumerology, getNumerologyPairs } from "@/lib/content";
+import { getExtraText, mergeFaq } from "@/lib/extra-text";
 import { CORE_NUMBERS, destinyNumber, formatDate, isMaster, pairKey, parseDate, toCore } from "@/lib/numerology";
 
 const PATH = "/numerologiya/sovmestimost";
@@ -37,6 +39,7 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
   const pairs = getNumerologyPairs();
   const numbers = getNumerology();
   const byKey = (k: string) => pairs.find((p) => p.pair === k);
+  const more = await getExtraText("tools", "numerologiya-sovmestimost");
 
   let result: React.ReactNode = null;
   if (a && b) {
@@ -152,10 +155,11 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
       <section className="prose mt-12">
         <h2>Как считается совместимость по дате рождения</h2>
         <p>Для каждого партнёра складываются все цифры даты рождения, пока не получится одна цифра: 14.03.1987 → 1 + 4 + 0 + 3 + 1 + 9 + 8 + 7 = 33, 3 + 3 = 6. Затем два числа сопоставляются по таблице из 45 сочетаний: от «двух лидеров» (1 и 1) до «общего горизонта» (9 и 9). Каждое сочетание описано с трёх сторон — общий характер пары, любовь и работа — и заканчивается советом.</p>
-        <p>Процент — не математика отношений, а условная мера похожести ценностей и темпа. Пары с низким процентом нередко дополняют друг друга лучше, чем похожие, если умеют договариваться. Подробнее о логике сочетаний в статье <Link href="/numerologiya/numerologicheskaya-sovmestimost">о нумерологической совместимости</Link>, а значение каждого числа на страницах <Link href="/chislo-sudby">числа судьбы</Link>. Для астрологического взгляда на пару есть <Link href="/sovmestimost">совместимость знаков зодиака</Link>.</p>
+        <p>Процент — не математика отношений, а условная мера похожести ценностей и темпа. Пары с низким процентом нередко дополняют друг друга лучше, чем похожие, если умеют договариваться. Как читать результат и что делать со «сложной» парой — ниже, а значение каждого числа на страницах <Link href="/chislo-sudby">числа судьбы</Link>. Для астрологического взгляда на пару есть <Link href="/sovmestimost">совместимость знаков зодиака</Link>.</p>
       </section>
 
-      <Faq items={FAQ} />
+      {more && <ExtraText html={more.html} />}
+      <Faq items={mergeFaq(FAQ, more?.faq)} />
       <NumerologyNav current={PATH} />
     </div>
   );

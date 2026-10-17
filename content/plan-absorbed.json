@@ -1,0 +1,480 @@
+[
+  {
+    "slug": "starshie-arkany-taro",
+    "section": "taro",
+    "title": "Старшие арканы Таро: значение всех 22 карт",
+    "query": "старшие арканы таро",
+    "secondary": [
+      "значение старших арканов",
+      "22 аркана таро",
+      "карты старших арканов"
+    ],
+    "intent": "info",
+    "priority": 1,
+    "words": 1500,
+    "outline": [
+      "Что такое старшие арканы",
+      "Карты 0-VII",
+      "Карты VIII-XIV",
+      "Карты XV-XXI",
+      "Как читать старшие арканы в раскладе"
+    ],
+    "links": [
+      "/taro",
+      "/taro/karty",
+      "/karta-dnya"
+    ],
+    "absorbed_by": "/taro/arkany/starshie",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "taro-da-net",
+    "section": "taro",
+    "title": "Таро да или нет: как задавать вопрос и читать ответ",
+    "query": "таро да нет",
+    "secondary": [
+      "расклад да нет",
+      "гадание да нет на таро"
+    ],
+    "intent": "info",
+    "priority": 1,
+    "words": 1000,
+    "outline": [
+      "Как работает расклад да/нет",
+      "Формулировка вопроса",
+      "Карты-да, карты-нет, неопределённые",
+      "Расклад на одну и три карты",
+      "Ошибки"
+    ],
+    "links": [
+      "/karta-dnya",
+      "/taro"
+    ],
+    "absorbed_by": "/taro/da-net",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "rasklad-taro-na-dengi-i-rabotu",
+    "section": "taro",
+    "title": "Расклад Таро на работу и деньги",
+    "query": "расклад таро на работу",
+    "secondary": [
+      "таро на деньги",
+      "расклад на финансы",
+      "расклад на карьеру"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1300,
+    "outline": [
+      "Что можно спросить",
+      "Схема расклада",
+      "Ключевые карты",
+      "Разбор примера",
+      "Как действовать после расклада"
+    ],
+    "links": [
+      "/taro",
+      "/karta-dnya",
+      "/kamni"
+    ],
+    "absorbed_by": "/taro/rasklady/na-rabotu",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "rasklad-taro-na-god",
+    "section": "taro",
+    "title": "Расклад Таро на год: схема из 12 карт",
+    "query": "расклад таро на год",
+    "secondary": [
+      "расклад на 12 месяцев",
+      "гадание на новый год таро"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1400,
+    "outline": [
+      "Когда делать",
+      "Схема 12+1",
+      "Трактовка по месяцам",
+      "Итоговая карта года",
+      "Как вести записи"
+    ],
+    "links": [
+      "/taro",
+      "/karta-dnya"
+    ],
+    "absorbed_by": "/taro/rasklady/na-god",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "luna-v-znakah-zodiaka",
+    "section": "astrologiya",
+    "title": "Луна в знаках зодиака: влияние на день",
+    "query": "луна в знаках зодиака",
+    "secondary": [
+      "луна в овне",
+      "луна в скорпионе",
+      "транзит луны"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1300,
+    "outline": [
+      "Как Луна проходит знаки",
+      "Огонь",
+      "Земля",
+      "Воздух",
+      "Вода",
+      "Как учитывать в планах"
+    ],
+    "links": [
+      "/astrologiya",
+      "/goroskop"
+    ],
+    "absorbed_by": "/astrologiya/luna-v-znake",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "znachenie-chisel-na-chasah",
+    "section": "numerologiya",
+    "title": "Значение чисел на часах: 1111, 1212, 2222 и другие",
+    "query": "значение чисел на часах",
+    "secondary": [
+      "одинаковые цифры на часах",
+      "зеркальные числа на часах",
+      "1111 значение"
+    ],
+    "intent": "info",
+    "priority": 1,
+    "words": 1500,
+    "outline": [
+      "Почему мы замечаем числа",
+      "Одинаковые цифры",
+      "Зеркальные числа",
+      "Последовательные числа",
+      "Что делать",
+      "Скептический взгляд"
+    ],
+    "links": [
+      "/numerologiya",
+      "/chislo-sudby"
+    ],
+    "absorbed_by": "/numerologiya/chisla-na-chasah",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "lichnyy-god-numerologiya",
+    "section": "numerologiya",
+    "title": "Личный год в нумерологии: как рассчитать",
+    "query": "личный год нумерология",
+    "secondary": [
+      "число года",
+      "нумерологический прогноз на год"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1200,
+    "outline": [
+      "Что такое личный год",
+      "Формула",
+      "Годы 1-9",
+      "Пример",
+      "Как планировать"
+    ],
+    "links": [
+      "/numerologiya",
+      "/chislo-sudby"
+    ],
+    "absorbed_by": "/numerologiya/lichnyy-god",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "numerologicheskaya-sovmestimost",
+    "section": "numerologiya",
+    "title": "Нумерологическая совместимость по дате рождения",
+    "query": "совместимость по дате рождения",
+    "secondary": [
+      "нумерология совместимость",
+      "совместимость чисел судьбы"
+    ],
+    "intent": "info",
+    "priority": 1,
+    "words": 1300,
+    "outline": [
+      "Как считается",
+      "Таблица сочетаний",
+      "Сильные пары",
+      "Сложные пары",
+      "Как использовать"
+    ],
+    "links": [
+      "/numerologiya",
+      "/chislo-sudby",
+      "/astrologiya"
+    ],
+    "absorbed_by": "/numerologiya/sovmestimost",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "schastlivoe-chislo",
+    "section": "numerologiya",
+    "title": "Счастливое число по дате рождения: как найти",
+    "query": "счастливое число по дате рождения",
+    "secondary": [
+      "моё счастливое число",
+      "число удачи"
+    ],
+    "intent": "info",
+    "priority": 3,
+    "words": 900,
+    "outline": [
+      "Что такое счастливое число",
+      "Расчёт",
+      "Значения",
+      "Как использовать",
+      "Суеверия и факты"
+    ],
+    "links": [
+      "/numerologiya",
+      "/chislo-sudby"
+    ],
+    "absorbed_by": "/numerologiya/schastlivoe-chislo",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "k-chemu-snitsya-voda",
+    "section": "sonnik",
+    "title": "К чему снится вода: толкование снов о воде",
+    "query": "к чему снится вода",
+    "secondary": [
+      "сон про воду",
+      "мутная вода во сне",
+      "вода во сне"
+    ],
+    "intent": "info",
+    "priority": 1,
+    "words": 1000,
+    "outline": [
+      "Общее значение",
+      "Чистая вода",
+      "Мутная вода",
+      "Потоп и наводнение",
+      "Купание",
+      "Психологическое толкование"
+    ],
+    "links": [
+      "/sonnik",
+      "/praktiki"
+    ],
+    "absorbed_by": "/sonnik/voda",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "k-chemu-snyatsya-umershie",
+    "section": "sonnik",
+    "title": "К чему снятся умершие родственники",
+    "query": "к чему снятся умершие",
+    "secondary": [
+      "снятся умершие родители",
+      "сон про умершего"
+    ],
+    "intent": "info",
+    "priority": 1,
+    "words": 1200,
+    "outline": [
+      "Почему мы видим умерших",
+      "Умершие говорят",
+      "Умершие зовут",
+      "Церковные и народные толкования",
+      "Психология"
+    ],
+    "links": [
+      "/sonnik"
+    ],
+    "absorbed_by": "/sonnik/umershiy-rodstvennik",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "k-chemu-snyatsya-zuby",
+    "section": "sonnik",
+    "title": "К чему снятся зубы: выпадение и лечение",
+    "query": "к чему снятся зубы",
+    "secondary": [
+      "выпали зубы во сне",
+      "зубы с кровью"
+    ],
+    "intent": "info",
+    "priority": 1,
+    "words": 1100,
+    "outline": [
+      "Общее значение",
+      "Выпадение",
+      "Кровь",
+      "Лечение",
+      "Толкование по сонникам"
+    ],
+    "links": [
+      "/sonnik"
+    ],
+    "absorbed_by": "/sonnik/zuby",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "k-chemu-snitsya-beremennost",
+    "section": "sonnik",
+    "title": "К чему снится беременность",
+    "query": "к чему снится беременность",
+    "secondary": [
+      "сон про беременность",
+      "беременная во сне"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1000,
+    "outline": [
+      "Общее значение",
+      "Для женщин",
+      "Для мужчин",
+      "Чужая беременность",
+      "Роды"
+    ],
+    "links": [
+      "/sonnik"
+    ],
+    "absorbed_by": "/sonnik/beremennost",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "k-chemu-snitsya-svadba",
+    "section": "sonnik",
+    "title": "К чему снится свадьба",
+    "query": "к чему снится свадьба",
+    "secondary": [
+      "своя свадьба во сне",
+      "сон про свадьбу"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1000,
+    "outline": [
+      "Общее значение",
+      "Своя свадьба",
+      "Чужая",
+      "Платье и кольцо",
+      "Народные приметы"
+    ],
+    "links": [
+      "/sonnik"
+    ],
+    "absorbed_by": "/sonnik/svadba",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "k-chemu-snitsya-padenie",
+    "section": "sonnik",
+    "title": "К чему снится падение",
+    "query": "к чему снится падение",
+    "secondary": [
+      "падать во сне",
+      "падение с высоты сон"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1000,
+    "outline": [
+      "Почему снятся падения",
+      "Падение с высоты",
+      "Падение в воду",
+      "Физиологическое объяснение",
+      "Толкование"
+    ],
+    "links": [
+      "/sonnik",
+      "/praktiki"
+    ],
+    "absorbed_by": "/sonnik/padenie",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "k-chemu-snitsya-byvshiy",
+    "section": "sonnik",
+    "title": "К чему снится бывший",
+    "query": "к чему снится бывший",
+    "secondary": [
+      "бывший парень во сне",
+      "бывший муж сон"
+    ],
+    "intent": "info",
+    "priority": 1,
+    "words": 1100,
+    "outline": [
+      "Почему бывший снится",
+      "Разговор",
+      "Расставание",
+      "Психология",
+      "Что делать"
+    ],
+    "links": [
+      "/sonnik",
+      "/taro"
+    ],
+    "absorbed_by": "/sonnik/byvshiy",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "k-chemu-snyatsya-dengi",
+    "section": "sonnik",
+    "title": "К чему снятся деньги",
+    "query": "к чему снятся деньги",
+    "secondary": [
+      "найти деньги во сне",
+      "терять деньги во сне"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1000,
+    "outline": [
+      "Общее значение",
+      "Найти",
+      "Потерять",
+      "Дать/взять",
+      "Монеты и купюры"
+    ],
+    "links": [
+      "/sonnik",
+      "/kamni"
+    ],
+    "absorbed_by": "/sonnik/dengi",
+    "removed": "2026-10-17"
+  },
+  {
+    "slug": "kamni-po-date-rozhdeniya",
+    "section": "kamni",
+    "title": "Камень по дате рождения: как выбрать талисман",
+    "query": "камень по дате рождения",
+    "secondary": [
+      "камень по месяцу рождения",
+      "камни по числу рождения"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1300,
+    "outline": [
+      "Принципы выбора",
+      "По месяцу",
+      "По знаку",
+      "По числу судьбы",
+      "Как проверить"
+    ],
+    "links": [
+      "/kamni",
+      "/chislo-sudby",
+      "/goroskop",
+      "/kamni/po-date-rozhdeniya",
+      "/kamni/po-znaku-zodiaka"
+    ],
+    "absorbed_by": "/kamni/po-date-rozhdeniya",
+    "removed": "2026-10-17"
+  }
+]
