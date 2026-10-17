@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import ArticleCard from "@/components/ArticleCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import HubHeader from "@/components/HubHeader";
+import TelegramDaily from "@/components/TelegramDaily";
 import { getArticles } from "@/lib/content";
 import { SECTIONS, SECTION_KEYS, SECTION_TOOLS, type SectionKey } from "@/lib/site";
 
@@ -40,6 +41,7 @@ export default async function SectionPage({ params }: PageProps<"/[section]">) {
       ) : (
         <p className="text-muted">Статьи этого раздела появятся совсем скоро.</p>
       )}
+      {key === "numerologiya" && <TelegramDaily campaign="numerologiya" />}
     </div>
   );
 }

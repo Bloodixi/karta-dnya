@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import TelegramDaily from "@/components/TelegramDaily";
 import ThreeCards from "@/components/ThreeCards";
 import { getTarot } from "@/lib/content";
 
@@ -25,6 +26,7 @@ export default function ThreeCardsPage() {
       <h1 className="text-3xl md:text-4xl font-semibold">Расклад на три карты онлайн</h1>
       <p className="text-muted mt-2 max-w-2xl">Классический расклад «прошлое, настоящее, будущее». Подумайте о ситуации, разложите карты и прочитайте их как одну историю.</p>
       <div className="mt-6">{cards.length ? <ThreeCards cards={cards} /> : <p className="text-muted">Колода готовится.</p>}</div>
+      <TelegramDaily campaign="taro-tri-karty" text="Карта дня с толкованием — каждое утро в 8:00 по Москве. Коротко и без рекламы." className="mt-8" />
       <section className="prose mt-10">
         <h2>Как читать расклад</h2>
         <ol>

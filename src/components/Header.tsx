@@ -3,13 +3,16 @@ import Link from "next/link";
 import { SECTIONS, SECTION_KEYS, SITE } from "@/lib/site";
 import ThemeToggle from "./ThemeToggle";
 import MobileMenu from "./MobileMenu";
-import type { IconName } from "./Icons";
+import Icon, { type IconName } from "./Icons";
 
-const MENU_TOOLS: { href: string; title: string; icon: IconName }[] = [
+const MENU_TOOLS: { href: string; title: string; icon: IconName; paid?: string }[] = [
   { href: "/karta-dnya", title: "Карта дня", icon: "card" },
   { href: "/goroskop", title: "Гороскоп", icon: "sun" },
   { href: "/lunnyy-kalendar", title: "Лунный календарь", icon: "calendar" },
   { href: "/sovmestimost", title: "Совместимость", icon: "hearts" },
+  { href: "/chislo-sudby", title: "Число судьбы", icon: "hash" },
+  { href: "/taro/da-net", title: "Да или нет", icon: "ball" },
+  { href: "/razbor", title: "Разбор по дате рождения", icon: "scroll", paid: "личный документ" },
 ];
 
 export default function Header() {
@@ -27,6 +30,12 @@ export default function Header() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2 text-sm">
+          {/* На самых узких экранах (<360px) лупы в шапке нет — поиск остаётся в нижней панели. */}
+          <span className="contents max-[359px]:hidden">
+            <Link href="/poisk" aria-label="Поиск по сайту" title="Поиск" className="icon-badge !w-11 !h-11 md:!w-9 md:!h-9 shrink-0 hover:border-accent hover:text-accent">
+              <Icon name="search" size={18} />
+            </Link>
+          </span>
           <ThemeToggle />
           {/* Обёртка скрывает кнопки на телефоне: у .btn свой display, он перебивает hidden на самой ссылке. */}
           <div className="hidden md:flex items-center gap-2">

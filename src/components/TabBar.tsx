@@ -20,6 +20,7 @@ const TABS: { href: string; title: string; icon: IconName | "sleep" }[] = [
   { href: "/goroskop", title: "Гороскоп", icon: "sun" },
   { href: "/lunnyy-kalendar", title: "Луна", icon: "moon" },
   { href: "/sonnik", title: "Сонник", icon: "sleep" },
+  { href: "/poisk", title: "Поиск", icon: "search" },
 ];
 
 /** Нижняя панель на телефоне: ежедневные разделы под большим пальцем. На десктопе скрыта. */
@@ -30,7 +31,7 @@ export default function TabBar() {
       aria-label="Быстрые переходы"
       className="md:hidden fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {TABS.map((t) => {
           const active = pathname === t.href || pathname.startsWith(t.href + "/");
           return (
@@ -40,7 +41,7 @@ export default function TabBar() {
                 aria-current={active ? "page" : undefined}
                 className={`relative flex h-16 flex-col items-center justify-center gap-1 text-[0.75rem] leading-none ${
                   active
-                    ? "text-accent-text font-medium before:absolute before:inset-x-6 before:top-0 before:h-0.5 before:rounded-full before:bg-accent"
+                    ? "text-accent-text font-medium before:absolute before:inset-x-4 before:top-0 before:h-0.5 before:rounded-full before:bg-accent"
                     : "text-muted"
                 }`}
               >
