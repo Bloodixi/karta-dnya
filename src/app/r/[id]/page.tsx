@@ -31,7 +31,8 @@ export default async function RazborShortPage({ params }: PageProps<"/r/[id]">) 
   if (!r) notFound();
   const { order, t } = r;
   const doc = buildDoc(t);
-  const gift = t.p === "razbor" ? await giftFor(order) : null;
+  // подарок — у разбора, совместимости, детского разбора и сертификата (в пакете подарка нет)
+  const gift = productOf(order.product) !== "pack" ? await giftFor(order) : null;
   const pack = productOf(order.product) === "pack" && order.token2;
 
   return (
@@ -43,7 +44,7 @@ export default async function RazborShortPage({ params }: PageProps<"/r/[id]">) 
       extra={pack ? <PackLink href={`/r/${id}/para`} label="совместимость пары" /> : null}
       note={
         gift ? (
-          <p className="no-print text-sm text-muted mt-3">Ссылка постоянная — сохрани письмо с ней или добавь эту страницу в закладки: разбор откроется в любой момент и на любом устройстве.</p>
+          <p className="no-print text-sm text-muted mt-3">Ссылка постоянная — сохрани письмо с ней или добавь эту страницу в закладки: {t.p === "compat" ? "совместимость откроется" : "разбор откроется"} в любой момент и на любом устройстве.</p>
         ) : (
           <p className="no-print text-sm text-muted mt-3">Ссылка постоянная — добавь в закладки. Она же пришла тебе на почту; если она потеряется — <Link href="/razbor#dostup" className="underline">пришлём ещё раз</Link>.</p>
         )

@@ -33,6 +33,7 @@ const WHAT: Record<Product, string> = {
   compat: "совместимость пары",
   pack: "разбор по дате рождения вместе с совместимостью пары",
   child: "детский разбор",
+  cert: "подарочный сертификат на разбор",
 };
 
 async function send(o: Order): Promise<void> {

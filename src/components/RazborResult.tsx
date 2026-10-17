@@ -7,6 +7,7 @@ import RazborView from "@/components/RazborView";
 import { CopyLinkButton, PdfLink, PrintButton } from "@/components/RazborClient";
 import type { RazborDoc } from "@/lib/razbor";
 import type { GiftView } from "@/lib/razborGift";
+import { giftPath, nyDates, nySeason, nyYear } from "@/lib/giftSeason";
 import { compatUpsellPath, DOC_PAGE, PRODUCTS } from "@/lib/razborProducts";
 import type { DocToken } from "@/lib/razborToken";
 import { SITE } from "@/lib/site";
@@ -100,7 +101,13 @@ function RazborMore({ kind, date, have }: { kind: DocToken["p"]; date: string; h
     items.push({ id: "compat", icon: "hearts", label: "для двоих", title: "Совместимость пары", text: iso ? "Твоя дата уже в форме — останется добавить дату партнёра." : "Две даты рождения: образ пары, любовь, быт, общий год и три совета.", price: PRODUCTS.compat.price, href: `${iso ? compatUpsellPath(iso) : PRODUCTS.compat.path}#forma` });
   if (!have.includes("child"))
     items.push({ id: "child", icon: "sun", label: "для родителя", title: "Детский разбор", text: "Характер ребёнка, сильные стороны и как поддержать его в разном возрасте.", price: PRODUCTS.child.price, href: `${PRODUCTS.child.path}#forma` });
-  items.push({ id: "gift", icon: "star", label: "в подарок", title: "Подарить разбор", text: "С подписью и пожеланием, письмо получателю — сразу или в выбранный день.", price: PRODUCTS.razbor.price, href: "/razbor?g=1#forma" });
+  // в новогодний сезон (1 ноября — 7 января) — подарок к Новому году: письмо 31 декабря или 1 января
+  const ny = nySeason();
+  items.push(
+    ny
+      ? { id: "gift", icon: "star", label: "в подарок", title: `Подарить прогноз на ${nyYear()} год`, text: nyDates().length ? `Разбор с прогнозом на новый год: письмо получателю придёт ${nyDates().map((d) => d.label).join(" или ")}.` : "Разбор с прогнозом на новый год: письмо получателю — сразу или в выбранный день.", price: PRODUCTS.razbor.price, href: giftPath() }
+      : { id: "gift", icon: "star", label: "в подарок", title: "Подарить разбор", text: "С подписью и пожеланием, письмо получателю — сразу или в выбранный день.", price: PRODUCTS.razbor.price, href: giftPath() },
+  );
 
   return (
     <section aria-labelledby="razbor-more" className="no-print mt-12 max-w-4xl border-t border-line pt-8">

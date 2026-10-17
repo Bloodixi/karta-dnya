@@ -2,9 +2,12 @@
 import { mailReady, sendMail, type Attachment, type Inline } from "./mailer";
 import { escapeHtml as h } from "./notify";
 import { buildRazbor } from "./razbor";
-import { extraLinks, productMail } from "./razborProductMail";
+import { giftMailUrl } from "./giftSeason";
+import { certUrl, unsubUrl } from "./razborGift";
+import { docHighlights, extraLinks, productMail } from "./razborProductMail";
 import { PRODUCTS, productOf } from "./razborProducts";
 import { getOrder, patchGift, patchOrder, processShared, type Order } from "./razborStore";
+import type { Product } from "./razborProducts";
 import { readToken } from "./razborToken";
 import { bookletStyle } from "./razborBookletData";
 import { genitive } from "./razborBooklet";
@@ -48,7 +51,17 @@ export function razborHighlights(token: string): string[] {
   }
 }
 
-const GIFT_URL = `${SITE.url}/razbor?g=1&utm_source=email&utm_medium=razbor&utm_campaign=gift`;
+/** «Подарить разбор» в письмах: в новогодний сезон — к блоку «Подари прогноз на год» (utm_campaign=ny). Считается в момент отправки. */
+const giftUrl = (medium = "razbor") => giftMailUrl(SITE.url, medium);
+
+/** Имя в родительном падеже: одно имя — «Анны», пара — «Анны и Сергея»; не уверены в склонении — null. */
+function genitiveOf(product: Product, name: string, name2 = ""): string | null {
+  if (product === "child" || product === "cert") return null; // в детском имя — ребёнка, у сертификата имени нет
+  const a = name ? genitive(name) : null;
+  if (product !== "compat") return a;
+  const b = name2 ? genitive(name2) : null;
+  return a && b ? `${a} и ${b}` : null;
+}
 
 /** ГГГГ-ММ-ДД → ДД.ММ.ГГГГ */
 const ru = (iso: string) => iso.split("-").reverse().join(".");
@@ -100,6 +113,8 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   if (order.mail_sent_at) return { sent: true };
   if (!order.email) return { error: "покупатель не указал e-mail" };
   if (!mailReady()) return { error: "не настроена отправка писем" };
+  if (productOf(order.product) === "cert") return mailCertBuyer(order);
+  const GIFT_URL = giftUrl();
   const url = `${SITE.url}/r/${order.id}`;
   const name = cleanName(order.name || "");
   const gift = order.gift;
@@ -108,10 +123,10 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   const links = extraLinks(order);
   // в подарке имя — получателя, в детском разборе — ребёнка, в совместимости — одного из пары: обращаемся без имени
   const hello = name && !gift && !(pm && order.product !== "pack") ? `${name}, здравствуй!` : "Здравствуй!";
-  // имя получателя в родительном («для Ольги»); не уверены в склонении — фраза без имени
-  const gen = name ? genitive(name) : null;
+  // имя получателя в родительном («для Ольги», «для Анны и Сергея»); детский разбор и неуверенное склонение — без имени
+  const gen = genitiveOf(productOf(order.product), name, cleanName(order.name2 || ""));
   const forName = gen ? ` для ${gen}` : "";
-  const subject = (order.test ? "[ТЕСТ] " : "") + (pm?.subject ?? (gift
+  const subject = (order.test ? "[ТЕСТ] " : "") + (pm && gift ? `Подарок: ${pm.subject.charAt(0).toLowerCase()}${pm.subject.slice(1)}` : pm?.subject ?? (gift
     ? (gen ? `Подарочный разбор для ${gen} готов` : name ? `Подарочный разбор готов: ${name}` : "Подарочный разбор готов")
     : name ? `${name}, твой разбор по дате рождения готов` : "Твой разбор по дате рождения готов"));
   const intro = pm?.intro ?? (gift ? `Спасибо за заказ. Это подарок${gen ? ` для ${gen}` : ""}: разбор по дате рождения готов и открывается по ссылке` : "Спасибо за заказ. Твой разбор по дате рождения готов и открывается по ссылке");
@@ -235,7 +250,7 @@ export async function mailReceipt(order: Order): Promise<{ sent?: boolean; error
     `Чек: ${r.pageUrl}`,
     `Проверить на сайте ФНС: ${r.fnsUrl}`,
     "",
-    `Твой разбор: ${SITE.url}/r/${order.id}`,
+    productOf(order.product) === "cert" && !order.cert_at ? `Сертификат: ${certUrl(order.id)}` : `Твой разбор: ${SITE.url}/r/${order.id}`,
     "",
     `${SITE.name} · ${SITE.url}`,
   ].join("\n");
@@ -272,6 +287,62 @@ export function mailGift(order: Order): Promise<{ sent?: boolean; error?: string
   return job;
 }
 
+/** Что дарят — тексты письма получателю по продукту заказа. */
+function giftLetter(order: Order, from: string): { subject: string; lead: string; open: string; button: string; mainTitle: string; main: string[]; url: string; keep: string } {
+  const product = productOf(order.product);
+  const name = cleanName(order.name || "");
+  const url = `${SITE.url}/r/${order.id}`;
+  const keep = "Ссылка твоя навсегда — сохрани письмо.";
+  if (product === "cert" && !order.cert_at) {
+    return {
+      subject: `${from} дарит тебе сертификат на нумерологический разбор`,
+      lead: `${from} дарит тебе сертификат на нумерологический разбор по дате рождения — личный текст о твоих числах, характере, сильных сторонах и ближайших двенадцати месяцах.`,
+      open: "Открой сертификат по ссылке, введи свою дату рождения и имя — разбор будет готов сразу. Прогноз по месяцам начнётся с месяца, когда ты это сделаешь:",
+      button: "Получить разбор",
+      mainTitle: "",
+      main: [],
+      url: certUrl(order.id),
+      keep: "Сертификат срабатывает один раз: после ввода даты ссылка ведёт на твой разбор.",
+    };
+  }
+  if (product === "compat") {
+    const pair = [name, cleanName(order.name2 || "")].filter(Boolean).join(" и ");
+    return {
+      subject: `${from} дарит вам совместимость пары по датам рождения`,
+      lead: `${from} дарит вам совместимость пары${pair ? ` ${pair}` : ""} по датам рождения — текст о вашей паре: в чём вы похожи и чем дополняете друг друга, как договариваться и какой у вас общий год.`,
+      open: "Совместимость открывается по ссылке:",
+      button: "Открыть подарок",
+      mainTitle: "Главное о вашей паре",
+      main: docHighlights(order.token),
+      url,
+      keep: "Ссылка ваша навсегда — сохраните письмо.",
+    };
+  }
+  if (product === "child") {
+    const gen = name ? genitive(name) : null;
+    return {
+      subject: `${from} дарит тебе детский разбор по дате рождения`,
+      lead: `${from} дарит тебе детский разбор по дате рождения${gen ? ` для ${gen}` : ""}: о характере ребёнка, его сильных сторонах и о том, как его поддержать. Разбор написан для родителя.`,
+      open: "Разбор открывается по ссылке:",
+      button: "Открыть подарок",
+      mainTitle: "Главное из разбора",
+      main: docHighlights(order.token),
+      url,
+      keep,
+    };
+  }
+  return {
+    subject: `${name ? `${name}, ` : ""}${from} дарит тебе нумерологический разбор`,
+    lead: `${from} дарит тебе нумерологический разбор по дате рождения — личный текст о твоих числах, характере, сильных сторонах и ближайших двенадцати месяцах.`,
+    open: "Разбор открывается по ссылке:",
+    button: "Открыть подарок",
+    mainTitle: "Главное о тебе",
+    main: razborHighlights(order.token),
+    url,
+    keep,
+  };
+}
+
 async function doMailGift(id: string): Promise<{ sent?: boolean; error?: string }> {
   const order = await getOrder(id);
   const gift = order?.gift;
@@ -279,33 +350,37 @@ async function doMailGift(id: string): Promise<{ sent?: boolean; error?: string 
   if (gift.sent_at) return { sent: true };
   if (order.status !== "paid") return { error: "заказ не оплачен" };
   if (!mailReady()) return { error: "не настроена отправка писем" };
-  const url = `${SITE.url}/r/${order.id}`;
-  const name = cleanName(order.name || "");
+  const product = productOf(order.product);
+  // в совместимости и детском разборе имя в заказе — не получателя: обращаемся без имени
+  const name = product === "razbor" ? cleanName(order.name || "") : "";
   const from = cleanName(gift.from);
   const wish = gift.wish?.trim() ?? "";
   // «от Вити», «по просьбе Вити»; несколько слов или незнакомое имя — без родительного
   const fromGen = genitive(from);
   const wishTitle = fromGen ? `Пожелание от ${fromGen}` : `Пожелание — ${from}`;
   const hello = name ? `${name}, привет!` : "Привет!";
+  const L = giftLetter(order, from);
+  const url = L.url;
   // тестовый магазин: письмо уходит, чтобы путь можно было прогнать, но с пометкой в теме
-  const subject = `${order.test ? "[ТЕСТ] " : ""}${name ? `${name}, ` : ""}${from} дарит тебе нумерологический разбор`;
-  const lead = `${from} дарит тебе нумерологический разбор по дате рождения — личный текст о твоих числах, характере, сильных сторонах и ближайших двенадцати месяцах.`;
-  const main = razborHighlights(order.token);
-  const booklet = await bookletAttachment(order, name);
+  const subject = `${order.test ? "[ТЕСТ] " : ""}${L.subject}`;
+  const lead = L.lead;
+  const main = L.main;
+  // PDF-буклет — только у разбора (сертификат до активации — без документа)
+  const booklet = product === "razbor" || (product === "cert" && order.cert_at) ? await bookletAttachment(order, cleanName(order.name || "")) : null;
   const text = [
     hello,
     "",
     lead,
     "",
     ...(wish ? [`${wishTitle}:`, wish, ""] : []),
-    "Разбор открывается по ссылке:",
+    L.open,
     url,
     "",
-    "Ссылка твоя навсегда — сохрани письмо.",
+    L.keep,
     "",
     pdfText(booklet),
     "",
-    ...(main.length ? ["Главное о тебе:", ...main.map((m) => `— ${m}`), "", "Остальное — в разборе по ссылке выше.", ""] : []),
+    ...(main.length ? [`${L.mainTitle}:`, ...main.map((m) => `— ${m}`), "", "Остальное — по ссылке выше.", ""] : []),
     `Письмо отправлено по просьбе ${fromGen ?? `дарителя (${from})`}: подарок оформлен на сайте «${SITE.name}». Если оно пришло по ошибке — просто не обращай на него внимания.`,
     "",
     `${SITE.name} · ${SITE.url}`,
@@ -320,23 +395,174 @@ ${wish ? `<tr><td style="padding:4px 0 14px">
 <p style="margin:8px 0 0;font-style:italic">${wishHtml(wish)}</p>
 </td></tr></table>
 </td></tr>` : ""}
-<tr><td style="padding:0 0 8px">${btn(url, "Открыть подарок", "#5b3fa8", "#ffffff")}</td></tr>
+${L.open !== "Разбор открывается по ссылке:" && L.open !== "Совместимость открывается по ссылке:" ? `<tr><td style="padding:0 0 12px"><p style="margin:0">${h(L.open.replace(/:$/, "."))}</p></td></tr>` : ""}
+<tr><td style="padding:0 0 8px">${btn(url, L.button, "#5b3fa8", "#ffffff")}</td></tr>
 <tr><td style="padding:0 0 4px;font-size:13px;color:#666">Ссылка: <a href="${h(url)}" style="color:#5b3fa8">${h(url)}</a></td></tr>
-<tr><td style="padding:0 0 12px;font-size:14px;font-weight:bold">Ссылка твоя навсегда — сохрани письмо.</td></tr>
+<tr><td style="padding:0 0 12px;font-size:14px;font-weight:bold">${h(L.keep)}</td></tr>
 ${pdfHtml(booklet)}
-${highlightsHtml("Главное о тебе", main)}
+${L.mainTitle ? highlightsHtml(L.mainTitle, main) : ""}
 <tr><td style="padding:12px 0 8px;font-size:13px;color:#666">Письмо отправлено по просьбе ${h(fromGen ?? `дарителя (${from})`)}: подарок оформлен на сайте «${h(SITE.name)}». Если оно пришло по ошибке — просто не обращай на него внимания.</td></tr>
 <tr><td style="padding:8px 0;font-size:12px;color:#888">${h(SITE.name)} · <a href="${h(SITE.url)}" style="color:#888">${h(SITE.url.replace(/^https?:\/\//, ""))}</a></td></tr>
 </table>
 </td></tr></table>`;
   try {
-    await sendMail({ to: gift.to_email, subject, text, html, ...(booklet.pdf ? { attachments: [booklet.pdf] } : {}) });
+    await sendMail({ to: gift.to_email, subject, text, html, ...(booklet?.pdf ? { attachments: [booklet.pdf] } : {}) });
     await patchGift(order.id, { sent_at: new Date().toISOString() });
     return { sent: true };
   } catch (e) {
     const why = smtpWhy(e);
     console.error("razbor gift mail:", order.id, why);
     return { error: why };
+  }
+}
+
+/** Короткое письмо из текста и кнопки: обёртка для служебных писем (подарок доставлен, сертификат, прогноз через год). */
+function simpleHtml(paras: string[], button?: { href: string; label: string }, foot: string[] = []): string {
+  return `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222;max-width:560px">
+${paras.map((p) => `<p>${h(p)}</p>`).join("\n")}
+${button ? `<p>${btn(button.href, button.label, "#5b3fa8", "#ffffff")}</p>` : ""}
+${foot.map((f) => `<p style="font-size:13px;color:#777">${f}</p>`).join("\n")}
+<p style="font-size:12px;color:#888">${h(SITE.name)} · <a href="${h(SITE.url)}" style="color:#888">${h(SITE.url.replace(/^https?:\/\//, ""))}</a></p></div>`;
+}
+
+/**
+ * Покупателю — «Подарок для Анны доставлен» со ссылкой «Подарить ещё»: после отложенной отправки (gift-send).
+ * Один раз на заказ (gift.giver_mail_at). Ошибку не бросает.
+ */
+export async function mailGiftDelivered(order: Order): Promise<{ sent?: boolean; error?: string }> {
+  const g = order.gift;
+  if (!g?.sent_at || g.giver_mail_at) return { sent: true };
+  if (!order.email || !mailReady()) return { error: "нет адреса или почты" };
+  const gen = genitiveOf(productOf(order.product), cleanName(order.name || ""), cleanName(order.name2 || ""));
+  const subject = `${order.test ? "[ТЕСТ] " : ""}${gen ? `Подарок для ${gen} доставлен` : "Твой подарок доставлен"}`;
+  const to = g.to_email ?? "";
+  const lead = `Письмо с подарком${gen ? ` для ${gen}` : ""} отправлено на ${to} в выбранный тобой день${g.from ? ` — с подписью «${cleanName(g.from)}»` : ""}.`;
+  const note = "Если письмо не найдётся во входящих, его стоит поискать в папке «Спам». Ссылка на подарок по-прежнему есть в нашем первом письме — её можно переслать и самому.";
+  const more = giftUrl("gift-delivered");
+  const text = ["Здравствуй!", "", lead, "", note, "", "Подарить ещё:", more, "", `${SITE.name} · ${SITE.url}`].join("\n");
+  const html = simpleHtml(["Здравствуй!", lead, note], { href: more, label: "Подарить ещё" });
+  try {
+    await sendMail({ to: order.email, subject, text, html });
+    await patchGift(order.id, { giver_mail_at: new Date().toISOString() });
+    return { sent: true };
+  } catch (e) {
+    const why = smtpWhy(e);
+    console.error("razbor giver mail:", order.id, why);
+    return { error: why };
+  }
+}
+
+/** Письмо покупателю сертификата: ссылка на сертификат, кому и когда уйдёт письмо, чек. Один раз на заказ (mail_sent_at). */
+async function mailCertBuyer(order: Order): Promise<{ sent?: boolean; error?: string }> {
+  const g = order.gift;
+  const url = certUrl(order.id);
+  const delivery = g?.to_email
+    ? g.send_at
+      ? `${ru(g.send_at)} утром письмо с сертификатом уйдёт на ${g.to_email}. До этого дня ссылку видишь только ты.`
+      : `Письмо с сертификатом мы отправляем на ${g.to_email} вместе с этим письмом.`
+    : "Письмо получателю мы не отправляем: передай ссылку сам(а) — так, как тебе удобно.";
+  const r = receiptView(order);
+  const inline: Inline[] = r ? [{ cid: "qr@karta-dnya.ru", filename: `chek-${r.number}.png`, content: await qrPng(r.fnsUrl), contentType: "image/png" }] : [];
+  const lead = "Спасибо за заказ. Сертификат на разбор по дате рождения готов и открывается по ссылке:";
+  const how = "Получатель откроет ссылку, сам введёт свою дату рождения и имя — и сразу получит полный разбор. Сертификат срабатывает один раз, срока у него нет.";
+  const text = [
+    "Здравствуй!",
+    "",
+    lead,
+    url,
+    "",
+    how,
+    "",
+    delivery,
+    "",
+    ...(r ? [`Чек № ${r.number} от ${r.date} ${r.time} (МСК): ${r.pageUrl}`, `Проверить на сайте ФНС: ${r.fnsUrl}`, ""] : []),
+    `Заказ ${order.id}, ${order.amount} ₽.`,
+    "Если ссылка не открывается или остались вопросы — просто ответь на это письмо.",
+    "",
+    `${SITE.name} · ${SITE.url}`,
+    `Продавец: ${SELLER.name}, ИНН ${SELLER.inn}`,
+  ].join("\n");
+  const html = simpleHtml(
+    ["Здравствуй!", lead],
+    { href: url, label: "Открыть сертификат" },
+    [
+      h(how),
+      h(delivery),
+      ...(r ? [`<img src="cid:qr@karta-dnya.ru" width="120" height="120" alt="QR-код чека ФНС"><br>Чек № ${h(r.number)} от ${h(r.date)} ${h(r.time)} (МСК) · <a href="${h(r.pageUrl)}" style="color:#5b3fa8">открыть чек</a> · <a href="${h(r.fnsUrl)}" style="color:#777">проверить на сайте ФНС</a>`] : []),
+      `Заказ ${h(order.id)}, ${h(order.amount)} ₽. Если ссылка не открывается или остались вопросы — просто ответь на это письмо.<br>Продавец: ${h(SELLER.name)}, ИНН ${h(SELLER.inn)}`,
+    ],
+  );
+  try {
+    await sendMail({ to: order.email, subject: `${order.test ? "[ТЕСТ] " : ""}Сертификат на разбор по дате рождения оформлен`, text, html, inline });
+    await patchOrder(order.id, { mail_sent_at: new Date().toISOString() });
+    return { sent: true };
+  } catch (e) {
+    const why = smtpWhy(e);
+    console.error("razbor cert mail:", order.id, why);
+    return { error: why };
+  }
+}
+
+/** Получателю сертификата после активации (если он оставил e-mail): постоянная ссылка на разбор. Ошибку не бросает. */
+export async function mailCertRedeemed(order: Order, email: string): Promise<{ sent?: boolean; error?: string }> {
+  if (!mailReady()) return { error: "не настроена отправка писем" };
+  const url = `${SITE.url}/r/${order.id}`;
+  const name = cleanName(order.name || "");
+  const hello = name ? `${name}, привет!` : "Привет!";
+  const lead = "Твой разбор по дате рождения готов и открывается по ссылке:";
+  const keep = "Ссылка твоя навсегда — сохрани письмо.";
+  const text = [hello, "", lead, url, "", keep, "", `${SITE.name} · ${SITE.url}`].join("\n");
+  const html = simpleHtml([hello, lead], { href: url, label: "Открыть разбор" }, [h(keep)]);
+  try {
+    await sendMail({ to: email, subject: `${order.test ? "[ТЕСТ] " : ""}${name ? `${name}, твой разбор готов` : "Твой разбор по дате рождения готов"}`, text, html });
+    return { sent: true };
+  } catch (e) {
+    const why = smtpWhy(e);
+    console.error("razbor cert redeemed mail:", order.id, why);
+    return { error: why };
+  }
+}
+
+/** Бесплатная часть с датой из заказа — для письма через год: разбор, совместимость или детский разбор. */
+function freePartUrl(order: Order): string {
+  const product = productOf(order.product);
+  const n = (k: string, v?: string) => (v ? `&${k}=${encodeURIComponent(v)}` : "");
+  const utm = "utm_source=email&utm_medium=razbor&utm_campaign=yearly";
+  if (product === "compat" && order.date2) return `${SITE.url}${PRODUCTS.compat.path}?a=${order.date}&b=${order.date2}${n("na", order.name)}${n("nb", order.name2)}&${utm}#teaser`;
+  if (product === "child") return `${SITE.url}${PRODUCTS.child.path}?d=${order.date}${n("n", order.name)}&${utm}#teaser`;
+  return `${SITE.url}/razbor?d=${order.date}${n("n", order.name)}&${utm}#razbor-teaser`;
+}
+
+/**
+ * «Прогноз на следующий год» через 11 месяцев после оплаты — только с согласия при оплате (consent_yearly).
+ * Одно письмо на заказ (yearly_sent_at ставит вызывающий до отправки), с подписанной ссылкой отписки.
+ */
+export async function mailYearly(order: Order): Promise<{ sent?: boolean; error?: string }> {
+  if (!order.email || !mailReady()) return { error: "нет адреса или почты" };
+  const product = productOf(order.product);
+  const name = product === "razbor" || product === "pack" || product === "cert" ? cleanName(order.name || "") : "";
+  const hello = name ? `${name}, здравствуй!` : "Здравствуй!";
+  const what = product === "compat" ? "совместимость пары" : product === "child" ? "детский разбор" : "разбор по дате рождения";
+  const lead = `Почти год назад ты открыл(а) на «${SITE.name}» ${what}. Прогноз по месяцам из него подходит к концу, а впереди — новый личный год со своим тоном.`;
+  const offer = "Бесплатная часть нового прогноза уже ждёт по ссылке — дата подставлена, ничего вводить не нужно. Полный текст на следующие двенадцать месяцев можно открыть там же.";
+  const href = freePartUrl(order);
+  const unsub = unsubUrl(order.id);
+  const why = "Ты получил(а) это письмо, потому что при оплате отметил(а) «Присылать раз в год напоминание о новом прогнозе». Это письмо единственное по этому заказу.";
+  const text = [hello, "", lead, "", offer, href, "", why, `Отписаться: ${unsub}`, "", `${SITE.name} · ${SITE.url}`].join("\n");
+  const html = simpleHtml([hello, lead, offer], { href, label: "Посмотреть прогноз на следующий год" }, [`${h(why)} <a href="${h(unsub)}" style="color:#777">Отписаться</a>`]);
+  try {
+    await sendMail({
+      to: order.email,
+      subject: `${order.test ? "[ТЕСТ] " : ""}${name ? `${name}, прогноз на следующий год` : "Прогноз на следующий год"}`,
+      text,
+      html,
+      headers: { "List-Unsubscribe": `<${unsub}>` },
+    });
+    return { sent: true };
+  } catch (e) {
+    const w = smtpWhy(e);
+    console.error("razbor yearly mail:", order.id, w);
+    return { error: w };
   }
 }
 
@@ -353,7 +579,7 @@ export async function mailReviewAsk(order: Order, formUrl: string): Promise<{ se
     "",
     "Отзыв читаем мы сами, по нему правим тексты. На сайте его покажем, только если ты сам(а) отметишь это в форме.",
     "",
-    `Твой документ по-прежнему открывается по ссылке: ${SITE.url}/r/${order.id}`,
+    `Твой документ по-прежнему открывается по ссылке: ${productOf(order.product) === "cert" && !order.cert_at ? certUrl(order.id) : `${SITE.url}/r/${order.id}`}`,
     "",
     `${SITE.name} · ${SITE.url}`,
   ].join("\n");
@@ -380,6 +606,8 @@ export async function mailAccess(email: string, orders: Order[], gifts: Order[] 
     ...orders.flatMap((o) => {
       const chek = o.receipt_uuid ? `${SITE.url}/razbor/chek/${o.id}` : "";
       const product = productOf(o.product);
+      if (product === "cert")
+        return [o.cert_at ? { url: `${SITE.url}/r/${o.id}`, chek, title: `Разбор по сертификату, дата рождения ${ru(o.date)}` } : { url: certUrl(o.id), chek, title: "Сертификат на разбор (ещё не активирован)" }];
       if (product === "razbor") return [{ url: `${SITE.url}/r/${o.id}`, chek, title: `Разбор${o.name ? (genitive(cleanName(o.name)) ? ` для ${genitive(cleanName(o.name))}` : `: ${cleanName(o.name)}`) : ""}, дата рождения ${ru(o.date)}` }];
       const dates = o.date2 ? `${ru(o.date)} и ${ru(o.date2)}` : ru(o.date);
       if (product === "pack")
@@ -389,11 +617,11 @@ export async function mailAccess(email: string, orders: Order[], gifts: Order[] 
         ];
       return [{ url: `${SITE.url}/r/${o.id}`, chek, title: `${PRODUCTS[product].short}, ${product === "compat" ? "даты" : "дата"} рождения ${dates}` }];
     }),
-    ...gifts.map((o) => ({
-      url: `${SITE.url}/r/${o.id}`,
-      chek: "",
-      title: `Подарок${o.gift?.from ? ` от ${cleanName(o.gift.from)}` : ""}: разбор по дате рождения ${ru(o.date)}`,
-    })),
+    ...gifts.map((o) => {
+      const product = productOf(o.product);
+      const what = product === "compat" ? `совместимость пары, даты ${ru(o.date)} и ${ru(o.date2 ?? "")}` : product === "child" ? `детский разбор, дата рождения ${ru(o.date)}` : product === "cert" && !o.cert_at ? "сертификат на разбор" : `разбор по дате рождения ${ru(o.date)}`;
+      return { url: product === "cert" && !o.cert_at ? certUrl(o.id) : `${SITE.url}/r/${o.id}`, chek: "", title: `Подарок${o.gift?.from ? ` от ${cleanName(o.gift.from)}` : ""}: ${what}` };
+    }),
   ];
   const text = [
     "Здравствуй!",

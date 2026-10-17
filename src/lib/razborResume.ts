@@ -24,13 +24,13 @@ export function resumePath(o: Pick<Order, "product" | "date" | "name" | "date2" 
   } else {
     if (date) q.set("d", date);
     if (name) q.set("n", name);
-    if (product === "razbor" && o.gift) q.set("g", "1");
     if (product === "pack") {
       q.set("p", "1");
       if (date2) q.set("d2", date2);
       if (name2) q.set("n2", name2);
     }
   }
+  if (o.gift && product !== "pack" && product !== "cert") q.set("g", "1");
   const s = q.toString();
   return `${PRODUCTS[product].path}${s ? `?${s}` : ""}#oplata`;
 }

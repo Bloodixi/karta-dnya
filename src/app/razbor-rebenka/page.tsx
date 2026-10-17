@@ -6,6 +6,9 @@ import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import { DateField, FormError, TextField } from "@/components/NumerologyFields";
 import RazborLocked, { PayError } from "@/components/RazborLocked";
+import GiftModeFields from "@/components/GiftModeFields";
+import { GIFT_FORM_ERRORS } from "@/lib/giftErrors";
+import { GIFT_DAYS_MAX, todayMsk } from "@/lib/razborGift";
 import RazborPreview from "@/components/RazborPreview";
 import RazborView from "@/components/RazborView";
 import RazborWhoWrote, { RazborPriceAside } from "@/components/RazborWhoWrote";
@@ -36,11 +39,13 @@ const FAQ = [
   { q: "Это диагностика или рекомендации специалиста?", a: "Нет. Разбор носит развлекательный и ознакомительный характер и не заменяет консультацию психолога, педагога или врача. Лучше всего своего ребёнка знаешь ты." },
   { q: "Как я получу разбор?", a: "Сразу после оплаты откроется страница с разбором, ссылка и чек придут на e-mail. Страницу можно сохранить в PDF кнопкой на странице." },
   { q: "Можно ли вернуть деньги?", a: "Если из-за технической ошибки разбор не открылся, мы вернём оплату полностью. Подробности на странице «Возврат»." },
+  { q: "Можно ли подарить детский разбор?", a: "Да, например родителям малыша. Введи дату рождения ребёнка, а в форме оплаты выбери «В подарок»: подпись, пожелание и e-mail родителя — письмо уйдёт сразу или в выбранный день. Ссылка и чек придут тебе." },
 ];
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 const ERRORS: Record<string, string> = {
+  ...GIFT_FORM_ERRORS,
   email: "Укажи e-mail — на него придут ссылка на разбор и чек об оплате.",
   age: `Детский разбор — для детей до ${CHILD_MAX_AGE + 1} лет. Для взрослого подойдёт обычный разбор по дате рождения.`,
   soon: "Детский разбор скоро появится в продаже. Бесплатная часть уже работает.",
@@ -145,6 +150,7 @@ export default async function ChildRazborPage({ searchParams }: PageProps<"/razb
                     Имя ребёнка — будет в тексте разбора
                     <input type="text" name="name" maxLength={60} defaultValue={name} placeholder="Например, Маша" className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
                   </label>
+                  <GiftModeFields counter={counter} product="child" today={todayMsk()} maxDate={todayMsk(GIFT_DAYS_MAX)} gift={one(sp.g) === "1"} err={err} />
                   <label className="grid gap-1 text-sm mt-4 max-w-sm">
                     Твой e-mail — пришлём сюда ссылку на разбор и чек
                     <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" aria-invalid={err === "email" || undefined} className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />

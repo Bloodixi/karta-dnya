@@ -16,6 +16,8 @@ import { cleanName, parseDate } from "@/lib/numerology";
 import { nowMsk } from "@/lib/razbor";
 import { buildCompatTeaser, COMPAT, COMPAT_TOC, compatReady } from "@/lib/razborCompat";
 import { PRODUCTS } from "@/lib/razborProducts";
+import { GIFT_FORM_ERRORS } from "@/lib/giftErrors";
+import { GIFT_DAYS_MAX, todayMsk } from "@/lib/razborGift";
 import { plural } from "@/lib/ruCount";
 import { pageTitle, SELLER, SITE } from "@/lib/site";
 
@@ -36,12 +38,14 @@ const FAQ = [
   { q: "Что нужно знать о втором человеке?", a: "Только дату рождения и имя. Время и место рождения не нужны: совместимость считается по числам судьбы и личным годам." },
   { q: "Бывают ли несовместимые пары?", a: "Нет. У каждой пары есть сильные стороны и зоны, где нужно договариваться. Совместимость подсказывает, на что опираться и как обходить острые углы, а не выносит приговор." },
   { q: "Как я получу совместимость?", a: "Сразу после оплаты откроется страница с текстом, ссылка и чек придут на e-mail. Страницу можно сохранить в PDF кнопкой на странице." },
+  { q: "Можно ли подарить совместимость?", a: "Да. Введи даты и имена пары, а в форме оплаты выбери «В подарок»: подпиши подарок, добавь пожелание и, если хочешь, e-mail одного из двоих — письмо уйдёт сразу или в выбранный день в пределах года. Ссылка и чек в любом случае придут тебе." },
   { q: "Можно ли вернуть деньги?", a: "Если из-за технической ошибки совместимость не открылась, мы вернём оплату полностью. Подробности на странице «Возврат»." },
 ];
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 const ERRORS: Record<string, string> = {
+  ...GIFT_FORM_ERRORS,
   date: "Проверь обе даты рождения: нужны настоящие даты, например 17.05.1990.",
   name: "Укажи оба имени — они будут в тексте совместимости.",
   email: "Укажи e-mail — на него придут ссылка и чек об оплате.",
@@ -161,6 +165,7 @@ export default async function CompatRazborPage({ searchParams }: PageProps<"/sov
                     firstDate={dmy(a.iso)}
                     err={err}
                     pack={packAddon > 0 ? { addon: packAddon, total: PRODUCTS.pack.price, full: PRODUCTS.razbor.price, on: one(sp.p) === "1" } : undefined}
+                    gift={{ today: todayMsk(), maxDate: todayMsk(GIFT_DAYS_MAX), on: one(sp.g) === "1" }}
                   />
                   <p className="text-xs text-muted mt-3 max-w-md">
                     Нажимая кнопку, ты принимаешь условия <Link href="/oferta" className="underline">оферты</Link>. Оплата через ЮKassa. Совместимость носит развлекательный и ознакомительный характер.

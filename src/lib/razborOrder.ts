@@ -8,7 +8,7 @@ import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeChildToken, makeCompatToken, makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
 import { mailBuyer, mailGift, mailReceipt } from "./razborMail";
-import { giftDue, giftFromMetadata, maskEmail } from "./razborGift";
+import { certCode, giftDue, giftFromMetadata, giftTo, maskEmail } from "./razborGift";
 import type { RazborInput } from "./razbor";
 import { compatUpsellPath, PRODUCTS, productOf } from "./razborProducts";
 import { resumePath } from "./razborResume";
@@ -104,6 +104,7 @@ function tokensFromPayment(p: Payment, i: RazborInput, order: string): { token: 
 /** Заказ из metadata платежа — когда файла заказа нет. */
 export function orderFromPayment(p: Payment): Order | null {
   const md = p.metadata ?? {};
+  if (productOf(md.p) === "cert") return certFromPayment(p);
   const i = inputFromPayment(p);
   if (!i || !md.order) return null;
   const t = tokensFromPayment(p, i, md.order);
@@ -117,6 +118,20 @@ export function orderFromPayment(p: Payment): Order | null {
     ...(product !== "razbor" ? { product } : {}),
     ...(md.date2 ? { date2: md.date2, name2: md.name2 ?? "" } : {}),
     ...(t.token2 ? { token2: t.token2 } : {}),
+    ...(p.test ? { test: true } : {}),
+    ...(md.yearly === "1" ? { consent_yearly: true } : {}),
+  };
+}
+
+/** Сертификат из metadata: даты нет (её введёт получатель), подарок обязателен. */
+function certFromPayment(p: Payment): Order | null {
+  const md = p.metadata ?? {};
+  const gift = giftFromMetadata(md);
+  const yr = Number(md.yr), mo = Number(md.mo);
+  if (!md.order || !gift || !yr || !mo) return null;
+  return {
+    id: md.order, token: "", date: "", name: "", email: md.email ?? "", amount: Number(p.amount.value),
+    status: "pending", payment_id: p.id, created_at: p.created_at, paid_at: "", yr, mo, gift, product: "cert",
     ...(p.test ? { test: true } : {}),
   };
 }
@@ -283,8 +298,8 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
   if (changed && order) {
     const test = p.test ? " · тест" : "";
     if (order.status === "paid") {
-      const url = `${SITE.url}/r/${order.id}`;
       const product = productOf(order.product);
+      const url = product === "cert" ? `${SITE.url}/razbor/sertifikat?c=${certCode(order.id)}` : `${SITE.url}/r/${order.id}`;
       // Чек, письмо (ждёт PDF до минуты) и уведомление владельцу — после ответа: ЮKassa ждёт ответ на уведомление
       // недолго и при задержке шлёт его повторно. Заказ уже «paid»; повтор чека/письма защищён finishPaid и mail_sent_at.
       void (async () => {
@@ -294,9 +309,9 @@ export async function applyPayment(p: Payment): Promise<Order | null> {
         [
           `<b>💳 Оплачен${product === "razbor" ? " разбор" : `о: ${h(PRODUCTS[product].short)}`} — ${h(p.amount.value)} ₽</b>${test}`,
           "",
-          `${product === "child" ? "Дата рождения ребёнка" : "Дата рождения"}: ${h(order.date)}${order.name ? `\nИмя: ${h(order.name)}` : ""}${order.date2 ? `\nВторая дата: ${h(order.date2)}${order.name2 ? `, ${h(order.name2)}` : ""}` : ""}${order.email ? `\nE-mail: ${h(order.email)}` : ""}`,
+          `${product === "cert" ? "Сертификат: дату и имя введёт получатель" : `${product === "child" ? "Дата рождения ребёнка" : "Дата рождения"}: ${h(order.date)}`}${order.name ? `\nИмя: ${h(order.name)}` : ""}${order.date2 ? `\nВторая дата: ${h(order.date2)}${order.name2 ? `, ${h(order.name2)}` : ""}` : ""}${order.email ? `\nE-mail: ${h(order.email)}` : ""}`,
           "",
-          `<a href="${h(url)}">Открыть ${product === "compat" ? "совместимость" : "разбор"}</a>${order.token2 ? ` · <a href="${h(`${url}/para`)}">совместимость</a>` : ""}`,
+          `<a href="${h(url)}">Открыть ${product === "compat" ? "совместимость" : product === "cert" ? "сертификат" : "разбор"}</a>${order.token2 ? ` · <a href="${h(`${url}/para`)}">совместимость</a>` : ""}`,
           ...f.lines,
           `<i>Заказ ${h(order.id)} · платёж ${h(p.id)}</i>`,
         ].join("\n"),
@@ -357,7 +372,7 @@ export type OrderState = {
   amount?: number; // сумма оплаты, ₽ — для цели Метрики на странице «Спасибо» (у тестовой оплаты нет)
   /** Подарок: имя получателя, замаскированный адрес и день письма (нет адреса — ссылку передаёт покупатель). */
   gift?: { to: string; email?: string; at?: string; sent?: boolean };
-  product?: "razbor" | "compat" | "pack" | "child";
+  product?: "razbor" | "compat" | "pack" | "child" | "cert";
   /** Пакет: короткая ссылка на совместимость. */
   pair?: string;
   /** Допродажа после обычного разбора себе: совместимость с первой датой покупателя. */
@@ -396,10 +411,12 @@ export async function orderState(orderId: string, cookiePaymentId?: string, offl
   if (!offline && o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
   if (o.status !== "paid") return { status: o.status }; // возврат мог прийти, пока шла проверка
   const g = o.gift;
-  const gift = g ? { to: o.name, ...(g.to_email ? { email: maskEmail(g.to_email) } : {}), ...(g.send_at ? { at: g.send_at } : {}), ...(g.sent_at ? { sent: true } : {}) } : undefined;
+  const gift = g ? { to: giftTo(o), ...(g.to_email ? { email: maskEmail(g.to_email) } : {}), ...(g.send_at ? { at: g.send_at } : {}), ...(g.sent_at ? { sent: true } : {}) } : undefined;
   const product = productOf(o.product);
+  // сертификат до активации — ссылка на страницу ввода даты (её покупатель передаёт сам или она уходит письмом)
+  const cert = product === "cert" && !o.cert_at ? `/razbor/sertifikat?c=${certCode(o.id)}` : "";
   return {
-    status: "paid", path: `/razbor/r/${o.token}`, short: `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined, ...(o.test ? {} : { amount: o.amount }), ...(gift ? { gift } : {}),
+    status: "paid", path: cert || `/razbor/r/${o.token}`, short: cert || `/r/${o.id}`, receipt: o.receipt_url ? `/razbor/chek/${o.id}` : undefined, ...(o.test ? {} : { amount: o.amount }), ...(gift ? { gift } : {}),
     product,
     ...(product === "pack" && o.token2 ? { pair: `/r/${o.id}/para` } : {}),
     ...(product === "razbor" && !g ? { upsell: compatUpsellPath(o.date) } : {}),
