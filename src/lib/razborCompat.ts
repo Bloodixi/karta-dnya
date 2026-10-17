@@ -166,17 +166,20 @@ export function buildCompat(i: CompatInput): RazborDoc {
   return { title: COMPAT.title, who: `${A} и ${B}`, date: `${fmt(i.a)} и ${fmt(i.b)}`, sections };
 }
 
-/** Бесплатная часть: ваши числа, образ пары и первые два предложения его описания; остальное — оглавлением. */
+/**
+ * Бесплатная часть: ваши числа, образ пары (первые два предложения) и целиком раздел «Любовь и близость»;
+ * остальное — оглавлением.
+ */
 export function buildCompatTeaser(i: CompatInput): RazborTeaser {
   const doc = buildCompat(i);
   const get = (id: string) => doc.sections.find((s) => s.id === id)!;
   const obraz = get("obraz");
   const first = obraz.blocks.map((x) => (x.kind === "p" ? x.text : "")).join(" ");
-  const shown = new Set(["chisla", "obraz"]);
+  const shown = new Set(["chisla", "obraz", "lyubov"]);
   return {
     who: doc.who,
     date: doc.date,
-    sections: [get("chisla"), { ...obraz, blocks: [{ kind: "p", text: firstSentences(first, 2) }] }],
+    sections: [get("chisla"), { ...obraz, blocks: [{ kind: "p", text: firstSentences(first, 2) }] }, get("lyubov")],
     locked: COMPAT_TOC.filter((t) => !shown.has(t.id)),
     months_hidden: 0,
   };

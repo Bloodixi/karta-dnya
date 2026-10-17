@@ -5,11 +5,13 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import { DateField, FormError, TextField } from "@/components/NumerologyFields";
+import CompatPackFields from "@/components/CompatPackFields";
 import RazborLocked, { PayError } from "@/components/RazborLocked";
+import RazborPreview from "@/components/RazborPreview";
 import RazborView from "@/components/RazborView";
 import RazborWhoWrote, { RazborPriceAside } from "@/components/RazborWhoWrote";
 import ScrollToResult from "@/components/ScrollToResult";
-import { PayButtons, RazborCheckoutForm, RazborGoal, RazborStickyCta } from "@/components/RazborClient";
+import { RazborCheckoutForm, RazborGoal, RazborStickyCta } from "@/components/RazborClient";
 import { cleanName, parseDate } from "@/lib/numerology";
 import { nowMsk } from "@/lib/razbor";
 import { buildCompatTeaser, COMPAT, COMPAT_TOC, compatReady } from "@/lib/razborCompat";
@@ -18,6 +20,7 @@ import { plural } from "@/lib/ruCount";
 import { pageTitle, SELLER, SITE } from "@/lib/site";
 
 const PATH = "/sovmestimost-razbor";
+const PRIMER = `${PATH}/primer`;
 const DESCRIPTION = `Совместимость пары по датам рождения: числа судьбы, образ пары, любовь, быт, споры, общий год и три совета. Бесплатная часть сразу, полный текст — ${COMPAT.price} ₽.`;
 
 export const metadata: Metadata = {
@@ -58,6 +61,9 @@ export default async function CompatRazborPage({ searchParams }: PageProps<"/sov
   const teaser = a && b ? buildCompatTeaser({ a: { d: a.d, m: a.m, y: a.y, name: na || undefined }, b: { d: b.d, m: b.m, y: b.y, name: nb || undefined }, ...now }) : null;
   const ready = compatReady();
   const price = PRODUCTS.compat.price;
+  // пакет «совместимость + личный разбор»: та же цена пакета, что на /razbor, доплата — к цене совместимости
+  const packAddon = Math.max(0, PRODUCTS.pack.price - price);
+  const dmy = (iso: string) => iso.split("-").reverse().join(".");
   const contactEmail = SELLER.email.includes("@") ? SELLER.email : null;
 
   return (
@@ -106,18 +112,26 @@ export default async function CompatRazborPage({ searchParams }: PageProps<"/sov
 
           <section id="oplata" className="mt-6 max-w-3xl scroll-mt-24">
             <div className="card p-6 frame-gold">
-              <p className="mono">Полная совместимость</p>
-              <p className="display text-4xl mt-2">{price} ₽</p>
-              <p className="text-sm text-muted mt-2">Страница с текстом по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Можно сохранить в PDF.</p>
-              <ul className="mt-4 grid gap-1.5 text-sm">
-                <li>{COMPAT_TOC.length} разделов · образ пары, любовь, быт, споры, общий год и три совета</li>
-                <li>
-                  Не открылась страница — вернём деньги. <Link href="/vozvrat" className="text-accent-text underline">Условия возврата</Link>
-                </li>
-                <li>
-                  Нужен и личный разбор? На странице <Link href="/razbor" className="text-accent-text underline">разбора по дате рождения</Link> — пакет «разбор + совместимость» за {PRODUCTS.pack.price} ₽.
-                </li>
-              </ul>
+              <div className="flex flex-col gap-6 md:grid md:grid-cols-[minmax(0,1fr)_17rem] md:items-start">
+                <div className="min-w-0">
+                  <p className="mono">Полная совместимость</p>
+                  <p className="display text-4xl mt-2">{price} ₽</p>
+                  <p className="text-sm text-muted mt-2">Страница с текстом по ссылке сразу после оплаты, копия ссылки и чек — на e-mail. Можно сохранить в PDF.</p>
+                  <ul className="mt-4 grid gap-1.5 text-sm">
+                    <li>{COMPAT_TOC.length} разделов · образ пары, любовь, быт, споры, общий год и три совета</li>
+                    <li>
+                      Не открылась страница — вернём деньги. <Link href="/vozvrat" className="text-accent-text underline">Условия возврата</Link>
+                    </li>
+                    <li>
+                      <Link href={PRIMER} className="text-accent-text underline">Посмотреть пример полной совместимости</Link>
+                    </li>
+                    {ready && !(a && b) && packAddon > 0 ? (
+                      <li>Нужен и личный разбор? Его можно добавить при оплате — вместе {PRODUCTS.pack.price} ₽.</li>
+                    ) : null}
+                  </ul>
+                </div>
+                <RazborPreview kind="compat" href={PRIMER} className="max-md:order-first" />
+              </div>
 
               <PayError text={err && err !== "date" ? ERRORS[err] : undefined} />
               {err === "pay" && (
@@ -133,19 +147,21 @@ export default async function CompatRazborPage({ searchParams }: PageProps<"/sov
                   <input type="hidden" name="date2" value={b.iso} />
                   <div className="grid gap-3 mt-5 sm:grid-cols-2 max-w-md">
                     <label className="grid gap-1 text-sm">
-                      Имя ({a.iso.split("-").reverse().join(".")})
+                      Имя ({dmy(a.iso)})
                       <input type="text" name="name" required maxLength={60} defaultValue={na} placeholder="Например, Анна" aria-invalid={err === "name" || undefined} className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
                     </label>
                     <label className="grid gap-1 text-sm">
-                      Имя ({b.iso.split("-").reverse().join(".")})
+                      Имя ({dmy(b.iso)})
                       <input type="text" name="name2" required maxLength={60} defaultValue={nb} placeholder="Например, Сергей" aria-invalid={err === "name" || undefined} className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
                     </label>
                   </div>
-                  <label className="grid gap-1 text-sm mt-4 max-w-sm">
-                    E-mail — пришлём сюда ссылку и чек
-                    <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" aria-invalid={err === "email" || undefined} className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
-                  </label>
-                  <PayButtons price={price} />
+                  <CompatPackFields
+                    counter={counter}
+                    price={price}
+                    firstDate={dmy(a.iso)}
+                    err={err}
+                    pack={packAddon > 0 ? { addon: packAddon, total: PRODUCTS.pack.price, on: one(sp.p) === "1" } : undefined}
+                  />
                   <p className="text-xs text-muted mt-3 max-w-md">
                     Нажимая кнопку, ты принимаешь условия <Link href="/oferta" className="underline">оферты</Link>. Оплата через ЮKassa. Совместимость носит развлекательный и ознакомительный характер.
                   </p>
@@ -167,6 +183,9 @@ export default async function CompatRazborPage({ searchParams }: PageProps<"/sov
                   <li key={t.id}>{t.title}</li>
                 ))}
               </ol>
+              <p className="mt-4">
+                <Link href={PRIMER} className="text-accent-text underline">Посмотреть пример полной совместимости</Link>
+              </p>
             </div>
             <div>
               <h2 className="text-2xl mb-3">Как считается</h2>
@@ -197,6 +216,7 @@ export default async function CompatRazborPage({ searchParams }: PageProps<"/sov
           points={[
             `${COMPAT_TOC.length} ${plural(COMPAT_TOC.length, ["раздел", "раздела", "разделов"])} · образ пары, любовь, быт, споры, общий год и три совета`,
             "Бесплатная часть откроется сразу, без регистрации.",
+            <Link key="primer" href={PRIMER} className="text-accent-text underline">Посмотреть пример полной совместимости</Link>,
           ]}
           href={ready && a && b ? "#oplata" : "#forma"}
           cta={ready && a && b ? "Открыть совместимость" : "Посмотреть бесплатно"}
