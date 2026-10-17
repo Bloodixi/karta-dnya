@@ -62,6 +62,9 @@ const nextConfig: NextConfig = {
       permanent: true,
     },
     { source: "/astrologiya/voshodyaschiy-znak-asc", destination: "/astrologiya/voshodyaschiy-znak", permanent: true },
+    // Гороскоп на сегодня живёт по адресу знака без периода: /goroskop/oven/segodnya → /goroskop/oven.
+    { source: "/goroskop/:sign(oven|telets|bliznetsy|rak|lev|deva|vesy|skorpion|strelets|kozerog|vodoley|ryby)/segodnya", destination: "/goroskop/:sign", permanent: true },
+    { source: "/goroskop/segodnya", destination: "/goroskop", permanent: true },
     // Короткие ссылки для описаний роликов и постов: karta-dnya.ru/yt/chislo-sudby → страница с UTM-метками площадки.
     // Временная переадресация: метки могут поменяться, браузеры не должны её запоминать.
     ...Object.entries(SHORT_LINKS).flatMap(([key, [source, medium]]) => [

@@ -3,16 +3,16 @@ import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { horoscopeAuthor } from "@/lib/authors";
 import PeriodNav from "@/components/PeriodNav";
+import Year2027Teaser from "@/components/Year2027";
 import HoroscopeGrid from "@/components/HoroscopeGrid";
 import { allHoroscopes, formatDateRu, todayKey } from "@/lib/daily";
+import { hubMeta } from "@/lib/horoscopeMeta";
 
 export const revalidate = 1800;
 
-export const metadata: Metadata = {
-  title: "Гороскоп на сегодня для всех знаков зодиака",
-  description: "Точный гороскоп на сегодня для каждого знака зодиака: общий фон дня, любовь, работа и деньги, самочувствие и совет. Обновляется ежедневно.",
-  alternates: { canonical: "/goroskop" },
-};
+export function generateMetadata(): Metadata {
+  return { ...hubMeta("segodnya"), alternates: { canonical: "/goroskop" } };
+}
 
 export default function HoroscopePage() {
   const date = todayKey();
@@ -25,6 +25,7 @@ export default function HoroscopePage() {
       <p className="text-muted mt-2 max-w-2xl">Короткий прогноз для каждого знака: настроение дня, любовь, дела и один совет. Выберите знак, чтобы прочитать подробнее, или переключите период.</p>
       <div className="mt-4"><PeriodNav current="segodnya" /></div>
       <HoroscopeGrid items={items} period="segodnya" />
+      <Year2027Teaser className="mt-8" />
       {author && items.some((h) => h.source === "astro") && <AuthorCard author={author} note="гороскопы ведёт" className="mt-10" />}
     </div>
   );

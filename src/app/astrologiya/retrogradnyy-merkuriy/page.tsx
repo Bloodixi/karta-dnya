@@ -5,10 +5,11 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
-import { inSignRu, mskDate, mskDateTime, retroPeriodsByYears, retroStatus } from "@/lib/astro/calendar";
+import { inSignRu, mskDate, mskDateTime, retroPeriodsByYears, retroStatus, type RetroPeriod } from "@/lib/astro/calendar";
 import { SIGN_NAMES_RU } from "@/lib/astro/engine";
 import { getArticle, type Faq as FaqItem } from "@/lib/content";
 import { SITE } from "@/lib/site";
+import { CALM_TIPS, nearestPeriod, periodMonths, periodSpan, signFocus, signsRu, venusOverlap } from "./nearest";
 
 /** Статус «сейчас ретрограден/директен до …» считается на лету, таблица — по эфемеридам на два года. */
 export const revalidate = 3600;
@@ -17,9 +18,18 @@ const year = () => new Date(Date.now() + 3 * 3_600_000).getUTCFullYear();
 
 export async function generateMetadata(): Promise<Metadata> {
   const y = year();
+  const near = nearestPeriod(retroPeriodsByYears("mercury", y, y + 1), new Date());
+  if (!near) {
+    return {
+      title: `Ретроградный Меркурий ${y} и ${y + 1}: даты, что делать`,
+      description: `Ретроградный Меркурий в ${y} и ${y + 1} году: точные даты разворотов по эфемеридам, знаки, что значит период, что делать и чего избегать. Ретро или директ сейчас.`,
+      alternates: { canonical: "/astrologiya/retrogradnyy-merkuriy" },
+    };
+  }
+  const base = `Ретроградный Меркурий ${periodSpan(near)} ${signsRu(near)}: точные даты по эфемеридам, что спокойно делать в эти недели и все периоды ${y}–${y + 1}.`;
   return {
-    title: `Ретроградный Меркурий ${y} и ${y + 1}: даты, что делать`,
-    description: `Ретроградный Меркурий в ${y} и ${y + 1} году: точные даты разворотов по эфемеридам, знаки, что значит период, что делать и чего избегать. Ретро или директ сейчас.`,
+    title: `Ретроградный Меркурий ${periodMonths(near)}: даты, советы`,
+    description: base.length < 140 ? `${base} Ретро или директ сейчас.` : base,
     alternates: { canonical: "/astrologiya/retrogradnyy-merkuriy" },
   };
 }
@@ -54,6 +64,8 @@ export default async function MercuryRetroPage() {
       <Breadcrumbs items={[{ href: "/astrologiya", label: "Астрология" }, { href: "/astrologiya/retrogradnyy-merkuriy", label: "Ретроградный Меркурий" }]} />
       <h1 className="text-3xl md:text-4xl font-semibold">Ретроградный Меркурий {y} и {y + 1}: даты, что делать</h1>
       <p className="text-muted mt-2 max-w-2xl">Точные моменты разворотов по эфемеридам, знаки, в которых они происходят, и спокойное объяснение, что это значит на практике.</p>
+
+      {upcoming && <NearestBlock p={upcoming} now={now} />}
 
       <section className="card p-6 mt-6">
         <p className="mono">сейчас</p>
@@ -149,5 +161,42 @@ export default async function MercuryRetroPage() {
         }}
       />
     </div>
+  );
+}
+
+/** «Сейчас / ближайший»: даты периода, о чём он в этом знаке и что спокойно делать в эти недели. */
+function NearestBlock({ p, now }: { p: RetroPeriod; now: Date }) {
+  const active = new Date(p.start).getTime() <= now.getTime();
+  const focus = signFocus(p.startSign);
+  const venus = venusOverlap(p);
+  const tips = [...(focus?.tips ?? []), ...CALM_TIPS];
+  return (
+    <section className="card p-6 mt-6 border-gold" aria-labelledby="mr-nearest">
+      <p className="mono">{active ? "идёт сейчас" : "ближайший период"}</p>
+      <h2 id="mr-nearest" className="text-2xl mt-1">
+        Ретроградный Меркурий {periodSpan(p)} {signsRu(p)}
+      </h2>
+      <p className="text-muted mt-1 text-sm">
+        Разворот назад — {mskDateTime(p.start, true)}, прямое движение — {mskDateTime(p.end, true)}; всего {p.days} дн. «Тени» — примерно по две недели до и после.
+      </p>
+      {focus && <p className="mt-3">{focus.theme}</p>}
+      {venus && (
+        <p className="mt-3">
+          В эти же недели ретроградна и Венера ({periodSpan(venus)}), поэтому темы отношений, симпатий и денег звучат громче обычного: хорошее время пересмотреть, а не начинать заново.
+        </p>
+      )}
+      <h3 className="font-semibold mt-4">Что спокойно делать в эти недели</h3>
+      <ul className="mt-2 grid gap-1.5 text-sm">
+        {tips.map((t) => (
+          <li key={t} className="flex gap-2">
+            <span aria-hidden="true" className="mt-[0.55em] inline-block w-1.5 h-1.5 bg-gold rotate-45 shrink-0" />
+            <span>{t}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="text-sm text-muted mt-4">
+        Как это отзывается у вашего знака — в <Link href="/goroskop/nedelya" className="text-accent-text underline">гороскопе на неделю</Link> и <Link href="/goroskop/mesyats" className="text-accent-text underline">на месяц</Link>.
+      </p>
+    </section>
   );
 }
