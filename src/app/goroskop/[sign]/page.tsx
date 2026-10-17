@@ -12,7 +12,7 @@ import PeriodNav from "@/components/PeriodNav";
 import RazborCta from "@/components/RazborCta";
 import ZodiacSign from "@/components/ZodiacSign";
 import Year2027Teaser from "@/components/Year2027";
-import Subscribe from "@/components/Subscribe";
+import TelegramDaily from "@/components/TelegramDaily";
 import { findZodiac, getStones, getZodiac } from "@/lib/content";
 import { hubMeta, signMeta } from "@/lib/horoscopeMeta";
 import { allHoroscopes, horoscopeFor, PERIODS, PERIOD_KEYS, periodLabel, todayKey, type PeriodKey } from "@/lib/daily";
@@ -100,7 +100,7 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
       </section>
 
       <RazborCta from="goroskop-znak" />
-      <Subscribe campaign="goroskop" className="mt-10" />
+      <TelegramDaily campaign="goroskop" text="Настроение знаков, карта дня и Луна — в 8:00 по Москве. Коротко и без рекламы." />
 
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Другие знаки</h2>

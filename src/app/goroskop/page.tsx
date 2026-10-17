@@ -3,6 +3,8 @@ import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { horoscopeAuthor } from "@/lib/authors";
 import PeriodNav from "@/components/PeriodNav";
+import Link from "next/link";
+import TelegramDaily from "@/components/TelegramDaily";
 import Year2027Teaser from "@/components/Year2027";
 import HoroscopeGrid from "@/components/HoroscopeGrid";
 import { allHoroscopes, formatDateRu, todayKey } from "@/lib/daily";
@@ -26,6 +28,8 @@ export default function HoroscopePage() {
       <div className="mt-4"><PeriodNav current="segodnya" /></div>
       <HoroscopeGrid items={items} period="segodnya" />
       <Year2027Teaser className="mt-8" />
+      <p className="text-muted mt-6">Знак по году рождения — в <Link href="/kitayskiy-goroskop" className="underline">китайском гороскопе</Link>: двенадцать животных, пять стихий и символ 2027 года.</p>
+      <TelegramDaily campaign="goroskop" text="Настроение знаков, карта дня и Луна — в 8:00 по Москве. Коротко и без рекламы." />
       {author && items.some((h) => h.source === "astro") && <AuthorCard author={author} note="гороскопы ведёт" className="mt-10" />}
     </div>
   );
