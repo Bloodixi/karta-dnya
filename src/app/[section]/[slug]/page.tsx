@@ -9,6 +9,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import RazborCta from "@/components/RazborCta";
+import TelegramDaily from "@/components/TelegramDaily";
 import ReadingProgress from "@/components/ReadingProgress";
 import StonePhoto from "@/components/StonePhoto";
 import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
@@ -186,6 +187,7 @@ function DreamPage({ slug }: { slug: string }) {
           <span aria-hidden="true" className="text-accent-text text-xl shrink-0">→</span>
         </Link>
       )}
+      <TelegramDaily campaign="sonnik-simvol" text="Карта дня, Луна и новые статьи о снах — каждое утро в 8:00 по Москве." />
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Другие символы</h2>
         <div className="flex flex-wrap gap-2">

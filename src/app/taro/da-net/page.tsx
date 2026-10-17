@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import TelegramDaily from "@/components/TelegramDaily";
 import YesNo from "@/components/YesNo";
 import { getTarot } from "@/lib/content";
 
@@ -26,6 +27,7 @@ export default function YesNoPage() {
       <h1 className="text-3xl md:text-4xl font-semibold">Таро да или нет: гадание онлайн</h1>
       <p className="text-muted mt-2 max-w-2xl">Сформулируйте закрытый вопрос, вытяните одну карту и получите ответ. Ответ строится на значении карты и её положении, объяснение прилагается.</p>
       <div className="mt-6 max-w-3xl">{cards.length ? <YesNo cards={cards} /> : <p className="text-muted">Колода готовится.</p>}</div>
+      <TelegramDaily campaign="taro-da-net" text="Карта дня с толкованием — каждое утро в 8:00 по Москве. Коротко и без рекламы." className="mt-8 max-w-3xl" />
       <section className="prose mt-10">
         <h2>Как работает гадание «да или нет»</h2>
         <p>Это самый короткий расклад Таро: одна карта на один закрытый вопрос. Благоприятные карты в прямом положении отвечают «да», сложные карты в прямом положении — «нет», перевёрнутые карты смягчают или ослабляют значение. Несколько карт говорят о паузе: тогда ответ «пока рано» и смысл зависит от ваших следующих шагов.</p>

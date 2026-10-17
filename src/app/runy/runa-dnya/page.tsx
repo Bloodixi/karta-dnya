@@ -3,6 +3,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import RazborCta from "@/components/RazborCta";
+import TelegramDaily from "@/components/TelegramDaily";
 import RuneGlyph from "@/components/RuneGlyph";
 import { runeOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import type { Faq as FaqItem } from "@/lib/content";
@@ -64,6 +65,7 @@ export default function RuneOfDayPage() {
               </p>
             </div>
             {/* приглашение к разбору и FAQ — в колонке текста, той же ширины, что и трактовка */}
+            <TelegramDaily campaign="runa-dnya" className="mt-10 max-w-[40rem]" />
             <RazborCta from="runa-dnya" className="mt-10 max-w-[40rem]" />
             <Faq items={FAQ} className="max-w-[40rem]" />
           </div>

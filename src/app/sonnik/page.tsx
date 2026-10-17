@@ -4,6 +4,7 @@ import ArticleCard from "@/components/ArticleCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DreamSearch from "@/components/DreamSearch";
 import HubHeader from "@/components/HubHeader";
+import TelegramDaily from "@/components/TelegramDaily";
 import { getArticles, getDreamImages, getDreams } from "@/lib/content";
 import { SECTIONS } from "@/lib/site";
 
@@ -53,6 +54,8 @@ export default function DreamsPage() {
           <p className="text-muted">Символы сонника готовятся.</p>
         )}
       </div>
+
+      <TelegramDaily campaign="sonnik" text="Карта дня, Луна и новые статьи о снах — каждое утро в 8:00 по Москве." />
 
       {articles.length > 0 && (
         <section className="mt-12">

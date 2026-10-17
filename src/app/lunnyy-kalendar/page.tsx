@@ -4,6 +4,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import MoonPhase from "@/components/MoonPhase";
 import MoonStrip from "@/components/MoonStrip";
 import Starfield from "@/components/Starfield";
+import TelegramDaily from "@/components/TelegramDaily";
 import Faq from "@/components/Faq";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, monthDays, PHASES } from "@/lib/moon";
@@ -127,6 +128,7 @@ export default function LunarPage() {
         </div>
         <p className="text-sm text-muted mt-3">Подробнее о дне — на странице <Link href={`/lunnyy-kalendar/${key}`} className="text-accent-text underline">{formatDateRu(key, { day: "numeric", month: "long" })}</Link>.</p>
       </section>
+      <TelegramDaily campaign="lunnyy-kalendar" text="Лунный день, фаза и карта дня — каждое утро в 8:00 по Москве. Коротко и без рекламы." />
 
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Календарь на {monthName}</h2>
