@@ -4,6 +4,7 @@ import { escapeHtml as h, notifyPayment } from "@/lib/notify";
 import { dueGifts } from "@/lib/razborGift";
 import { mailGift } from "@/lib/razborMail";
 import { askReviews } from "@/lib/razborReview";
+import { purgeAbandoned } from "@/lib/razborStore";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ async function run() {
   }
   // заодно — просьбы об отзыве (через 7 дней после оплаты): утром, вместе с подарками
   const reviews = await askReviews().catch((e) => (console.error("razbor reviews:", (e as Error).message), { due: 0, sent: 0 }));
+  await purgeAbandoned().catch((e) => console.error("razbor purge:", (e as Error).message)); // брошенные заказы старше 7 дней
   return { due: due.length, sent, failed: failed.length, reviews: reviews.sent };
 }
 

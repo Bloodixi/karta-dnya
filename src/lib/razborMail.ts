@@ -4,7 +4,7 @@ import { escapeHtml as h } from "./notify";
 import { buildRazbor } from "./razbor";
 import { extraLinks, productMail } from "./razborProductMail";
 import { PRODUCTS, productOf } from "./razborProducts";
-import { getOrder, patchGift, patchOrder, type Order } from "./razborStore";
+import { getOrder, patchGift, patchOrder, processShared, type Order } from "./razborStore";
 import { readToken } from "./razborToken";
 import { bookletStyle } from "./razborBookletData";
 import { genitive } from "./razborBooklet";
@@ -258,7 +258,7 @@ export async function mailReceipt(order: Order): Promise<{ sent?: boolean; error
 }
 
 /** Письмо получателю подарка уходит один раз: вебхук, страница «Спасибо» и ежедневный запуск не пошлют его дважды. */
-const giftSending = new Map<string, Promise<{ sent?: boolean; error?: string }>>();
+const giftSending = processShared("razborGiftSending", () => new Map<string, Promise<{ sent?: boolean; error?: string }>>());
 
 /**
  * Письмо получателю подарка (gift.to_email) — один раз на заказ (gift.sent_at). Дату отправки и статус оплаты

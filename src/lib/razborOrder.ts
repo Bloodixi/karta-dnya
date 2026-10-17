@@ -3,7 +3,7 @@
  * дубликат данных — в metadata платежа: по нему заказ восстанавливается, если файла нет. Только сервер.
  */
 import { getPayment, recentPayments, type Payment, type Refund } from "./yookassa";
-import { getOrder, listOrders, patchOrder, refundOrder, settleOrder, type Order } from "./razborStore";
+import { getOrder, listOrders, patchOrder, processShared, refundOrder, settleOrder, type Order } from "./razborStore";
 import { escapeHtml as h, notifyPayment } from "./notify";
 import { makeChildToken, makeCompatToken, makeToken } from "./razborToken";
 import { issueReceipt } from "./razborReceipt";
@@ -123,7 +123,7 @@ export function orderFromPayment(p: Payment): Order | null {
  * После оплаты: чек «Мой налог» и письмо покупателю (каждое — один раз на заказ).
  * Возвращает строки для уведомления владельцу и заказ с обновлёнными полями.
  */
-const finishing = new Map<string, Promise<{ order?: Order; lines: string[] }>>();
+const finishing = processShared("razborFinishing", () => new Map<string, Promise<{ order?: Order; lines: string[] }>>());
 function finishPaid(order: Order): Promise<{ order?: Order; lines: string[] }> {
   // вебхук и страница «Спасибо» могут прийти одновременно — второй ждёт первый, чек не пробивается дважды
   const running = finishing.get(order.id);
