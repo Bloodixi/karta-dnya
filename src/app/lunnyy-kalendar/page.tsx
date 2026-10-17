@@ -84,17 +84,17 @@ export default function LunarPage() {
                 <Link href={`/goroskop/${today.sign.slug}`} className="chip hover:border-[var(--gold)] hover:text-[var(--night-ink)]">Луна в знаке {today.sign.name}</Link>
               </div>
               {upcoming.length > 0 && (
-                <dl className="mt-6 grid grid-cols-2 gap-px max-w-md border border-[var(--night-line)] rounded-[4px] overflow-hidden bg-[var(--night-line)]">
+                <ul className="mt-6 grid grid-cols-2 gap-px max-w-md border border-[var(--night-line)] rounded-[4px] overflow-hidden bg-[var(--night-line)]">
                   {upcoming.map((u) => (
-                    <div key={u.label} className="bg-[var(--night)]">
+                    <li key={u.label} className="bg-[var(--night)]">
                       <Link href={`/lunnyy-kalendar/${u.next.key}`} className="block p-3 hover:bg-[var(--night-2)]">
-                        <dt className="mono">{u.label}</dt>
-                        <dd className="display text-lg mt-1">{formatDateRu(u.next.key, { day: "numeric", month: "long" })}</dd>
-                        <dd className="text-xs text-muted">через {u.next.inDays} {plural(u.next.inDays, "день", "дня", "дней")}</dd>
+                        <span className="mono block">{u.label}</span>
+                        <span className="display text-lg mt-1 block">{formatDateRu(u.next.key, { day: "numeric", month: "long" })}</span>
+                        <span className="text-xs text-muted block">через {u.next.inDays} {plural(u.next.inDays, "день", "дня", "дней")}</span>
                       </Link>
-                    </div>
+                    </li>
                   ))}
-                </dl>
+                </ul>
               )}
             </div>
             <div className="order-1 md:order-2 justify-self-center grid justify-items-center">
