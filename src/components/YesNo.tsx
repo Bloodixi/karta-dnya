@@ -3,20 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import TarotCardView from "./TarotCardView";
+import TarotShareCard from "./TarotShareCard";
+import { tarotVerdict } from "@/lib/tarotVerdict";
 
 type Card = { slug: string; name: string; keywords: string[]; upright: string; reversed: string; advice: string; arcana: string; suitName: string | null };
-
-const NEGATIVE = new Set(["bashnya", "smert", "dyavol", "luna", "povesheniy", "povechenny", "troyka-mechey", "desyatka-mechey", "pyaterka-pentakley", "pyaterka-kubkov", "vosmerka-kubkov", "devyatka-mechey", "pyaterka-mechey", "semerka-mechey", "vosmerka-mechey"]);
-const NEUTRAL = new Set(["dvoyka-mechey", "semerka-pentakley", "chetvyorka-kubkov", "otshelnik", "umerennost", "koleso-fortuny", "sud", "spravedlivost"]);
-
-function verdict(c: Card, reversed: boolean): { answer: string; tone: "yes" | "no" | "maybe"; why: string } {
-  const neg = NEGATIVE.has(c.slug), neu = NEUTRAL.has(c.slug);
-  if (neu) return { answer: "Скорее нет, пока рано", tone: "maybe", why: "Карта говорит о паузе и неопределённости: ответ зависит от ваших следующих шагов." };
-  if (!reversed && !neg) return { answer: "Да", tone: "yes", why: "Прямое положение благоприятной карты: обстоятельства на вашей стороне." };
-  if (reversed && neg) return { answer: "Скорее да", tone: "yes", why: "Перевёрнутая сложная карта смягчает её значение: препятствие ослабевает." };
-  if (!reversed && neg) return { answer: "Нет", tone: "no", why: "Карта предупреждает: сейчас затея потребует больше, чем даст." };
-  return { answer: "Скорее нет", tone: "no", why: "Перевёрнутая карта: нужное пока заблокировано или требует другого подхода." };
-}
 
 export default function YesNo({ cards }: { cards: Card[] }) {
   const [res, setRes] = useState<{ card: Card; reversed: boolean } | null>(null);
@@ -39,7 +29,7 @@ export default function YesNo({ cards }: { cards: Card[] }) {
     }, 600);
     return () => window.clearTimeout(t);
   }, [res]);
-  const v = res ? verdict(res.card, res.reversed) : null;
+  const v = res ? tarotVerdict(res.card.slug, res.reversed) : null;
   const color = v?.tone === "yes" ? "text-yes" : v?.tone === "no" ? "text-no" : "text-maybe";
   return (
     <div className="card p-6">
@@ -65,6 +55,7 @@ export default function YesNo({ cards }: { cards: Card[] }) {
           <p className="text-muted self-center">Сформулируйте вопрос так, чтобы на него можно было ответить «да» или «нет», и переверните карту.</p>
         )}
       </div>
+      {res && v && <TarotShareCard kind="yn" cards={[{ slug: res.card.slug, name: res.card.name, reversed: res.reversed }]} question={question} answer={{ text: v.answer, tone: v.tone }} />}
     </div>
   );
 }

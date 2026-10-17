@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import ScrollToResult from "./ScrollToResult";
 import TarotCardView from "./TarotCardView";
+import TarotShareCard from "./TarotShareCard";
+import { THREE_POSITIONS as POSITIONS } from "@/lib/tarotVerdict";
 
 type Card = { slug: string; name: string; keywords: string[]; upright: string; reversed: string; advice: string; arcana: string; suitName: string | null };
 type Drawn = { card: Card; reversed: boolean };
-const POSITIONS = ["Прошлое", "Настоящее", "Будущее"];
 
 export default function ThreeCards({ cards }: { cards: Card[] }) {
   const [res, setRes] = useState<Drawn[] | null>(null);
@@ -65,6 +66,7 @@ export default function ThreeCards({ cards }: { cards: Card[] }) {
               Совет расклада: {res[2].card.advice}
             </div>
           </div>
+          <TarotShareCard kind="three" cards={res.map((d) => ({ slug: d.card.slug, name: d.card.name, reversed: d.reversed }))} question={question} advice={res[2].card.advice} />
         </>
       )}
     </div>
