@@ -328,7 +328,14 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
       </fieldset>
 
       {!gift ? (
-        <input type="hidden" name="name" value={initialName} />
+        <>
+          <input type="hidden" name="name" value={initialName} />
+          {!date ? (
+            <p className="text-sm mt-4 border-l-2 border-accent pl-3">
+              Для себя сначала введи свою дату рождения <a href="#forma" className="text-accent-text underline">в форме выше</a> — откроется бесплатная часть.
+            </p>
+          ) : null}
+        </>
       ) : (
         <div className="grid gap-4 mt-4 max-w-md">
           {ny?.on ? <input type="hidden" name="ny" value="1" /> : null}
