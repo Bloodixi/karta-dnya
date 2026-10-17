@@ -5,7 +5,7 @@ import Faq from "@/components/Faq";
 import RazborCta from "@/components/RazborCta";
 import TelegramDaily from "@/components/TelegramDaily";
 import RuneGlyph from "@/components/RuneGlyph";
-import { runeOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
+import { runeOfDay, formatDateRu, todayKey } from "@/lib/daily";
 import type { Faq as FaqItem } from "@/lib/content";
 
 export const revalidate = 1800;
@@ -26,7 +26,6 @@ const FAQ: FaqItem[] = [
 export default function RuneOfDayPage() {
   const date = todayKey();
   const today = runeOfDay(date);
-  const tomorrow = runeOfDay(shiftKey(date, 1));
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/runy", label: "Руны" }, { href: "/runy/runa-dnya", label: "Руна дня" }]} />
@@ -55,11 +54,7 @@ export default function RuneOfDayPage() {
               <p>{today.rune.practice}</p>
               <h2>Совет дня</h2>
               <blockquote>{today.rune.advice}</blockquote>
-              {tomorrow && (
-                <p className="text-sm text-muted">
-                  Руна на завтра: <Link href={`/runy/${tomorrow.rune.slug}`}>{tomorrow.rune.name}</Link>{tomorrow.reversed ? " (перевёрнутая)" : ""}. Загляните завтра за толкованием.
-                </p>
-              )}
+              <p className="text-sm text-muted">Руна на завтра откроется в 00:00 по Москве — загляните завтра.</p>
               <p>
                 <Link href={`/runy/${today.rune.slug}`}>Подробнее о руне {today.rune.name}</Link> · <Link href="/runy">все 24 руны</Link> · <Link href="/karta-dnya">карта дня Таро</Link>
               </p>
