@@ -2,14 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ArticleCard from "@/components/ArticleCard";
+import ArticleToc from "@/components/ArticleToc";
 import AuthorCard from "@/components/AuthorCard";
 import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import RazborCta from "@/components/RazborCta";
+import ReadingProgress from "@/components/ReadingProgress";
 import StonePhoto from "@/components/StonePhoto";
-import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac, type TocItem } from "@/lib/content";
+import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
 import { pageTitle, SECTIONS, SECTION_KEYS, SITE, type SectionKey } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -64,6 +66,7 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
   const showToc = a.toc.length >= 3;
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
+      <ReadingProgress targetId="article-body" />
       <Breadcrumbs items={[{ href: `/${key}`, label: SECTIONS[key].title }, { href: `/${key}/${slug}`, label: a.title }]} />
       <header className="max-w-[72ch]">
         <h1 className="text-3xl md:text-4xl font-semibold leading-tight">{a.title}</h1>
@@ -86,16 +89,16 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
                 <span>Содержание</span>
                 <span aria-hidden="true" className="text-muted group-open:rotate-45 transition-transform">+</span>
               </summary>
-              <TocList items={a.toc} />
+              <ArticleToc items={a.toc} />
             </details>
           )}
-          <div className="prose prose-article" dangerouslySetInnerHTML={{ __html: a.html }} />
+          <div id="article-body" className="prose prose-article" dangerouslySetInnerHTML={{ __html: a.html }} />
         </div>
         {showToc && (
           <aside className="hidden lg:block">
             <nav aria-label="Содержание" className="sticky top-24 border-l border-line pl-4">
-              <p className="text-sm font-semibold mb-2">Содержание</p>
-              <TocList items={a.toc} />
+              <p className="mono mb-2">Содержание</p>
+              <ArticleToc items={a.toc} rail />
             </nav>
           </aside>
         )}
@@ -134,18 +137,6 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
         }}
       />
     </article>
-  );
-}
-
-function TocList({ items }: { items: TocItem[] }) {
-  return (
-    <ol className="mt-2 space-y-1.5 text-sm">
-      {items.map((t) => (
-        <li key={t.id}>
-          <a href={`#${t.id}`} className="text-muted hover:text-ink leading-snug block">{t.title}</a>
-        </li>
-      ))}
-    </ol>
   );
 }
 
@@ -238,7 +229,7 @@ function StonePage({ slug }: { slug: string }) {
   const img = findStoneImage(slug);
   const zodiac = getZodiac();
   const signs = s.zodiac.map((z) => zodiac.find((x) => x.slug === z)).filter(Boolean);
-  const others = getStones().filter((x) => x.slug !== slug).slice(0, 10);
+  const related = relatedStones(slug, 6);
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/kamni", label: "Камни" }, { href: `/kamni/${slug}`, label: s.name }]} />
@@ -274,15 +265,91 @@ function StonePage({ slug }: { slug: string }) {
           </>
         )}
       </div>
-      <section className="mt-10">
-        <h2 className="text-2xl mb-3">Другие камни</h2>
-        <div className="flex flex-wrap gap-2">
-          {others.map((o) => (
-            <Link key={o.slug} href={`/kamni/${o.slug}`} className="chip hover:text-ink">{o.name}</Link>
-          ))}
-          <Link href="/kamni" className="chip hover:text-ink">все камни →</Link>
-        </div>
-      </section>
+      {related.length > 0 && (
+        <section className="mt-12">
+          <div className="ornament mb-4 border-b border-line pb-2">
+            <h2 className="text-2xl">Похожие камни</h2>
+            <span className="mono">по знаку, цвету и свойствам</span>
+            <Link href="/kamni" className="mono ml-auto hover:!text-ink">все камни →</Link>
+          </div>
+          <ul className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+            {related.map(({ stone: o, reason }) => {
+              const pic = findStoneImage(o.slug);
+              return (
+                <li key={o.slug}>
+                  <Link href={`/kamni/${o.slug}`} className="card card-hover block h-full overflow-hidden group">
+                    {pic ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- миниатюра из того же набора, что и на /kamni
+                      <img src={pic.thumb} width={400} height={300} alt="" loading="lazy" decoding="async" className="stone-img block w-full aspect-[4/3] object-cover bg-night" />
+                    ) : (
+                      <span aria-hidden="true" className="block w-full aspect-[4/3] bg-night" />
+                    )}
+                    <span className="block p-3">
+                      <span className="block font-semibold leading-snug group-hover:text-accent-text">{o.name}</span>
+                      <span className="mono block mt-1 !normal-case !tracking-normal">{reason}</span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
     </article>
   );
+}
+
+/** Семейство цвета по первому упомянутому оттенку: «нежно-розовый, сиреневый» → «розовый». */
+const COLOR_FAMILIES: [RegExp, string][] = [
+  [/фиолет|сирен/, "фиолетовый"],
+  [/розов/, "розовый"],
+  [/красн|алый|малин|винн/, "красный"],
+  [/оранж/, "оранжевый"],
+  [/жёлт|желт|золот|мед/, "золотистый"],
+  [/зелён|зелен|бирюз|олив|мят/, "зелёный"],
+  [/голуб|син/, "голубой и синий"],
+  [/бел|молоч|бесцвет|прозрач/, "светлый"],
+  [/чёрн|черн|сер|дымч/, "тёмный"],
+  [/коричн/, "коричневый"],
+];
+
+function colorFamily(color: string): string | null {
+  const c = color.toLowerCase();
+  let best: { at: number; name: string } | null = null;
+  for (const [re, name] of COLOR_FAMILIES) {
+    const m = re.exec(c);
+    if (m && (!best || m.index < best.at)) best = { at: m.index, name };
+  }
+  return best?.name ?? null;
+}
+
+/**
+ * Связанные камни: общий знак зодиака, то же семейство цвета, общее свойство; при равенстве — ближайшие по списку.
+ * У каждого — короткая причина, почему он рядом («тоже для Рыб» не склоняем: «знак: Рыбы»).
+ */
+function relatedStones(slug: string, n: number) {
+  const all = getStones();
+  const i = all.findIndex((x) => x.slug === slug);
+  if (i < 0) return [];
+  const me = all[i];
+  const myColor = colorFamily(me.color);
+  const zodiac = getZodiac();
+  const scored = all
+    .map((o, j) => {
+      if (o.slug === slug) return null;
+      const signs = o.zodiac.filter((z) => me.zodiac.includes(z));
+      const props = o.properties.filter((p) => me.properties.includes(p));
+      const sameColor = myColor !== null && colorFamily(o.color) === myColor;
+      const score = signs.length * 2 + props.length * 3 + (sameColor ? 2 : 0);
+      const dist = Math.min(Math.abs(i - j), all.length - Math.abs(i - j));
+      let reason: string;
+      if (props.length) reason = props[0];
+      else if (signs.length) reason = `знак: ${zodiac.find((z) => z.slug === signs[0])?.name ?? signs[0]}`;
+      else if (sameColor && myColor) reason = `цвет: ${myColor}`;
+      else reason = o.properties[0] ?? o.color;
+      return { stone: o, reason, score, dist };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null)
+    .sort((a, b) => b.score - a.score || a.dist - b.dist);
+  return scored.slice(0, n).map(({ stone, reason }) => ({ stone, reason }));
 }

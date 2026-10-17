@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 export type DreamItem = { slug: string; word: string; short: string; thumb?: string };
 
@@ -58,17 +58,52 @@ export default function DreamSearch({ items, intro, listHeading }: { items: Drea
   const groups = useMemo(() => groupByLetter(items), [items]);
   const found = useMemo(() => (s ? items.filter((d) => d.word.toLowerCase().includes(s) || d.short.toLowerCase().includes(s)) : items), [s, items]);
 
+  // Поле поиска залипает под шапкой сайта. Метка-«датчик» над полем: когда она уходит под шапку, у полосы появляется нижняя линия.
+  const sentinel = useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = useState(false);
+  // Высота шапки: на средних экранах меню может перенестись во вторую строку, поэтому меряем, а классы top-* — запасной вариант до гидратации.
+  const [headerH, setHeaderH] = useState<number | null>(null);
+  useEffect(() => {
+    const header = document.querySelector<HTMLElement>("body > header");
+    if (!header) return;
+    const measure = () => setHeaderH(header.offsetHeight);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el || headerH === null || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting && e.boundingClientRect.top < headerH + 1), { rootMargin: `-${headerH + 1}px 0px 0px 0px` });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [headerH]);
+
+  const onQuery = (value: string) => {
+    setQ(value);
+    // Если поле уже залипло (листали длинный список), список под ним меняется — возвращаем начало результатов к полю.
+    const el = sentinel.current;
+    if (stuck && el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (headerH ?? 0) });
+  };
+
   return (
     <div>
-      <input
-        type="search"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="К чему снится… например, змея"
-        aria-label="Поиск по соннику"
-        className="w-full max-w-xl border border-line rounded-sm px-4 py-3 bg-surface focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-      />
-      <p className="mono mt-3" aria-live="polite">
+      <div ref={sentinel} aria-hidden="true" />
+      <div
+        className={`sticky top-[61px] md:top-[69px] z-10 -mx-4 px-4 py-2 bg-bg/90 backdrop-blur border-b ${stuck ? "border-line" : "border-transparent"}`}
+        style={headerH !== null ? { top: headerH } : undefined}
+      >
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => onQuery(e.target.value)}
+          placeholder="К чему снится… например, змея"
+          aria-label="Поиск по соннику"
+          enterKeyHint="search"
+          className="w-full max-w-xl border border-line rounded-sm px-4 py-3 bg-surface focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+        />
+      </div>
+      <p className="mono mt-1" aria-live="polite">
         {s ? `Найдено: ${found.length}` : `Символов: ${items.length} · букв: ${groups.length}`}
       </p>
 
@@ -82,7 +117,7 @@ export default function DreamSearch({ items, intro, listHeading }: { items: Drea
             <p className="text-muted">Такого символа пока нет. Попробуйте другое слово, например:</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {HINTS.map((h) => (
-                <button key={h} type="button" onClick={() => setQ(h)} className="chip min-h-10 hover:text-ink hover:border-gold">
+                <button key={h} type="button" onClick={() => onQuery(h)} className="chip min-h-10 hover:text-ink hover:border-gold">
                   {h}
                 </button>
               ))}
@@ -101,7 +136,7 @@ export default function DreamSearch({ items, intro, listHeading }: { items: Drea
             ))}
           </nav>
           {groups.map(([letter, list]) => (
-            <section key={letter} id={letterAnchor(letter)} className="mt-10 scroll-mt-24">
+            <section key={letter} id={letterAnchor(letter)} className="mt-10 scroll-mt-36 md:scroll-mt-40">
               <div className="ornament mb-3 border-b border-line pb-2">
                 <h2 className="text-3xl">{letter}</h2>
                 <span className="mono">{plural(list.length)}</span>
