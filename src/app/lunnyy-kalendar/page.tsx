@@ -7,6 +7,7 @@ import Starfield from "@/components/Starfield";
 import Faq from "@/components/Faq";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, monthDays, PHASES } from "@/lib/moon";
+import { lunarMonthWindow, monthLabel } from "@/lib/moon-month";
 import { moonIllumination, mskNoon } from "@/lib/astro/engine";
 
 export const revalidate = 1800;
@@ -142,6 +143,22 @@ export default function LunarPage() {
                 <p className={`text-xs ${isToday ? "font-semibold text-accent-text" : "text-muted"}`}>{Number(d.key.slice(8))}{isToday && <span className="sr-only">, сегодня</span>}</p>
                 <MoonPhase age={d.age} size={34} className="mx-auto my-1" />
                 <p className="text-xs">{d.lunarDay} л.д.</p>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="mt-10" aria-labelledby="by-month">
+        <h2 id="by-month" className="text-2xl mb-3">По месяцам</h2>
+        <p className="text-muted mb-3 max-w-2xl">Таблица всех дней месяца с лунным днём, фазой и знаком Луны, даты новолуния, полнолуния и затмений.</p>
+        <div className="flex flex-wrap gap-2">
+          {lunarMonthWindow(key).map((mk) => {
+            const L = monthLabel(mk);
+            const current = mk === key.slice(0, 7);
+            return (
+              <Link key={mk} href={`/lunnyy-kalendar/${mk}`} aria-current={current ? "page" : undefined} className={`chip hover:text-ink ${current ? "ring-1 ring-accent" : ""}`}>
+                {L.nom[0].toUpperCase()}{L.nom.slice(1)} {L.year}
               </Link>
             );
           })}

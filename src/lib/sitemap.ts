@@ -6,6 +6,7 @@ import { moonWindowKeys } from "@/lib/moon";
 import { SITE, type SectionKey } from "@/lib/site";
 import { getAuthors } from "@/lib/authors";
 import { getMoonSigns } from "@/lib/moonSigns";
+import { lunarMonthWindow } from "@/lib/moon-month";
 import { getAffirmationTopics } from "@/lib/affirmations";
 
 /** Карта сайта по разделам: /sitemap.xml — индекс, /sitemaps/<раздел>.xml — дочерние карты.
@@ -60,6 +61,7 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
       const page = changed(app("lunnyy-kalendar/[date]"), "src/lib/moon.ts");
       // день недалёкого прошлого и будущего не меняется; его lastmod — правка шаблона (или сам день, если он позже)
       for (const k of moonWindowKeys(today)) add(`/lunnyy-kalendar/${k}`, k > page && k <= today ? k : page, "monthly", 0.6);
+      for (const k of lunarMonthWindow(today)) add(`/lunnyy-kalendar/${k}`, page, "weekly", 0.7);
       break;
     }
     case "taro": {

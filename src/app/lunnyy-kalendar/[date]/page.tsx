@@ -2,22 +2,32 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import LunarMonthPage, { lunarMonthMetadata } from "@/components/LunarMonthPage";
 import MoonPhase from "@/components/MoonPhase";
 import RazborCta from "@/components/RazborCta";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, moonWindow, moonWindowKeys, PHASES } from "@/lib/moon";
+import { lunarMonthStaticKeys, monthLabel, MONTH_RE } from "@/lib/moon-month";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** Месяц в разумных пределах (как и дни: 2000–2100). */
+function isMonth(key: string): boolean {
+  const m = MONTH_RE.exec(key);
+  return Boolean(m && Number(m[1]) >= 2000 && Number(m[1]) <= 2100);
+}
+
 export function generateStaticParams() {
-  return moonWindowKeys(todayKey()).map((date) => ({ date }));
+  // Тот же сегмент обслуживает и месяцы: /lunnyy-kalendar/2026-11 (src/components/LunarMonthPage.tsx).
+  return [...moonWindowKeys(todayKey()), ...lunarMonthStaticKeys(todayKey())].map((date) => ({ date }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/lunnyy-kalendar/[date]">): Promise<Metadata> {
   const { date } = await params;
+  if (isMonth(date)) return lunarMonthMetadata(date);
   if (!DATE_RE.test(date)) return {};
   const d = dayInfo(date);
   return {
@@ -29,6 +39,7 @@ export async function generateMetadata({ params }: PageProps<"/lunnyy-kalendar/[
 
 export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalendar/[date]">) {
   const { date } = await params;
+  if (isMonth(date)) return <LunarMonthPage month={date} />;
   if (!DATE_RE.test(date)) notFound();
   const [y, m, dd] = date.split("-").map(Number);
   if (y < 2000 || y > 2100 || m < 1 || m > 12 || dd < 1 || dd > 31) notFound();
@@ -61,7 +72,10 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
       </div>
       <div className="mt-6 flex flex-wrap gap-2 justify-between text-sm">
         {prev >= win.from && prev <= win.to ? <Link href={`/lunnyy-kalendar/${prev}`} className="btn btn-ghost">← {formatDateRu(prev, { day: "numeric", month: "long" })}</Link> : <span />}
-        <Link href="/lunnyy-kalendar" className="btn btn-ghost">Сегодня и месяц</Link>
+        <span className="flex flex-wrap gap-2">
+          <Link href="/lunnyy-kalendar" className="btn btn-ghost">Сегодня</Link>
+          <Link href={`/lunnyy-kalendar/${date.slice(0, 7)}`} className="btn btn-ghost">Весь {monthLabel(date.slice(0, 7)).nom}</Link>
+        </span>
         {next >= win.from && next <= win.to ? <Link href={`/lunnyy-kalendar/${next}`} className="btn btn-ghost">{formatDateRu(next, { day: "numeric", month: "long" })} →</Link> : <span />}
       </div>
       <RazborCta from="lunnyy-den" />
