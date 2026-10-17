@@ -79,6 +79,11 @@ export default function CompatIndex() {
           <p className="text-xs text-muted mt-2">Строка — первый знак, столбец — второй. Нажмите на число, чтобы открыть разбор пары.</p>
         </section>
       )}
+      <section className="prose mt-10">
+        <h2>Как читать оценку пары</h2>
+        <p>Процент складывается из стихий и характера знаков: огонь легче понимает воздух, земля — воду, а знаки одной стихии быстро находят общий язык, но могут соперничать. Низкая оценка не приговор: она показывает, где паре придётся чаще договариваться. Откуда берутся такие правила и как к ним относиться, рассказано в статье <Link href="/astrologiya/sovmestimost-znakov-zodiaka">почему одни знаки сходятся легче</Link>.</p>
+        <p>Если не уверены в знаке партнёра, особенно когда день рождения на стыке, сверьтесь с таблицей <Link href="/astrologiya/znaki-zodiaka-po-datam">знаков зодиака по датам</Link>. Взгляд нумерологии на ту же пару даёт <Link href="/numerologiya/sovmestimost">совместимость по дате рождения</Link>.</p>
+      </section>
       <CompatCta from="sovmestimost" />
       <RazborCta from="sovmestimost" className="mt-6" />
     </div>

@@ -76,7 +76,7 @@ export default async function PairPage({ params }: PageProps<"/sovmestimost/[pai
           <h2>Совет паре</h2>
           <blockquote>{c.text.advice}</blockquote>
           <p>
-            Подробнее о знаках: <Link href={`/goroskop/${p.a.slug}`}>{p.a.name}</Link> и <Link href={`/goroskop/${p.b.slug}`}>{p.b.name}</Link>.
+            Подробнее о знаках: <Link href={`/goroskop/${p.a.slug}`}>{p.a.name}</Link> и <Link href={`/goroskop/${p.b.slug}`}>{p.b.name}</Link>. Почему одни сочетания складываются легче других, объясняет статья <Link href="/astrologiya/sovmestimost-znakov-zodiaka">об основах совместимости знаков</Link>.
             {p.a.slug !== p.b.slug && <> Обратная пара: <Link href={`/sovmestimost/${p.b.slug}-${p.a.slug}`}>{p.b.name} и {p.a.name}</Link>.</>}
           </p>
         </div>
