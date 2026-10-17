@@ -126,7 +126,7 @@ export async function mailBuyer(order: Order): Promise<{ sent?: boolean; error?:
   // имя получателя в родительном («для Ольги», «для Анны и Сергея»); детский разбор и неуверенное склонение — без имени
   const gen = genitiveOf(productOf(order.product), name, cleanName(order.name2 || ""));
   const forName = gen ? ` для ${gen}` : "";
-  const subject = (order.test ? "[ТЕСТ] " : "") + (pm && gift ? `Подарок: ${pm.subject.charAt(0).toLowerCase()}${pm.subject.slice(1)}` : pm?.subject ?? (gift
+  const subject = (order.test ? "[ТЕСТ] " : "") + (pm && gift ? `${pm.subject} (подарок)` : pm?.subject ?? (gift
     ? (gen ? `Подарочный разбор для ${gen} готов` : name ? `Подарочный разбор готов: ${name}` : "Подарочный разбор готов")
     : name ? `${name}, твой разбор по дате рождения готов` : "Твой разбор по дате рождения готов"));
   const intro = pm?.intro ?? (gift ? `Спасибо за заказ. Это подарок${gen ? ` для ${gen}` : ""}: разбор по дате рождения готов и открывается по ссылке` : "Спасибо за заказ. Твой разбор по дате рождения готов и открывается по ссылке");
