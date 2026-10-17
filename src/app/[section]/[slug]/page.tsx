@@ -167,7 +167,7 @@ function DreamPage({ slug }: { slug: string }) {
         {d.long?.intro.map((t, i) => <p key={i}>{t}</p>)}
         {d.long && (
           <>
-            <h2>К чему снится {d.word.toLowerCase()}: детали сна</h2>
+            <h2>{d.word} во сне: детали и ситуации</h2>
             {d.long.details.map((x, i) => (
               <section key={i}>
                 <h3>{x.title}</h3>
@@ -176,7 +176,7 @@ function DreamPage({ slug }: { slug: string }) {
             ))}
             {d.long.forWhom?.map((x, i) => (
               <section key={i}>
-                <h2>К чему снится {d.word.toLowerCase()} {x.who.toLowerCase()}</h2>
+                <h2>{d.word} во сне — {x.who.toLowerCase()}</h2>
                 <p>{x.text}</p>
               </section>
             ))}
