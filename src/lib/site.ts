@@ -111,6 +111,8 @@ export const TOOLS: { href: string; title: string; text: string; emoji: string; 
   { href: "/lunnyy-kalendar", title: "Лунный календарь", text: "Лунный день, фаза, стрижка и посадки", emoji: "🌙", icon: "calendar" },
   { href: "/astrologiya/natalnaya-karta", title: "Натальная карта", text: "Планеты, дома и Асцендент по дате, времени и месту рождения", emoji: "✨", icon: "star" },
   { href: "/numerologiya/po-date-rozhdeniya", title: "Нумерология по дате рождения", text: "Число судьбы, дня рождения, имени и личный год в одном расчёте", emoji: "🔢", icon: "hash" },
+  { href: "/kitayskiy-goroskop", title: "Китайский гороскоп", text: "Животное и стихия по дате рождения с учётом лунного Нового года", emoji: "🐉", icon: "calendar" },
+  { href: "/numerologiya/sovmestimost-imen", title: "Совместимость имён", text: "Числа двух имён и разбор пары", emoji: "💞", icon: "hearts" },
 ];
 
 /** Инструменты раздела «Нумерология»: порядок — для хаба и блока перелинковки. */
@@ -119,18 +121,20 @@ export const NUMEROLOGY_TOOLS: { href: string; title: string; text: string }[] =
   { href: "/chislo-sudby", title: "Число судьбы", text: "Калькулятор и значения чисел 1–9, 11, 22, 33" },
   { href: "/matrica-sudby", title: "Матрица судьбы", text: "Арканы по дате рождения и центр матрицы" },
   { href: "/numerologiya/sovmestimost", title: "Совместимость по дате рождения", text: "Две даты, процент и разбор пары чисел" },
+  { href: "/numerologiya/sovmestimost-imen", title: "Совместимость имён", text: "Два имени, их числа и разбор пары" },
   { href: "/numerologiya/chislo-imeni", title: "Число имени", text: "Число выражения, души и личности по буквам" },
   { href: "/numerologiya/lichnyy-god", title: "Личный год", text: "Какой год цикла идёт у вас сейчас" },
   { href: "/numerologiya/schastlivoe-chislo", title: "Счастливое число", text: "Ваше число удачи, дни и ряд чисел" },
   { href: "/numerologiya/master-chisla", title: "Мастер-числа 11, 22, 33", text: "Что они значат и есть ли они у вас" },
   { href: "/kvadrat-pifagora", title: "Квадрат Пифагора", text: "Психоматрица по дате рождения" },
   { href: "/numerologiya/chisla-na-chasah", title: "Числа на часах", text: "Одинаковые и зеркальные сочетания" },
+  { href: "/numerologiya/2027", title: "Прогноз на 2027 год", text: "Год мастер-числа 11 и личные годы 1–9" },
 ];
 
 /** Инструменты и хабы раздела: кнопки под заголовком на странице раздела. */
 export const SECTION_TOOLS: Partial<Record<SectionKey, { href: string; title: string }[]>> = {
   taro: [{ href: "/karta-dnya", title: "Карта дня" }, { href: "/taro/rasklady", title: "Расклады онлайн" }, { href: "/taro/da-net", title: "Таро да или нет" }, { href: "/taro/tri-karty", title: "Три карты" }, { href: "/taro/karty", title: "Значения всех карт" }, { href: "/taro/arkany/starshie", title: "Старшие арканы" }, { href: "/taro/arkany/mladshie", title: "Младшие арканы" }],
-  astrologiya: [{ href: "/goroskop", title: "Гороскоп на сегодня" }, { href: "/goroskop/zavtra", title: "На завтра" }, { href: "/goroskop/god", title: "На год" }, { href: "/astrologiya/natalnaya-karta", title: "Натальная карта" }, { href: "/astrologiya/voshodyaschiy-znak", title: "Восходящий знак" }, { href: "/astrologiya/retrogradnyy-merkuriy", title: "Ретроградный Меркурий" }, { href: "/astrologiya/luna-v-znake", title: "Луна в знаке" }, { href: "/astrologiya/tranzity", title: "Транзиты" }, { href: "/sovmestimost", title: "Совместимость" }, { href: "/lunnyy-kalendar", title: "Лунный календарь" }],
+  astrologiya: [{ href: "/goroskop", title: "Гороскоп на сегодня" }, { href: "/goroskop/zavtra", title: "На завтра" }, { href: "/goroskop/god", title: "На год" }, { href: "/astrologiya/natalnaya-karta", title: "Натальная карта" }, { href: "/astrologiya/voshodyaschiy-znak", title: "Восходящий знак" }, { href: "/astrologiya/retrogradnyy-merkuriy", title: "Ретроградный Меркурий" }, { href: "/astrologiya/luna-v-znake", title: "Луна в знаке" }, { href: "/astrologiya/tranzity", title: "Транзиты" }, { href: "/kitayskiy-goroskop", title: "Китайский гороскоп" }, { href: "/sovmestimost", title: "Совместимость" }, { href: "/lunnyy-kalendar", title: "Лунный календарь" }],
   numerologiya: NUMEROLOGY_TOOLS.map((t) => ({ href: t.href, title: t.title })),
   sonnik: [{ href: "/sonnik", title: "Все символы сонника" }],
   runy: [{ href: "/runy", title: "Значение всех рун" }, { href: "/runy/runa-dnya", title: "Руна дня" }],

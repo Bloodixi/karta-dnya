@@ -7,6 +7,7 @@ import { SITE, type SectionKey } from "@/lib/site";
 import { getAuthors } from "@/lib/authors";
 import { getMoonSigns } from "@/lib/moonSigns";
 import { getAffirmationTopics } from "@/lib/affirmations";
+import { getChineseAnimals } from "@/lib/chineseZodiac";
 
 /** Карта сайта по разделам: /sitemap.xml — индекс, /sitemaps/<раздел>.xml — дочерние карты.
  *  lastmod: у ежедневных страниц — сегодня по Москве, у остальных — дата последнего коммита их маршрута и данных
@@ -104,7 +105,8 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
       add("/numerologiya/chisla-na-chasah", clock, "monthly", 0.8);
       for (const c of getClockNumbers()) add(`/numerologiya/chisla-na-chasah/${c.slug}`, clock, "monthly", 0.6);
       const tools: [string, string][] = [["po-date-rozhdeniya", "numerology-birthday.json"], ["sovmestimost", "numerology-compat.json"], ["chislo-imeni", "numerology-name.json"],
-        ["lichnyy-god", "numerology-year.json"], ["schastlivoe-chislo", "numerology-lucky.json"], ["master-chisla", "numerology.json"]];
+        ["lichnyy-god", "numerology-year.json"], ["schastlivoe-chislo", "numerology-lucky.json"], ["master-chisla", "numerology.json"],
+        ["sovmestimost-imen", "numerology-name-compat.json"], ["2027", "numerology-2027.json"]];
       for (const [p, f] of tools) add(`/numerologiya/${p}`, changed(app(`numerologiya/${p}`), data(f)), "monthly", 0.8);
       break;
     }
@@ -141,6 +143,10 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
       daily("/astrologiya/tranzity", 0.8);
       const ms = changed(app("astrologiya/luna-v-znake/["), data("astro/moon-signs.json"));
       for (const m of getMoonSigns()) add(`/astrologiya/luna-v-znake/${m.slug}`, ms, "weekly", 0.6);
+      const cz = changed(app("kitayskiy-goroskop"), data("chinese-zodiac.json"), "src/lib/chineseZodiac.ts");
+      add("/kitayskiy-goroskop", cz, "monthly", 0.8);
+      add("/kitayskiy-goroskop/2027", cz, "monthly", 0.8);
+      for (const a of getChineseAnimals()) add(`/kitayskiy-goroskop/${a.slug}`, cz, "monthly", 0.7);
       break;
     }
     case "praktiki": {
