@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
 import { SignDates } from "@/components/HoroscopeGrid";
+import HomeTools from "@/components/HomeTools";
 import { IconBadge } from "@/components/Icons";
 import MoonPhase from "@/components/MoonPhase";
 import RazborCta from "@/components/RazborCta";
@@ -20,8 +21,6 @@ export const metadata: Metadata = {
   description: "Карта дня на сегодня: карта Таро с толкованием, гороскоп для каждого знака и лунный календарь. Какой сегодня день по гороскопу и в каком знаке Луна.",
   alternates: { canonical: "/" },
 };
-
-const TOOL_KIND: Record<string, string> = { "/karta-dnya": "таро", "/goroskop": "астрология", "/chislo-sudby": "нумерология", "/sonnik": "сонник", "/runy/runa-dnya": "руны", "/sovmestimost": "астрология", "/goroskop/zavtra": "астрология", "/taro/da-net": "таро", "/lunnyy-kalendar": "луна", "/astrologiya/natalnaya-karta": "астрология", "/numerologiya/po-date-rozhdeniya": "нумерология" };
 
 export default function Home() {
   const date = todayKey();
@@ -108,26 +107,7 @@ export default function Home() {
 
       <section className="mx-auto max-w-6xl px-4 pt-12">
         <div className="ornament mb-5"><h2 className="text-3xl">Инструменты</h2><span className="mono">{TOOLS.length} ежедневных</span></div>
-        {/* 11 инструментов: первая плитка («Карта дня») на две колонки — сетка 2 и 4 колонки заполняется без дыр */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {TOOLS.map((t, i) => {
-            const wide = i === 0 && TOOLS.length % 2 === 1;
-            return (
-              <Link key={t.href} href={t.href} className={`card card-hover p-4 sm:p-5 flex gap-4 ${wide ? "col-span-2" : ""}`}>
-                {wide && today && (
-                  <span className="w-14 sm:w-16 shrink-0 self-center">
-                    <TarotCardView slug={today.card.slug} name={today.card.name} reversed={today.reversed} className="tcard-thumb" sizes="64px" />
-                  </span>
-                )}
-                <span className="flex flex-col gap-2 min-w-0">
-                  <span className="mono">{String(i + 1).padStart(2, "0")} · {TOOL_KIND[t.href] || "инструмент"}</span>
-                  <span className="display text-lg sm:text-xl">{t.title}</span>
-                  <span className={`text-sm text-muted ${wide ? "" : "hidden sm:block"}`}>{t.text}</span>
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+        <HomeTools date={date} />
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pt-12">
