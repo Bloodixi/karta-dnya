@@ -6,6 +6,7 @@ import MoonPhase from "@/components/MoonPhase";
 import RazborCta from "@/components/RazborCta";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, moonWindow, moonWindowKeys, PHASES } from "@/lib/moon";
+import { pageTitle } from "@/lib/site";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -21,7 +22,8 @@ export async function generateMetadata({ params }: PageProps<"/lunnyy-kalendar/[
   if (!DATE_RE.test(date)) return {};
   const d = dayInfo(date);
   return {
-    title: `Лунный календарь на ${formatDateRu(date).replace(/\s*г\.$/, "")}: ${d.lunarDay}-й лунный день`,
+    // pageTitle: длинные даты («23 сентября») без суффикса бренда, чтобы уложиться в 65 знаков.
+    title: pageTitle(`Лунный календарь на ${formatDateRu(date).replace(/\s*г\.$/, "")}: ${d.lunarDay}-й лунный день`),
     description: `${formatDateRu(date)}: ${d.lunarDay}-й лунный день, ${PHASES[d.phase].name}, Луна в знаке ${d.sign.name}. Что благоприятно, чего избегать, стрижка и посадки.`,
     alternates: { canonical: `/lunnyy-kalendar/${date}` },
   };

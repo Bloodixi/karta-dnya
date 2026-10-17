@@ -15,7 +15,7 @@ import { SITE } from "@/lib/site";
 const PATH = "/matrica-sudby/sovmestimost";
 
 export const metadata: Metadata = {
-  title: "Совместимость по матрице судьбы: рассчитать пару онлайн",
+  title: "Совместимость по матрице судьбы: расчёт пары онлайн",
   description: "Совместимость по матрице судьбы онлайн: введите две даты рождения, узнайте арканы партнёров, общий аркан пары и разбор сильных сторон союза.",
   alternates: { canonical: PATH },
 };
