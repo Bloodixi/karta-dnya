@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Icon, { type IconName } from "./Icons";
 
-type Item = { href: string; title: string; icon: IconName };
+type Item = { href: string; title: string; icon: IconName; paid?: string };
 
 /** Меню разделов для телефона: кнопка в шапке раскрывает панель под ней. Закрывается при переходе, по Escape и касанием вне панели.
  *  Пока меню открыто: страница затемнена подложкой (поверх неё и нижней панели), прокрутка страницы заблокирована. */
@@ -86,14 +86,16 @@ export default function MobileMenu({ sections, tools }: { sections: Item[]; tool
             {tools.map((t) => {
               const active = pathname === t.href;
               return (
-                <li key={t.href}>
+                // платный разбор — во всю ширину, с золотой рамкой и подписью; без цены и призывов
+                <li key={t.href} className={t.paid ? "col-span-2" : undefined}>
                   <Link
                     href={t.href}
                     aria-current={active ? "page" : undefined}
-                    className={`flex min-h-12 items-center gap-3 rounded-[2px] border px-3 text-[0.95rem] ${active ? "border-accent text-accent-text" : "border-line text-ink"}`}
+                    className={`flex min-h-12 items-center gap-3 rounded-[2px] border px-3 text-[0.95rem] ${active ? "border-accent text-accent-text" : t.paid ? "border-gold text-ink" : "border-line text-ink"}`}
                   >
-                    <Icon name={t.icon} size={20} className="shrink-0 text-accent" />
+                    <Icon name={t.icon} size={20} className={`shrink-0 ${t.paid ? "text-gold" : "text-accent"}`} />
                     {t.title}
+                    {t.paid && <span className="mono ml-auto">{t.paid}</span>}
                   </Link>
                 </li>
               );
