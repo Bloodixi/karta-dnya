@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { mailAccess } from "@/lib/razborMail";
 import { paidGiftsByRecipient, paidOrdersByEmail, patchGift, patchOrder } from "@/lib/razborStore";
-import { clientIp, rateLimit } from "@/lib/rateLimit";
+import { BodyTooLarge, readForm, tooLarge } from "@/lib/bodyLimit";
+import { clientIp, sharedRateLimit } from "@/lib/rateLimit";
 import { SITE } from "@/lib/site";
 
 /** Один запрос на адрес в 10 минут, не больше 10 запросов в час с одного IP (в памяти; суточный потолок — ниже). */
-const byEmail = rateLimit(1, 10 * 60_000);
-const byIp = rateLimit(10, 3600_000);
+const byEmail = sharedRateLimit("dostup-email", 1, 10 * 60_000);
+const byIp = sharedRateLimit("dostup-ip", 10, 3600_000);
 
 function allowed(email: string, ip: string): boolean {
   if (!byEmail.check(email) || !byIp.check(ip)) return false;
@@ -42,7 +43,13 @@ async function sendAccess(email: string): Promise<void> {
  * Ответ всегда одинаковый, чтобы по нему нельзя было узнать, покупал ли человек что-то на сайте.
  */
 export async function POST(req: Request) {
-  const form = await req.formData();
+  let form: FormData;
+  try {
+    form = await readForm(req);
+  } catch (e) {
+    if (e instanceof BodyTooLarge) return tooLarge();
+    return new NextResponse("Bad request", { status: 400 });
+  }
   const email = String(form.get("email") ?? "").trim().toLowerCase().slice(0, 200);
   const done = NextResponse.redirect(new URL("/razbor?dostup=1#dostup", SITE.url), 303);
   if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(email) || !allowed(email, clientIp(req))) return done;

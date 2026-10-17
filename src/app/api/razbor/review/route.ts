@@ -4,10 +4,11 @@ import { isOrderId } from "@/lib/razborOrder";
 import { PRODUCTS, productOf } from "@/lib/razborProducts";
 import { reviewSig, reviewSigOk } from "@/lib/razborReview";
 import { getOrder, patchOrder } from "@/lib/razborStore";
-import { clientIp, rateLimit } from "@/lib/rateLimit";
+import { BodyTooLarge, readForm, tooLarge } from "@/lib/bodyLimit";
+import { clientIp, sharedRateLimit } from "@/lib/rateLimit";
 import { SITE } from "@/lib/site";
 
-const byIp = rateLimit(10, 3600_000);
+const byIp = sharedRateLimit("review-ip", 10, 3600_000);
 
 /** Одна строка без управляющих символов. */
 const clean = (v: FormDataEntryValue | null, max: number, multiline = false) =>
@@ -20,7 +21,13 @@ const clean = (v: FormDataEntryValue | null, max: number, multiline = false) =>
 
 /** Отзыв по подписанной ссылке: сохраняется в заказ (повторная отправка — обновление), владельцу — текст в Telegram. */
 export async function POST(req: Request) {
-  const form = await req.formData();
+  let form: FormData;
+  try {
+    form = await readForm(req);
+  } catch (e) {
+    if (e instanceof BodyTooLarge) return tooLarge();
+    return new NextResponse("Bad request", { status: 400 });
+  }
   const id = String(form.get("o") ?? "");
   const sig = String(form.get("s") ?? "");
   if (!isOrderId(id) || !reviewSigOk(id, sig)) return new NextResponse("Not found", { status: 404 });

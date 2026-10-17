@@ -11,12 +11,13 @@ import { PRODUCTS, type Product } from "@/lib/razborProducts";
 import { patchOrder, saveOrder, type Gift, type Order } from "@/lib/razborStore";
 import { makeChildToken, makeCompatToken, makeToken } from "@/lib/razborToken";
 import { createPayment, yookassaReady } from "@/lib/yookassa";
-import { clientIp, rateLimit } from "@/lib/rateLimit";
+import { BodyTooLarge, readForm, tooLarge } from "@/lib/bodyLimit";
+import { clientIp, sharedRateLimit } from "@/lib/rateLimit";
 import { SITE } from "@/lib/site";
 import { TEST_COOKIE, testCookieOk } from "@/lib/razborTest";
 
 /** Не больше 5 заказов за 10 минут с одного IP: каждый заказ — платёж в ЮKassa и файл на томе. */
-const byIp = rateLimit(5, 10 * 60_000);
+const byIp = sharedRateLimit("checkout-ip", 5, 10 * 60_000);
 
 function tooMany(back: string): Response {
   const html = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Слишком много попыток</title></head>
@@ -103,7 +104,13 @@ function parse(form: FormData): { ok: Parsed } | { back: string } {
 
 /** Формы оплаты разбора, совместимости и детского разбора: создаёт платёж ЮKassa и отправляет на страницу оплаты. */
 export async function POST(req: Request) {
-  const form = await req.formData();
+  let form: FormData;
+  try {
+    form = await readForm(req);
+  } catch (e) {
+    if (e instanceof BodyTooLarge) return tooLarge();
+    return new Response("Bad request", { status: 400 });
+  }
   const r = parse(form);
   const redirect = (path: string) => NextResponse.redirect(new URL(`${path}#oplata`, SITE.url), 303);
   if ("back" in r) return redirect(r.back);

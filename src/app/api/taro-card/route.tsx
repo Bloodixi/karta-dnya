@@ -4,7 +4,8 @@ import { ImageResponse } from "next/og";
 import { C, cardDataUrl, ogFonts } from "../../_og/og";
 import { findTarot } from "@/lib/content";
 import { formatDateRu, todayKey } from "@/lib/daily";
-import { clientIp, rateLimit } from "@/lib/rateLimit";
+import { BodyTooLarge, readJson, tooLarge } from "@/lib/bodyLimit";
+import { clientIp, sharedRateLimit } from "@/lib/rateLimit";
 import { cleanQuestion, tarotVerdict, THREE_POSITIONS, type VerdictTone } from "@/lib/tarotVerdict";
 
 /**
@@ -16,7 +17,7 @@ import { cleanQuestion, tarotVerdict, THREE_POSITIONS, type VerdictTone } from "
 export const dynamic = "force-dynamic";
 
 const W = 1080, H = 1920;
-const byIp = rateLimit(30, 10 * 60_000);
+const byIp = sharedRateLimit("taro-card-ip", 30, 10 * 60_000);
 const TONE: Record<VerdictTone, string> = { yes: "#8fcf9c", no: "#f19a8f", maybe: "#d9c49a" };
 const CARD_RATIO = 691 / 400;
 
@@ -26,6 +27,16 @@ let logo: Promise<string | null> | null = null;
 function logoDataUrl() {
   logo ??= readFile(join(process.cwd(), "public", "logo-192.png")).then((b) => `data:image/png;base64,${b.toString("base64")}`).catch(() => null);
   return logo;
+}
+
+/**
+ * Только символы, которые есть во встроенных шрифтах картинки: кириллица, латиница, цифры, обычная пунктуация.
+ * Для остального (эмодзи, иероглифы, редкие алфавиты) satori подгрузил бы шрифт из интернета, передав туда текст
+ * вопроса, а @vercel/og копит такие шрифты в памяти без предела; сбой загрузки эмодзи давал 500.
+ */
+const OFF_FONT = /[^\u0020-\u007e\u00a0-\u00ff\u0400-\u045f\u2013\u2014\u2018\u2019\u201c\u201d\u201e\u2026\u2116\s]/gu;
+function questionForImage(q: unknown, max: number): string {
+  return typeof q === "string" ? cleanQuestion(cleanQuestion(q, 400).replace(OFF_FONT, " "), max) : "";
 }
 
 function bad(msg: string, status = 400) {
@@ -56,8 +67,9 @@ export async function POST(req: Request) {
   if (!byIp.take(clientIp(req))) return bad("Too many requests", 429);
   let body: { kind?: unknown; cards?: unknown; date?: unknown; q?: unknown };
   try {
-    body = await req.json();
-  } catch {
+    body = await readJson(req);
+  } catch (e) {
+    if (e instanceof BodyTooLarge) return tooLarge();
     return bad("Bad JSON");
   }
   const kind = body.kind === "three" ? "three" : body.kind === "yn" ? "yn" : null;
@@ -76,7 +88,7 @@ export async function POST(req: Request) {
     picked.push({ slug: c.slug, name: c.name, reversed: !!(raw as { r?: unknown }).r, img, upright: c.upright, reversedText: c.reversed, advice: c.advice });
   }
   const dateKey = typeof body.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.date) && Math.abs(Date.parse(body.date) - Date.parse(todayKey())) <= 2 * 86_400_000 ? body.date : todayKey();
-  const question = cleanQuestion(body.q, kind === "three" ? 100 : 110);
+  const question = questionForImage(body.q, kind === "three" ? 100 : 110);
   const [fonts, logoUrl] = await Promise.all([ogFonts(), logoDataUrl()]);
 
   const header = (
