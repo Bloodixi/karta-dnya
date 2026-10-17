@@ -38,7 +38,7 @@ export default function CardOfDayPage() {
       {today ? (
         <div className="mt-8 grid gap-8 md:grid-cols-[260px_1fr] items-start">
           <div className="w-60 md:w-full md:sticky md:top-24">
-            <TarotCardView slug={today.card.slug} name={today.card.name} reversed={today.reversed} flipIn priority />
+            <TarotCardView slug={today.card.slug} name={today.card.name} reversed={today.reversed} flipIn priority sizes="(min-width: 768px) 260px, 106px" />
             <p className="text-xs text-muted mt-3 text-center">{today.card.arcana === "major" ? "Старший аркан" : today.card.suitName} · {today.card.keywords.slice(0, 3).join(" · ")}</p>
           </div>
           <div className="prose">

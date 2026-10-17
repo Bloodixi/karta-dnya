@@ -13,7 +13,7 @@ import { currentYearMsk, formatDate, parseDate, personalMonth, personalYear } fr
 const PATH = "/numerologiya/lichnyy-god";
 
 export const metadata: Metadata = {
-  title: "Личный год в нумерологии: рассчитать онлайн и значение",
+  title: "Личный год в нумерологии: расчёт онлайн и значение",
   description: "Калькулятор личного года по дате рождения: какой год девятилетнего цикла идёт у вас сейчас, значение всех девяти лет, личные месяцы и совет на этот этап.",
   alternates: { canonical: PATH },
 };

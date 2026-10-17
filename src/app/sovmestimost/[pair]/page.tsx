@@ -5,7 +5,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import PairPicker from "@/components/PairPicker";
 import ZodiacSign from "@/components/ZodiacSign";
 import { getZodiac } from "@/lib/content";
-import { allPairs, compatibility, parsePair } from "@/lib/compat";
+import { allPairs, canonicalPairSlug, compatibility, parsePair } from "@/lib/compat";
 
 export const dynamicParams = false;
 
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/sovmestimost/[pai
   return {
     title: `${p.a.name} и ${p.b.name}: совместимость в любви и дружбе`,
     description: `Совместимость ${p.a.name} и ${p.b.name}: ${c.score}%, ${c.verdict}. Как складываются любовь, быт и работа, на что обратить внимание и совет паре.`,
-    alternates: { canonical: `/sovmestimost/${pair}` },
+    alternates: { canonical: `/sovmestimost/${canonicalPairSlug(p.a, p.b)}` },
   };
 }
 

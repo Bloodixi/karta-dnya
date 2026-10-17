@@ -13,7 +13,7 @@ export default function Footer() {
       <div className="relative mx-auto max-w-6xl px-4 pt-14 pb-10 grid gap-8 md:grid-cols-3 text-sm">
         <div>
           <p className="display text-lg inline-flex items-center gap-2">
-            <Image src="/logo-192.png" alt="" width={24} height={24} className="rounded" /> {SITE.name}
+            <Image src="/logo-56.webp" alt="" width={24} height={24} className="rounded" /> {SITE.name}
           </p>
           <p className="text-muted mt-2 max-w-sm">{SITE.tagline}.</p>
           <p className="mt-2 flex flex-wrap gap-x-5">

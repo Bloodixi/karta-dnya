@@ -12,6 +12,7 @@ import RazborCta from "@/components/RazborCta";
 import ReadingProgress from "@/components/ReadingProgress";
 import StonePhoto from "@/components/StonePhoto";
 import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
+import { metaDescription } from "@/lib/meta";
 import { pageTitle, SECTIONS, SECTION_KEYS, SITE, type SectionKey } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -29,11 +30,11 @@ export async function generateMetadata({ params }: PageProps<"/[section]/[slug]"
   const key = section as SectionKey;
   if (key === "sonnik") {
     const d = findDream(slug);
-    if (d) return { title: `К чему снится ${d.word.toLowerCase()}: толкование сна`, description: `${d.short} ${d.meaning}`.slice(0, 160), alternates: { canonical: `/sonnik/${slug}` } };
+    if (d) return { title: `К чему снится ${d.word.toLowerCase()}: толкование сна`, description: metaDescription(`${d.short} ${d.meaning}`), alternates: { canonical: `/sonnik/${slug}` } };
   }
   if (key === "kamni") {
     const s = findStone(slug);
-    if (s) return { title: s.name.length > 12 ? `${s.name}: свойства и кому подходит` : `${s.name}: свойства, кому подходит и как носить`, description: s.description.slice(0, 160), alternates: { canonical: `/kamni/${slug}` } };
+    if (s) return { title: s.name.length > 12 ? `${s.name}: свойства и кому подходит` : `${s.name}: свойства, кому подходит и как носить`, description: metaDescription(s.description), alternates: { canonical: `/kamni/${slug}` } };
   }
   const a = await getArticle(key, slug);
   if (!a) return {};

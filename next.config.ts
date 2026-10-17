@@ -30,6 +30,11 @@ const SECURITY_HEADERS = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
 ];
 
+// Картинки из public/ без хэша в имени: карты, камни, сонник, обложки, авторы, логотип и иконки.
+// Имена стабильные (при замене картинки меняется и её имя или это допустимо раз в месяц), поэтому 30 дней без immutable.
+const LONG_CACHE = [{ key: "Cache-Control", value: "public, max-age=2592000" }];
+const STATIC_ASSETS = ["/cards/:path*", "/stones/:path*", "/dreams/:path*", "/articles/:path*", "/authors/:path*", "/logo-:file", "/icon.png", "/apple-icon.png", "/favicon.ico"];
+
 // Личные страницы покупателя (ссылка = доступ к разбору/чеку): адрес не должен уходить в Referer и поисковики.
 const PRIVATE_PATHS = ["/r/:path*", "/razbor/r/:path*", "/razbor/chek/:path*", "/razbor/spasibo"];
 
@@ -44,6 +49,7 @@ const nextConfig: NextConfig = {
   // Правило ниже по списку перекрывает тот же заголовок выше (Referrer-Policy у личных страниц).
   headers: async () => [
     { source: "/:path*", headers: SECURITY_HEADERS },
+    ...STATIC_ASSETS.map((source) => ({ source, headers: LONG_CACHE })),
     ...PRIVATE_PATHS.map((source) => ({
       source,
       headers: [
@@ -62,6 +68,7 @@ const nextConfig: NextConfig = {
       permanent: true,
     },
     { source: "/astrologiya/voshodyaschiy-znak-asc", destination: "/astrologiya/voshodyaschiy-znak", permanent: true },
+    { source: "/taro/karta-dnya", destination: "/karta-dnya", statusCode: 301 },
     // Короткие ссылки для описаний роликов и постов: karta-dnya.ru/yt/chislo-sudby → страница с UTM-метками площадки.
     // Временная переадресация: метки могут поменяться, браузеры не должны её запоминать.
     ...Object.entries(SHORT_LINKS).flatMap(([key, [source, medium]]) => [

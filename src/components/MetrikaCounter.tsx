@@ -30,6 +30,13 @@ function load(id: number) {
   const s = document.createElement("script");
   s.async = true;
   s.src = "https://mc.yandex.ru/metrika/tag.js";
+  // Метрика недоступна (авария, блокировщик): без повторов и без исключений — очередь заменяем пустышкой,
+  // reachGoal и просмотры дальше молча ничего не делают. Саму сетевую ошибку загрузки браузер всё равно покажет.
+  s.onerror = () => {
+    s.remove();
+    w.ym = Object.assign(() => {}, { a: [], l: 0 }) as Ym;
+    counterId = null;
+  };
   document.head.appendChild(s);
   // defer: просмотры отправляем сами (ниже), чтобы решать, какие адреса учитывать
   w.ym(id, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: false, defer: true });

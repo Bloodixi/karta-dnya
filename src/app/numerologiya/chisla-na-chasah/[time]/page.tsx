@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
-import { DIGITS, clockDescription, clockFaq, clockSteps, clockTitle, compactTime, digitsOf, findClock, getClockNumbers, relatedClocks } from "@/lib/clock";
+import { CLOCK_KINDS, DIGITS, clockDescription, clockFaq, clockSteps, clockTitle, compactTime, digitsOf, findClock, getClockNumbers, reduceDigit, relatedClocks } from "@/lib/clock";
 import { pageTitle } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -37,7 +37,7 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
   const { mirror, sameSum } = relatedClocks(c, all);
   const steps = clockSteps(c);
   const faq = clockFaq(c);
-  const kindWord = c.kind === "double" ? "одинаковые" : "зеркальные";
+  const kindWord = CLOCK_KINDS[c.kind].plural;
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/numerologiya/chisla-na-chasah", label: "Числа на часах" }, { href: `/numerologiya/chisla-na-chasah/${time}`, label: c.time }]} />
@@ -48,7 +48,7 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
           <p className="display text-xl mt-2">{c.title}</p>
           <p className="text-sm text-muted mt-3">{c.keywords.join(" · ")}</p>
           <p className="mono mt-5">сумма цифр · {c.sum}</p>
-          <p className="text-sm text-muted mt-1">{DIGITS[c.sum]?.title}: {DIGITS[c.sum]?.text}</p>
+          <p className="text-sm text-muted mt-1">{DIGITS[reduceDigit(c.sum)].title}: {DIGITS[reduceDigit(c.sum)].text}</p>
         </div>
         <div className="prose">
           <h1 className="text-3xl md:text-4xl !mt-0">{c.time} на часах: значение и что это значит</h1>

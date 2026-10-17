@@ -10,7 +10,7 @@ import type { Faq as FaqItem } from "@/lib/content";
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
-  title: "Руна дня: какая руна выпала на сегодня и что она значит",
+  title: "Руна дня: какая руна выпала сегодня и что значит",
   description: "Руна дня Старшего Футарка на сегодня: одна руна, её значение, совет и простая практика на день. Обновляется каждую полночь по московскому времени.",
   alternates: { canonical: "/runy/runa-dnya" },
 };

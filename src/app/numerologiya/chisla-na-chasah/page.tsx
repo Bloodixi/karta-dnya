@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
-import { DIGITS, getClockNumbers, type ClockNumber } from "@/lib/clock";
+import { CLOCK_KINDS, DIGITS, getClockNumbers, type ClockKind, type ClockNumber } from "@/lib/clock";
 
 export const metadata: Metadata = {
   title: "Числа на часах: значение одинаковых и зеркальных цифр",
-  description: "Что значат одинаковые и зеркальные числа на часах: 11:11, 22:22, 12:12, 00:00, 21:21 и ещё 30 сочетаний. Значение каждой цифры, любовь, деньги и совет.",
+  description: "Что значат одинаковые и зеркальные числа на часах: 11:11, 22:22, 12:12, 00:00, 12:34 и ещё 42 сочетания. Значение каждой цифры, любовь, деньги и совет.",
   alternates: { canonical: "/numerologiya/chisla-na-chasah" },
 };
 
@@ -41,22 +41,19 @@ function Grid({ items }: { items: ClockNumber[] }) {
 
 export default function ClockHubPage() {
   const all = getClockNumbers();
-  const doubles = all.filter((c) => c.kind === "double");
-  const mirrors = all.filter((c) => c.kind === "mirror");
+  const groups = (Object.keys(CLOCK_KINDS) as ClockKind[]).map((k) => ({ k, items: all.filter((c) => c.kind === k) })).filter((g) => g.items.length);
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/numerologiya/chisla-na-chasah", label: "Числа на часах" }]} />
       <h1 className="text-3xl md:text-4xl">Значение чисел на часах</h1>
-      <p className="text-muted mt-3 max-w-2xl text-lg">Случайно взглянули на часы и увидели 11:11 или 12:21? Ниже все одинаковые и зеркальные сочетания с толкованием: общее значение, любовь, деньги и совет на день.</p>
+      <p className="text-muted mt-3 max-w-2xl text-lg">Случайно взглянули на часы и увидели 11:11 или 12:21? Ниже одинаковые, зеркальные и другие частые сочетания с толкованием: общее значение, любовь, деньги и совет на день.</p>
 
-      <section className="mt-10">
-        <div className="ornament mb-4"><h2 className="text-2xl">Одинаковые числа</h2><span className="mono">{doubles.length} сочетаний</span></div>
-        {doubles.length ? <Grid items={doubles} /> : <p className="text-muted">Толкования готовятся.</p>}
-      </section>
-      <section className="mt-10">
-        <div className="ornament mb-4"><h2 className="text-2xl">Зеркальные числа</h2><span className="mono">{mirrors.length} сочетаний</span></div>
-        {mirrors.length ? <Grid items={mirrors} /> : <p className="text-muted">Толкования готовятся.</p>}
-      </section>
+      {groups.map(({ k, items }) => (
+        <section key={k} className="mt-10">
+          <div className="ornament mb-4"><h2 className="text-2xl">{CLOCK_KINDS[k].hub}</h2><span className="mono">{items.length} сочетаний</span></div>
+          <Grid items={items} />
+        </section>
+      ))}
 
       <section className="prose mt-12">
         <h2>Как читать числа на часах</h2>

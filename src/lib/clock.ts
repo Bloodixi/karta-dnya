@@ -1,8 +1,17 @@
 import { readJsonData } from "./content";
 
 export type ClockFaq = { q: string; a: string };
+export type ClockKind = "double" | "mirror" | "sequence" | "special";
+
+/** Подписи видов: «одинаковые цифры», «зеркальное время»… */
+export const CLOCK_KINDS: Record<ClockKind, { plural: string; time: string; digits: string; hub: string }> = {
+  double: { plural: "одинаковые", time: "одинаковое время", digits: "одинаковых цифр", hub: "Одинаковые числа" },
+  mirror: { plural: "зеркальные", time: "зеркальное время", digits: "зеркальных цифр", hub: "Зеркальные числа" },
+  sequence: { plural: "последовательные", time: "цифры по порядку", digits: "цифр по порядку", hub: "Цифры по порядку" },
+  special: { plural: "повторяющиеся", time: "повторяющиеся цифры", digits: "повторяющихся цифр", hub: "Другие частые сочетания" },
+};
 export type ClockNumber = {
-  slug: string; time: string; kind: "double" | "mirror"; title: string; keywords: string[]; short: string;
+  slug: string; time: string; kind: ClockKind; title: string; keywords: string[]; short: string;
   meaning: string; love: string; money: string; advice: string; sum: number; faq: ClockFaq[];
 };
 
@@ -74,15 +83,35 @@ export function clockSteps(c: ClockNumber): string[] {
   return digits.slice(0, 3).map((d) => DIGIT_STEPS[d]);
 }
 
-/** Title без суффикса бренда: под запросы «12:21 на часах», «значение», «что значит», «в любви». */
-export const clockTitle = (c: ClockNumber) => `${c.time} на часах: значение, что значит в любви`;
+/** Title под запросы «12:21 на часах», «1221», «зеркальное время», «что значит», «в любви» (≤ 65 знаков). */
+export function clockTitle(c: ClockNumber): string {
+  const t = `${c.time} (${compactTime(c.time)})`;
+  const opts = c.kind === "mirror"
+    ? [`${t} на часах: зеркальное время, что значит в любви`, `${t} на часах: что значит зеркальное время`]
+    : [`${t} на часах: что значит, значение в любви`, `${c.time} на часах: что значит, значение в любви`];
+  return opts.find((o) => o.length <= 65) || opts[opts.length - 1];
+}
 
-/** Description 120–160 символов с формулировками запросов. */
+/** Description 140–160 знаков: первый вариант, попавший в диапазон, иначе самый длинный ≤ 160. */
 export function clockDescription(c: ClockNumber): string {
-  const kind = c.kind === "double" ? "одинаковых" : "зеркальных";
-  const base = `Что значит ${c.time} (${compactTime(c.time)}) на часах: значение ${kind} цифр в ангельской нумерологии, ${c.time} в любви и работе, что делать и совет на день.`;
-  if (base.length <= 160) return base;
-  return `Что значит ${c.time} на часах: значение ${kind} цифр в ангельской нумерологии, ${c.time} в любви и работе, что делать и совет.`;
+  const t = c.time, n = compactTime(c.time);
+  const k = CLOCK_KINDS[c.kind];
+  const kw = c.keywords.slice(0, 2).join(" и ");
+  const opts = c.kind === "mirror"
+    ? [
+        `Что значит ${t} (${n}) на часах: зеркальное время в ангельской нумерологии, ${kw}. Значение ${n} в любви и отношениях, работе, что делать и совет.`,
+        `Что значит ${t} (${n}) на часах: зеркальное время в ангельской нумерологии. Значение ${n} в любви и отношениях, в работе и деньгах, совет на день.`,
+        `${t} (${n}) на часах: что значит зеркальное время, значение ${n} в любви и отношениях, работе и деньгах, что делать и совет на день.`,
+      ]
+    : [
+        `Что значит ${t} (${n}) на часах: ${k.time} в ангельской нумерологии, ${kw}. Значение ${n} в любви и отношениях, работе, что делать и совет.`,
+        `Что значит ${t} (${n}) на часах: значение ${k.digits} в ангельской нумерологии, ${t} в любви и отношениях, работе и деньгах, совет на день.`,
+        `${t} (${n}) на часах: что значит это время, значение ${k.digits} в любви и отношениях, работе и деньгах, что делать и совет на день.`,
+      ];
+  const ok = opts.find((o) => o.length >= 140 && o.length <= 160);
+  if (ok) return ok;
+  const fit = opts.filter((o) => o.length <= 160).sort((a, b) => b.length - a.length);
+  return fit[0] || opts[opts.length - 1].slice(0, 160);
 }
 
 /** FAQ страницы: вопросы из данных + общие под запросы «в любви», «что делать», «сумма цифр». */
