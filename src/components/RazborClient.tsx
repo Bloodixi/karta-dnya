@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import BirthDateInput from "@/components/BirthDateInput";
+import { YearlyConsent } from "@/components/GiftModeFields";
 import { giftHasLink } from "@/lib/giftText";
 
 type Ym = (id: number, action: "reachGoal", goal: string) => void;
@@ -196,7 +198,7 @@ export type PackOffer = { addon: number; total: number; on?: boolean; date2?: st
 
 /** Черновик формы оплаты в sessionStorage вкладки: после ошибки сервера (?err=…) поля не приходится заполнять заново. */
 const DRAFT_KEY = "razbor-checkout";
-type Draft = { date: string; gift: boolean; name: string; from: string; wish: string; to: string; when: "now" | "date"; at: string; ok: boolean; email: string; pack?: boolean; date2?: string; name2?: string };
+type Draft = { date: string; gift: boolean; name: string; from: string; wish: string; to: string; when: "now" | "date"; at: string; ok: boolean; email: string; pack?: boolean; date2?: string; name2?: string; bdate?: string };
 
 function readDraft(date: string): Draft | null {
   try {
@@ -209,24 +211,32 @@ function readDraft(date: string): Draft | null {
 
 const LINK_HINT = "Без ссылок и адресов: письмо уходит от имени сайта. Даты вроде 14.03 можно.";
 
+/** Новогодний подарок в форме: год прогноза, готовые дни отправки (31 декабря, 1 января) и выбран ли он сразу (?ny=1). */
+export type NyOffer = { year: number; dates: { iso: string; label: string }[]; on: boolean };
+
 /**
  * Переключатель «Себе / В подарок» в форме оплаты, поля подарка и e-mail покупателя. В режиме «Себе» имя из формы
- * бесплатной части уходит скрытым полем; в подарок — его можно поправить (это имя получателя в разборе).
+ * бесплатной части уходит скрытым полем; в подарок — свои поля даты рождения (gift_date) и имени получателя:
+ * пустые, если только дата из верхней формы не была введена как дата получателя (?g=1).
  * Лимиты и проверка ссылок совпадают с серверной (razborGift.ts, giftText.ts): подпись 40, пожелание 300 знаков,
  * дата — до года вперёд, согласие получателя на письмо (оферта, п. 5.4).
  * Цель Метрики «razbor_gift_mode» — один раз, при первом выборе «В подарок».
  */
-export function RazborGiftFields({ counter, date, name: initialName, today, maxDate, gift: initial = false, err, price, pack: offer }: { counter?: string; date: string; name: string; today: string; maxDate: string; gift?: boolean; err?: string; price?: number; pack?: PackOffer }) {
+export function RazborGiftFields({ counter, date, name: initialName, today, maxDate, gift: initial = false, err, price, pack: offer, ny }: { counter?: string; date: string; name: string; today: string; maxDate: string; gift?: boolean; err?: string; price?: number; pack?: PackOffer; ny?: NyOffer }) {
   const [gift, setGift] = useState(initial);
-  const [name, setName] = useState(initialName);
+  // ?g=1 — дата и имя в верхней форме уже получателя; иначе там свои, а поля получателя пустые
+  const [name, setName] = useState(initial ? initialName : "");
+  const [bdate, setBdate] = useState(initial ? date : "");
+  const [bdateKey, setBdateKey] = useState(0);
+  const nyFirst = ny?.on ? ny.dates[0]?.iso : undefined;
   const [from, setFrom] = useState("");
   const [wish, setWish] = useState("");
   const [to, setTo] = useState("");
-  const [when, setWhen] = useState<"now" | "date">("now");
-  const [at, setAt] = useState("");
+  const [when, setWhen] = useState<"now" | "date">(nyFirst ? "date" : "now");
+  const [at, setAt] = useState(nyFirst ?? "");
   const [ok, setOk] = useState(false);
   const [email, setEmail] = useState("");
-  const [open, setOpen] = useState(err === "gift_wish" || err === "gift_email" || err === "gift_consent" || err === "gift_date");
+  const [open, setOpen] = useState(Boolean(nyFirst) || err === "gift_wish" || err === "gift_email" || err === "gift_consent" || err === "gift_date");
   const [ready, setReady] = useState(false);
   const [pack, setPack] = useState(Boolean(offer?.on));
   const [date2, setDate2] = useState(offer?.date2 ?? "");
@@ -243,6 +253,10 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
       /* eslint-disable react-hooks/set-state-in-effect -- sessionStorage есть только в браузере: читаем после гидрации */
       setGift(d.gift);
       if (d.gift) setName(d.name);
+      if (d.gift && d.bdate !== undefined) {
+        setBdate(d.bdate);
+        setBdateKey((k) => k + 1);
+      }
       setFrom(d.from);
       setWish(d.wish);
       setTo(d.to);
@@ -265,11 +279,11 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
 
   useEffect(() => {
     if (!ready) return;
-    const d: Draft = { date, gift, name, from, wish, to, when, at, ok, email, pack, date2, name2 };
+    const d: Draft = { date, gift, name, from, wish, to, when, at, ok, email, pack, date2, name2, bdate };
     try {
       sessionStorage.setItem(DRAFT_KEY, JSON.stringify(d));
     } catch {}
-  }, [ready, date, gift, name, from, wish, to, when, at, ok, email, pack, date2, name2]);
+  }, [ready, date, gift, name, from, wish, to, when, at, ok, email, pack, date2, name2, bdate]);
 
   const fromLink = giftHasLink(from);
   const wishLink = giftHasLink(wish);
@@ -317,7 +331,15 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
         <input type="hidden" name="name" value={initialName} />
       ) : (
         <div className="grid gap-4 mt-4 max-w-md">
-          <p className="text-sm text-muted">Разбор строится по дате рождения, введённой выше, — это должна быть дата получателя.</p>
+          {ny?.on ? <input type="hidden" name="ny" value="1" /> : null}
+          <label className="grid gap-1 text-sm" onChange={(e) => {
+            const t: EventTarget = e.target;
+            if (t instanceof HTMLInputElement && t.type === "text") setBdate(t.value);
+          }}>
+            Дата рождения получателя
+            <BirthDateInput key={bdateKey} name="gift_date" defaultValue={bdate} max={today} invalid={err === "gift_bdate"} className={FIELD + " min-h-11 tabular-nums w-48 aria-[invalid=true]:border-danger"} />
+            <span className="text-xs text-muted">Разбор строится по этой дате — не по той, что в форме выше.</span>
+          </label>
           <label className="grid gap-1 text-sm">
             Как зовут получателя
             <input type="text" name="name" required value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder="Например, Анна" aria-invalid={bad("gift_name")} className={FIELD} />
@@ -355,11 +377,18 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
                       В выбранный день, например ко дню рождения
                     </label>
                     {when === "date" && (
-                      <input type="date" name="gift_at" required min={today} max={maxDate} value={at} onChange={(e) => setAt(e.target.value)} aria-invalid={bad("gift_date")} className={FIELD + " w-48"} />
+                      <div className="flex flex-wrap items-center gap-2">
+                        <input type="date" name="gift_at" required min={today} max={maxDate} value={at} onChange={(e) => setAt(e.target.value)} aria-invalid={bad("gift_date")} className={FIELD + " w-48"} />
+                        {ny?.dates.map((d) => (
+                          <button key={d.iso} type="button" onClick={() => setAt(d.iso)} aria-pressed={at === d.iso} className={`chip min-h-11 cursor-pointer ${at === d.iso ? "bg-ink text-bg" : ""}`}>
+                            {d.label}
+                          </button>
+                        ))}
+                      </div>
                     )}
                     <span className="text-xs text-muted">
-                      Письмо уходит утром по Москве. Ссылка на разбор в любом случае сразу придёт тебе.
-                      {when === "date" ? " Прогноз по месяцам начнётся с месяца отправки — с того, когда разбор откроют." : ""}
+                      Письмо уходит в 9 утра по Москве. Ссылка на разбор в любом случае сразу придёт тебе.
+                      {when === "date" ? " Прогноз по месяцам начнётся с месяца отправки — с того, когда разбор откроют; письмо с 25 декабря — прогноз с января." : ""}
                     </span>
                   </fieldset>
                   <label className="flex items-start gap-2">
@@ -400,6 +429,7 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
         </div>
       ) : null}
 
+      {!gift ? <YearlyConsent /> : null}
       <label className="grid gap-1 text-sm mt-5 max-w-sm">
         {gift ? "Твой e-mail — пришлём сюда ссылку на разбор и чек" : packOn ? "E-mail — пришлём сюда обе ссылки и чек" : "E-mail — пришлём сюда ссылку на разбор и чек"}
         <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={err === "email" || undefined} className={FIELD} />

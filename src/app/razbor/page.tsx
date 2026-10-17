@@ -15,6 +15,9 @@ import { ageAt, buildTeaser, nowMsk, RAZBOR, RAZBOR_TOC } from "@/lib/razbor";
 import { compatReady } from "@/lib/razborCompat";
 import { packAddon, PRODUCTS } from "@/lib/razborProducts";
 import { GIFT_DAYS_MAX, todayMsk } from "@/lib/razborGift";
+import { GIFT_FORM_ERRORS } from "@/lib/giftErrors";
+import { nyDates, nySeason, nyYear } from "@/lib/giftSeason";
+import { CertBlock, NyGiftBlock } from "@/components/RazborGiftBlocks";
 import { countWords, plural } from "@/lib/ruCount";
 import { pageTitle, SELLER, SITE } from "@/lib/site";
 import { paidCount, publicReviews } from "@/lib/razborReview";
@@ -36,7 +39,7 @@ const FAQ = [
   { q: "Что входит в полный разбор?", a: `${SECTIONS[0].toUpperCase()}${SECTIONS.slice(1)}: твои числа с расчётом, сведение — как числа работают вместе, твой период жизни по возрасту, суть числа судьбы, сильные стороны и ловушки, призвание, талант дня рождения, квадрат Пифагора с расшифровкой девяти ячеек, любовь, работа, личный год, прогноз на двенадцать месяцев, следующий год, пять советов и памятка на год.` },
   { q: "Можно ли добавить совместимость с близким?", a: `Да. В форме оплаты отметь «+ совместимость с близким» и укажи дату рождения и имя второго человека. Пакет «разбор + совместимость» стоит ${PRODUCTS.pack.price} ₽ вместо ${PRODUCTS.razbor.price + PRODUCTS.compat.price} ₽ по отдельности; после оплаты придут две ссылки.` },
   { q: "Есть ли разбор для ребёнка?", a: "Да, для детей до 18 лет есть отдельный детский разбор: его читает родитель — о характере ребёнка, сильных сторонах, о том, как поддержать и на что не давить." },
-  { q: "Можно ли подарить разбор?", a: "Да. В форме оплаты выбери «В подарок» и укажи дату рождения и имя получателя, подпись и, если хочешь, пожелание. Ссылка на разбор и чек придут тебе, а по желанию мы отправим получателю письмо с подарком — сразу после оплаты или в выбранный день в пределах года. Если письмо отложено, прогноз по месяцам начнётся с месяца отправки." },
+  { q: "Можно ли подарить разбор?", a: "Да. В форме оплаты выбери «В подарок» и укажи дату рождения и имя получателя, подпись и, если хочешь, пожелание. Ссылка на разбор и чек придут тебе, а по желанию мы отправим получателю письмо с подарком — сразу после оплаты или в выбранный день в пределах года. Если письмо отложено, прогноз по месяцам начнётся с месяца отправки. Не знаешь дату рождения — подари сертификат: получатель введёт её сам." },
   { q: "Как я получу разбор?", a: "Сразу после оплаты откроется страница с разбором. Ссылка на неё твоя: её можно сохранить в закладки, открыть с телефона или сохранить разбор в PDF кнопкой на странице." },
   { q: "Можно ли вернуть деньги?", a: "Если из-за технической ошибки разбор не открылся, мы вернём оплату полностью. Напиши нам, приложив номер заказа, — ответим в течение трёх рабочих дней. Подробности на странице «Возврат»." },
   { q: "Нужно ли знать точное время рождения?", a: "Нет. Нумерологический разбор строится только по дате рождения: дню, месяцу и году. Время и место рождения не нужны." },
@@ -158,6 +161,7 @@ const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 /** Ошибки полей подарка (коды из razborGift.parseGift). */
 const GIFT_ERRORS: Record<string, string> = {
+  ...GIFT_FORM_ERRORS,
   gift_name: "Укажи имя получателя — оно будет в разборе и в письме.",
   gift_from: "Подпиши подарок: от кого он, до 40 знаков и без ссылок.",
   gift_wish: "Пожелание — до 300 знаков и без ссылок.",
@@ -173,7 +177,10 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
   const sp = await searchParams;
   const date = parseDate(sp.d);
   const name = cleanName(sp.n);
-  const err = one(sp.err);
+  // ошибки формы сертификата (?c=1) показывает его блок, а не форма оплаты разбора
+  const cert = one(sp.c) === "1";
+  const rawErr = one(sp.err);
+  const err = cert ? undefined : rawErr;
   const invalid = (sp.d !== undefined && !date) || err === "date";
   const counter = process.env.METRIKA_ID;
   const isGift = one(sp.g) === "1";
@@ -185,6 +192,10 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
   const childHref = date ? `${PRODUCTS.child.path}?d=${date.iso}${name ? `&n=${encodeURIComponent(name)}` : ""}#teaser` : "";
   const offerPack = compatReady();
   const d2 = parseDate(sp.d2);
+  // подарок к Новому году: блок с 1 ноября по 7 января (по Москве), для проверки — ?ny=1
+  const today = todayMsk();
+  const nyOn = one(sp.ny) === "1";
+  const ny = nySeason(today) || nyOn ? { year: nyYear(today), dates: nyDates(today), on: nyOn && isGift } : null;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -209,6 +220,8 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
             <FormError text={invalid ? "Проверь дату: нужна настоящая дата рождения, например 17.05.1990." : undefined} />
             <p className="text-xs text-muted mt-3">Бесплатная часть откроется сразу, без регистрации.</p>
           </div>
+
+          {ny && !teaser ? <NyGiftBlock year={ny.year} dates={ny.dates} price={RAZBOR.price} /> : null}
 
           {teaser && date && (
             <section id="razbor-teaser" className="mt-10 scroll-mt-24">
@@ -286,18 +299,19 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
                 </p>
               )}
 
-              {date ? (
+              {date || isGift ? (
                 <RazborCheckoutForm counter={counter}>
-                  <input type="hidden" name="date" value={date.iso} />
+                  {date ? <input type="hidden" name="date" value={date.iso} /> : null}
                   <RazborGiftFields
                     counter={counter}
-                    date={date.iso}
+                    date={date?.iso ?? ""}
                     name={name}
                     today={todayMsk()}
                     maxDate={todayMsk(GIFT_DAYS_MAX)}
                     gift={isGift}
                     err={err}
                     price={RAZBOR.price}
+                    ny={ny ?? undefined}
                     pack={offerPack ? { addon: packAddon(), total: PRODUCTS.pack.price, on: one(sp.p) === "1", date2: d2?.iso, name2: cleanName(sp.n2), today: todayMsk() } : undefined}
                   />
                   <p className="text-xs text-muted mt-3 max-w-md">
@@ -312,6 +326,9 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
               <RazborWhoWrote className="lg:hidden" />
             </div>
           </section>
+
+          {ny && teaser ? <NyGiftBlock year={ny.year} dates={ny.dates} price={RAZBOR.price} /> : null}
+          <CertBlock counter={counter} price={PRODUCTS.cert.price} today={today} maxDate={todayMsk(GIFT_DAYS_MAX)} err={cert ? rawErr : undefined} errors={GIFT_ERRORS} />
 
           <Reviews />
 

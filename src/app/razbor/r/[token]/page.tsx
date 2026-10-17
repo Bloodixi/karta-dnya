@@ -24,7 +24,8 @@ export default async function RazborResultPage({ params }: PageProps<"/razbor/r/
   const order = t.order ? await getOrder(t.order) : null;
   if (order && (order.status === "refunded" || order.status === "canceled")) notFound();
   const doc = buildDoc(t);
-  const gift = order && t.p === "razbor" ? await giftFor(order) : null;
+  // подарок — у разбора, совместимости, детского разбора и сертификата (в пакете подарка нет)
+  const gift = order && productOf(order.product) !== "pack" ? await giftFor(order) : null;
   // пакет: со страницы разбора — на совместимость, со страницы совместимости — на разбор
   const pack = order && productOf(order.product) === "pack" && order.token2 ? order : null;
   const extra = pack ? (t.p === "razbor" ? <PackLink href={`/razbor/r/${pack.token2}`} label="совместимость пары" /> : <PackLink href={`/razbor/r/${pack.token}`} label="разбор по дате рождения" />) : null;
@@ -38,7 +39,7 @@ export default async function RazborResultPage({ params }: PageProps<"/razbor/r/
       extra={extra}
       note={
         <p className="no-print text-sm text-muted mt-3">
-          {gift ? "Ссылка постоянная — сохрани письмо с ней или добавь эту страницу в закладки: разбор откроется в любой момент и на любом устройстве." : `Ссылка постоянная — добавь в закладки. По ней ${t.p === "compat" ? "совместимость" : "разбор"} откроется в любой момент и на любом устройстве.`}
+          {gift ? `Ссылка постоянная — сохрани письмо с ней или добавь эту страницу в закладки: ${t.p === "compat" ? "совместимость откроется" : "разбор откроется"} в любой момент и на любом устройстве.` : `Ссылка постоянная — добавь в закладки. По ней ${t.p === "compat" ? "совместимость" : "разбор"} откроется в любой момент и на любом устройстве.`}
         </p>
       }
     />

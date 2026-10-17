@@ -13,7 +13,7 @@ export function mailReady(): boolean {
 export type Inline = { cid: string; filename: string; content: Buffer; contentType: string };
 export type Attachment = { filename: string; content: Buffer; contentType: string };
 
-export async function sendMail(m: { to: string; subject: string; text: string; html: string; inline?: Inline[]; attachments?: Attachment[] }): Promise<void> {
+export async function sendMail(m: { to: string; subject: string; text: string; html: string; inline?: Inline[]; attachments?: Attachment[]; headers?: Record<string, string> }): Promise<void> {
   transport ??= nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.mail.ru",
     port: Number(process.env.SMTP_PORT) || 2525,

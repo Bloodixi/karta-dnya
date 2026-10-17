@@ -7,7 +7,7 @@ import { buildCompat, COMPAT } from "./razborCompat";
 import { buildRazbor, envPrice, RAZBOR, type RazborDoc } from "./razbor";
 import type { DocToken } from "./razborToken";
 
-export type Product = "razbor" | "compat" | "pack" | "child";
+export type Product = "razbor" | "compat" | "pack" | "child" | "cert";
 
 export type ProductInfo = {
   /** Название на странице и в описании платежа. */
@@ -32,11 +32,13 @@ export const PRODUCTS: Record<Product, ProductInfo> = {
     receipt: "Разбор по дате рождения и совместимость пары (karta-dnya.ru)",
   },
   child: { title: CHILD.title, short: CHILD.short, price: CHILD.price, path: "/razbor-rebenka", receipt: "Детский разбор по дате рождения (karta-dnya.ru)" },
+  // сертификат без даты рождения: получатель сам вводит дату по ссылке из письма, заказ становится разбором (cert_at)
+  cert: { title: "Сертификат на разбор по дате рождения", short: "Сертификат на разбор", price: RAZBOR.price, path: "/razbor", receipt: "Сертификат на разбор по дате рождения (karta-dnya.ru)" },
 };
 
 /** Продукт из заказа, токена или metadata: всё незнакомое (и отсутствие поля в старых заказах) — обычный разбор. */
 export function productOf(v: unknown): Product {
-  return v === "compat" || v === "pack" || v === "child" ? v : "razbor";
+  return v === "compat" || v === "pack" || v === "child" || v === "cert" ? v : "razbor";
 }
 
 /** Доплата за совместимость к разбору в пакете (690 − 490 = 200 ₽). */

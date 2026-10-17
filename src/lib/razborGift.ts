@@ -2,9 +2,13 @@
  * Разбор в подарок: проверка полей формы, данные подарка для страницы результата и отложенная отправка письма
  * получателю (/api/razbor/gift-send). Только сервер.
  */
+import { createHmac, timingSafeEqual } from "node:crypto";
+import { giftStartYm } from "./giftSeason";
 import { giftHasLink, normGiftText as norm } from "./giftText";
+import { productOf } from "./razborProducts";
 import { getOrder, listOrders, type Gift, type Order } from "./razborStore";
-import { readToken } from "./razborToken";
+import { readDocToken } from "./razborToken";
+import { SITE } from "./site";
 
 export const GIFT_FROM_MAX = 40;
 export const GIFT_WISH_MAX = 300;
@@ -46,11 +50,12 @@ const HAS_LINK = { test: giftHasLink };
 export type GiftError = "gift_name" | "gift_from" | "gift_wish" | "gift_email" | "gift_consent" | "gift_date";
 
 /**
- * Поля подарка из формы оплаты. `name` — уже очищенное имя получателя (оно же имя в разборе).
- * Ошибка — код для ?err= на странице разбора.
+ * Поля подарка из формы оплаты. `name` — уже очищенное имя получателя (оно же имя в разборе); null — имя
+ * проверяет сам продукт (совместимость — два имени, детский разбор — имя ребёнка необязательно, сертификат — без имени).
+ * Ошибка — код для ?err= на странице продукта.
  */
-export function parseGift(form: FormData, name: string): { gift: Gift } | { error: GiftError } {
-  if (!name) return { error: "gift_name" };
+export function parseGift(form: FormData, name: string | null): { gift: Gift } | { error: GiftError } {
+  if (name !== null && !name) return { error: "gift_name" };
   const from = oneLine(String(form.get("gift_from") ?? ""));
   if (!from || from.length > GIFT_FROM_MAX || HAS_LINK.test(from)) return { error: "gift_from" };
   const wish = multiLine(String(form.get("gift_wish") ?? ""));
@@ -72,12 +77,11 @@ export function parseGift(form: FormData, name: string): { gift: Gift } | { erro
 }
 
 /**
- * Месяц, с которого считается прогноз: для отложенного подарка — месяц и год отправки письма (дата уже по Москве),
- * иначе — `now` (текущий месяц по Москве).
+ * Месяц, с которого считается прогноз: для отложенного подарка — месяц и год отправки письма (дата уже по Москве;
+ * письмо с 25 декабря — подарок к Новому году, прогноз с января), иначе — `now` (текущий месяц по Москве).
  */
 export function giftYm(g: Gift | undefined, now: { yr: number; mo: number }): { yr: number; mo: number } {
-  const m = g?.send_at?.match(/^(\d{4})-(\d{2})-\d{2}$/);
-  return m ? { yr: Number(m[1]), mo: Number(m[2]) } : now;
+  return (g?.send_at && giftStartYm(g.send_at)) || now;
 }
 
 /** «a***@mail.ru» — адрес для страницы «Спасибо» без полного раскрытия. */
@@ -107,9 +111,20 @@ export function giftFromMetadata(md: Record<string, string | undefined>): Gift |
 /** Что можно показать на странице разбора: без e-mail и дат отправки. */
 export type GiftView = { to: string; from: string; wish?: string };
 
+/**
+ * Кому подарок — для плашки и страницы «Спасибо»: имя получателя разбора, пара в совместимости.
+ * В детском разборе имя — ребёнка, а получатель — родитель: без имени.
+ */
+export function giftTo(o: Order): string {
+  const p = productOf(o.product);
+  if (p === "child") return "";
+  if (p === "compat") return [o.name, o.name2].filter(Boolean).join(" и ");
+  return o.name;
+}
+
 function view(o: Order | null): GiftView | null {
   if (!o?.gift?.from) return null;
-  return { to: o.name, from: o.gift.from, ...(o.gift.wish ? { wish: o.gift.wish } : {}) };
+  return { to: giftTo(o), from: o.gift.from, ...(o.gift.wish ? { wish: o.gift.wish } : {}) };
 }
 
 /**
@@ -118,14 +133,14 @@ function view(o: Order | null): GiftView | null {
  */
 export async function giftFor(src: Order | string): Promise<GiftView | null> {
   if (typeof src !== "string") return view(src);
-  const id = src.includes(".") ? readToken(src)?.order : src;
+  const id = src.includes(".") ? readDocToken(src)?.order : src;
   if (!id) return null;
   return view(await getOrder(id));
 }
 
 /**
  * Пора ли слать письмо получателю: оплачен (боевой платёж или тестовый магазин — чтобы путь можно было прогнать),
- * есть адрес, ещё не отправлено, дата наступила.
+ * есть адрес, ещё не отправлено, дата наступила. Сертификат без адреса получателя покупатель передаёт сам.
  */
 export function giftDue(o: Order, today = todayMsk()): boolean {
   const g = o.gift;
@@ -136,4 +151,69 @@ export function giftDue(o: Order, today = todayMsk()): boolean {
 export function dueGifts(): Promise<Order[]> {
   const today = todayMsk();
   return listOrders((o) => giftDue(o, today));
+}
+
+/**
+ * Письмо покупателю «Подарок доставлен»: подарок был отложен (send_at), письмо получателю ушло не раньше трёх дней
+ * назад (повтор на следующий день, если почта не ответила), покупателю ещё не писали.
+ */
+export function giverDue(o: Order, now = Date.now()): boolean {
+  const g = o.gift;
+  return Boolean(o.status === "paid" && o.email && g?.send_at && g.sent_at && !g.giver_mail_at && now - Date.parse(g.sent_at) < 3 * DAY);
+}
+
+export function dueGivers(): Promise<Order[]> {
+  const now = Date.now();
+  return listOrders((o) => giverDue(o, now));
+}
+
+/* ---------- Сертификат: подписанный код в ссылке получателя ---------- */
+
+function secret(): string {
+  const s = process.env.RAZBOR_SECRET;
+  if (s && s.length >= 16) return s;
+  if (process.env.NODE_ENV !== "production") return "dev-only-razbor-secret";
+  throw new Error("RAZBOR_SECRET не задан");
+}
+
+const sig = (kind: string, id: string) => createHmac("sha256", secret()).update(`${kind}:${id}`).digest("base64url").slice(0, 22);
+
+function sigOk(kind: string, id: string, s: string): boolean {
+  const a = Buffer.from(sig(kind, id));
+  const b = Buffer.from(s);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/** Код сертификата: номер заказа и HMAC (RAZBOR_SECRET). Одноразовость — по cert_at в заказе. */
+export const certCode = (id: string) => `${id}.${sig("cert", id)}`;
+
+/** Номер заказа из кода сертификата или null, если подпись не сошлась. */
+export function readCertCode(code: string): string | null {
+  const [id, s] = String(code ?? "").split(".");
+  return id && s && /^[A-Za-z0-9_-]{12}$/.test(id) && sigOk("cert", id, s) ? id : null;
+}
+
+export const certUrl = (id: string) => `${SITE.url}/razbor/sertifikat?c=${certCode(id)}`;
+
+/* ---------- Напоминание через год ---------- */
+
+/** Подписанная ссылка отписки от письма «Прогноз на следующий год». */
+export const unsubUrl = (id: string) => `${SITE.url}/razbor/otpiska?o=${id}&s=${sig("yearly", id)}`;
+export const unsubOk = (id: string, s: string) => /^[A-Za-z0-9_-]{12}$/.test(id) && sigOk("yearly", id, String(s ?? ""));
+
+/** Через сколько после оплаты напоминаем: 11 месяцев (≈ 335 дней); тестовый заказ — через сутки, чтобы путь можно было проверить. */
+const YEARLY_AFTER = 335 * DAY;
+const YEARLY_TEST_AFTER = DAY;
+
+/** Пора ли писать «Прогноз на следующий год»: согласие при оплате, не отписан, документ есть (сертификат — активирован), письмо не уходило. */
+export function yearlyDue(o: Order, now = Date.now()): boolean {
+  if (o.status !== "paid" || !o.consent_yearly || o.yearly_sent_at || o.yearly_off_at || !o.email || !o.date || !o.paid_at) return false;
+  const age = now - Date.parse(o.paid_at);
+  // боевой заказ — не позже 13 месяцев: старые заказы при первом запуске не получат запоздалых писем
+  return o.test ? age >= YEARLY_TEST_AFTER : age >= YEARLY_AFTER && age <= 395 * DAY;
+}
+
+export function dueYearly(): Promise<Order[]> {
+  const now = Date.now();
+  return listOrders((o) => yearlyDue(o, now));
 }

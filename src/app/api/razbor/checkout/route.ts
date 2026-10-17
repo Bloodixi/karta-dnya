@@ -28,64 +28,96 @@ function tooMany(back: string): Response {
   return new Response(html, { status: 429, headers: { "Content-Type": "text/html; charset=utf-8", "Retry-After": "600", "Cache-Control": "no-store" } });
 }
 
-/** Что заказывают: обычный разбор (по умолчанию, в том числе пакет с совместимостью), совместимость или детский разбор. */
-type Kind = "razbor" | "compat" | "child";
-const kindOf = (v: FormDataEntryValue | null): Kind => (v === "compat" || v === "child" ? v : "razbor");
+/** Что заказывают: обычный разбор (по умолчанию, в том числе пакет с совместимостью), совместимость, детский разбор или сертификат. */
+type Kind = "razbor" | "compat" | "child" | "cert";
+const kindOf = (v: FormDataEntryValue | null): Kind => (v === "compat" || v === "child" || v === "cert" ? v : "razbor");
 
 /** Данные заказа после проверки формы — или адрес возврата на форму с кодом ошибки. */
 type Parsed = {
   product: Product;
-  a: BirthDate;
+  /** Дата документа; у сертификата её нет — получатель введёт сам. */
+  a?: BirthDate;
   name: string;
   b?: BirthDate;
   name2?: string;
   gift?: Gift;
   email: string;
+  /** Галочка «Присылать раз в год напоминание о новом прогнозе». */
+  yearly: boolean;
   /** Куда вернуть покупателя, если платёж не создался: страница формы с заполненными полями. */
   retry: string;
 };
 
 const enc = encodeURIComponent;
 
+/** Подарок из формы, если выбран режим «В подарок»: `name` — имя для проверки (null — продукт проверяет сам). */
+function giftOf(form: FormData, name: string | null): { gift?: Gift } | { error: string } {
+  if (form.get("for") !== "gift") return {};
+  const g = parseGift(form, name);
+  return "error" in g ? { error: g.error } : { gift: g.gift };
+}
+
 /**
  * Проверка полей формы на сервере: даты, имена (cleanName — только буквы, пробел и дефис, до 60), e-mail, подарок.
  * Пакет «разбор + совместимость» (pack=1) приходит из двух форм: разбора (вторая дата — date2) и совместимости
  * (product=compat, первая дата — личный разбор). Заказ в обоих случаях одинаковый, отличается только страница возврата.
+ * Подарок (for=gift) — у всех продуктов, кроме пакета; у разбора дата получателя — отдельное поле gift_date.
  */
 function parse(form: FormData): { ok: Parsed } | { back: string } {
   const kind = kindOf(form.get("product"));
-  const a = parseDate(String(form.get("date") ?? ""));
+  const own = parseDate(String(form.get("date") ?? ""));
   const name = cleanName(String(form.get("name") ?? ""));
   const email = cleanEmail(form.get("email"));
   const b = parseDate(String(form.get("date2") ?? ""));
   const name2 = cleanName(String(form.get("name2") ?? ""));
+  const isGift = form.get("for") === "gift";
+  // напоминание через год — только себе: в подарке дата чужая
+  const yearly = !isGift && kind !== "cert" && form.get("consent_yearly") === "1";
+
+  if (kind === "cert") {
+    // сертификат всегда подарок: получатель сам введёт дату и имя по ссылке из письма
+    const base = "/razbor?c=1";
+    const g = parseGift(form, null);
+    if ("error" in g) return { back: `${base}&err=${g.error}` };
+    if (!email) return { back: `${base}&err=email` };
+    return { ok: { product: "cert", name: "", gift: g.gift, email, yearly: false, retry: `${base}` } };
+  }
 
   if (kind === "compat") {
+    const a = own;
     const base = PRODUCTS.compat.path;
-    const pack = form.get("pack") === "1";
-    const again = `a=${a?.iso ?? ""}&b=${b?.iso ?? ""}${name ? `&na=${enc(name)}` : ""}${name2 ? `&nb=${enc(name2)}` : ""}${pack ? "&p=1" : ""}`;
+    const pack = !isGift && form.get("pack") === "1";
+    const again = `a=${a?.iso ?? ""}&b=${b?.iso ?? ""}${name ? `&na=${enc(name)}` : ""}${name2 ? `&nb=${enc(name2)}` : ""}${pack ? "&p=1" : ""}${isGift ? "&g=1" : ""}`;
     if (!a || !b) return { back: `${base}?${again}&err=date` };
     if (!name || !name2) return { back: `${base}?${again}&err=name` };
+    const g = giftOf(form, null);
+    if ("error" in g) return { back: `${base}?${again}&err=${g.error}` };
     if (!email) return { back: `${base}?${again}&err=email` };
     if (!compatReady()) return { back: `${base}?${again}&err=soon` };
-    return { ok: { product: pack ? "pack" : "compat", a, name, b, name2, email, retry: `${base}?${again}` } };
+    return { ok: { product: pack ? "pack" : "compat", a, name, b, name2, gift: g.gift, email, yearly, retry: `${base}?${again}` } };
   }
 
   if (kind === "child") {
+    const a = own;
     const base = PRODUCTS.child.path;
     if (!a) return { back: `${base}?err=date` };
-    const again = `d=${a.iso}${name ? `&n=${enc(name)}` : ""}`;
+    const again = `d=${a.iso}${name ? `&n=${enc(name)}` : ""}${isGift ? "&g=1" : ""}`;
     const age = ageAt({ d: a.d, m: a.m, y: a.y, ...nowMsk() });
     if (age < 0 || age > CHILD_MAX_AGE) return { back: `${base}?${again}&err=age` };
+    const g = giftOf(form, null);
+    if ("error" in g) return { back: `${base}?${again}&err=${g.error}` };
     if (!email) return { back: `${base}?${again}&err=email` };
     if (!childReady()) return { back: `${base}?${again}&err=soon` };
-    return { ok: { product: "child", a, name, email, retry: `${base}?${again}` } };
+    return { ok: { product: "child", a, name, gift: g.gift, email, yearly, retry: `${base}?${again}` } };
   }
 
-  const isGift = form.get("for") === "gift";
+  // разбор: в подарок — дата получателя из своего поля (gift_date); в старой форме без этого поля — дата страницы
+  const a = isGift && form.has("gift_date") ? parseDate(String(form.get("gift_date") ?? "")) : own;
   const pack = !isGift && form.get("pack") === "1";
-  if (!a) return { back: "/razbor?err=date" };
-  const again = `d=${a.iso}${name ? `&n=${enc(name)}` : ""}${isGift ? "&g=1" : ""}${pack ? `&p=1${b ? `&d2=${b.iso}` : ""}${name2 ? `&n2=${enc(name2)}` : ""}` : ""}`;
+  const keep = own ?? (isGift ? null : a);
+  const ny = form.get("ny") === "1" ? "&ny=1" : "";
+  const again = `${keep ? `d=${keep.iso}` : ""}${!isGift && name ? `&n=${enc(name)}` : ""}${isGift ? `&g=1${ny}` : ""}${pack ? `&p=1${b ? `&d2=${b.iso}` : ""}${name2 ? `&n2=${enc(name2)}` : ""}` : ""}`.replace(/^&/, "");
+  if (!a) return { back: `/razbor?${again}&err=${isGift ? "gift_bdate" : "date"}` };
   let gift: Gift | undefined;
   if (isGift) {
     const g = parseGift(form, name);
@@ -98,16 +130,17 @@ function parse(form: FormData): { ok: Parsed } | { back: string } {
     if (!compatReady()) return { back: `/razbor?${again}&err=soon` };
   }
   if (!email) return { back: `/razbor?${again}&err=email` };
-  return { ok: { product: pack ? "pack" : "razbor", a, name, ...(pack ? { b: b!, name2 } : {}), gift, email, retry: `/razbor?${again}` } };
+  return { ok: { product: pack ? "pack" : "razbor", a, name, ...(pack ? { b: b!, name2 } : {}), gift, email, yearly, retry: `/razbor?${again}` } };
 }
 
-/** Формы оплаты разбора, совместимости и детского разбора: создаёт платёж ЮKassa и отправляет на страницу оплаты. */
+/** Формы оплаты разбора, совместимости, детского разбора и сертификата: создаёт платёж ЮKassa и отправляет на страницу оплаты. */
 export async function POST(req: Request) {
   const form = await req.formData();
   const r = parse(form);
-  const redirect = (path: string) => NextResponse.redirect(new URL(`${path}#oplata`, SITE.url), 303);
+  // сертификат оформляется в своём блоке на /razbor — туда и возвращаем
+  const redirect = (path: string) => NextResponse.redirect(new URL(`${path}${path.startsWith("/razbor?c=1") ? "#sertifikat" : "#oplata"}`, SITE.url), 303);
   if ("back" in r) return redirect(r.back);
-  const { product, a, name, b, name2, gift, email, retry } = r.ok;
+  const { product, a, name, b, name2, gift, email, yearly, retry } = r.ok;
   const info = PRODUCTS[product];
   // тестовая покупка владельца (cookie из /api/razbor/test) — платёж в тестовом магазине
   const test = testCookieOk((await cookies()).get(TEST_COOKIE)?.value);
@@ -118,30 +151,33 @@ export async function POST(req: Request) {
   const order = randomBytes(9).toString("base64url");
   // отложенный подарок: прогноз — с месяца, когда получатель откроет письмо (его же yr/mo — в токене и metadata)
   const { yr, mo } = giftYm(gift, nowMsk());
-  const A = { d: a.d, m: a.m, y: a.y, name: name || undefined };
-  const pair = b ? makeCompatToken({ a: A, b: { d: b.d, m: b.m, y: b.y, name: name2 || undefined }, yr, mo, v: COMPAT_VERSION }, order) : "";
+  const A = a ? { d: a.d, m: a.m, y: a.y, name: name || undefined } : null;
+  const pair = A && b ? makeCompatToken({ a: A, b: { d: b.d, m: b.m, y: b.y, name: name2 || undefined }, yr, mo, v: COMPAT_VERSION }, order) : "";
   const v = product === "compat" ? COMPAT_VERSION : product === "child" ? CHILD_VERSION : RAZBOR_VERSION;
-  const token = product === "compat" ? pair : product === "child" ? makeChildToken({ ...A, yr, mo, v }, order) : makeToken({ ...A, yr, mo, v }, order);
+  // сертификат — без документа: дата, имя и ссылка появятся, когда получатель его активирует (/razbor/sertifikat)
+  const token = !A ? "" : product === "compat" ? pair : product === "child" ? makeChildToken({ ...A, yr, mo, v }, order) : makeToken({ ...A, yr, mo, v }, order);
   const draft: Order = {
-    id: order, token, date: a.iso, name, email,
+    id: order, token, date: a?.iso ?? "", name, email,
     amount: info.price, status: "pending", payment_id: "", created_at: new Date().toISOString(), paid_at: "", yr, mo,
     ...(gift ? { gift } : {}),
     ...(product !== "razbor" ? { product } : {}),
     ...(b ? { date2: b.iso, name2: name2 ?? "" } : {}),
     ...(product === "pack" ? { token2: pair } : {}),
     ...(test ? { test: true } : {}),
+    ...(yearly ? { consent_yearly: true } : {}),
   };
-  const dates = b ? `${a.iso} и ${b.iso}` : a.iso;
+  const dates = !a ? "дата — у получателя" : b ? `${a.iso} и ${b.iso}` : a.iso;
   try {
     // Без файла заказа оплата всё равно пройдёт: данные дублируются в metadata платежа.
     await saveOrder(draft).catch((e) => console.error("razbor checkout: заказ не записан", order, e));
     const p = await createPayment({
       idempotenceKey: `razbor-${order}`,
       amount: info.price,
-      description: `${test ? "[ТЕСТ] " : ""}${info.title}${gift ? " в подарок" : ""}, ${dates}`,
+      description: `${test ? "[ТЕСТ] " : ""}${info.title}${gift && product !== "cert" ? " в подарок" : ""}, ${dates}`,
       returnUrl: `${SITE.url}/razbor/spasibo?o=${order}`,
       metadata: {
-        order, date: a.iso, name, yr: String(yr), mo: String(mo), v: String(v), email, ...giftMetadata(gift),
+        order, date: a?.iso ?? "", name, yr: String(yr), mo: String(mo), v: String(v), email, ...giftMetadata(gift),
+        ...(yearly ? { yearly: "1" } : {}),
         // обычный разбор — без новых полей, как до фазы 3
         ...(product !== "razbor" ? { p: product } : {}),
         ...(b ? { date2: b.iso, name2: name2 ?? "" } : {}),
