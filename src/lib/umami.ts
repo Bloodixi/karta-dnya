@@ -9,9 +9,25 @@ export const UMAMI_INTERNAL_URL = process.env.UMAMI_INTERNAL_URL ?? "http://umam
 
 type Umami = { track: (...args: unknown[]) => void };
 
+/** Личные страницы покупателя (адрес = доступ к разбору или чеку): туда статистика не ходит. */
+export const isPrivateUmamiPath = (path: string) => /^\/(r|razbor\/r|razbor\/chek)(\/|$)/.test(path) || /^\/razbor\/spasibo\/?$/.test(path);
+
+/** Откуда пришли: только сайт и путь, без ?параметров; личные страницы — не передаём. */
+export function cleanReferrer(ref: string): string {
+  try {
+    const u = new URL(ref);
+    if (u.origin === location.origin && isPrivateUmamiPath(u.pathname)) return "";
+    return `${u.origin}${u.pathname}`;
+  } catch {
+    return "";
+  }
+}
+
 /** Событие из браузера (цель). Скрипта может не быть (блокировщик, личная страница) — тогда молча ничего. */
 export function umamiTrack(name: string, data?: Record<string, string | number>) {
   try {
-    (window as unknown as { umami?: Umami }).umami?.track(name, data);
+    if (isPrivateUmamiPath(location.pathname)) return;
+    // адрес — только путь: в параметрах бывают даты рождения и имена
+    (window as unknown as { umami?: Umami }).umami?.track((p: Record<string, unknown>) => ({ ...p, url: location.pathname, referrer: cleanReferrer(document.referrer), name, ...(data ? { data } : {}) }));
   } catch {}
 }

@@ -2,8 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { isPrivatePath } from "@/components/MetrikaCounter";
-import { UMAMI_WEBSITE_ID } from "@/lib/umami";
+import { cleanReferrer, isPrivateUmamiPath, UMAMI_WEBSITE_ID } from "@/lib/umami";
 
 type Umami = { track: (payload: (p: Record<string, unknown>) => Record<string, unknown>) => void };
 
@@ -15,11 +14,11 @@ export default function UmamiCounter() {
   const pathname = usePathname();
   const prev = useRef<string | null>(null);
   useEffect(() => {
-    if (isPrivatePath(pathname)) return;
+    if (isPrivateUmamiPath(pathname)) return;
     const w = window as unknown as { umami?: Umami };
     const send = () => {
       if (prev.current === pathname) return;
-      const referrer = prev.current ? `${location.origin}${prev.current}` : document.referrer;
+      const referrer = prev.current ? `${location.origin}${prev.current}` : cleanReferrer(document.referrer);
       w.umami?.track((p) => ({ ...p, url: pathname, referrer }));
       prev.current = pathname;
     };
@@ -33,6 +32,8 @@ export default function UmamiCounter() {
       s.dataset.websiteId = UMAMI_WEBSITE_ID;
       s.dataset.autoTrack = "false";
       s.dataset.domains = "karta-dnya.ru";
+      s.dataset.excludeSearch = "true";
+      s.dataset.excludeHash = "true";
       document.head.appendChild(s);
     }
     s.addEventListener("load", send, { once: true });
