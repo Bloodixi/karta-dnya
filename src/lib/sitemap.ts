@@ -46,6 +46,7 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
       add("/privacy", changed(app("privacy")), "yearly", 0.1);
       add("/oferta", changed(app("oferta")), "yearly", 0.2);
       add("/vozvrat", changed(app("vozvrat")), "yearly", 0.2);
+      add("/o-proekte", changed(app("o-proekte"), data("authors.json")), "monthly", 0.4);
       add("/poisk", changed(app("poisk")), "monthly", 0.3);
       for (const a of getAuthors()) add(`/avtory/${a.slug}`, changed(app("avtory"), data("authors.json")), "monthly", 0.5);
       break;
