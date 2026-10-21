@@ -38,13 +38,42 @@ export function calcMatrix(day: number, month: number, year: number): Matrix {
   };
 }
 
-export const POSITIONS: { key: "a" | "b" | "c" | "d" | "e"; letter: string; title: string; text: string }[] = [
-  { key: "a", letter: "A", title: "День рождения: характер", text: "Качества, с которыми человек приходит в жизнь: природный стиль поведения и то, что даётся без усилий." },
-  { key: "b", letter: "B", title: "Месяц рождения: ресурс и задачи", text: "Внутренний ресурс и то, чему предстоит учиться: через какие темы человек раскрывается и где ему нужна опора." },
-  { key: "c", letter: "C", title: "Год рождения: таланты и опыт", text: "Способности, которые лучше всего проявляются со временем, и тема, через которую накапливается жизненный опыт." },
-  { key: "d", letter: "D", title: "Сумма трёх: жизненные уроки", text: "Повторяющиеся ситуации и уроки, а также способ, которым человек учится принимать зрелые решения." },
-  { key: "e", letter: "E", title: "Центр: личное предназначение", text: "Главная энергия матрицы: суть личности, баланс всех точек и направление, в котором человеку проще всего находить смысл." },
+export const POSITIONS: { key: "a" | "b" | "c" | "d" | "e"; letter: string; title: string; text: string; anchor: string }[] = [
+  { key: "a", letter: "A", title: "День рождения: визитная карточка", anchor: "vizitka", text: "Качества, с которыми человек приходит в жизнь и которые первыми замечают окружающие: природный стиль поведения и то, что даётся без усилий." },
+  { key: "b", letter: "B", title: "Месяц рождения: таланты", anchor: "talanty", text: "Способности и внутренний ресурс: к чему тянет, что получается легко и через какие занятия человек раскрывается." },
+  { key: "c", letter: "C", title: "Год рождения: деньги и дело", anchor: "dengi", text: "Тема, через которую строится материальная сторона жизни: стиль работы, способ проявить себя в деле и накопить опыт." },
+  { key: "d", letter: "D", title: "Сумма трёх: жизненные уроки", anchor: "uroki", text: "Повторяющиеся ситуации и уроки, а также способ, которым человек учится принимать зрелые решения." },
+  { key: "e", letter: "E", title: "Центр: характер и зона комфорта", anchor: "centr", text: "Главная энергия матрицы: суть личности, баланс всех точек и состояние, в котором человеку спокойно и естественно." },
 ];
+
+/** Тексты аркана по позициям матрицы (content/data/matrix-positions.json). */
+export type MatrixPositions = {
+  n: number; desc: string; vizitka: string; centr: string; talanty: string;
+  prednaznachenie: { lichnoe: string; socialnoe: string; planetarnoe: string };
+  dengi: string; otnosheniya: string; zdorove: string; zhenshchina: string; muzhchina: string;
+};
+export const getMatrixPositions = () => readJsonData<MatrixPositions[]>("matrix-positions.json", []);
+export const findMatrixPositions = (n: number) => getMatrixPositions().find((a) => a.n === n) || null;
+
+/** Блоки страницы аркана: якорь и заголовок (порядок вывода). */
+export const POSITION_BLOCKS: { id: string; label: string }[] = [
+  { id: "vizitka", label: "в визитной карточке" },
+  { id: "centr", label: "в центре матрицы" },
+  { id: "talanty", label: "в талантах" },
+  { id: "prednaznachenie", label: "в предназначении" },
+  { id: "dengi", label: "в деньгах и работе" },
+  { id: "otnosheniya", label: "в отношениях" },
+  { id: "zdorove", label: "в здоровье" },
+  { id: "zhenshchina", label: "для женщины" },
+  { id: "muzhchina", label: "для мужчины" },
+];
+
+/** Личное предназначение: небо (B + D) + земля (A + C). */
+export function calcPurpose(m: Matrix) {
+  const sky = toArcana(m.b + m.d);
+  const earth = toArcana(m.a + m.c);
+  return { sky, earth, personal: toArcana(sky + earth) };
+}
 
 /** Совместимость: арканы обоих и общий аркан пары (сумма центров). */
 export function calcPair(m1: Matrix, m2: Matrix) {
