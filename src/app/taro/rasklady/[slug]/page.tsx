@@ -7,6 +7,7 @@ import JsonLd from "@/components/JsonLd";
 import Spread from "@/components/Spread";
 import { findSpread, getSpreads, getTarot, spreadHref } from "@/lib/content";
 import { SITE } from "@/lib/site";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const dynamicParams = false;
 
@@ -75,6 +76,7 @@ export default async function SpreadPage({ params }: PageProps<"/taro/rasklady/[
         </aside>
       </div>
 
+      <ArticleLinks path={`/taro/rasklady/${slug}`} />
       <Faq items={s.faq} />
       <JsonLd
         data={{

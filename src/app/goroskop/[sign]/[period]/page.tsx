@@ -15,6 +15,7 @@ import { horoscopeFor, periodKey, PERIODS, PERIOD_KEYS, todayKey, type PeriodKey
 import Year2027Teaser from "@/components/Year2027";
 import { signMeta } from "@/lib/horoscopeMeta";
 import { FORECAST_YEAR } from "@/lib/horoscopeYear";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const revalidate = 1800;
 export const dynamicParams = false;
@@ -60,6 +61,7 @@ export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[s
       <p className="mt-6 text-muted">
         <Link href={`/goroskop/${sign}`} className="text-accent-text underline">Характер знака {z.name} и гороскоп на сегодня</Link>
       </p>
+      <ArticleLinks path={`/goroskop/${sign}/${period}`} />
       <RazborCta from="goroskop-period" />
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Гороскоп {PERIODS[pk].title} для других знаков</h2>

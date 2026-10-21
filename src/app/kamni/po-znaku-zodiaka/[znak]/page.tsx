@@ -9,6 +9,7 @@ import ZodiacSign from "@/components/ZodiacSign";
 import { findZodiac, getStoneImages, getZodiac } from "@/lib/content";
 import { pageTitle, SITE } from "@/lib/site";
 import { getStoneSigns, stonesForSign } from "@/lib/stones";
+import ArticleLinks from "@/components/ArticleLinks";
 
 const HUB = "/kamni/po-znaku-zodiaka";
 
@@ -116,6 +117,7 @@ export default async function StonesForSignPage({ params }: PageProps<"/kamni/po
         </section>
       )}
 
+      <ArticleLinks path={`/kamni/po-znaku-zodiaka/${znak}`} />
       <Faq items={faq} />
 
       <section className="mt-10">

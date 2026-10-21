@@ -5,6 +5,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import { AFFIRM_PATH, getAffirmationTopics } from "@/lib/affirmations";
 import { formatDateRu, todayKey } from "@/lib/daily";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const revalidate = 1800;
 
@@ -54,6 +55,7 @@ export default function AffirmationDayPage() {
         </div>
       </section>
 
+      <ArticleLinks path="/praktiki/affirmacii/dnya" />
       <Faq items={FAQ} />
     </div>
   );

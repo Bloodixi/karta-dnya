@@ -8,6 +8,7 @@ import { getArticles, getRunes } from "@/lib/content";
 import ArticleCard from "@/components/ArticleCard";
 import { ATTS, HUB_FAQ, runesOfAtt } from "@/lib/runes";
 import { SITE } from "@/lib/site";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const metadata: Metadata = {
   title: "Значение рун Старшего Футарка: все 24 руны и руна дня",
@@ -80,6 +81,7 @@ export default function RunesHub() {
         </section>
       )}
 
+      <ArticleLinks path="/runy" />
       <Faq items={HUB_FAQ} />
       <JsonLd
         data={{

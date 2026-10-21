@@ -10,6 +10,7 @@ import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, monthDays, PHASES } from "@/lib/moon";
 import { lunarMonthWindow, monthLabel } from "@/lib/moon-month";
 import { moonIllumination, mskNoon } from "@/lib/astro/engine";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const revalidate = 1800;
 
@@ -177,6 +178,7 @@ export default function LunarPage() {
         <h2>Как пользоваться лунным календарём</h2>
         <p>Растущая Луна, от новолуния до полнолуния, подходит для начинаний, роста и накопления: стартовать проекты, стричься для быстрого роста волос, сажать то, что растёт над землёй. Убывающая Луна помогает завершать, очищать и отпускать: уборка, отдых, корнеплоды, разбор долгов. Полнолуние и новолуние лучше оставить для отдыха и планирования. Подробнее в статье <Link href="/astrologiya/lunnyy-kalendar-kak-polzovatsya">как пользоваться фазами Луны</Link>.</p>
       </section>
+      <ArticleLinks path="/lunnyy-kalendar" />
       <Faq items={FAQ} />
       </div>
     </div>

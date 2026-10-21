@@ -15,6 +15,7 @@ import StonePhoto from "@/components/StonePhoto";
 import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
 import { metaDescription } from "@/lib/meta";
 import { pageTitle, SECTIONS, SECTION_KEYS, SITE, type SectionKey, orgJsonLd } from "@/lib/site";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const dynamicParams = false;
 
@@ -63,7 +64,11 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
 
   const a = await getArticle(key, slug);
   if (!a) notFound();
-  const more = getArticles(key).filter((x) => x.slug !== slug).slice(0, 3);
+  // Соседи по кругу (следующие по дате, после самой старой — снова свежие): у каждой статьи раздела
+  // одинаковое число входящих ссылок, а не только у трёх последних.
+  const siblings = getArticles(key);
+  const at = siblings.findIndex((x) => x.slug === slug);
+  const more = Array.from({ length: Math.min(3, siblings.length - 1) }, (_, i) => siblings[(at + 1 + i) % siblings.length]);
   const author = key === "astrologiya" ? horoscopeAuthor() : null;
   const showToc = a.toc.length >= 3;
   return (
@@ -289,6 +294,7 @@ function StonePage({ slug }: { slug: string }) {
           </>
         )}
       </div>
+      <ArticleLinks path={`/kamni/${slug}`} />
       {related.length > 0 && (
         <section className="mt-12">
           <div className="ornament mb-4 border-b border-line pb-2">

@@ -4,6 +4,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import Pythagoras from "@/components/Pythagoras";
 import RazborDateScope, { ScopedRazborCta } from "@/components/RazborDateScope";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const metadata: Metadata = {
   title: "Квадрат Пифагора по дате рождения: рассчитать онлайн",
@@ -32,6 +33,7 @@ export default function PythagorasPage() {
         </section>
         <ScopedRazborCta from="kvadrat-pifagora" />
       </RazborDateScope>
+      <ArticleLinks path="/kvadrat-pifagora" />
       <Faq items={FAQ} />
     </div>
   );

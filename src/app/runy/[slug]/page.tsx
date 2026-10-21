@@ -8,6 +8,7 @@ import RuneGlyph from "@/components/RuneGlyph";
 import { findRune, getRunes } from "@/lib/content";
 import { ATTS, neighbours, runeFaq, runesOfAtt } from "@/lib/runes";
 import { pageTitle, SITE, orgJsonLd } from "@/lib/site";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const dynamicParams = false;
 
@@ -81,6 +82,7 @@ export default async function RunePage({ params }: PageProps<"/runy/[slug]">) {
         </article>
       </div>
 
+      <ArticleLinks path={`/runy/${slug}`} />
       <Faq items={faq} />
 
       <section className="mt-10">

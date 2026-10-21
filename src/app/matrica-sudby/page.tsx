@@ -12,6 +12,7 @@ import ScrollToResult from "@/components/ScrollToResult";
 import { formatDate, parseDate } from "@/lib/numerology";
 import { POSITIONS, calcMatrix, findMatrixArcana, getMatrixArcana } from "@/lib/matrix";
 import { SITE } from "@/lib/site";
+import ArticleLinks from "@/components/ArticleLinks";
 
 const PATH = "/matrica-sudby";
 
@@ -125,6 +126,7 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
         </div>
       </section>
 
+      <ArticleLinks path="/matrica-sudby" />
       <Faq items={FAQ} />
       <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Калькулятор матрицы судьбы", url: `${SITE.url}${PATH}`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
       <MatrixNav current={PATH} />
