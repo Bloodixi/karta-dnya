@@ -94,7 +94,7 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
       break;
     }
     case "sovmestimost": {
-      const pairs = changed(app("sovmestimost"), "src/lib/compat.ts");
+      const pairs = changed(app("sovmestimost"), "src/lib/compat.ts", data("zodiac-pairs.json"));
       add("/sovmestimost", pairs, "monthly", 0.8);
       for (const pr of allPairs()) if (pr.slug === canonicalPairSlug(pr.a, pr.b)) add(`/sovmestimost/${pr.slug}`, pairs, "monthly", 0.6); // зеркальные пары — canonical на основную
       break;
