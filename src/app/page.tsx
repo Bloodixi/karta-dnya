@@ -17,11 +17,31 @@ import { SECTIONS, SECTION_KEYS, TOOLS } from "@/lib/site";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: { absolute: "Карта дня на сегодня: Таро, гороскоп и лунный день" },
-  description: "Карта дня на сегодня: карта Таро с толкованием, гороскоп для каждого знака и лунный календарь. Какой сегодня день по гороскопу и в каком знаке Луна.",
-  alternates: { canonical: "/" },
-};
+/** Снимок «какой сегодня день»: дата, знак Солнца, знак Луны и лунный день — прямо в сниппете. */
+function homeDescription(date: string): string {
+  const [, month, day] = date.split("-").map(Number);
+  const sun = signByDate(month, day);
+  const moon = dayInfo(date);
+  const d = formatDateRu(date, { day: "numeric", month: "long" });
+  const head = `Сегодня ${d}${sun ? `, по гороскопу — время знака ${sun.name}` : ""}, Луна в знаке ${moon.sign.name}, ${moon.lunarDay}-й лунный день.`;
+  const tails = [
+    " Карта Таро дня с толкованием и гороскоп на сегодня для каждого знака.",
+    " Карта Таро дня и гороскоп на сегодня для каждого знака.",
+    " Карта Таро дня и гороскоп для каждого знака.",
+    " Карта Таро и гороскоп на сегодня.",
+  ];
+  return tails.map((t) => head + t).find((x) => x.length <= 160) || head.slice(0, 160);
+}
+
+export function generateMetadata(): Metadata {
+  const date = todayKey();
+  const d = formatDateRu(date, { day: "numeric", month: "long" });
+  return {
+    title: { absolute: `Карта дня на сегодня, ${d}: гороскоп, Таро, Луна` },
+    description: homeDescription(date),
+    alternates: { canonical: "/" },
+  };
+}
 
 export default function Home() {
   const date = todayKey();

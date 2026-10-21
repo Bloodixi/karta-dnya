@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import TarotHint from "@/components/TarotHint";
 import { CLOCK_KINDS, DIGITS, clockDescription, clockFaq, clockSteps, clockTitle, compactTime, digitsOf, findClock, getClockNumbers, reduceDigit, relatedClocks } from "@/lib/clock";
-import { pageTitle } from "@/lib/site";
+import { cardsOfNumber } from "@/lib/tarot-links";
 
 export const dynamicParams = false;
 
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: PageProps<"/numerologiya/chis
   const c = findClock(time);
   if (!c) return {};
   return {
-    title: pageTitle(clockTitle(c)),
+    title: clockTitle(c),
     description: clockDescription(c),
     alternates: { canonical: `/numerologiya/chisla-na-chasah/${time}` },
   };
@@ -38,6 +39,7 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
   const steps = clockSteps(c);
   const faq = clockFaq(c);
   const kindWord = CLOCK_KINDS[c.kind].plural;
+  const tarot = cardsOfNumber(c.sum);
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/numerologiya/chisla-na-chasah", label: "Числа на часах" }, { href: `/numerologiya/chisla-na-chasah/${time}`, label: c.time }]} />
@@ -73,6 +75,15 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
         </div>
       </div>
       <Faq items={faq} />
+      {tarot.major && (
+        <TarotHint
+          title={`Карта Таро числа ${c.time}`}
+          lede={<>Сумма цифр {c.time} — {c.sum}. В Таро этому числу соответствует старший аркан «{tarot.major.name}»{tarot.minors.length > 0 && <>, а среди младших арканов — карты с номером {tarot.minorNumber}: они добавляют к подсказке часов бытовые детали</>}.</>}
+          items={[{ card: tarot.major, label: `аркан ${tarot.major.number}` }]}
+          related={tarot.minors}
+          relatedLabel={`младшие арканы · ${tarot.minorNumber}`}
+        />
+      )}
       {mirror.length > 0 && (
         <section className="mt-10">
           <h2 className="text-2xl mb-3">Зеркальные и похожие на {c.time}</h2>

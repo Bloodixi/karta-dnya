@@ -73,6 +73,8 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
   const idx = all.findIndex((x) => x.slug === slug);
   const prev = all[(idx - 1 + all.length) % all.length];
   const next = all[(idx + 1) % all.length];
+  const sameGroup = all.filter((x) => x.slug !== slug && (c.arcana === "major" ? x.arcana === "major" : x.suit === c.suit));
+  const sameNumber = c.arcana === "major" ? [] : all.filter((x) => x.slug !== slug && x.arcana !== "major" && x.number === c.number);
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/taro", label: "Таро" }, { href: "/taro/karty", label: "Значения карт" }, { href: `/taro/karty/${slug}`, label: c.name }]} />
@@ -130,6 +132,21 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
       {/* на десктопе — под колонкой текста, справа от карты */}
       <Faq items={faq} className="max-w-3xl md:ml-[272px] md:max-w-[40rem]" />
       <RazborCta from="taro-karta" className="mt-10 md:ml-[272px] md:max-w-[40rem]" />
+      <section className="mt-10" aria-labelledby="same-group">
+        <h2 id="same-group" className="text-2xl mb-3">{c.arcana === "major" ? "Другие старшие арканы" : `Другие карты: ${c.suitName}`}</h2>
+        <div className="flex flex-wrap gap-2">
+          {sameGroup.map((x) => <Link key={x.slug} href={`/taro/karty/${x.slug}`} className="chip hover:text-ink hover:border-gold">{x.name}</Link>)}
+        </div>
+        {sameNumber.length > 0 && (
+          <>
+            <p className="mono mt-4 mb-2">та же карта в других мастях</p>
+            <div className="flex flex-wrap gap-2">
+              {sameNumber.map((x) => <Link key={x.slug} href={`/taro/karty/${x.slug}`} className="chip hover:text-ink hover:border-gold">{x.name}</Link>)}
+            </div>
+          </>
+        )}
+        <p className="text-sm mt-4">Задать карте короткий вопрос: <Link href="/taro/da-net" className="text-accent-text underline">Таро «да или нет»</Link> · <Link href="/karta-dnya" className="text-accent-text underline">карта дня</Link> · <Link href="/taro/tri-karty" className="text-accent-text underline">расклад на три карты</Link>.</p>
+      </section>
       <div className="mt-10 flex flex-wrap gap-2 justify-between text-sm">
         <Link href={`/taro/karty/${prev.slug}`} className="btn btn-ghost">← {prev.name}</Link>
         <Link href="/taro/karty" className="btn btn-ghost">Все карты</Link>

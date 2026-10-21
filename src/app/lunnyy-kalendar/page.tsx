@@ -85,6 +85,12 @@ export default function LunarPage() {
                 <span className="chip">символ дня: {ld.symbol}</span>
                 <Link href={`/goroskop/${today.sign.slug}`} className="chip hover:border-[var(--gold)] hover:text-[var(--night-ink)]">Луна в знаке {today.sign.name}</Link>
               </div>
+              <nav aria-label="Лунный календарь по месяцам" className="mt-3 flex flex-wrap gap-2">
+                {lunarMonthWindow(key).slice(1).map((mk) => {
+                  const L = monthLabel(mk);
+                  return <Link key={mk} href={`/lunnyy-kalendar/${mk}`} className="chip hover:border-[var(--gold)] hover:text-[var(--night-ink)]">{L.nom} {L.year}</Link>;
+                })}
+              </nav>
               {upcoming.length > 0 && (
                 <ul className="mt-6 grid grid-cols-2 gap-px max-w-md border border-[var(--night-line)] rounded-[4px] overflow-hidden bg-[var(--night-line)]">
                   {upcoming.map((u) => (

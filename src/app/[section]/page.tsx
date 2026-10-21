@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import ArticleCard from "@/components/ArticleCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import HubHeader from "@/components/HubHeader";
+import TarotIndex from "@/components/TarotIndex";
 import TelegramDaily from "@/components/TelegramDaily";
 import { getArticles } from "@/lib/content";
 import { SECTIONS, SECTION_KEYS, SECTION_TOOLS, type SectionKey } from "@/lib/site";
@@ -31,6 +32,7 @@ export default async function SectionPage({ params }: PageProps<"/[section]">) {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: `/${key}`, label: s.title }]} />
       <HubHeader icon={s.icon} title={s.title} lede={s.description} links={tools} />
+      {key === "taro" && <TarotIndex className="mt-10" />}
       <h2 className="text-2xl mt-10 mb-3">Статьи</h2>
       {articles.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
