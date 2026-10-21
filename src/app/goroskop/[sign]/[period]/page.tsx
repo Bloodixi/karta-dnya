@@ -10,6 +10,8 @@ import HoroscopeCard from "@/components/HoroscopeCard";
 import PeriodNav from "@/components/PeriodNav";
 import RazborCta from "@/components/RazborCta";
 import ZodiacSign from "@/components/ZodiacSign";
+import GenderHoroscope from "@/components/GenderHoroscope";
+import { GENDER_PERIODS } from "@/lib/genderHoroscope";
 import { findZodiac, getZodiac } from "@/lib/content";
 import { horoscopeFor, periodKey, PERIODS, PERIOD_KEYS, todayKey, type PeriodKey } from "@/lib/daily";
 import Year2027Teaser from "@/components/Year2027";
@@ -57,6 +59,7 @@ export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[s
       </div>
       <div className="mt-4"><PeriodNav current={pk} sign={z.slug} /></div>
       {h && <div className="mt-4"><HoroscopeCard h={h} /></div>}
+      {h && GENDER_PERIODS.includes(pk) && <GenderHoroscope h={h} />}
       {pk === "god" && <Year2027Teaser sign={z.slug} name={z.name} />}
       <p className="mt-6 text-muted">
         <Link href={`/goroskop/${sign}`} className="text-accent-text underline">Характер знака {z.name} и гороскоп на сегодня</Link>

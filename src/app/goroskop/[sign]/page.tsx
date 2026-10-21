@@ -12,6 +12,8 @@ import PeriodNav from "@/components/PeriodNav";
 import RazborCta from "@/components/RazborCta";
 import TarotHint from "@/components/TarotHint";
 import ZodiacSign from "@/components/ZodiacSign";
+import GenderHoroscope from "@/components/GenderHoroscope";
+import Faq from "@/components/Faq";
 import Year2027Teaser from "@/components/Year2027";
 import TelegramDaily from "@/components/TelegramDaily";
 import { findTarot, findZodiac, getStones, getZodiac } from "@/lib/content";
@@ -37,6 +39,21 @@ export async function generateMetadata({ params }: PageProps<"/goroskop/[sign]">
   if (!z) return {};
   return { ...signMeta(z.name, "segodnya"), alternates: { canonical: `/goroskop/${sign}` } };
 }
+
+const signFaq = (name: string) => [
+  {
+    q: "Чем гороскоп для женщины отличается от гороскопа для мужчины?",
+    a: `Общий прогноз для знака ${name} один: положение планет одинаково для всех, кто родился под этим знаком. Блоки «Для женщины» и «Для мужчины» не меняют его смысл и не приписывают полу особый характер — они показывают тот же прогноз в разных жизненных ролях: в паре, в семье, с друзьями, на работе. Можно прочитать оба и взять то, что ближе к вашей ситуации.`,
+  },
+  {
+    q: "Когда обновляется гороскоп на сегодня?",
+    a: "Каждый день в полночь по Москве. Прогноз на завтра доступен заранее, а гороскопы на неделю и месяц обновляются с началом нового периода.",
+  },
+  {
+    q: "Какой гороскоп читать, если день рождения на границе знаков?",
+    a: "Даты перехода Солнца из знака в знак немного сдвигаются от года к году. Если день рождения приходится на границу, точный солнечный знак покажет натальная карта по дате, времени и месту рождения; а дополнить портрет поможет восходящий знак.",
+  },
+];
 
 export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">) {
   const { sign } = await params;
@@ -80,6 +97,7 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
       </div>
       <div className="mt-4"><PeriodNav current="segodnya" sign={z.slug} /></div>
       {h && <div className="mt-4"><HoroscopeCard h={h} /></div>}
+      {h && <GenderHoroscope h={h} />}
       <Year2027Teaser sign={z.slug} name={z.name} />
 
       <section className="prose mt-10">
@@ -115,6 +133,8 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
 
       <RazborCta from="goroskop-znak" />
       <TelegramDaily campaign="goroskop" text="Настроение знаков, карта дня и Луна — в 8:00 по Москве. Коротко и без рекламы." />
+
+      <Faq items={signFaq(z.name)} />
 
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Другие знаки</h2>

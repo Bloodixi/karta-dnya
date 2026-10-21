@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ZodiacSign from "./ZodiacSign";
 import type { Horoscope, PeriodKey } from "@/lib/daily";
+import { GENDER_INFO, GENDER_PERIODS } from "@/lib/genderHoroscope";
 
 const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
 
@@ -51,14 +52,16 @@ export function Score({ label, n }: { label: string; n: number }) {
 export default function HoroscopeGrid({ items, period }: { items: Horoscope[]; period: PeriodKey }) {
   if (!items.length) return <p className="mt-6 text-muted">Гороскоп готовится.</p>;
   const href = (slug: string) => (period === "segodnya" ? `/goroskop/${slug}` : `/goroskop/${slug}/${period}`);
+  const gender = GENDER_PERIODS.includes(period);
   return (
     <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((h) => (
-        <Link key={h.sign.slug} href={href(h.sign.slug)} className="card card-hover p-5">
+        // Вся карточка кликабельна через растянутую ссылку на знак; ссылки «для женщины / для мужчины» лежат поверх неё.
+        <div key={h.sign.slug} className="card card-hover p-5 relative">
           <div className="flex items-center gap-3">
             <ZodiacSign symbol={h.sign.symbol} element={h.sign.element} slug={`grid-${h.sign.slug}`} size={48} className="shrink-0" />
             <div>
-              <p className="font-semibold text-lg">{h.sign.name}</p>
+              <Link href={href(h.sign.slug)} className="font-semibold text-lg after:absolute after:inset-0 after:content-['']">{h.sign.name}</Link>
               <p className="text-xs text-muted"><SignDates dates={h.sign.dates} /></p>
             </div>
             <span className="ml-auto chip">{h.mood}</span>
@@ -67,7 +70,19 @@ export default function HoroscopeGrid({ items, period }: { items: Horoscope[]; p
           <p className="text-xs text-muted mt-3">
             <Score label="Любовь" n={h.score.love} /> · <Score label="Дела" n={h.score.career} /> · <Score label="Энергия" n={h.score.energy} />
           </p>
-        </Link>
+          {gender && (
+            <p className="relative z-10 mt-2 text-xs text-muted">
+              {(["woman", "man"] as const).map((g, i) => (
+                <span key={g}>
+                  {i > 0 && " / "}
+                  <Link href={`${href(h.sign.slug)}#${GENDER_INFO[g].anchor}`} className="hover:text-ink hover:underline">
+                    {GENDER_INFO[g].short}
+                  </Link>
+                </span>
+              ))}
+            </p>
+          )}
+        </div>
       ))}
     </div>
   );
