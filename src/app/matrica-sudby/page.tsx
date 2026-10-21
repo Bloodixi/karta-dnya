@@ -10,7 +10,7 @@ import RazborCta from "@/components/RazborCta";
 import { DateField, FormError, ShareLink, dateErrorText } from "@/components/NumerologyFields";
 import ScrollToResult from "@/components/ScrollToResult";
 import { formatDate, parseDate } from "@/lib/numerology";
-import { POSITIONS, calcMatrix, findMatrixArcana, getMatrixArcana } from "@/lib/matrix";
+import { POSITIONS, calcMatrix, calcPurpose, findMatrixArcana, getMatrixArcana } from "@/lib/matrix";
 import { SITE } from "@/lib/site";
 
 const PATH = "/matrica-sudby";
@@ -40,6 +40,8 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
   if (date) {
     const m = calcMatrix(date.d, date.m, date.y);
     const main = findMatrixArcana(m.e);
+    const purpose = calcPurpose(m);
+    const purposeArcana = findMatrixArcana(purpose.personal);
     result = (
       <section className="mt-8 scroll-mt-24" id="rezultat">
         <div className="ornament mb-4">
@@ -58,22 +60,30 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
                 <div key={p.key} className="card p-4">
                   <p className="mono">{p.letter} · {p.title}</p>
                   <p className="display text-2xl mt-1">
-                    <Link href={`/matrica-sudby/arkany/${m[p.key]}`} className="hover:text-accent">{m[p.key]} · {a?.name}</Link>
+                    <Link href={`/matrica-sudby/arkany/${m[p.key]}#${p.anchor}`} className="hover:text-accent">{m[p.key]} · {a?.name}</Link>
                   </p>
                   <p className="text-sm text-muted mt-1">{p.text}</p>
-                  <p className="text-sm mt-2">{a?.short}</p>
+                  <p className="text-sm mt-2">{a?.short} <Link href={`/matrica-sudby/arkany/${m[p.key]}#${p.anchor}`} className="text-accent underline">Аркан {m[p.key]}: {p.title.split(": ")[1]} — подробнее</Link></p>
                 </div>
               );
             })}
+            <div className="card p-4">
+              <p className="mono">Небо {purpose.sky} + земля {purpose.earth} · Личное предназначение</p>
+              <p className="display text-2xl mt-1">
+                <Link href={`/matrica-sudby/arkany/${purpose.personal}#prednaznachenie`} className="hover:text-accent">{purpose.personal} · {purposeArcana?.name}</Link>
+              </p>
+              <p className="text-sm text-muted mt-1">Небо — сумма B и D, земля — сумма A и C. Их сумма показывает личную задачу первой половины жизни: в чём искать себя и свой путь.</p>
+              <p className="text-sm mt-2"><Link href={`/matrica-sudby/arkany/${purpose.personal}#prednaznachenie`} className="text-accent underline">Аркан {purpose.personal} в предназначении</Link></p>
+            </div>
           </div>
         </div>
         {main && (
           <div className="prose mt-6">
-            <h3>Личное предназначение: аркан {main.n}, {main.name}</h3>
+            <h3>Центр матрицы: аркан {main.n}, {main.name}</h3>
             <p>{main.essence}</p>
             <p><strong>В плюсе.</strong> {main.plus}</p>
             <p><strong>Что полезно помнить.</strong> {main.minus}</p>
-            <p><Link href={`/matrica-sudby/arkany/${main.n}`}>Полный разбор аркана {main.n}</Link></p>
+            <p><Link href={`/matrica-sudby/arkany/${main.n}#centr`}>Аркан {main.n} в центре матрицы</Link> · <Link href={`/matrica-sudby/arkany/${main.n}`}>полный разбор аркана</Link></p>
           </div>
         )}
         <p className="mt-4 flex flex-wrap gap-2">
@@ -109,6 +119,7 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
         <p>Все числа сводятся к диапазону от 1 до 22: если результат больше 22, складываются его цифры (29 → 2 + 9 = 11). Число 22 остаётся как есть. Расчёт строится из пяти точек.</p>
         <ul>
           {POSITIONS.map((p) => <li key={p.key}><strong>{p.letter}</strong> — {p.title.toLowerCase()}. {p.key === "a" && "Равна дню рождения."}{p.key === "b" && "Равна номеру месяца (от 1 до 12)."}{p.key === "c" && "Сумма цифр года рождения."}{p.key === "d" && "A + B + C."}{p.key === "e" && "A + B + C + D."}</li>)}
+          <li><strong>Личное предназначение</strong> — сумма неба (B + D) и земли (A + C).</li>
         </ul>
         <p>Пример: 14.03.1987. A = 14, B = 3, год 1 + 9 + 8 + 7 = 25 → 2 + 5 = 7, C = 7. D = 14 + 3 + 7 = 24 → 6. Центр E = 14 + 3 + 7 + 6 = 30 → 3 + 0 = 3. Центральный аркан — 3, Императрица.</p>
         <p>Нумерация арканов совпадает со старшими арканами Таро: аркан 22 соответствует Шуту (карта 0). Значения арканов связаны со страницами карт на сайте, например <Link href="/taro/karty/mag">Маг</Link> и <Link href="/taro/karty/imperatritsa">Императрица</Link>. Если интересуют числа даты рождения без арканов, посмотрите <Link href="/numerologiya/po-date-rozhdeniya">нумерологию по дате рождения</Link> и <Link href="/chislo-sudby">число судьбы</Link>.</p>

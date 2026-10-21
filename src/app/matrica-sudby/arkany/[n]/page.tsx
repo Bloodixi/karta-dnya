@@ -5,7 +5,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import MatrixNav from "@/components/MatrixNav";
-import { ARCANA_NUMBERS, findMatrixArcana, getMatrixArcana, POSITIONS, tarotFor } from "@/lib/matrix";
+import { ARCANA_NUMBERS, findMatrixArcana, findMatrixPositions, getMatrixArcana, POSITION_BLOCKS, POSITIONS, tarotFor } from "@/lib/matrix";
 import { SITE, pageTitle, orgJsonLd } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -18,13 +18,19 @@ function get(n: string) {
   return /^\d{1,2}$/.test(n) ? findMatrixArcana(Number(n)) : null;
 }
 
+/** Первые предложения абзаца — для ответов FAQ. */
+function lead(text: string, count = 2) {
+  return text.split(/(?<=[.!?…])\s+/).slice(0, count).join(" ");
+}
+
 export async function generateMetadata({ params }: PageProps<"/matrica-sudby/arkany/[n]">): Promise<Metadata> {
   const { n } = await params;
   const a = get(n);
   if (!a) return {};
-  const desc = `${a.n} аркан в матрице судьбы — ${a.name}. ${a.short} Плюсы и минусы, отношения, деньги и работа.`;
+  const pos = findMatrixPositions(a.n);
+  const desc = pos?.desc || `${a.n} аркан в матрице судьбы — ${a.name}. ${a.short} Плюсы и минусы, отношения, деньги и работа.`;
   return {
-    title: pageTitle(`${a.n} аркан в матрице судьбы: ${a.name}, значение`),
+    title: pageTitle(`${a.n} аркан в матрице судьбы: значение в визитке, талантах, деньгах`),
     description: desc.length > 160 ? desc.slice(0, desc.lastIndexOf(" ", 157)).replace(/[,.;:]$/, "") + "…" : desc,
     alternates: { canonical: `/matrica-sudby/arkany/${a.n}` },
   };
@@ -38,27 +44,72 @@ export default async function ArcanaPage({ params }: PageProps<"/matrica-sudby/a
   const prev = all[(a.n - 2 + all.length) % all.length];
   const next = all[a.n % all.length];
   const tarot = tarotFor(a.n);
-  const faq = [
-    { q: `Что означает ${a.n} аркан в матрице судьбы?`, a: `${a.name} — ${a.short.charAt(0).toLowerCase() + a.short.slice(1)} Ключевые слова: ${a.keywords.join(", ")}.` },
-    { q: `Что означает аркан ${a.n} в центре матрицы?`, a: `В центре матрицы аркан описывает главную энергию личности: ${a.short.charAt(0).toLowerCase() + a.short.slice(1)} Центр читают вместе с остальными точками, поэтому для полного разбора рассчитайте матрицу целиком.` },
-    { q: `Как связаны ${a.name} в матрице и в Таро?`, a: tarot ? `Это один образ: в Таро ему соответствует карта «${tarot.name}». В матрице аркан описывает энергию даты рождения, а в раскладе карта отвечает на конкретный вопрос. Сравнить трактовки можно на странице карты.` : "Это один образ из старших арканов Таро." },
-  ];
+  const pos = findMatrixPositions(a.n);
+  const faq = pos
+    ? [
+        { q: `Что значит ${a.n} аркан в визитной карточке?`, a: lead(pos.vizitka) },
+        { q: `Что означает ${a.n} аркан в центре матрицы?`, a: lead(pos.centr) },
+        { q: `Что значит ${a.n} аркан в талантах?`, a: lead(pos.talanty) },
+        { q: `Что значит ${a.n} аркан для женщины?`, a: lead(pos.zhenshchina) },
+        { q: `Что означает ${a.n} аркан в предназначении?`, a: `${lead(pos.prednaznachenie.lichnoe, 1)} ${lead(pos.prednaznachenie.planetarnoe, 1)}` },
+      ]
+    : [{ q: `Что означает ${a.n} аркан в матрице судьбы?`, a: `${a.name} — ${a.short.charAt(0).toLowerCase() + a.short.slice(1)} Ключевые слова: ${a.keywords.join(", ")}.` }];
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/matrica-sudby", label: "Матрица судьбы" }, { href: "/matrica-sudby/arkany", label: "Арканы" }, { href: `/matrica-sudby/arkany/${a.n}`, label: `${a.n} · ${a.name}` }]} />
       <div className="prose max-w-3xl">
         <h1 className="text-3xl md:text-4xl font-semibold !mt-0">{a.n} аркан в матрице судьбы: {a.name}</h1>
         <p className="text-muted text-lg">{a.short} Ключевые слова: {a.keywords.join(", ")}.</p>
+        {pos && (
+          <nav aria-label="Содержание" className="card p-4 my-6">
+            <p className="mono mb-2">Аркан {a.n} в позициях матрицы</p>
+            <ul className="m-0! list-none! flex flex-wrap gap-2">
+              {POSITION_BLOCKS.map((b) => (
+                <li key={b.id} className="m-0!"><a href={`#${b.id}`} className="chip no-underline!">{b.label}</a></li>
+              ))}
+            </ul>
+          </nav>
+        )}
         <h2>Суть энергии</h2>
         <p>{a.essence}</p>
         <h2>В плюсе</h2>
         <p>{a.plus}</p>
-        <h2>В минусе</h2>
+        <h2 id="uroki" className="scroll-mt-24">В минусе: жизненные уроки</h2>
         <p>{a.minus}</p>
-        <h2>В отношениях</h2>
-        <p>{a.love}</p>
-        <h2>В деньгах и работе</h2>
-        <p>{a.career}</p>
+        {pos ? (
+          <>
+            <h2 id="vizitka" className="scroll-mt-24">{a.n} аркан в визитной карточке</h2>
+            <p>{pos.vizitka}</p>
+            <h2 id="centr" className="scroll-mt-24">{a.n} аркан в центре матрицы</h2>
+            <p>{pos.centr}</p>
+            <h2 id="talanty" className="scroll-mt-24">{a.n} аркан в талантах</h2>
+            <p>{pos.talanty}</p>
+            <h2 id="prednaznachenie" className="scroll-mt-24">{a.n} аркан в предназначении</h2>
+            <p><strong>Личное предназначение.</strong> {pos.prednaznachenie.lichnoe}</p>
+            <p><strong>Социальное предназначение.</strong> {pos.prednaznachenie.socialnoe}</p>
+            <p><strong>Планетарное предназначение.</strong> {pos.prednaznachenie.planetarnoe}</p>
+            <h2 id="dengi" className="scroll-mt-24">{a.n} аркан в деньгах и работе</h2>
+            <p>{pos.dengi}</p>
+            <p>{a.career}</p>
+            <h2 id="otnosheniya" className="scroll-mt-24">{a.n} аркан в отношениях</h2>
+            <p>{pos.otnosheniya}</p>
+            <p>{a.love}</p>
+            <h2 id="zdorove" className="scroll-mt-24">{a.n} аркан в здоровье</h2>
+            <p>{pos.zdorove}</p>
+            <p className="text-sm text-muted">Матрица судьбы — символическая система для самонаблюдения и не заменяет консультацию врача.</p>
+            <h2 id="zhenshchina" className="scroll-mt-24">{a.n} аркан для женщины</h2>
+            <p>{pos.zhenshchina}</p>
+            <h2 id="muzhchina" className="scroll-mt-24">{a.n} аркан для мужчины</h2>
+            <p>{pos.muzhchina}</p>
+          </>
+        ) : (
+          <>
+            <h2>В отношениях</h2>
+            <p>{a.love}</p>
+            <h2>В деньгах и работе</h2>
+            <p>{a.career}</p>
+          </>
+        )}
         <h2>Совет аркана</h2>
         <blockquote>{a.advice}</blockquote>
         <h2>Аркан {a.n} в разных точках матрицы</h2>

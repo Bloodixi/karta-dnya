@@ -3,7 +3,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import MatrixNav from "@/components/MatrixNav";
-import { getMatrixArcana, tarotFor } from "@/lib/matrix";
+import { ARCANA_NUMBERS, getMatrixArcana, tarotFor } from "@/lib/matrix";
 
 const PATH = "/matrica-sudby/arkany";
 
@@ -12,6 +12,17 @@ export const metadata: Metadata = {
   description: "Значение 22 арканов в матрице судьбы: Маг, Жрица, Императрица и другие. Суть энергии, плюсы и минусы, отношения, деньги и работа — для каждого аркана.",
   alternates: { canonical: PATH },
 };
+
+const POS_INFO: { id: string; title: string; text: string; rows?: boolean }[] = [
+  { id: "vizitka", title: "Визитная карточка", text: "точка A, день рождения: каким человека видят окружающие и что в нём замечают первым.", rows: true },
+  { id: "centr", title: "Центр матрицы", text: "точка E: характер и зона комфорта, состояние, в котором человеку спокойно.", rows: true },
+  { id: "talanty", title: "Таланты", text: "точка B, месяц рождения: способности и то, что даётся легко.", rows: true },
+  { id: "prednaznachenie", title: "Предназначение", text: "личное (небо + земля), социальное и планетарное — задачи разных периодов жизни.", rows: true },
+  { id: "dengi", title: "Деньги и работа", text: "точка C, год рождения: стиль работы и материальная сторона жизни.", rows: true },
+  { id: "otnosheniya", title: "Отношения", text: "как энергия аркана проявляется в любви и в паре." },
+  { id: "zdorove", title: "Здоровье", text: "мягкие подсказки о ритме, отдыхе и заботе о себе." },
+  { id: "zhenshchina", title: "Для женщины и для мужчины", text: "как одна и та же энергия может звучать по-разному." },
+];
 
 const FAQ = [
   { q: "Сколько арканов в матрице судьбы?", a: "В классической схеме используются 22 аркана — по числу старших арканов Таро. Все числа матрицы сводятся к диапазону от 1 до 22." },
@@ -38,6 +49,24 @@ export default function ArcanaHub() {
           );
         })}
       </div>
+      <section className="mt-12 max-w-3xl">
+        <h2 className="text-2xl">Позиции арканов в матрице</h2>
+        <p className="text-muted mt-2">Один и тот же аркан звучит по-разному в зависимости от места в матрице. На странице каждого аркана есть отдельные блоки по позициям — выберите номер, чтобы сразу перейти к нужному.</p>
+        <ul className="grid gap-4 mt-4">
+          {POS_INFO.map((p) => (
+            <li key={p.id}>
+              <p><strong>{p.title}</strong> — {p.text}</p>
+              {p.rows && (
+                <p className="flex flex-wrap gap-1 mt-1 text-sm">
+                  {ARCANA_NUMBERS.map((n) => (
+                    <Link key={n} href={`${PATH}/${n}#${p.id}`} className="chip" aria-label={`${n} аркан: ${p.title.toLowerCase()}`}>{n}</Link>
+                  ))}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
       <Faq items={FAQ} />
       <MatrixNav current={PATH} />
     </div>
