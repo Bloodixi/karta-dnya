@@ -7,7 +7,7 @@ import JsonLd from "@/components/JsonLd";
 import RazborCta from "@/components/RazborCta";
 import TarotCardView from "@/components/TarotCardView";
 import { findTarot, findTarotExtra, findTarotLong, getTarot, type TarotCard, type TarotExtra } from "@/lib/content";
-import { SITE } from "@/lib/site";
+import { SITE, orgJsonLd } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -145,7 +145,7 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
           inLanguage: "ru",
           mainEntityOfPage: `${SITE.url}/taro/karty/${slug}`,
           about: { "@type": "Thing", name: `${c.name} (карта Таро)` },
-          publisher: { "@type": "Organization", name: SITE.name, url: SITE.url },
+          author: orgJsonLd(), publisher: orgJsonLd(),
         }}
       />
     </article>

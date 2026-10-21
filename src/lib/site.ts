@@ -148,4 +148,25 @@ export const SOCIAL = {
   telegram: { title: "Telegram", handle: "@karta_dnya_ru", url: "https://t.me/karta_dnya_ru" },
   youtube: { title: "YouTube", handle: "@karta_dnya_ru", url: "https://www.youtube.com/@karta_dnya_ru" },
   vk: { title: "ВКонтакте", handle: "club242081949", url: "https://vk.com/club242081949" },
+  dzen: { title: "Дзен", handle: "karta_dnya_ru", url: "https://dzen.ru/karta_dnya_ru" },
 } as const;
+
+/** Контактная почта редакции и поддержки. */
+export const CONTACT_EMAIL = "help@karta-dnya.ru";
+
+/** @id организации в JSON-LD: полная запись — в layout, на страницах — ссылка на неё. */
+export const ORG_ID = `${SITE.url}/#org`;
+
+/** Organization для JSON-LD: полная (layout, «О проекте») или краткая (publisher/author в Article). */
+export function orgJsonLd(full = false): Record<string, unknown> {
+  const base: Record<string, unknown> = { "@type": "Organization", "@id": ORG_ID, name: SITE.name, url: SITE.url, logo: `${SITE.url}/logo-512.png` };
+  if (!full) return base;
+  return {
+    ...base,
+    alternateName: "karta-dnya.ru",
+    description: SITE.description,
+    email: CONTACT_EMAIL,
+    sameAs: Object.values(SOCIAL).map((s) => s.url),
+    contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: CONTACT_EMAIL, availableLanguage: "ru" },
+  };
+}

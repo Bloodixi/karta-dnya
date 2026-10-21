@@ -10,7 +10,7 @@ import Metrika from "@/components/Metrika";
 import UmamiCounter from "@/components/UmamiCounter";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import IosInstallHint from "@/components/IosInstallHint";
-import { SITE, SOCIAL } from "@/lib/site";
+import { ORG_ID, orgJsonLd, SITE } from "@/lib/site";
 
 const display = Prata({ variable: "--font-prata", subsets: ["latin", "cyrillic"], weight: "400" });
 // У Prata единица похожа на «l» — цифры заголовков берём из Old Standard TT (только 0–9).
@@ -54,8 +54,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           data={{
             "@context": "https://schema.org",
             "@graph": [
-              { "@type": "WebSite", "@id": `${SITE.url}/#website`, name: SITE.name, alternateName: "karta-dnya.ru", url: SITE.url, inLanguage: "ru", publisher: { "@id": `${SITE.url}/#org` } },
-              { "@type": "Organization", "@id": `${SITE.url}/#org`, name: SITE.name, url: SITE.url, logo: `${SITE.url}/logo-512.png`, sameAs: Object.values(SOCIAL).map((s) => s.url) },
+              { "@type": "WebSite", "@id": `${SITE.url}/#website`, name: SITE.name, alternateName: "karta-dnya.ru", url: SITE.url, inLanguage: "ru", publisher: { "@id": ORG_ID } },
+              orgJsonLd(true),
             ],
           }}
         />

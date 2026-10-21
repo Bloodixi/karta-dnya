@@ -6,7 +6,7 @@ import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import MatrixNav from "@/components/MatrixNav";
 import { ARCANA_NUMBERS, findMatrixArcana, getMatrixArcana, POSITIONS, tarotFor } from "@/lib/matrix";
-import { SITE, pageTitle } from "@/lib/site";
+import { SITE, pageTitle, orgJsonLd } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -67,7 +67,7 @@ export default async function ArcanaPage({ params }: PageProps<"/matrica-sudby/a
         {tarot && <p>Образ связан с картой Таро: <Link href={`/taro/karty/${tarot.slug}`}>{tarot.name}: значение карты</Link>. Там трактовка в раскладах, прямом и перевёрнутом положении.</p>}
       </div>
       <Faq items={faq} />
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "Article", headline: `${a.n} аркан в матрице судьбы: ${a.name}`, inLanguage: "ru", mainEntityOfPage: `${SITE.url}/matrica-sudby/arkany/${a.n}`, publisher: { "@type": "Organization", name: SITE.name, url: SITE.url } }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "Article", headline: `${a.n} аркан в матрице судьбы: ${a.name}`, inLanguage: "ru", mainEntityOfPage: `${SITE.url}/matrica-sudby/arkany/${a.n}`, author: orgJsonLd(), publisher: orgJsonLd() }} />
       <div className="mt-10 flex flex-wrap gap-2 justify-between text-sm">
         <Link href={`/matrica-sudby/arkany/${prev.n}`} className="btn btn-ghost">← {prev.n} · {prev.name}</Link>
         <Link href="/matrica-sudby/arkany" className="btn btn-ghost">Все арканы</Link>

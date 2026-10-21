@@ -5,7 +5,7 @@ import Faq from "@/components/Faq";
 import HanziMark from "@/components/HanziMark";
 import JsonLd from "@/components/JsonLd";
 import { COMPAT_LABELS, compatLevel, findChineseAnimal, getChineseAnimals, getForecast2027 } from "@/lib/chineseZodiac";
-import { pageTitle, SITE } from "@/lib/site";
+import { pageTitle, SITE, orgJsonLd } from "@/lib/site";
 
 const PATH = "/kitayskiy-goroskop/2027";
 
@@ -113,7 +113,7 @@ export default function Year2027Page() {
           headline: "Символ 2027 года — Красная Огненная Коза (Овца)",
           url: `${SITE.url}${PATH}`,
           inLanguage: "ru",
-          publisher: { "@type": "Organization", name: SITE.name, url: SITE.url },
+          author: orgJsonLd(), publisher: orgJsonLd(),
         }}
       />
     </article>

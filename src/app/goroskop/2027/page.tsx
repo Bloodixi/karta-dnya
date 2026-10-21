@@ -8,7 +8,7 @@ import ZodiacSign from "@/components/ZodiacSign";
 import { SignDates } from "@/components/HoroscopeGrid";
 import { getZodiac } from "@/lib/content";
 import { FORECAST_YEAR, yearOverview, yearSigns, type YearSign } from "@/lib/horoscopeYear";
-import { SITE } from "@/lib/site";
+import { SITE, orgJsonLd } from "@/lib/site";
 
 export const revalidate = 86400;
 
@@ -99,7 +99,7 @@ export default function YearHubPage() {
           dateModified: "2026-10-17",
           inLanguage: "ru",
           mainEntityOfPage: `${SITE.url}/goroskop/${Y}`,
-          publisher: { "@type": "Organization", name: SITE.name },
+          author: orgJsonLd(), publisher: orgJsonLd(),
         }}
       />
     </div>

@@ -8,7 +8,7 @@ import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
 import { inSignRu, mskDate, mskDateTime, retroPeriodsByYears, retroStatus, type RetroPeriod } from "@/lib/astro/calendar";
 import { SIGN_NAMES_RU } from "@/lib/astro/engine";
 import { getArticle, type Faq as FaqItem } from "@/lib/content";
-import { SITE } from "@/lib/site";
+import { SITE, orgJsonLd } from "@/lib/site";
 import { CALM_TIPS, nearestPeriod, periodMonths, periodSpan, signFocus, signsRu, venusOverlap } from "./nearest";
 
 /** Статус «сейчас ретрограден/директен до …» считается на лету, таблица — по эфемеридам на два года. */
@@ -156,8 +156,8 @@ export default async function MercuryRetroPage() {
           dateModified: now.toISOString().slice(0, 10),
           inLanguage: "ru",
           mainEntityOfPage: `${SITE.url}/astrologiya/retrogradnyy-merkuriy`,
-          ...(author ? { author: authorJsonLd(author) } : {}),
-          publisher: { "@type": "Organization", name: SITE.name },
+          author: author ? authorJsonLd(author) : orgJsonLd(),
+          publisher: orgJsonLd(),
         }}
       />
     </div>

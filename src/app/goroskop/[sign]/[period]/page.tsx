@@ -5,7 +5,7 @@ import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import JsonLd from "@/components/JsonLd";
 import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
-import { SITE } from "@/lib/site";
+import { SITE, orgJsonLd } from "@/lib/site";
 import HoroscopeCard from "@/components/HoroscopeCard";
 import PeriodNav from "@/components/PeriodNav";
 import RazborCta from "@/components/RazborCta";
@@ -80,8 +80,8 @@ export default async function SignPeriodPage({ params }: PageProps<"/goroskop/[s
             dateModified: h.key,
             inLanguage: "ru",
             mainEntityOfPage: `${SITE.url}/goroskop/${sign}/${period}`,
-            ...(author ? { author: authorJsonLd(author) } : {}),
-            publisher: { "@type": "Organization", name: SITE.name },
+            author: author ? authorJsonLd(author) : orgJsonLd(),
+            publisher: orgJsonLd(),
           }}
         />
       )}

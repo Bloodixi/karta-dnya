@@ -7,7 +7,7 @@ import JsonLd from "@/components/JsonLd";
 import RuneGlyph from "@/components/RuneGlyph";
 import { findRune, getRunes } from "@/lib/content";
 import { ATTS, neighbours, runeFaq, runesOfAtt } from "@/lib/runes";
-import { pageTitle, SITE } from "@/lib/site";
+import { pageTitle, SITE, orgJsonLd } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -105,7 +105,7 @@ export default async function RunePage({ params }: PageProps<"/runy/[slug]">) {
           description: r.about,
           inLanguage: "ru",
           mainEntityOfPage: `${SITE.url}/runy/${slug}`,
-          publisher: { "@type": "Organization", name: SITE.name, url: SITE.url },
+          author: orgJsonLd(), publisher: orgJsonLd(),
         }}
       />
     </div>

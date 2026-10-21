@@ -19,7 +19,7 @@ import {
   elementForYear,
   type CompatLevel,
 } from "@/lib/chineseZodiac";
-import { pageTitle, SITE } from "@/lib/site";
+import { pageTitle, SITE, orgJsonLd } from "@/lib/site";
 
 const HUB = "/kitayskiy-goroskop";
 
@@ -190,7 +190,7 @@ export default async function ChineseAnimalPage({ params }: PageProps<"/kitayski
           description: a.description,
           url: `${SITE.url}${HUB}/${a.slug}`,
           inLanguage: "ru",
-          publisher: { "@type": "Organization", name: SITE.name, url: SITE.url },
+          author: orgJsonLd(), publisher: orgJsonLd(),
         }}
       />
     </article>

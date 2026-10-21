@@ -7,7 +7,7 @@ import JsonLd from "@/components/JsonLd";
 import NumerologyNav from "@/components/NumerologyNav";
 import { DateField } from "@/components/NumerologyFields";
 import { readJsonData } from "@/lib/content";
-import { pageTitle, SITE } from "@/lib/site";
+import { pageTitle, SITE, orgJsonLd } from "@/lib/site";
 
 const PATH = "/numerologiya/2027";
 const CALC = "/numerologiya/lichnyy-god";
@@ -104,7 +104,7 @@ export default function Numerology2027Page() {
           headline: "Нумерологический прогноз на 2027 год",
           url: `${SITE.url}${PATH}`,
           inLanguage: "ru",
-          publisher: { "@type": "Organization", name: SITE.name, url: SITE.url },
+          author: orgJsonLd(), publisher: orgJsonLd(),
         }}
       />
     </article>

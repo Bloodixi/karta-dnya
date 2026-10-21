@@ -12,7 +12,7 @@ import { cityLabel } from "@/lib/astro/cities";
 import { getAstroData } from "@/lib/astro/interpret";
 import { SIGNS, type SignSlug } from "@/lib/astro/types";
 import { getArticle, getZodiac, readJsonData, type Faq as FaqItem } from "@/lib/content";
-import { SITE } from "@/lib/site";
+import { SITE, orgJsonLd } from "@/lib/site";
 
 const TITLE = "Восходящий знак (асцендент): как узнать и рассчитать онлайн";
 
@@ -196,8 +196,8 @@ export default async function AscendantPage({ searchParams }: PageProps<"/astrol
           dateModified: article?.date,
           inLanguage: "ru",
           mainEntityOfPage: `${SITE.url}${ASC_PATH}`,
-          ...(author ? { author: authorJsonLd(author) } : {}),
-          publisher: { "@type": "Organization", name: SITE.name },
+          author: author ? authorJsonLd(author) : orgJsonLd(),
+          publisher: orgJsonLd(),
         }}
       />
     </div>

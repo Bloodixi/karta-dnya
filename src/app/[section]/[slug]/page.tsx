@@ -14,7 +14,7 @@ import ReadingProgress from "@/components/ReadingProgress";
 import StonePhoto from "@/components/StonePhoto";
 import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
 import { metaDescription } from "@/lib/meta";
-import { pageTitle, SECTIONS, SECTION_KEYS, SITE, type SectionKey } from "@/lib/site";
+import { pageTitle, SECTIONS, SECTION_KEYS, SITE, type SectionKey, orgJsonLd } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -134,8 +134,8 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
           datePublished: a.date,
           inLanguage: "ru",
           mainEntityOfPage: `${SITE.url}/${key}/${slug}`,
-          ...(author ? { author: authorJsonLd(author) } : {}),
-          publisher: { "@type": "Organization", name: SITE.name },
+          author: author ? authorJsonLd(author) : orgJsonLd(),
+          publisher: orgJsonLd(),
         }}
       />
     </article>

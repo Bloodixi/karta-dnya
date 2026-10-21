@@ -11,7 +11,7 @@ import { Score } from "@/components/HoroscopeGrid";
 import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
 import { findZodiac, getZodiac } from "@/lib/content";
 import { FORECAST_YEAR, yearOverview, yearSign } from "@/lib/horoscopeYear";
-import { SITE } from "@/lib/site";
+import { SITE, orgJsonLd } from "@/lib/site";
 
 export const revalidate = 86400;
 export const dynamicParams = false;
@@ -154,8 +154,8 @@ export default async function SignYearPage({ params }: { params: Promise<{ sign:
           dateModified: "2026-10-17",
           inLanguage: "ru",
           mainEntityOfPage: `${SITE.url}/goroskop/${sign}/${Y}`,
-          ...(author ? { author: authorJsonLd(author) } : {}),
-          publisher: { "@type": "Organization", name: SITE.name },
+          author: author ? authorJsonLd(author) : orgJsonLd(),
+          publisher: orgJsonLd(),
         }}
       />
     </div>
