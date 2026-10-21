@@ -476,5 +476,163 @@
     ],
     "absorbed_by": "/kamni/po-date-rozhdeniya",
     "removed": "2026-10-17"
+  },
+  {
+    "slug": "masti-taro-znachenie",
+    "section": "taro",
+    "title": "Масти Таро: жезлы, кубки, мечи, пентакли",
+    "query": "масти таро",
+    "secondary": [
+      "жезлы таро значение",
+      "кубки таро значение",
+      "мечи таро",
+      "пентакли таро"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1300,
+    "outline": [
+      "Четыре масти и стихии",
+      "Жезлы",
+      "Кубки",
+      "Мечи",
+      "Пентакли",
+      "Сочетания мастей"
+    ],
+    "links": [
+      "/taro",
+      "/taro/karty",
+      "/astrologiya"
+    ],
+    "absorbed_by": "/taro/arkany/mladshie",
+    "removed": "2026-10-21"
+  },
+  {
+    "slug": "pridvornye-karty-taro",
+    "section": "taro",
+    "title": "Придворные карты Таро: пажи, рыцари, королевы, короли",
+    "query": "придворные карты таро",
+    "secondary": [
+      "паж таро",
+      "рыцарь таро",
+      "королева таро значение"
+    ],
+    "intent": "info",
+    "priority": 3,
+    "words": 1200,
+    "outline": [
+      "Кто такие придворные",
+      "Пажи",
+      "Рыцари",
+      "Королевы и короли",
+      "Как определить человека в раскладе"
+    ],
+    "links": [
+      "/taro/karty",
+      "/taro"
+    ],
+    "absorbed_by": "/taro/arkany/mladshie",
+    "removed": "2026-10-21"
+  },
+  {
+    "slug": "solnechnoe-i-lunnoe-zatmenie",
+    "section": "astrologiya",
+    "title": "Затмения в астрологии: влияние и что делать",
+    "query": "затмения в астрологии",
+    "secondary": [
+      "солнечное затмение значение",
+      "лунное затмение что нельзя"
+    ],
+    "intent": "info",
+    "priority": 3,
+    "words": 1100,
+    "outline": [
+      "Что такое затмение",
+      "Затмения и узлы",
+      "Что делать",
+      "Чего избегать",
+      "Ближайшие затмения"
+    ],
+    "links": [
+      "/astrologiya"
+    ],
+    "absorbed_by": "/astrologiya/zatmeniya-2027",
+    "removed": "2026-10-21"
+  },
+  {
+    "slug": "tranzity-planet-chto-eto",
+    "section": "astrologiya",
+    "title": "Транзиты планет: что это и как смотреть",
+    "query": "транзиты планет",
+    "secondary": [
+      "транзиты в астрологии",
+      "как смотреть транзиты"
+    ],
+    "intent": "info",
+    "priority": 3,
+    "words": 1300,
+    "outline": [
+      "Что такое транзит",
+      "Быстрые и медленные планеты",
+      "Аспекты к натальной карте",
+      "Пример",
+      "Инструменты"
+    ],
+    "links": [
+      "/astrologiya"
+    ],
+    "absorbed_by": "/astrologiya/tranzity",
+    "removed": "2026-10-21"
+  },
+  {
+    "slug": "znaki-zodiaka-harakteristika",
+    "section": "astrologiya",
+    "title": "Характеристика знаков зодиака: сильные и слабые стороны",
+    "query": "характеристика знаков зодиака",
+    "secondary": [
+      "черты знаков зодиака",
+      "сильные стороны знаков"
+    ],
+    "intent": "info",
+    "priority": 2,
+    "words": 1500,
+    "outline": [
+      "Кардинальные, фиксированные, мутабельные",
+      "Огненные",
+      "Земные",
+      "Воздушные",
+      "Водные"
+    ],
+    "links": [
+      "/goroskop",
+      "/astrologiya"
+    ],
+    "absorbed_by": "/goroskop",
+    "removed": "2026-10-21"
+  },
+  {
+    "slug": "kak-otlichit-nastoyaschiy-ametist",
+    "section": "kamni",
+    "title": "Аметист: свойства и как отличить настоящий",
+    "query": "аметист свойства",
+    "secondary": [
+      "как отличить аметист",
+      "аметист значение"
+    ],
+    "intent": "info",
+    "priority": 3,
+    "words": 1000,
+    "outline": [
+      "Что за камень",
+      "Свойства",
+      "Как отличить от подделок",
+      "Уход",
+      "Кому подходит"
+    ],
+    "links": [
+      "/kamni"
+    ],
+    "absorbed_by": "/kamni/ametist",
+    "removed": "2026-10-21"
   }
 ]
