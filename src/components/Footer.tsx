@@ -16,10 +16,17 @@ export default function Footer() {
             <Image src="/logo-56.webp" alt="" width={24} height={24} className="rounded" /> {SITE.name}
           </p>
           <p className="text-muted mt-2 max-w-sm">{SITE.tagline}.</p>
-          <p className="mt-2 flex flex-wrap gap-x-5">
-            {Object.values(SOCIAL).map((s) => (
-              <a key={s.url} href={s.url} target="_blank" rel="noopener" className="inline-block py-2 underline decoration-[var(--night-line)] underline-offset-4 hover:decoration-[var(--accent-soft)]">{s.title}</a>
+          <p className="mono mt-5 !text-[var(--gold)]">Мы в соцсетях</p>
+          <ul className="mt-1 flex flex-wrap gap-x-5">
+            {[SOCIAL.telegram, SOCIAL.vk, SOCIAL.youtube, SOCIAL.dzen].map((s) => (
+              <li key={s.url}>
+                <a href={s.url} target="_blank" rel="me noopener" className="inline-block py-2 underline decoration-[var(--night-line)] underline-offset-4 hover:decoration-[var(--accent-soft)]">{s.title}</a>
+              </li>
             ))}
+          </ul>
+          <p className="mt-1 flex flex-wrap gap-x-5">
+            <Link href="/o-proekte" className="inline-block py-2 underline decoration-[var(--night-line)] underline-offset-4 hover:decoration-[var(--accent-soft)]">О проекте</Link>
+            <Link href="/astrologiya/kak-my-schitaem" className="inline-block py-2 underline decoration-[var(--night-line)] underline-offset-4 hover:decoration-[var(--accent-soft)]">Как мы считаем</Link>
           </p>
           <p className="text-muted mt-3 text-xs">
             Материалы сайта носят развлекательный и познавательный характер и не заменяют консультацию специалистов.
