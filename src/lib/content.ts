@@ -168,6 +168,12 @@ export const getSpreads = () => readJson<Spread[]>("spreads.json", []);
 export const findSpread = (slug: string): Spread | null => getSpreads().find((s) => s.slug === slug && !s.href) || null;
 export const spreadHref = (s: Spread) => s.href || `/taro/rasklady/${s.slug}`;
 export const getZodiac = () => readJson<Zodiac[]>("zodiac.json", []);
+/** Тексты страниц пар /sovmestimost/[pair] по основному slug (порядок зодиака). Собирает scripts/sovm-pairs-build.py. */
+export type ZodiacPairText = {
+  title: string; description: string; love: string; brak: string; druzhba: string; rabota: string; blizost: string;
+  heA: string; sheA: string | null; neutral: string; strengths: string; trudnosti: string; faq: Faq[];
+};
+export const getZodiacPairText = (slug: string) => readJson<Record<string, ZodiacPairText>>("zodiac-pairs.json", {})[slug];
 export const getHoroscopeBank = () => readJson<HoroscopeBank>("horoscope-bank.json", { general: [], love: [], career: [], health: [], advice: [], mood: [] });
 export const getNumerology = () => readJson<NumerologyNumber[]>("numerology.json", []);
 export const findNumerology = (n: number) => getNumerology().find((x) => x.number === n);

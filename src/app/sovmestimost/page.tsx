@@ -77,6 +77,9 @@ export default function CompatIndex() {
             <div className="pointer-events-none absolute inset-y-px right-px w-8 rounded-r bg-linear-to-l from-surface to-transparent lg:hidden" aria-hidden="true" />
           </div>
           <p className="text-xs text-muted mt-2">Строка — первый знак, столбец — второй. Нажмите на число, чтобы открыть разбор пары.</p>
+          <p className="text-sm text-muted mt-3 max-w-3xl">
+            В разборе каждой пары есть разделы: в любви, в браке и быту, в дружбе, в работе, близость и нежность, «он — один знак, она — другой» и наоборот, сильные стороны, трудности и частые вопросы. Например: <Link href="/sovmestimost/oven-lev#lyubov" className="underline">Овен и Лев в любви</Link>, <Link href="/sovmestimost/rak-kozerog#brak" className="underline">Рак и Козерог в браке</Link>, <Link href="/sovmestimost/bliznetsy-vodoley#druzhba" className="underline">Близнецы и Водолей в дружбе</Link>, <Link href="/sovmestimost/oven-ryby#on-oven-ona-ryby" className="underline">он Овен, она Рыбы</Link>.
+          </p>
         </section>
       )}
       <section className="prose mt-10">
