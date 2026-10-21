@@ -10,10 +10,12 @@ import HoroscopeCard from "@/components/HoroscopeCard";
 import HoroscopeGrid from "@/components/HoroscopeGrid";
 import PeriodNav from "@/components/PeriodNav";
 import RazborCta from "@/components/RazborCta";
+import TarotHint from "@/components/TarotHint";
 import ZodiacSign from "@/components/ZodiacSign";
 import Year2027Teaser from "@/components/Year2027";
 import TelegramDaily from "@/components/TelegramDaily";
-import { findZodiac, getStones, getZodiac } from "@/lib/content";
+import { findTarot, findZodiac, getStones, getZodiac } from "@/lib/content";
+import { signCardOfDay, ZODIAC_ARCANA } from "@/lib/tarot-links";
 import { hubMeta, signMeta } from "@/lib/horoscopeMeta";
 import { allHoroscopes, horoscopeFor, PERIODS, PERIOD_KEYS, periodLabel, todayKey, type PeriodKey } from "@/lib/daily";
 
@@ -60,6 +62,12 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
   const all = getZodiac();
   const name = (s: string) => all.find((x) => x.slug === s);
   const stones = getStones().filter((s) => s.zodiac.includes(z.slug)).slice(0, 4);
+  const dayCard = signCardOfDay(z.slug, date);
+  const signArcana = findTarot(ZODIAC_ARCANA[z.slug] || "");
+  const tarotItems = [
+    ...(dayCard ? [{ card: dayCard, label: `карта дня · ${z.name}` }] : []),
+    ...(signArcana && signArcana.slug !== dayCard?.slug ? [{ card: signArcana, label: "аркан знака" }] : []),
+  ];
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/goroskop", label: "Гороскоп" }, { href: `/goroskop/${sign}`, label: z.name }]} />
@@ -98,6 +106,12 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
         <p>Камень: {z.stone}. Цвет: {z.color}. Счастливые числа: {z.luckyNumbers.join(", ")}.</p>
         {stones.length > 0 && <p>Подробнее о камнях: {stones.map((s, i) => <span key={s.slug}>{i > 0 && ", "}<Link href={`/kamni/${s.slug}`}>{s.name}</Link></span>)}. <Link href={`/kamni/po-znaku-zodiaka/${z.slug}`}>Все камни для знака {z.name} →</Link></p>}
       </section>
+
+      <TarotHint
+        title={`Таро для знака ${z.name}`}
+        lede={<>Карта дня для знака {z.name} меняется каждый день и дополняет гороскоп одним образом. Аркан знака{signArcana ? <> — «{signArcana.name}»</> : null} постоянный: в традиции Таро он описывает характер знака языком карт.</>}
+        items={tarotItems}
+      />
 
       <RazborCta from="goroskop-znak" />
       <TelegramDaily campaign="goroskop" text="Настроение знаков, карта дня и Луна — в 8:00 по Москве. Коротко и без рекламы." />
