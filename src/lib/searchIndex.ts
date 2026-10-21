@@ -68,7 +68,7 @@ export function buildSearchIndex(): SearchIndex {
   for (const d of getDreams()) add(d.word, `/sonnik/${d.slug}`, "Сонник", "сонник к чему снится сон толкование");
 
   for (const n of getNumerology()) add(`Число судьбы ${n.number}: ${n.title}`, `/chislo-sudby/${n.number}`, "Числа", "число судьбы нумерология значение", n.keywords.join(" "));
-  for (const c of getClockNumbers()) add(`${c.time} на часах: ${c.title}`, `/numerologiya/chisla-na-chasah/${c.slug}`, "Числа", "числа на часах одинаковые зеркальные", c.keywords.join(" "));
+  for (const c of getClockNumbers()) add(`${c.time} на часах: ${c.title}`, `/numerologiya/chisla-na-chasah/${c.slug}`, "Числа", "числа на часах одинаковые зеркальные тройные", c.keywords.join(" "));
   const arcana = readJsonData<{ n: number; name: string; keywords: string[] }[]>("matrix-arcana.json", []);
   for (const a of arcana) add(`Аркан ${a.n} в матрице судьбы: ${a.name}`, `/matrica-sudby/arkany/${a.n}`, "Матрица судьбы", "матрица судьбы аркан", a.keywords.join(" "));
 

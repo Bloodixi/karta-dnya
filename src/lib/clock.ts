@@ -1,12 +1,13 @@
 import { readJsonData } from "./content";
 
 export type ClockFaq = { q: string; a: string };
-export type ClockKind = "double" | "mirror" | "sequence" | "special";
+export type ClockKind = "double" | "mirror" | "triple" | "sequence" | "special";
 
 /** Подписи видов: «одинаковые цифры», «зеркальное время»… */
 export const CLOCK_KINDS: Record<ClockKind, { plural: string; time: string; digits: string; hub: string }> = {
   double: { plural: "одинаковые", time: "одинаковое время", digits: "одинаковых цифр", hub: "Одинаковые числа" },
   mirror: { plural: "зеркальные", time: "зеркальное время", digits: "зеркальных цифр", hub: "Зеркальные числа" },
+  triple: { plural: "тройные", time: "три одинаковые цифры", digits: "трёх одинаковых цифр", hub: "Три одинаковые цифры" },
   sequence: { plural: "последовательные", time: "цифры по порядку", digits: "цифр по порядку", hub: "Цифры по порядку" },
   special: { plural: "повторяющиеся", time: "повторяющиеся цифры", digits: "повторяющихся цифр", hub: "Другие частые сочетания" },
 };
@@ -60,12 +61,15 @@ const rev = (s: string) => s.split("").reverse().join("");
 /** Время без двоеточия, как его часто ищут: 12:21 → 1221. */
 export const compactTime = (time: string) => time.replace(":", "");
 
-/** Соседи по смыслу: зеркальные и перевёрнутые варианты (12:12 ↔ 12:21 ↔ 21:12 ↔ 21:21), затем время с той же суммой цифр. */
+/** Соседи по смыслу: зеркальные, перевёрнутые и переставленные варианты (12:12 ↔ 12:21 ↔ 21:12 ↔ 21:21), затем время с той же суммой цифр. */
 export function relatedClocks(c: ClockNumber, all = getClockNumbers()): { mirror: ClockNumber[]; sameSum: ClockNumber[] } {
   const [h, m] = c.time.split(":");
   const cand = [`${h}:${h}`, `${h}:${rev(h)}`, `${m}:${m}`, `${m}:${h}`, `${rev(h)}:${rev(h)}`, `${rev(h)}:${h}`, `${rev(m)}:${rev(m)}`, `${m}:${rev(m)}`];
   const bySlug = new Map(all.map((x) => [x.time, x]));
-  const mirror = Array.from(new Set(cand)).filter((t) => t !== c.time && bySlug.has(t)).map((t) => bySlug.get(t)!);
+  // Те же цифры в другом порядке: 11:10 ↔ 11:01 ↔ 01:11, 02:22 ↔ 22:20.
+  const sorted = (t: string) => digitsOf(t).sort().join("");
+  const anagrams = all.filter((x) => sorted(x.time) === sorted(c.time)).map((x) => x.time);
+  const mirror = Array.from(new Set([...cand, ...anagrams])).filter((t) => t !== c.time && bySlug.has(t)).map((t) => bySlug.get(t)!);
   const taken = new Set([c.time, ...mirror.map((x) => x.time)]);
   const sameSum = all.filter((x) => !taken.has(x.time) && reduceDigit(x.sum) === reduceDigit(c.sum)).slice(0, 6);
   return { mirror, sameSum };
