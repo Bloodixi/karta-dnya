@@ -7,6 +7,7 @@ import HubHeader from "@/components/HubHeader";
 import JsonLd from "@/components/JsonLd";
 import { AFFIRM_PATH, getAffirmationTopics } from "@/lib/affirmations";
 import { pageTitle, SECTIONS, SITE } from "@/lib/site";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const revalidate = 1800;
 
@@ -82,6 +83,7 @@ export default function AffirmationsHub() {
         </div>
       </section>
 
+      <ArticleLinks path="/praktiki/affirmacii" />
       <Faq items={FAQ} />
 
       <JsonLd

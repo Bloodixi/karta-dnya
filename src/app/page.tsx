@@ -14,6 +14,7 @@ import { cardOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, PHASES } from "@/lib/moon";
 import { signByDate } from "@/lib/stones";
 import { SECTIONS, SECTION_KEYS, TOOLS } from "@/lib/site";
+import SectionArticles from "@/components/SectionArticles";
 
 export const revalidate = 3600;
 
@@ -173,6 +174,7 @@ export default function Home() {
           </div>
         </section>
       )}
+      <SectionArticles skip={articles} />
     </div>
   );
 }

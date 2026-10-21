@@ -7,6 +7,7 @@ import NumerologyNav from "@/components/NumerologyNav";
 import { FormError, ShareLink, TextField } from "@/components/NumerologyFields";
 import { getNameNumbers } from "@/lib/content";
 import { cleanName, CYRILLIC_TABLE, isMaster, nameNumbers } from "@/lib/numerology";
+import ArticleLinks from "@/components/ArticleLinks";
 
 const PATH = "/numerologiya/chislo-imeni";
 
@@ -116,6 +117,7 @@ export default async function NameNumberPage({ searchParams }: PageProps<typeof 
         </div>
       </section>
 
+      <ArticleLinks path="/numerologiya/chislo-imeni" />
       <Faq items={FAQ} />
       <NumerologyNav current={PATH} />
     </div>

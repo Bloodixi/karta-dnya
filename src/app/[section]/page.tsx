@@ -7,6 +7,7 @@ import TarotIndex from "@/components/TarotIndex";
 import TelegramDaily from "@/components/TelegramDaily";
 import { getArticles } from "@/lib/content";
 import { SECTIONS, SECTION_KEYS, SECTION_TOOLS, type SectionKey } from "@/lib/site";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const dynamicParams = false;
 
@@ -33,6 +34,7 @@ export default async function SectionPage({ params }: PageProps<"/[section]">) {
       <Breadcrumbs items={[{ href: `/${key}`, label: s.title }]} />
       <HubHeader icon={s.icon} title={s.title} lede={s.description} links={tools} />
       {key === "taro" && <TarotIndex className="mt-10" />}
+      <ArticleLinks path={`/${key}`} title="С чего начать" />
       <h2 className="text-2xl mt-10 mb-3">Статьи</h2>
       {articles.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

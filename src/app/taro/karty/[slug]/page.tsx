@@ -8,6 +8,7 @@ import RazborCta from "@/components/RazborCta";
 import TarotCardView from "@/components/TarotCardView";
 import { findTarot, findTarotExtra, findTarotLong, getTarot, type TarotCard, type TarotExtra } from "@/lib/content";
 import { SITE, orgJsonLd } from "@/lib/site";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const dynamicParams = false;
 
@@ -91,6 +92,7 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
           <p>{long?.upright || c.upright}</p>
           <h2>Перевёрнутое положение</h2>
           <p>{long?.reversed || c.reversed}</p>
+          <p>Как читать перевёрнутые карты в раскладе в целом: <Link href="/taro/perevernutye-karty-taro">статья о перевёрнутых картах Таро</Link>.</p>
           <h2>В любви и отношениях</h2>
           {long ? (
             <>
@@ -130,6 +132,7 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
         </div>
       </div>
       {/* на десктопе — под колонкой текста, справа от карты */}
+      <ArticleLinks path={[`/taro/karty/${slug}`, ...(c.arcana === "minor" ? ["taro-minor"] : [])]} className="max-w-3xl md:ml-[272px] md:max-w-[40rem]" />
       <Faq items={faq} className="max-w-3xl md:ml-[272px] md:max-w-[40rem]" />
       <RazborCta from="taro-karta" className="mt-10 md:ml-[272px] md:max-w-[40rem]" />
       <section className="mt-10" aria-labelledby="same-group">

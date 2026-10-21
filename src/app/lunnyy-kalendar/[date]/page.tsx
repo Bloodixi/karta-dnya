@@ -11,6 +11,7 @@ import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, moonWindow, moonWindowKeys, PHASES } from "@/lib/moon";
 import { pageTitle } from "@/lib/site";
 import { lunarMonthStaticKeys, monthLabel, MONTH_RE } from "@/lib/moon-month";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -90,6 +91,7 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
         {next >= win.from && next <= win.to ? <Link href={`/lunnyy-kalendar/${next}`} className="btn btn-ghost">{formatDateRu(next, { day: "numeric", month: "long" })} →</Link> : <span />}
       </div>
       <TelegramDaily campaign="lunnyy-den" text="Лунный день, фаза и карта дня — каждое утро в 8:00 по Москве. Коротко и без рекламы." />
+      <ArticleLinks path={`/lunnyy-kalendar/${date}`} />
       <RazborCta from="lunnyy-den" />
     </div>
   );

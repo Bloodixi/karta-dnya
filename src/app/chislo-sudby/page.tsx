@@ -6,6 +6,7 @@ import NumerologyNav from "@/components/NumerologyNav";
 import TelegramDaily from "@/components/TelegramDaily";
 import RazborCta from "@/components/RazborCta";
 import { getArticles, getNumerology } from "@/lib/content";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const metadata: Metadata = {
   title: "Число судьбы по дате рождения: расчёт и значение",
@@ -47,6 +48,7 @@ export default function DestinyPage() {
           Подробнее: {articles.map((a, i) => <span key={a.slug}>{i > 0 && ", "}<Link className="text-accent-text underline" href={`/numerologiya/${a.slug}`}>{a.title}</Link></span>)}.
         </p>
       )}
+      <ArticleLinks path="/chislo-sudby" />
       <RazborCta from="chislo-sudby" />
       <NumerologyNav current="/chislo-sudby" />
     </div>

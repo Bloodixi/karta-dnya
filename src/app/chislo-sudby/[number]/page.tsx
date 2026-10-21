@@ -8,6 +8,7 @@ import { ScopedRazborCta } from "@/components/RazborDateScope";
 import { findNumerology, getNumerology } from "@/lib/content";
 import { isMaster, NUMBER_WORDS, toCore } from "@/lib/numerology";
 import { pageTitle } from "@/lib/site";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const dynamicParams = false;
 
@@ -108,6 +109,7 @@ export default async function DestinyNumberPage({ params }: PageProps<"/chislo-s
 
       {/* если пришли из калькулятора со ссылкой ?d=ГГГГ-ММ-ДД — разбор откроется сразу по этой дате */}
       <ScopedRazborCta from="chislo-sudby-znachenie" />
+      <ArticleLinks path={`/chislo-sudby/${number}`} />
       <Faq items={n.faq ?? []} />
       <NumerologyNav current="/chislo-sudby" />
     </div>

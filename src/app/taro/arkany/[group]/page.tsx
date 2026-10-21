@@ -7,6 +7,7 @@ import Faq from "@/components/Faq";
 import TarotCardView from "@/components/TarotCardView";
 import { getTarot } from "@/lib/content";
 import { getExtraText, mergeFaq } from "@/lib/extra-text";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const dynamicParams = false;
 
@@ -99,6 +100,7 @@ export default async function ArcanaPage({ params }: PageProps<"/taro/arkany/[gr
         См. также: <Link href={`/taro/arkany/${group === "starshie" ? "mladshie" : "starshie"}`} className="text-accent underline">{group === "starshie" ? "младшие арканы" : "старшие арканы"}</Link>, <Link href="/taro/karty" className="text-accent underline">все 78 карт</Link>, <Link href="/karta-dnya" className="text-accent underline">карта дня</Link>.
       </p>
       {more && <ExtraText html={more.html} />}
+      <ArticleLinks path={`/taro/arkany/${group}`} />
       <Faq items={mergeFaq([...g.faq], more?.faq)} />
     </div>
   );

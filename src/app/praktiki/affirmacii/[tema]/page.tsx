@@ -6,6 +6,7 @@ import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import { AFFIRM_PATH, findAffirmationTopic, getAffirmationTopics } from "@/lib/affirmations";
 import { pageTitle, SITE } from "@/lib/site";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const dynamicParams = false;
 
@@ -61,6 +62,7 @@ export default async function AffirmationTopicPage({ params }: PageProps<"/prakt
         </p>
       </section>
 
+      <ArticleLinks path={`/praktiki/affirmacii/${tema}`} />
       <Faq items={t.faq} />
 
       <section className="mt-12">

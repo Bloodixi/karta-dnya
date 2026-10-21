@@ -8,6 +8,7 @@ import ZodiacSign from "@/components/ZodiacSign";
 import { getArticles, getZodiac } from "@/lib/content";
 import { pageTitle, SITE } from "@/lib/site";
 import { ELEMENTS, ELEMENT_NOTES, stonesForSign } from "@/lib/stones";
+import ArticleLinks from "@/components/ArticleLinks";
 
 const PATH = "/kamni/po-znaku-zodiaka";
 
@@ -134,6 +135,7 @@ export default function StonesByZodiacPage() {
         </p>
       </section>
 
+      <ArticleLinks path="/kamni/po-znaku-zodiaka" />
       <Faq items={FAQ} />
 
       {articles.length > 0 && (

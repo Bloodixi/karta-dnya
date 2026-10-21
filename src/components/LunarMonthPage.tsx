@@ -7,6 +7,7 @@ import { inSignRu, mskTime } from "@/lib/astro/calendar";
 import { formatDateRu, todayKey } from "@/lib/daily";
 import { PHASES } from "@/lib/moon";
 import { eclipseKindRu, isLinkedMonth, lunarMonth, MONTH_NOTES, monthLabel, nextMonth, prevMonth, type LunarMonth } from "@/lib/moon-month";
+import ArticleLinks from "@/components/ArticleLinks";
 
 const PHASE_RU = { "new-moon": "Новолуние", "first-quarter": "Первая четверть", "full-moon": "Полнолуние", "last-quarter": "Последняя четверть" } as const;
 const WEEKDAY = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
@@ -182,6 +183,7 @@ export default function LunarMonthPage({ month }: { month: string }) {
         {isLinkedMonth(next, today) ? <Link href={`/lunnyy-kalendar/${next}`} className="btn btn-ghost">{monthLabel(next).nom} {monthLabel(next).year} →</Link> : <span />}
       </nav>
 
+      <ArticleLinks path={`/lunnyy-kalendar/${month}`} />
       <Faq items={faq} />
     </div>
   );

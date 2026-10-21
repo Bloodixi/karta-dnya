@@ -7,6 +7,7 @@ import NumerologyNav from "@/components/NumerologyNav";
 import { DateField, FormError, ShareLink, TextField } from "@/components/NumerologyFields";
 import { findNumerology } from "@/lib/content";
 import { birthdayNumber, cleanName, destinyByParts, destinyNumber, formatDate, isMaster, MASTER_NUMBERS, nameNumbers, parseDate, toCore } from "@/lib/numerology";
+import ArticleLinks from "@/components/ArticleLinks";
 
 const PATH = "/numerologiya/master-chisla";
 
@@ -130,6 +131,7 @@ export default async function MasterNumbersPage({ searchParams }: PageProps<type
         </aside>
       </div>
 
+      <ArticleLinks path="/numerologiya/master-chisla" />
       <Faq items={FAQ} />
       <NumerologyNav current={PATH} />
     </div>

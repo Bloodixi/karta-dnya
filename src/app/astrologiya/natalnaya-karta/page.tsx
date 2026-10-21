@@ -8,6 +8,7 @@ import NatalCalc, { type NatalRefs } from "@/components/NatalCalc";
 import { getArticles, type Faq as FaqItem } from "@/lib/content";
 import { getAstroData } from "@/lib/astro/interpret";
 import { BODIES, SIGNS } from "@/lib/astro/types";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const metadata: Metadata = {
   title: "Натальная карта онлайн: рассчитать бесплатно",
@@ -66,6 +67,7 @@ export default function NatalPage() {
 
       {author && <AuthorCard author={author} className="mt-10" />}
 
+      <ArticleLinks path="/astrologiya/natalnaya-karta" />
       <Faq items={FAQ} />
 
       <section className="mt-10">

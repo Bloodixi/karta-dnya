@@ -8,6 +8,7 @@ import TelegramDaily from "@/components/TelegramDaily";
 import TomorrowCard from "@/components/TomorrowCard";
 import { cardOfDay, formatDateRu, todayKey } from "@/lib/daily";
 import { findTarotExtra } from "@/lib/content";
+import ArticleLinks from "@/components/ArticleLinks";
 
 export const revalidate = 1800;
 
@@ -69,6 +70,7 @@ export default function CardOfDayPage() {
       ) : (
         <p className="mt-6 text-muted">Колода готовится, загляните чуть позже.</p>
       )}
+      <ArticleLinks path="/karta-dnya" />
       <RazborCta from="karta-dnya" />
       <Faq items={FAQ} />
     </div>
