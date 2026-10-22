@@ -9,8 +9,11 @@ import TarotCardView from "@/components/TarotCardView";
 import { findTarot, findTarotExtra, findTarotLong, getTarot, type TarotCard, type TarotExtra } from "@/lib/content";
 import { SITE, orgJsonLd } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
+import CardVideoBlock from "@/components/CardVideoBlock";
 
 export const dynamicParams = false;
+// раз в час: выпуск «Знакомство с картами» появляется после 07:00 МСК дня выхода без новой выкладки
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return getTarot().map((c) => ({ slug: c.slug }));
@@ -86,6 +89,7 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
           <TarotCardView slug={c.slug} name={c.name} priority />
           <figcaption className="text-xs text-muted mt-3 text-center">{c.arcana === "major" ? `Старший аркан ${c.number}` : c.suitName} · колода Райдера–Уэйта, 1909</figcaption>
         </figure>
+        <CardVideoBlock slug={c.slug} className="md:col-start-2 max-w-[40rem]" />
         <div className="prose md:col-start-2">
           {c.description && <p>{c.description}</p>}
           <h2>Прямое положение</h2>

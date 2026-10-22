@@ -9,6 +9,7 @@ import TomorrowCard from "@/components/TomorrowCard";
 import { cardOfDay, formatDateRu, todayKey } from "@/lib/daily";
 import { findTarotExtra } from "@/lib/content";
 import ArticleLinks from "@/components/ArticleLinks";
+import CardVideoBlock from "@/components/CardVideoBlock";
 
 export const revalidate = 1800;
 
@@ -48,6 +49,7 @@ export default function CardOfDayPage() {
               {today.card.name}
               <span className="text-accent-text"> · {today.reversed ? "перевёрнутая" : "прямая"}</span>
             </h2>
+            <CardVideoBlock slug={today.card.slug} className="mt-6" />
             <div className="prose mt-4">
               <h2>Значение</h2>
               <p>{today.reversed ? today.card.reversed : today.card.upright}</p>
