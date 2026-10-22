@@ -5,6 +5,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import NumerologyNav from "@/components/NumerologyNav";
 import { ScopedRazborCta } from "@/components/RazborDateScope";
+import TelegramBot from "@/components/TelegramBot";
 import { findNumerology, getNumerology } from "@/lib/content";
 import { isMaster, NUMBER_WORDS, toCore } from "@/lib/numerology";
 import { pageTitle } from "@/lib/site";
@@ -108,6 +109,7 @@ export default async function DestinyNumberPage({ params }: PageProps<"/chislo-s
       </div>
 
       {/* если пришли из калькулятора со ссылкой ?d=ГГГГ-ММ-ДД — разбор откроется сразу по этой дате */}
+      <TelegramBot from="chislo-number" />
       <ScopedRazborCta from="chislo-sudby-znachenie" />
       <ArticleLinks path={`/chislo-sudby/${number}`} />
       <Faq items={n.faq ?? []} />

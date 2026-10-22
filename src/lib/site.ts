@@ -154,6 +154,9 @@ export const SOCIAL = {
 /** Чат сообщества ВК: на сообщения сразу отвечает бот karta-vk, сложное — владельцу. Ссылка без виджета ВК, чтобы не грузить чужой скрипт. */
 export const VK_CHAT_URL = "https://vk.me/karta_dnya_ru";
 
+/** Бот-подарок: дата рождения → число судьбы, карта дня, совместимость (tools/tgbot в proect-workspace). */
+export const TG_BOT_URL = "https://t.me/karta_dnya_ru_bot";
+
 /** Контактная почта редакции и поддержки. */
 export const CONTACT_EMAIL = "help@karta-dnya.ru";
 

@@ -1,3 +1,4 @@
+import TelegramBot from "@/components/TelegramBot";
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
@@ -159,6 +160,7 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
       </section>
 
       {more && <ExtraText html={more.html} />}
+      <TelegramBot from="sovmestimost" title="Совместимость по датам — в Telegram" text="Отправь боту две даты рождения — он покажет, как сочетаются ваши числа. Удобно переслать партнёру." />
       <Faq items={mergeFaq(FAQ, more?.faq)} />
       <NumerologyNav current={PATH} />
     </div>

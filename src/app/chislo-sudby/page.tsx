@@ -3,7 +3,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DestinyCalc from "@/components/DestinyCalc";
 import NumerologyNav from "@/components/NumerologyNav";
-import TelegramDaily from "@/components/TelegramDaily";
+import TelegramBot from "@/components/TelegramBot";
 import RazborCta from "@/components/RazborCta";
 import { getArticles, getNumerology } from "@/lib/content";
 import ArticleLinks from "@/components/ArticleLinks";
@@ -27,7 +27,7 @@ export default function DestinyPage() {
       <p className="text-muted mt-3 max-w-2xl text-lg">Сложите все цифры даты рождения до одной цифры, кроме мастер-чисел 11, 22 и 33. Калькулятор сделает это за вас и покажет значение. Нужны сразу все числа даты и имени — откройте <Link className="text-accent-text underline" href="/numerologiya/po-date-rozhdeniya">нумерологию по дате рождения</Link>, а для разбора через 22 аркана — <Link className="text-accent-text underline" href="/matrica-sudby">матрицу судьбы</Link>.</p>
       <div className="mt-6 max-w-2xl">
         <DestinyCalc numbers={numbers} />
-        <TelegramDaily campaign="chislo-sudby" className="mt-6" />
+        <TelegramBot from="chislo-sudby" className="mt-6" />
       </div>
       {numbers.length > 0 && (
         <section className="mt-12">
