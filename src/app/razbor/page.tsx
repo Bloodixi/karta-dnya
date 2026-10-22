@@ -19,7 +19,7 @@ import { GIFT_FORM_ERRORS } from "@/lib/giftErrors";
 import { nyDates, nySeason, nyYear } from "@/lib/giftSeason";
 import { CertBlock, NyGiftBlock } from "@/components/RazborGiftBlocks";
 import { countWords, plural } from "@/lib/ruCount";
-import { pageTitle, SELLER, SITE } from "@/lib/site";
+import { pageTitle, SELLER, SITE, VK_CHAT_URL } from "@/lib/site";
 import { paidCount, publicReviews } from "@/lib/razborReview";
 
 const PATH = "/razbor";
@@ -391,6 +391,16 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           </section>
 
           <Faq items={FAQ} />
+
+          <section className="mt-10 max-w-3xl">
+            <div className="card p-6 flex flex-col md:flex-row md:items-center gap-4">
+              <div className="flex-1">
+                <h2 className="text-xl">Остались вопросы?</h2>
+                <p className="mt-2 text-muted">Напиши нам во ВКонтакте — ответим сразу, подскажем по разбору и оплате.</p>
+              </div>
+              <a href={VK_CHAT_URL} target="_blank" rel="noopener" className="btn btn-ghost">Написать во ВКонтакте</a>
+            </div>
+          </section>
         </div>
 
         <RazborPriceAside

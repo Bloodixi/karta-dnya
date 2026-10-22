@@ -147,9 +147,12 @@ export const SECTION_TOOLS: Partial<Record<SectionKey, { href: string; title: st
 export const SOCIAL = {
   telegram: { title: "Telegram", handle: "@karta_dnya_ru", url: "https://t.me/karta_dnya_ru" },
   youtube: { title: "YouTube", handle: "@karta_dnya_ru", url: "https://www.youtube.com/@karta_dnya_ru" },
-  vk: { title: "ВКонтакте", handle: "club242081949", url: "https://vk.com/club242081949" },
+  vk: { title: "ВКонтакте", handle: "karta_dnya_ru", url: "https://vk.com/karta_dnya_ru" },
   dzen: { title: "Дзен", handle: "karta_dnya_ru", url: "https://dzen.ru/karta_dnya_ru" },
 } as const;
+
+/** Чат сообщества ВК: на сообщения сразу отвечает бот karta-vk, сложное — владельцу. Ссылка без виджета ВК, чтобы не грузить чужой скрипт. */
+export const VK_CHAT_URL = "https://vk.me/karta_dnya_ru";
 
 /** Контактная почта редакции и поддержки. */
 export const CONTACT_EMAIL = "help@karta-dnya.ru";

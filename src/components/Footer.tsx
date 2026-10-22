@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { horoscopeAuthor } from "@/lib/authors";
-import { SECTIONS, SECTION_KEYS, SITE, SOCIAL, TOOLS } from "@/lib/site";
+import { SECTIONS, SECTION_KEYS, SITE, SOCIAL, TOOLS, VK_CHAT_URL } from "@/lib/site";
 
 export default function Footer() {
   const author = horoscopeAuthor();
@@ -27,6 +27,7 @@ export default function Footer() {
           <p className="mt-1 flex flex-wrap gap-x-5">
             <Link href="/o-proekte" className="inline-block py-2 underline decoration-[var(--night-line)] underline-offset-4 hover:decoration-[var(--accent-soft)]">О проекте</Link>
             <Link href="/astrologiya/kak-my-schitaem" className="inline-block py-2 underline decoration-[var(--night-line)] underline-offset-4 hover:decoration-[var(--accent-soft)]">Как мы считаем</Link>
+            <a href={VK_CHAT_URL} target="_blank" rel="noopener" className="inline-block py-2 underline decoration-[var(--night-line)] underline-offset-4 hover:decoration-[var(--accent-soft)]">Написать нам во ВКонтакте</a>
           </p>
           <p className="text-muted mt-3 text-xs">
             Материалы сайта носят развлекательный и познавательный характер и не заменяют консультацию специалистов.
