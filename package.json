@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "tsx --test 'src/**/*.test.ts'",
     "test:astro": "tsx --test src/lib/astro/engine.test.ts",
     "astro": "tsx src/lib/astro/cli.ts"
   },
