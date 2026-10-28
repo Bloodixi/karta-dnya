@@ -3,7 +3,7 @@ import { allPairs, canonicalPairSlug } from "@/lib/compat";
 import { getClockNumbers } from "@/lib/clock";
 import { PERIOD_KEYS, todayKey } from "@/lib/daily";
 import { FORECAST_YEAR } from "@/lib/horoscopeYear";
-import { moonWindowKeys } from "@/lib/moon";
+import { moonIndexKeys } from "@/lib/moon";
 import { SITE, type SectionKey } from "@/lib/site";
 import { getAuthors } from "@/lib/authors";
 import { getMoonSigns } from "@/lib/moonSigns";
@@ -67,8 +67,8 @@ export function sitemapSection(section: SitemapSection): SitemapEntry[] {
     case "lunnyy-kalendar": {
       daily("/lunnyy-kalendar", 0.9);
       const page = changed(app("lunnyy-kalendar/[date]"), "src/lib/moon.ts");
-      // день недалёкого прошлого и будущего не меняется; его lastmod — правка шаблона (или сам день, если он позже)
-      for (const k of moonWindowKeys(today)) add(`/lunnyy-kalendar/${k}`, k > page && k <= today ? k : page, "monthly", 0.6);
+      // только окно индексации (сегодня ± 7, как robots на странице); lastmod — правка шаблона (или сам день, если он позже)
+      for (const k of moonIndexKeys(today)) add(`/lunnyy-kalendar/${k}`, k > page && k <= today ? k : page, "monthly", 0.6);
       for (const k of lunarMonthWindow(today)) add(`/lunnyy-kalendar/${k}`, page, "weekly", 0.7);
       break;
     }

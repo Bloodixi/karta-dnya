@@ -134,3 +134,24 @@ export function moonWindowKeys(today: string): string[] {
   for (let d = new Date(`${from}T00:00:00Z`); d.toISOString().slice(0, 10) <= to; d.setUTCDate(d.getUTCDate() + 1)) out.push(d.toISOString().slice(0, 10));
   return out;
 }
+
+/** Сколько дней от «сегодня» (по Москве) в обе стороны лунные дни открыты для поиска; остальные — noindex и вне sitemap. */
+export const MOON_INDEX_DAYS = 7;
+
+/** Окно индексации лунных дней: [сегодня − 7; сегодня + 7]. Одна правда для страницы (robots) и sitemap. */
+export function moonIndexWindow(today: string): { from: string; to: string } {
+  const [y, m, d] = today.split("-").map(Number);
+  const iso = (n: number) => new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
+  return { from: iso(-MOON_INDEX_DAYS), to: iso(MOON_INDEX_DAYS) };
+}
+
+export function isMoonDayIndexed(date: string, today: string): boolean {
+  const { from, to } = moonIndexWindow(today);
+  return date >= from && date <= to;
+}
+
+export function moonIndexKeys(today: string): string[] {
+  const { from } = moonIndexWindow(today);
+  const [y, m, d] = from.split("-").map(Number);
+  return Array.from({ length: 2 * MOON_INDEX_DAYS + 1 }, (_, i) => new Date(Date.UTC(y, m - 1, d + i)).toISOString().slice(0, 10));
+}

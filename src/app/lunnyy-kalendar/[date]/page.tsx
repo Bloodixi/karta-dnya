@@ -8,7 +8,7 @@ import RazborCta from "@/components/RazborCta";
 import TelegramDaily from "@/components/TelegramDaily";
 import { readJsonData } from "@/lib/content";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
-import { dayInfo, LUNAR_DAYS, moonWindow, moonWindowKeys, PHASES } from "@/lib/moon";
+import { dayInfo, isMoonDayIndexed, LUNAR_DAYS, moonWindow, moonWindowKeys, PHASES } from "@/lib/moon";
 import { pageTitle } from "@/lib/site";
 import { lunarMonthStaticKeys, monthLabel, MONTH_RE } from "@/lib/moon-month";
 import ArticleLinks from "@/components/ArticleLinks";
@@ -39,6 +39,9 @@ export async function generateMetadata({ params }: PageProps<"/lunnyy-kalendar/[
     title: pageTitle(`Лунный календарь на ${formatDateRu(date).replace(/\s*г\.$/, "")}: ${d.lunarDay}-й лунный день`),
     description: `${formatDateRu(date)}: ${d.lunarDay}-й лунный день, ${PHASES[d.phase].name}, Луна в знаке ${d.sign.name}. Что благоприятно, чего избегать, стрижка и посадки.`,
     alternates: { canonical: `/lunnyy-kalendar/${date}` },
+    // В поиске только сегодня ± 7 дней (по Москве): остальные даты — почти-дубли, людям доступны, но noindex.
+    // Признак пересчитывается при каждой пересборке страницы: revalidate = 86400 и ночная сборка.
+    robots: isMoonDayIndexed(date, todayKey()) ? { index: true, follow: true } : { index: false, follow: true },
   };
 }
 
