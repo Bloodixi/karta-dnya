@@ -4,6 +4,7 @@ import ArticleCard from "@/components/ArticleCard";
 import { SignDates } from "@/components/HoroscopeGrid";
 import HomeTools from "@/components/HomeTools";
 import { IconBadge } from "@/components/Icons";
+import JsonLd from "@/components/JsonLd";
 import MoonPhase from "@/components/MoonPhase";
 import RazborCta from "@/components/RazborCta";
 import TarotCardView from "@/components/TarotCardView";
@@ -13,7 +14,7 @@ import { getArticles, getZodiac } from "@/lib/content";
 import { cardOfDay, formatDateRu, shiftKey, todayKey } from "@/lib/daily";
 import { dayInfo, LUNAR_DAYS, PHASES } from "@/lib/moon";
 import { signByDate } from "@/lib/stones";
-import { SECTIONS, SECTION_KEYS, TOOLS } from "@/lib/site";
+import { ORG_ID, SECTIONS, SECTION_KEYS, SITE, TOOLS } from "@/lib/site";
 import SectionArticles from "@/components/SectionArticles";
 
 export const revalidate = 3600;
@@ -175,6 +176,32 @@ export default function Home() {
         </section>
       )}
       <SectionArticles skip={articles} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": `${SITE.url}/#webpage`,
+          url: SITE.url,
+          name: `Карта дня на сегодня, ${formatDateRu(date, { day: "numeric", month: "long" })}: гороскоп, Таро, Луна`,
+          description: homeDescription(date),
+          inLanguage: "ru",
+          dateModified: date,
+          isPartOf: { "@id": `${SITE.url}/#website` },
+          about: { "@id": ORG_ID },
+          publisher: { "@id": ORG_ID },
+          mainEntity: {
+            "@type": "ItemList",
+            name: "Разделы и ежедневные инструменты Карты дня",
+            itemListElement: SECTION_KEYS.map((k, idx) => ({
+              "@type": "ListItem",
+              position: idx + 1,
+              name: SECTIONS[k].title,
+              description: SECTIONS[k].description,
+              url: `${SITE.url}/${k}`,
+            })),
+          },
+        }}
+      />
     </div>
   );
 }
