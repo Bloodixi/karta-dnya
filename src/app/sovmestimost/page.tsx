@@ -5,7 +5,7 @@ import PairPicker from "@/components/PairPicker";
 import CompatCta from "@/components/CompatCta";
 import RazborCta from "@/components/RazborCta";
 import { getZodiac } from "@/lib/content";
-import { compatibility } from "@/lib/compat";
+import { canonicalPairSlug, compatibility } from "@/lib/compat";
 
 export const metadata: Metadata = {
   title: "Совместимость знаков зодиака: таблица пар в любви",
@@ -64,7 +64,7 @@ export default function CompatIndex() {
                       const bg = c.score >= 80 ? "bg-accent/35 font-semibold" : c.score >= 65 ? "bg-accent/15" : "bg-sunk text-muted";
                       return (
                         <td key={b.slug} className={`p-1 text-center ${bg}`}>
-                          <Link href={`/sovmestimost/${a.slug}-${b.slug}`} className="block min-w-9 py-2 sm:min-w-0 sm:py-0">{c.score}</Link>
+                          <Link href={`/sovmestimost/${canonicalPairSlug(a, b)}`} className="block min-w-9 py-2 sm:min-w-0 sm:py-0">{c.score}</Link>
                         </td>
                       );
                     })}

@@ -3,10 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import PairPicker from "@/components/PairPicker";
 import ZodiacSign from "@/components/ZodiacSign";
 import { getZodiac, getZodiacPairText } from "@/lib/content";
-import { pageTitle } from "@/lib/site";
+import { orgJsonLd, pageTitle, SITE } from "@/lib/site";
 import { allPairs, canonicalPairSlug, compatibility, parsePair } from "@/lib/compat";
 
 export const dynamicParams = false;
@@ -21,12 +22,13 @@ export async function generateMetadata({ params }: PageProps<"/sovmestimost/[pai
   if (!p) return {};
   const canonical = canonicalPairSlug(p.a, p.b);
   const t = getZodiacPairText(canonical);
-  // зеркальная страница (lev-oven) — те же тексты, имена в порядке адреса; canonical всё равно на основную
+  // зеркальная страница (lev-oven) — те же тексты, имена в порядке адреса; canonical на основную + noindex (чтобы 66 зеркал не считались дублями)
   const swap = (s: string) => (canonical === pair ? s : s.replace(`${p.b.name} и ${p.a.name}`, `${p.a.name} и ${p.b.name}`));
   return {
     title: pageTitle(swap(t?.title ?? `${p.a.name} и ${p.b.name}: совместимость в любви и дружбе`)),
     description: t ? swap(t.description) : undefined,
     alternates: { canonical: `/sovmestimost/${canonical}` },
+    ...(canonical !== pair ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
@@ -142,7 +144,7 @@ export default async function PairPage({ params }: PageProps<"/sovmestimost/[pai
           <blockquote>{c.text.advice}</blockquote>
           <p>
             Подробнее о знаках: <Link href={`/goroskop/${p.a.slug}`}>{p.a.name}</Link> и <Link href={`/goroskop/${p.b.slug}`}>{p.b.name}</Link>. Почему одни сочетания складываются легче других, объясняет статья <Link href="/astrologiya/sovmestimost-znakov-zodiaka">об основах совместимости знаков</Link>.
-            {p.a.slug !== p.b.slug && <> Обратная пара: <Link href={`/sovmestimost/${p.b.slug}-${p.a.slug}`}>{p.b.name} и {p.a.name}</Link>.</>}
+            {mirror && p.a.slug !== p.b.slug && <> Основной разбор пары: <Link href={`/sovmestimost/${canonical}`}>{p.b.name} и {p.a.name}</Link>.</>}
           </p>
         </div>
       </div>
@@ -155,10 +157,24 @@ export default async function PairPage({ params }: PageProps<"/sovmestimost/[pai
         <h2 className="text-2xl mb-3">{p.a.name} с другими знаками</h2>
         <div className="flex flex-wrap gap-2">
           {sameA.map((b) => (
-            <Link key={b.slug} href={`/sovmestimost/${p.a.slug}-${b.slug}`} className="chip hover:text-ink">{b.symbol}{VS} {b.name} · {compatibility(p.a, b).score}%</Link>
+            <Link key={b.slug} href={`/sovmestimost/${canonicalPairSlug(p.a, b)}`} className="chip hover:text-ink">{b.symbol}{VS} {b.name} · {compatibility(p.a, b).score}%</Link>
           ))}
         </div>
       </section>
+      {!mirror && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: t?.title ?? `${p.a.name} и ${p.b.name}: совместимость в любви, браке и дружбе`,
+            description: t?.description,
+            inLanguage: "ru",
+            mainEntityOfPage: `${SITE.url}/sovmestimost/${canonical}`,
+            author: orgJsonLd(),
+            publisher: orgJsonLd(),
+          }}
+        />
+      )}
     </div>
   );
 }
