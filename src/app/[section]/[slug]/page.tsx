@@ -110,7 +110,7 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
           </aside>
         )}
       </div>
-      {key === "numerologiya" && <RazborCta from={`statya-${slug}`} />}
+      <RazborCta from={`statya-${slug}`} className="mt-10 max-w-[72ch]" />
       {author && <AuthorCard author={author} className="mt-10 max-w-[72ch]" />}
       <Faq items={a.faq} />
       {a.tags.length > 0 && (

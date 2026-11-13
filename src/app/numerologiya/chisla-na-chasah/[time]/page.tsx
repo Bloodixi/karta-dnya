@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import RazborCta from "@/components/RazborCta";
 import TarotHint from "@/components/TarotHint";
 import { CLOCK_KINDS, DIGITS, clockDescription, clockFaq, clockSteps, clockTitle, compactTime, digitsOf, findClock, getClockNumbers, reduceDigit, relatedClocks } from "@/lib/clock";
 import { cardsOfNumber } from "@/lib/tarot-links";
@@ -74,6 +75,7 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
           <p>Хотите узнать свой постоянный фон, а не подсказку момента? Рассчитайте <Link href="/chislo-sudby">число судьбы</Link> или постройте <Link href="/kvadrat-pifagora">квадрат Пифагора</Link>.</p>
         </div>
       </div>
+      <RazborCta from="chisla-na-chasah" className="mt-10" />
       <Faq items={faq} />
       {tarot.major && (
         <TarotHint

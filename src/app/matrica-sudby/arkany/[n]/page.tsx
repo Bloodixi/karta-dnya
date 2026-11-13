@@ -5,6 +5,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import MatrixNav from "@/components/MatrixNav";
+import RazborCta from "@/components/RazborCta";
 import { ARCANA_NUMBERS, findMatrixArcana, findMatrixPositions, getMatrixArcana, POSITION_BLOCKS, POSITIONS, tarotFor } from "@/lib/matrix";
 import { SITE, pageTitle, orgJsonLd } from "@/lib/site";
 
@@ -117,6 +118,7 @@ export default async function ArcanaPage({ params }: PageProps<"/matrica-sudby/a
         <p>Хотите узнать, где этот аркан в вашей матрице? <Link href="/matrica-sudby">Рассчитайте матрицу по дате рождения</Link> или проверьте <Link href="/matrica-sudby/sovmestimost">совместимость с партнёром</Link>.</p>
         {tarot && <p>Образ связан с картой Таро: <Link href={`/taro/karty/${tarot.slug}`}>{tarot.name}: значение карты</Link>. Там трактовка в раскладах, прямом и перевёрнутом положении.</p>}
       </div>
+      <RazborCta from="matrica-arkan" className="mt-10 max-w-3xl" />
       <Faq items={faq} />
       <JsonLd data={{ "@context": "https://schema.org", "@type": "Article", headline: `${a.n} аркан в матрице судьбы: ${a.name}`, inLanguage: "ru", mainEntityOfPage: `${SITE.url}/matrica-sudby/arkany/${a.n}`, author: orgJsonLd(), publisher: orgJsonLd() }} />
       <div className="mt-10 flex flex-wrap gap-2 justify-between text-sm">

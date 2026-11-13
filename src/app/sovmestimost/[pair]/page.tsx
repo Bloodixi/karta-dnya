@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import CompatCta from "@/components/CompatCta";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import PairPicker from "@/components/PairPicker";
+import RazborCta from "@/components/RazborCta";
 import ZodiacSign from "@/components/ZodiacSign";
 import { getZodiac, getZodiacPairText } from "@/lib/content";
 import { orgJsonLd, pageTitle, SITE } from "@/lib/site";
@@ -148,6 +150,8 @@ export default async function PairPage({ params }: PageProps<"/sovmestimost/[pai
           </p>
         </div>
       </div>
+      <CompatCta from="sovmestimost-para" />
+      <RazborCta from="sovmestimost-para" className="mt-6 max-w-3xl" />
       {t && <div id="faq" className="scroll-mt-24"><Faq items={faq} /></div>}
       <section className="mt-10 max-w-2xl">
         <h2 className="text-2xl mb-3">Проверить другую пару</h2>
