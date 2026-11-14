@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Редактура черновиков гороскопа 3.0 языковой моделью (claude -p, sonnet) — только стандартная библиотека.
+"""Редактура черновиков гороскопа 3.0 языковой моделью (free_llm.py → agy) — только стандартная библиотека.
 
     python3 scripts/horoscope-polish.py content/data/horoscopes/segodnya/2026-10-07.json [ещё файлы…]
-        [--model sonnet] [--timeout 600] [--retries 1] [--log content/data/horoscopes/polish.log] [--force]
+        [--model auto] [--timeout 600] [--retries 1] [--log content/data/horoscopes/polish.log] [--force]
 
 Для каждого файла: читает массив из 12 HoroscopeText (model: "draft"), события окна из соседнего <ключ>.events.json
 (если есть) и редактирует знаки батчами по 4 (в одном вызове на 12 знаков модель систематически пишет короче нормы).
@@ -242,31 +242,87 @@ def validate(items, drafts: list[dict], period: str) -> list[str]:
     return errs
 
 
-def run_claude(prompt: str, model: str, timeout: int) -> tuple[str, float | None, str | None]:
-    """→ (текст ответа, стоимость USD, ошибка). Без инструментов, один ход — модель только пишет текст."""
-    claude = shutil.which("claude") or str(Path.home() / ".local" / "bin" / "claude")
-    cmd = [claude, "-p", prompt, "--model", model, "--output-format", "json", "--tools", "", "--max-turns", "1"]
-    keep = ("PATH", "HOME", "USER", "LANG", "LC_ALL", "TZ", "TERM", "SHELL", "XDG_CONFIG_HOME", "CLAUDE_CONFIG_DIR", "HTTPS_PROXY", "HTTP_PROXY", "NO_PROXY")
-    env = {k: v for k, v in os.environ.items() if k in keep}
+FREE_LLM_SCRIPT = Path("/home/proect/tools/free_llm.py")
+AGY_FALLBACK_MODELS = ["gemini-4-argon-low", "gemini-4-hydrogen-low", "claude-sonnet-5-5-low"]
+
+
+def _run_free_llm(prompt: str, timeout: int) -> tuple[str, str | None]:
+    """Вызов /home/proect/tools/free_llm.py через stdin → (текст, ошибка)."""
+    if not FREE_LLM_SCRIPT.exists():
+        return "", "free_llm.py не найден"
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
+        r = subprocess.run(
+            [sys.executable, str(FREE_LLM_SCRIPT)],
+            input=prompt,
+            capture_output=True,
+            text=True,
+            timeout=min(timeout, 180),
+        )
     except subprocess.TimeoutExpired:
-        return "", None, f"таймаут {timeout} с"
+        return "", f"free_llm таймаут {min(timeout, 180)} с"
     except OSError as e:
-        return "", None, f"не запустился claude: {e}"
-    try:
-        data = json.loads(r.stdout)
-    except ValueError:
+        return "", f"не запустился free_llm: {e}"
+    if r.returncode != 0 or not (r.stdout or "").strip():
+        return "", f"free_llm rc={r.returncode}: {(r.stderr or r.stdout).strip()[-240:]}"
+    return r.stdout.strip(), None
+
+
+def _run_agy(prompt: str, model: str, timeout: int) -> tuple[str, str, str | None]:
+    """Вызов agy в print-режиме с резервом моделей → (текст, модель, ошибка)."""
+    agy = shutil.which("agy") or next((p for p in ("/home/karta/.local/bin/agy", "/usr/local/bin/agy") if Path(p).exists()), "")
+    if not agy:
+        return "", model, "не найден бинарник agy"
+    cands: list[str] = []
+    if model and model not in ("auto", "free", "sonnet", "haiku", "opus") and not model.startswith(("claude-3", "claude-haiku")):
+        cands.append(model)
+    for m in AGY_FALLBACK_MODELS:
+        if m not in cands:
+            cands.append(m)
+    last_err = "нет ответа agy"
+    for m in cands:
+        cmd = [
+            agy,
+            "--model", m,
+            "--output-format", "json",
+            "--disable-slash-commands",
+            "--print-timeout", f"{timeout}s",
+            "-p", prompt,
+        ]
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 30, stdin=subprocess.DEVNULL)
+        except subprocess.TimeoutExpired:
+            last_err = f"agy/{m}: таймаут {timeout} с"
+            continue
+        except OSError as e:
+            return "", m, f"не запустился agy: {e}"
+        raw = (r.stdout or "").strip()
         data = None
-    if r.returncode != 0 and not isinstance(data, dict):
-        return "", None, f"claude rc={r.returncode}: {(r.stderr or r.stdout).strip()[-300:]}"
-    if not isinstance(data, dict):
-        return "", None, f"stdout не JSON: {r.stdout.strip()[:200]}"
-    if r.returncode != 0 or data.get("is_error") or data.get("subtype", "success") != "success":
-        status = data.get("api_error_status")
-        tag = "ЛИМИТ: " if status == 429 or "limit" in str(data.get("result", "")).lower() else ""
-        return "", data.get("total_cost_usd"), f"{tag}ответ с ошибкой{f' (HTTP {status})' if status else ''}: {str(data.get('result', data.get('subtype')))[:200]}"
-    return str(data.get("result", "")), data.get("total_cost_usd"), None
+        if raw:
+            try:
+                data = json.loads(raw.splitlines()[-1])
+            except ValueError:
+                data = None
+        if r.returncode == 0 and isinstance(data, dict) and data.get("status") == "SUCCESS":
+            return str(data.get("response", "")), m, None
+        err = (data.get("error") if isinstance(data, dict) else None) or r.stderr or raw or f"rc={r.returncode}"
+        err_s = str(err).strip()[-240:]
+        if "429" in err_s or "limit" in err_s.lower() or "quota" in err_s.lower():
+            last_err = f"ЛИМИТ: agy/{m}: {err_s}"
+        else:
+            last_err = f"agy/{m}: {err_s}"
+    return "", cands[-1], last_err
+
+
+def run_llm(prompt: str, model: str, timeout: int) -> tuple[str, str, float | None, str | None]:
+    """→ (текст ответа, использованная модель, стоимость USD, ошибка). Сначала free_llm.py, затем agy."""
+    force_agy = model.startswith("agy:") or model in AGY_FALLBACK_MODELS or model.endswith(("-low", "-medium", "-high"))
+    if not force_agy:
+        text, err = _run_free_llm(prompt, timeout)
+        if not err and text:
+            return text, "free_llm", 0.0, None
+    agy_model = model.removeprefix("agy:")
+    text, used_model, err = _run_agy(prompt, agy_model, timeout)
+    return text, used_model, 0.0, err
 
 
 def is_limit(errors: dict[str, list[str]]) -> bool:
@@ -275,22 +331,22 @@ def is_limit(errors: dict[str, list[str]]) -> bool:
 
 
 def polish_batch(drafts: list[dict], events: list[dict], period: str, key: str, model: str, timeout: int,
-                 retry_note: str = "") -> tuple[dict[str, dict], dict[str, list[str]], float]:
-    """Один вызов модели для группы знаков → (готовые объекты по slug, брак по slug, стоимость)."""
+                 retry_note: str = "") -> tuple[dict[str, dict], dict[str, list[str]], float, str]:
+    """Один вызов модели для группы знаков → (готовые объекты по slug, брак по slug, стоимость, модель)."""
     prompt = build_prompt(drafts, events, period, key) + retry_note
-    text, cost, err = run_claude(prompt, model, timeout)
+    text, used_model, cost, err = run_llm(prompt, model, timeout)
     cost = cost or 0.0
     if err:
-        return {}, {d["sign"]: [err] for d in drafts}, cost
+        return {}, {d["sign"]: [err] for d in drafts}, cost, used_model
     try:
         items = extract_json_array(text)
     except ValueError as e:
-        return {}, {d["sign"]: [f"JSON не разобран: {e}"] for d in drafts}, cost
+        return {}, {d["sign"]: [f"JSON не разобран: {e}"] for d in drafts}, cost, used_model
     bad = sign_errors(items, drafts, period)
     if "*" in bad:
-        return {}, {d["sign"]: bad["*"] for d in drafts}, cost
+        return {}, {d["sign"]: bad["*"] for d in drafts}, cost, used_model
     good = {it["sign"]: it for it in items if it["sign"] not in bad}
-    return good, bad, cost
+    return good, bad, cost, used_model
 
 
 def polish_file(path: Path, model: str, timeout: int, retries: int, force: bool) -> dict:
@@ -318,11 +374,14 @@ def polish_file(path: Path, model: str, timeout: int, retries: int, force: bool)
             events = []
     good: dict[str, dict] = {}
     failed: dict[str, list[str]] = {}
+    used_models: dict[str, str] = {}
     for i in range(0, len(todo), BATCH):
         batch = todo[i:i + BATCH]
-        g, bad, cost = polish_batch(batch, events, period, key, model, timeout)
+        g, bad, cost, used_m = polish_batch(batch, events, period, key, model, timeout)
         out["cost_usd"] = round(out["cost_usd"] + cost, 4)
         good.update(g)
+        for s_ in g:
+            used_models[s_] = used_m
         if is_limit(bad):
             failed.update(bad)
             failed.update({d["sign"]: ["не редактировался: лимит исчерпан"] for d in todo[i + BATCH:]})
@@ -335,9 +394,11 @@ def polish_file(path: Path, model: str, timeout: int, retries: int, force: bool)
                     + "; ".join(f"{SIGN_RU[s_]}: {', '.join(v)}" for s_, v in bad.items())[:700]
                     + ". Напиши заново ПОЛНЕЕ" + (" и без слова «сегодня» (это гороскоп на завтра)" if period == "zavtra" else "")
                     + " — каждое из полей love, career, health разверни до 3–4 предложений, general — до нужного объёма; верни строго JSON.")
-            g, bad, cost = polish_batch(again, events, period, key, model, timeout, note)
+            g, bad, cost, used_m = polish_batch(again, events, period, key, model, timeout, note)
             out["cost_usd"] = round(out["cost_usd"] + cost, 4)
             good.update(g)
+            for s_ in g:
+                used_models[s_] = used_m
             if is_limit(bad):
                 break
         failed.update(bad)
@@ -355,14 +416,14 @@ def polish_file(path: Path, model: str, timeout: int, retries: int, force: bool)
                 for f in FIELDS:
                     nd[f] = " ".join(str(it[f]).split())
                 nd["generatedAt"] = now
-                nd["model"] = model
+                nd["model"] = used_models.get(d["sign"], model)
             result.append(nd)
         tmp = path.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         tmp.replace(path)
     out["polished"] = sum(1 for d in drafts if d["sign"] in good or (d.get("model") not in (None, "draft") and d["sign"] not in failed))
     out["ok"] = not failed and out["polished"] == 12
-    out["model"] = model if good else None
+    out["model"] = next(iter(used_models.values()), None) if good else None
     if failed:
         out["error"] = "остались черновиком: " + "; ".join(f"{SIGN_RU[s_]} — {', '.join(v)[:160]}" for s_, v in failed.items())[:1000]
     out["seconds"] = round(time.monotonic() - t0, 1)
@@ -372,7 +433,7 @@ def polish_file(path: Path, model: str, timeout: int, retries: int, force: bool)
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("files", nargs="+", help="JSON-файлы черновиков")
-    ap.add_argument("--model", default="sonnet")
+    ap.add_argument("--model", default="auto")
     ap.add_argument("--timeout", type=int, default=600, help="секунд на один вызов модели")
     ap.add_argument("--retries", type=int, default=1)
     ap.add_argument("--log", default=None, help="журнал (по умолчанию <папка horoscopes>/polish.log)")
