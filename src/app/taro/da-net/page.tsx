@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import RazborCta from "@/components/RazborCta";
 import ExtraText from "@/components/ExtraText";
 import Faq from "@/components/Faq";
 import TelegramDaily from "@/components/TelegramDaily";
@@ -31,6 +32,7 @@ export default async function YesNoPage() {
       <p className="text-muted mt-2 max-w-2xl">Сформулируйте закрытый вопрос, вытяните одну карту и получите ответ. Ответ строится на значении карты и её положении, объяснение прилагается.</p>
       <div className="mt-6 max-w-3xl">{cards.length ? <YesNo cards={cards} /> : <p className="text-muted">Колода готовится.</p>}</div>
       <TelegramDaily campaign="taro-da-net" text="Карта дня с толкованием — каждое утро в 8:00 по Москве. Коротко и без рекламы." className="mt-8 max-w-3xl" />
+      <RazborCta from="taro-da-net" className="mt-8 max-w-3xl" />
       {more && <ExtraText html={more.html} />}
       <section className="prose mt-8">
         <p>Для более подробного ответа посмотрите <Link href="/taro/tri-karty">расклад на три карты</Link> или прочитайте <Link href="/taro/kak-nachat-gadat-na-taro">руководство для новичков</Link>. Если вопрос о заветной мечте, попробуйте <Link href="/taro/na-zhelanie">гадание на желание</Link>. Значения всех карт собраны в <Link href="/taro/karty">каталоге карт</Link>, а другие схемы — на странице <Link href="/taro/rasklady">все расклады Таро онлайн</Link>.</p>
