@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import TarotCardView from "@/components/TarotCardView";
 import RazborCta from "@/components/RazborCta";
 import TelegramDaily from "@/components/TelegramDaily";
 import TomorrowCard from "@/components/TomorrowCard";
 import { cardOfDay, formatDateRu, todayKey } from "@/lib/daily";
 import { findTarotExtra } from "@/lib/content";
+import { ORG_ID, SITE, orgJsonLd } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
 import CardVideoBlock from "@/components/CardVideoBlock";
 
@@ -26,17 +28,31 @@ const FAQ = [
   { q: "Чем карта дня отличается от гороскопа на сегодня?", a: "Гороскоп написан для вашего знака зодиака и опирается на положение планет, а карта дня одна для всех и работает как общий совет. Их удобно читать вместе." },
 ];
 
+const DAILY_PRACTICES = [
+  { href: "/runy/runa-dnya", label: "Руна дня" },
+  { href: "/praktiki/affirmacii/dnya", label: "Аффирмация дня" },
+  { href: "/goroskop", label: "Гороскоп на сегодня" },
+  { href: "/lunnyy-kalendar", label: "Лунный день" },
+];
+
 export default function CardOfDayPage() {
   const date = todayKey();
   const today = cardOfDay(date);
   const extra = today ? findTarotExtra(today.card.slug) : null;
+  const pageTitleText = `Карта дня на сегодня, ${formatDateRu(date)}`;
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/karta-dnya", label: "Карта дня" }]} />
-      <h1 className="text-3xl md:text-4xl font-semibold">Карта дня на сегодня, {formatDateRu(date)}</h1>
+      <h1 className="text-3xl md:text-4xl font-semibold">{pageTitleText}</h1>
       <p className="text-muted mt-2 max-w-2xl">
         Одна карта на сегодня для всех. Прочитайте значение, выделите одну мысль и понаблюдайте, как она проявится в течение дня. Это не предсказание, а повод для внимательности.
       </p>
+      <nav aria-label="Другие практики на сегодня" className="mt-4 flex flex-wrap items-center gap-2">
+        <span className="mono mr-1">Другие практики на сегодня:</span>
+        {DAILY_PRACTICES.map((p) => (
+          <Link key={p.href} href={p.href} className="chip hover:text-ink">{p.label}</Link>
+        ))}
+      </nav>
       {today ? (
         <div className="mt-8 grid gap-8 md:grid-cols-[260px_1fr] items-start">
           <div className="w-60 md:w-full md:sticky md:top-24">
@@ -49,6 +65,12 @@ export default function CardOfDayPage() {
               {today.card.name}
               <span className="text-accent-text"> · {today.reversed ? "перевёрнутая" : "прямая"}</span>
             </h2>
+            <div className="card p-4 mt-4">
+              <p className="mono mb-1">Совет карты дня за 10 секунд</p>
+              <p className="text-sm text-muted">
+                {today.card.advice} Ключевые темы: {today.card.keywords.slice(0, 3).join(", ")}{today.reversed ? " (в перевёрнутом положении — через паузу и внутреннюю проверку)" : ""}.
+              </p>
+            </div>
             <CardVideoBlock slug={today.card.slug} className="mt-6" />
             <div className="prose mt-4">
               <h2>Значение</h2>
@@ -75,6 +97,35 @@ export default function CardOfDayPage() {
       <ArticleLinks path="/karta-dnya" />
       <RazborCta from="karta-dnya" />
       <Faq items={FAQ} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": `${SITE.url}/karta-dnya#webpage`,
+          url: `${SITE.url}/karta-dnya`,
+          name: pageTitleText,
+          description: metadata.description,
+          inLanguage: "ru",
+          dateModified: date,
+          isPartOf: { "@id": `${SITE.url}/#website` },
+          publisher: { "@id": ORG_ID },
+        }}
+      />
+      {today && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: `${pageTitleText}: ${today.card.name} (${today.reversed ? "перевёрнутая" : "прямая"})`,
+            datePublished: date,
+            dateModified: date,
+            inLanguage: "ru",
+            mainEntityOfPage: `${SITE.url}/karta-dnya`,
+            author: orgJsonLd(),
+            publisher: orgJsonLd(),
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -50,9 +50,9 @@ export function lunarMonthStaticKeys(today: string): string[] {
   return [...new Set([...rangeKeys(STATIC_FROM, STATIC_TO), ...lunarMonthWindow(today)])].sort();
 }
 
-/** Месяц, на который можно поставить ссылку (соседние месяцы, блок «По месяцам»). */
+/** Месяц, на который можно поставить ссылку (только месяцы из sitemap: прошлый, текущий и три следующих). */
 export function isLinkedMonth(key: string, today: string): boolean {
-  return lunarMonthStaticKeys(today).includes(key);
+  return lunarMonthWindow(today).includes(key);
 }
 
 export function monthLabel(key: string): { nom: string; gen: string; loc: string; year: number; month: number } {
