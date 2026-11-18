@@ -492,6 +492,13 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
         {gift ? "Твой e-mail — пришлём сюда ссылку на разбор и чек" : packOn ? "E-mail — пришлём сюда обе ссылки и чек" : "E-mail — пришлём сюда ссылку на разбор и чек"}
         <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={err === "email" || undefined} className={FIELD} />
       </label>
+      {price ? (
+        <ul className="mt-4 grid gap-1 text-sm text-muted list-none p-0" aria-label="Как проходит оплата">
+          <li>✓ Ссылка и чек придут на e-mail сразу после оплаты</li>
+          <li>✓ Если разбор не открылся по технической ошибке — вернём деньги полностью (<Link href="/vozvrat" className="underline underline-offset-4">условия возврата</Link>)</li>
+          <li>✓ Оплату принимает ЮKassa, данные карты мы не видим</li>
+        </ul>
+      ) : null}
       {price ? <PayButtons price={packOn && offer ? offer.total : price} /> : null}
     </>
   );
