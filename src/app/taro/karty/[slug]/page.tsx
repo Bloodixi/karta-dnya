@@ -7,6 +7,7 @@ import JsonLd from "@/components/JsonLd";
 import RazborCta from "@/components/RazborCta";
 import TarotCardView from "@/components/TarotCardView";
 import { findTarot, findTarotExtra, findTarotLong, getTarot, type TarotCard, type TarotExtra } from "@/lib/content";
+import { firstSentence } from "@/lib/meta";
 import { SITE, orgJsonLd } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
 import CardVideoBlock from "@/components/CardVideoBlock";
@@ -90,7 +91,27 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
           <figcaption className="text-xs text-muted mt-3 text-center">{c.arcana === "major" ? `Старший аркан ${c.number}` : c.suitName} · колода Райдера–Уэйта, 1909</figcaption>
         </figure>
         <CardVideoBlock slug={c.slug} className="md:col-start-2 max-w-[40rem]" />
-        <div className="prose md:col-start-2">
+        <div className="md:col-start-2 space-y-5 min-w-0">
+          <div className="card p-4 max-w-[40rem]">
+            <p className="mono mb-2">Ответ за 10 секунд</p>
+            <dl className="grid gap-1.5 text-sm">
+              {extra && (
+                <div>
+                  <dt className="inline font-semibold">Да или нет: </dt>
+                  <dd className="inline text-muted">{cap(extra.yesno)}. {firstSentence(long?.yesno || extra.yesnoWhy)}</dd>
+                </div>
+              )}
+              <div>
+                <dt className="inline font-semibold">Любовь: </dt>
+                <dd className="inline text-muted">{firstSentence(long?.love || c.love)}</dd>
+              </div>
+              <div>
+                <dt className="inline font-semibold">Работа: </dt>
+                <dd className="inline text-muted">{firstSentence(long?.career || c.career)}</dd>
+              </div>
+            </dl>
+          </div>
+          <div className="prose">
           {c.description && <p>{c.description}</p>}
           <h2>Прямое положение</h2>
           <p>{long?.upright || c.upright}</p>
@@ -133,6 +154,7 @@ export default async function CardPage({ params }: PageProps<"/taro/karty/[slug]
           <h2>Совет карты</h2>
           <blockquote>{long?.advice || c.advice}</blockquote>
           {c.arcana === "major" && <p>Этот образ есть и в матрице судьбы: <Link href={`/matrica-sudby/arkany/${c.number === 0 ? 22 : c.number}`}>{c.number === 0 ? 22 : c.number} аркан, {c.name}</Link>.</p>}
+          </div>
         </div>
       </div>
       {/* на десктопе — под колонкой текста, справа от карты */}

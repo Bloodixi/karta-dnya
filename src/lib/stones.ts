@@ -1,8 +1,8 @@
 import { getStones, getZodiac, readJsonData, type Stone, type Zodiac } from "@/lib/content";
 import { digitsSum, isValidDate } from "@/lib/numerology";
 
-/** Тексты для страниц «камни знака»: почему подходят, как носить, с чего начать, и порядок главных камней. */
-export type StoneSign = { main: string[]; why: string; wear: string; tip: string };
+/** Тексты для страниц «камни знака»: почему подходят, как носить, с чего начать, для женщины/мужчины и порядок главных камней. */
+export type StoneSign = { main: string[]; why: string; wear: string; tip: string; forWomen?: string; forMen?: string };
 export const getStoneSigns = () => readJsonData<Record<string, StoneSign>>("stone-signs.json", {});
 
 export const ELEMENTS = ["Огонь", "Земля", "Воздух", "Вода"] as const;
@@ -54,4 +54,20 @@ export function parseDateParam(d: string | string[] | undefined): { year: number
   const [year, month, day] = s.split("-").map(Number);
   if (!isValidDate(day, month, year)) return null;
   return { year, month, day, key: s };
+}
+
+const STONE_TASK_RULES: { task: string; note: string; kws: string[] }[] = [
+  { task: "Любовь и отношения", note: "тепло в общении, мягкость и внимание к близким", kws: ["любов", "нежност", "верност", "тепло", "отношен", "женствен", "принят", "сострадан", "уют", "мягкост", "страст", "открыт", "дружелюб"] },
+  { task: "Деньги и карьера", note: "деловая собранность, решимость и доведение задач до результата", kws: ["делов", "успех", "удач", "решител", "целеустремл", "дисциплин", "порядок", "упорств", "мотивац", "энерг", "трудолюб", "практичност"] },
+  { task: "Защита и опора", note: "личные границы, заземление и устойчивость в нагрузках", kws: ["защит", "заземлен", "опор", "стойкост", "выдержк", "силы", "сила", "оберег", "устойчивост", "границ", "собранност", "смелост", "уверенност"] },
+  { task: "Спокойствие и ясность", note: "ровный эмоциональный фон, сон и ясная голова", kws: ["спокойств", "покой", "равновес", "интуиц", "ясност", "гармон", "тишин", "умиротвор", "баланс", "чистот"] },
+];
+
+/** Подборка камней знака под жизненные задачи (по 1–2 минерала в каждой строке). */
+export function stoneTasksForSign(stones: Stone[]): { task: string; note: string; picked: Stone[] }[] {
+  return STONE_TASK_RULES.map((rule) => {
+    const matched = stones.filter((s) => s.properties.some((p) => rule.kws.some((k) => p.toLowerCase().includes(k))));
+    const picked = (matched.length > 0 ? matched : stones).slice(0, 2);
+    return { task: rule.task, note: rule.note, picked };
+  });
 }
