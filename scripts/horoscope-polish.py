@@ -330,6 +330,18 @@ def is_limit(errors: dict[str, list[str]]) -> bool:
     return any(e.startswith("ЛИМИТ") for v in errors.values() for e in v)
 
 
+def _parse_and_check(text: str, drafts: list[dict], period: str) -> tuple[dict[str, dict], dict[str, list[str]]]:
+    try:
+        items = extract_json_array(text)
+    except ValueError as e:
+        return {}, {d["sign"]: [f"JSON не разобран: {e}"] for d in drafts}
+    bad = sign_errors(items, drafts, period)
+    if "*" in bad:
+        return {}, {d["sign"]: bad["*"] for d in drafts}
+    good = {it["sign"]: it for it in items if it["sign"] not in bad}
+    return good, bad
+
+
 def polish_batch(drafts: list[dict], events: list[dict], period: str, key: str, model: str, timeout: int,
                  retry_note: str = "") -> tuple[dict[str, dict], dict[str, list[str]], float, str]:
     """Один вызов модели для группы знаков → (готовые объекты по slug, брак по slug, стоимость, модель)."""
@@ -338,14 +350,22 @@ def polish_batch(drafts: list[dict], events: list[dict], period: str, key: str, 
     cost = cost or 0.0
     if err:
         return {}, {d["sign"]: [err] for d in drafts}, cost, used_model
-    try:
-        items = extract_json_array(text)
-    except ValueError as e:
-        return {}, {d["sign"]: [f"JSON не разобран: {e}"] for d in drafts}, cost, used_model
-    bad = sign_errors(items, drafts, period)
-    if "*" in bad:
-        return {}, {d["sign"]: bad["*"] for d in drafts}, cost, used_model
-    good = {it["sign"]: it for it in items if it["sign"] not in bad}
+    good, bad = _parse_and_check(text, drafts, period)
+    for it in good.values():
+        it["_model"] = used_model
+    if used_model == "free_llm" and bad and not is_limit(bad):
+        # free_llm часто ломает JSON или недобирает слова — сразу добиваем брак через резерв agy
+        remaining = [d for d in drafts if d["sign"] in bad] or drafts
+        agy_prompt = build_prompt(remaining, events, period, key) + retry_note
+        agy_text, used_m2, err2 = _run_agy(agy_prompt, model.removeprefix("agy:"), timeout)
+        if err2:
+            bad = {d["sign"]: [err2] for d in remaining}
+        else:
+            good2, bad = _parse_and_check(agy_text, remaining, period)
+            for it in good2.values():
+                it["_model"] = used_m2
+            good.update(good2)
+        used_model = used_m2
     return good, bad, cost, used_model
 
 
@@ -379,13 +399,14 @@ def polish_file(path: Path, model: str, timeout: int, retries: int, force: bool)
         batch = todo[i:i + BATCH]
         g, bad, cost, used_m = polish_batch(batch, events, period, key, model, timeout)
         out["cost_usd"] = round(out["cost_usd"] + cost, 4)
+        for s_, it in g.items():
+            used_models[s_] = it.pop("_model", used_m)
         good.update(g)
-        for s_ in g:
-            used_models[s_] = used_m
         if is_limit(bad):
             failed.update(bad)
             failed.update({d["sign"]: ["не редактировался: лимит исчерпан"] for d in todo[i + BATCH:]})
             break
+        retry_model = f"agy:{model.removeprefix('agy:')}"
         for attempt in range(retries):
             if not bad:
                 break
@@ -394,11 +415,11 @@ def polish_file(path: Path, model: str, timeout: int, retries: int, force: bool)
                     + "; ".join(f"{SIGN_RU[s_]}: {', '.join(v)}" for s_, v in bad.items())[:700]
                     + ". Напиши заново ПОЛНЕЕ" + (" и без слова «сегодня» (это гороскоп на завтра)" if period == "zavtra" else "")
                     + " — каждое из полей love, career, health разверни до 3–4 предложений, general — до нужного объёма; верни строго JSON.")
-            g, bad, cost, used_m = polish_batch(again, events, period, key, model, timeout, note)
+            g, bad, cost, used_m = polish_batch(again, events, period, key, retry_model, timeout, note)
             out["cost_usd"] = round(out["cost_usd"] + cost, 4)
+            for s_, it in g.items():
+                used_models[s_] = it.pop("_model", used_m)
             good.update(g)
-            for s_ in g:
-                used_models[s_] = used_m
             if is_limit(bad):
                 break
         failed.update(bad)
