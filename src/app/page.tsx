@@ -107,6 +107,10 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pt-12">
+        <RazborCta from="glavnaya-top" className="" />
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-12">
         <div className="ornament mb-5"><h2 className="text-3xl">Какой сегодня день по гороскопу</h2><span className="mono">{formatDateRu(date, { day: "numeric", month: "long" })}</span></div>
         <div className="prose max-w-3xl">
           <p>
@@ -124,10 +128,6 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-4 pt-12">
         <div className="ornament mb-5"><h2 className="text-3xl">Инструменты</h2><span className="mono">{TOOLS.length} ежедневных</span></div>
         <HomeTools date={date} />
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 pt-12">
-        <RazborCta from="glavnaya" className="" />
       </section>
 
       {zodiac.length > 0 && (

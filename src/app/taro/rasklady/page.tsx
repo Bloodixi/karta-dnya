@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import RazborCta from "@/components/RazborCta";
 import Faq from "@/components/Faq";
 import { getSpreads, spreadHref } from "@/lib/content";
 
@@ -31,6 +32,8 @@ export default function SpreadsHubPage() {
         <p>Здесь собраны десять раскладов Таро, которые можно сделать онлайн бесплатно: от одной карты на короткий вопрос до годового круга из двенадцати карт. Каждый расклад открывается на своей странице с описанием позиций, порядком чтения и ответами на частые вопросы. Карты вытягиваются случайно из полной колоды Райдера–Уэйта в 78 карт, часть выпадает перевёрнутыми, и под каждой картой показано короткое значение именно для её положения.</p>
         <p>Расклад стоит выбирать по вопросу, а не по числу карт. Когда нужен быстрый ответ, достаточно одной карты или гадания «да или нет». Если важно увидеть ситуацию во времени, подойдут три карты или «Подкова». Чувства и пару лучше рассматривать через расклады на любовь и отношения, а для серьёзного запутанного вопроса есть «Кельтский крест». Для ежедневной практики подойдут «Совет дня» и <Link href="/karta-dnya" className="text-accent-text underline">карта дня</Link>, а значения всех карт собраны в <Link href="/taro/karty" className="text-accent-text underline">каталоге карт Таро</Link>.</p>
       </div>
+
+      <RazborCta from="taro-rasklady" className="mt-8" />
 
       <section className="mt-10">
         <div className="ornament mb-4"><h2 className="text-2xl">Выберите расклад</h2><span className="mono">{spreads.length} раскладов</span></div>

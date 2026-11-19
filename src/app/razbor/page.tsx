@@ -221,8 +221,6 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
             <p className="text-xs text-muted mt-3">Бесплатная часть откроется сразу, без регистрации.</p>
           </div>
 
-          {ny && !teaser ? <NyGiftBlock year={ny.year} dates={ny.dates} price={RAZBOR.price} /> : null}
-
           {teaser && date && (
             <section id="razbor-teaser" className="mt-10 scroll-mt-24">
               <ScrollToResult key={`${date.iso}|${name}`} id="razbor-teaser" when={!err} />
@@ -251,6 +249,9 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
                   numbers={date ? BLUR_ROWS.map((_, i) => monthNumber(date.d, date.m, now.yr, now.mo, 12 - hiddenMonths(teaser) + i)) : []}
                 />
               )}
+              <p className="mt-4 max-w-3xl">
+                <a href="#oplata" className="btn justify-center">Открыть полный разбор — {RAZBOR.price} ₽</a>
+              </p>
 
               <div className="card p-5 mt-8 max-w-3xl razbor-locked">
                 <p className="mono mb-3">Ещё {teaser.locked.length} разделов в полном разборе</p>
@@ -327,7 +328,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
             </div>
           </section>
 
-          {ny && teaser ? <NyGiftBlock year={ny.year} dates={ny.dates} price={RAZBOR.price} /> : null}
+          {ny ? <NyGiftBlock year={ny.year} dates={ny.dates} price={RAZBOR.price} /> : null}
           <CertBlock counter={counter} price={PRODUCTS.cert.price} today={today} maxDate={todayMsk(GIFT_DAYS_MAX)} err={cert ? rawErr : undefined} errors={GIFT_ERRORS} />
 
           <Reviews />

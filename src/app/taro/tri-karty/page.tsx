@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import RazborCta from "@/components/RazborCta";
 import ExtraText from "@/components/ExtraText";
 import Faq from "@/components/Faq";
 import TelegramDaily from "@/components/TelegramDaily";
@@ -30,6 +31,7 @@ export default async function ThreeCardsPage() {
       <p className="text-muted mt-2 max-w-2xl">Классический расклад «прошлое, настоящее, будущее». Подумайте о ситуации, разложите карты и прочитайте их как одну историю.</p>
       <div className="mt-6">{cards.length ? <ThreeCards cards={cards} /> : <p className="text-muted">Колода готовится.</p>}</div>
       <TelegramDaily campaign="taro-tri-karty" text="Карта дня с толкованием — каждое утро в 8:00 по Москве. Коротко и без рекламы." className="mt-8" />
+      <RazborCta from="taro-tri-karty" className="mt-8" />
       {more && <ExtraText html={more.html} />}
       <section className="prose mt-8">
         <p>Перевёрнутые карты читаются как ослабленное, заблокированное или внутреннее проявление значения. Для короткого ответа подойдёт <Link href="/taro/da-net">гадание «да или нет»</Link>, для загаданной мечты — <Link href="/taro/na-zhelanie">гадание на желание</Link>, а расклады на любовь, отношения, работу и год собраны в каталоге <Link href="/taro/rasklady">все расклады Таро онлайн</Link>.</p>
