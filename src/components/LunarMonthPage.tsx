@@ -5,7 +5,7 @@ import Faq from "@/components/Faq";
 import MoonPhase from "@/components/MoonPhase";
 import { inSignRu, mskTime } from "@/lib/astro/calendar";
 import { formatDateRu, todayKey } from "@/lib/daily";
-import { PHASES } from "@/lib/moon";
+import { isMoonDayIndexed, PHASES } from "@/lib/moon";
 import { eclipseKindRu, isLinkedMonth, lunarMonth, MONTH_NOTES, monthLabel, nextMonth, prevMonth, type LunarMonth } from "@/lib/moon-month";
 import ArticleLinks from "@/components/ArticleLinks";
 
@@ -96,7 +96,11 @@ export default function LunarMonthPage({ month }: { month: string }) {
             <div key={p.iso} className="bg-surface p-4">
               <dt className="mono">{PHASE_RU[p.kind]}</dt>
               <dd className="display text-xl mt-1">
-                <Link href={`/lunnyy-kalendar/${p.day}`} className="hover:text-accent-text">{dayMonth(p.day)}</Link>
+                {isMoonDayIndexed(p.day, today) ? (
+                  <Link href={`/lunnyy-kalendar/${p.day}`} className="hover:text-accent-text">{dayMonth(p.day)}</Link>
+                ) : (
+                  dayMonth(p.day)
+                )}
               </dd>
               <dd className="text-sm text-muted">
                 {mskTime(p.iso)} МСК · Луна {inSignRu(p.sign)}
@@ -107,7 +111,11 @@ export default function LunarMonthPage({ month }: { month: string }) {
             <div key={e.iso} className="bg-surface p-4">
               <dt className="mono">{e.type === "solar" ? "Солнечное" : "Лунное"} затмение</dt>
               <dd className="display text-xl mt-1">
-                <Link href={`/lunnyy-kalendar/${e.day}`} className="hover:text-accent-text">{dayMonth(e.day)}</Link>
+                {isMoonDayIndexed(e.day, today) ? (
+                  <Link href={`/lunnyy-kalendar/${e.day}`} className="hover:text-accent-text">{dayMonth(e.day)}</Link>
+                ) : (
+                  dayMonth(e.day)
+                )}
               </dd>
               <dd className="text-sm text-muted">
                 {eclipseKindRu(e.kind)}, пик в {mskTime(e.iso)} МСК
@@ -137,9 +145,13 @@ export default function LunarMonthPage({ month }: { month: string }) {
                 return (
                   <tr key={d.key} className={`border-t border-line ${isToday ? "bg-accent/10" : ""}`} aria-current={isToday ? "date" : undefined}>
                     <td className="p-2 sm:p-3 whitespace-nowrap">
-                      <Link href={`/lunnyy-kalendar/${d.key}`} className="text-accent-text underline">
-                        {dayMonth(d.key)}
-                      </Link>
+                      {isMoonDayIndexed(d.key, today) ? (
+                        <Link href={`/lunnyy-kalendar/${d.key}`} className="text-accent-text underline">
+                          {dayMonth(d.key)}
+                        </Link>
+                      ) : (
+                        dayMonth(d.key)
+                      )}
                       <span className="text-muted">, {WEEKDAY[new Date(`${d.key}T12:00:00Z`).getUTCDay()]}</span>
                       {isToday && <span className="text-muted"> · сегодня</span>}
                     </td>

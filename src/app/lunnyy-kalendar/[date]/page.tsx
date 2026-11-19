@@ -8,9 +8,9 @@ import RazborCta from "@/components/RazborCta";
 import TelegramDaily from "@/components/TelegramDaily";
 import { readJsonData } from "@/lib/content";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
-import { dayInfo, isMoonDayIndexed, LUNAR_DAYS, moonWindow, moonWindowKeys, PHASES } from "@/lib/moon";
+import { dayInfo, isMoonDayIndexed, LUNAR_DAYS, moonWindowKeys, PHASES } from "@/lib/moon";
 import { pageTitle } from "@/lib/site";
-import { lunarMonthStaticKeys, monthLabel, MONTH_RE } from "@/lib/moon-month";
+import { isLinkedMonth, lunarMonthStaticKeys, monthLabel, MONTH_RE } from "@/lib/moon-month";
 import ArticleLinks from "@/components/ArticleLinks";
 
 export const revalidate = 86400;
@@ -52,7 +52,7 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
   const [y, m, dd] = date.split("-").map(Number);
   if (y < 2000 || y > 2100 || m < 1 || m > 12 || dd < 1 || dd > 31) notFound();
   const d = dayInfo(date);
-  const win = moonWindow(todayKey());
+  const today = todayKey();
   const prev = shiftKey(date, -1);
   const next = shiftKey(date, 1);
   const ld = LUNAR_DAYS[d.lunarDay];
@@ -86,12 +86,14 @@ export default async function LunarDayPage({ params }: PageProps<"/lunnyy-kalend
         </section>
       )}
       <div className="mt-6 flex flex-wrap gap-2 justify-between text-sm">
-        {prev >= win.from && prev <= win.to ? <Link href={`/lunnyy-kalendar/${prev}`} className="btn btn-ghost">← {formatDateRu(prev, { day: "numeric", month: "long" })}</Link> : <span />}
+        {isMoonDayIndexed(prev, today) ? <Link href={`/lunnyy-kalendar/${prev}`} className="btn btn-ghost">← {formatDateRu(prev, { day: "numeric", month: "long" })}</Link> : <span />}
         <span className="flex flex-wrap gap-2">
           <Link href="/lunnyy-kalendar" className="btn btn-ghost">Сегодня</Link>
-          <Link href={`/lunnyy-kalendar/${date.slice(0, 7)}`} className="btn btn-ghost">Весь {monthLabel(date.slice(0, 7)).nom}</Link>
+          {isLinkedMonth(date.slice(0, 7), today) && (
+            <Link href={`/lunnyy-kalendar/${date.slice(0, 7)}`} className="btn btn-ghost">Весь {monthLabel(date.slice(0, 7)).nom}</Link>
+          )}
         </span>
-        {next >= win.from && next <= win.to ? <Link href={`/lunnyy-kalendar/${next}`} className="btn btn-ghost">{formatDateRu(next, { day: "numeric", month: "long" })} →</Link> : <span />}
+        {isMoonDayIndexed(next, today) ? <Link href={`/lunnyy-kalendar/${next}`} className="btn btn-ghost">{formatDateRu(next, { day: "numeric", month: "long" })} →</Link> : <span />}
       </div>
       <TelegramDaily campaign="lunnyy-den" text="Лунный день, фаза и карта дня — каждое утро в 8:00 по Москве. Коротко и без рекламы." />
       <ArticleLinks path={`/lunnyy-kalendar/${date}`} />

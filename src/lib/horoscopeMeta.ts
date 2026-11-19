@@ -1,4 +1,5 @@
 import { formatDateRu, periodKey, shiftKey, todayKey, type PeriodKey } from "./daily";
+import { pageTitle } from "./site";
 
 /**
  * Заголовки и описания страниц гороскопа с датами периода.
@@ -79,10 +80,11 @@ export function signMeta(name: string, period: PeriodKey, dateKey = todayKey()):
   return { title, description };
 }
 
-export function hubMeta(period: PeriodKey, dateKey = todayKey()): { title: string; description: string } {
+export function hubMeta(period: PeriodKey, dateKey = todayKey()): { title: string | { absolute: string }; description: string } {
   const phrase = inPhrase(period, dateKey);
   const long = `Гороскоп ${phrase} для всех знаков зодиака`;
-  const title = long.length <= 56 ? long : `Гороскоп ${phrase} для всех знаков`;
+  const short = `Гороскоп ${phrase} для всех знаков`;
+  const title = pageTitle(long.length <= 53 ? long : short);
   const description = fit(`Гороскоп ${inPhrase(period, dateKey)} для всех 12 знаков зодиака: ${HUB_DESC[period]}.`, [" Выберите свой знак.", ...TAILS[period]]);
   return { title, description };
 }

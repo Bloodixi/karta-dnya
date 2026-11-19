@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import JsonLd from "@/components/JsonLd";
 import MoonPhase from "@/components/MoonPhase";
 import MoonStrip from "@/components/MoonStrip";
 import Starfield from "@/components/Starfield";
 import TelegramDaily from "@/components/TelegramDaily";
 import Faq from "@/components/Faq";
+import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
 import { formatDateRu, shiftKey, todayKey } from "@/lib/daily";
-import { dayInfo, LUNAR_DAYS, monthDays, PHASES } from "@/lib/moon";
+import { dayInfo, isMoonDayIndexed, LUNAR_DAYS, monthDays, PHASES, type PhaseKey } from "@/lib/moon";
 import { lunarMonthWindow, monthLabel } from "@/lib/moon-month";
 import { moonIllumination, mskNoon } from "@/lib/astro/engine";
+import { SITE, orgJsonLd } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
 
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
   title: "Лунный календарь на сегодня: лунный день и фаза Луны",
-  description: "Лунный календарь на сегодня и на месяц: фаза Луны, лунный день, знак Луны, благоприятные дни для стрижки, посадок и важных дел.",
+  description: "Лунный календарь на сегодня и на месяц: фаза Луны, лунный день, знак Луны, благоприятные дни для стрижки, посадок, гадания и важных дел на каждый день.",
   alternates: { canonical: "/lunnyy-kalendar" },
 };
 
@@ -27,6 +30,17 @@ const FAQ = [
   { q: "Почему в месяце бывает 29 или 30 лунных дней?", a: "Лунный цикл длится 29,53 суток, поэтому 30-й день случается не каждый месяц и обычно короткий." },
   { q: "Когда лучше стричься по лунному календарю?", a: "Традиционно на растущей Луне и в «сильные» лунные дни; на 9, 15, 23 и 29 день стрижку обычно откладывают." },
 ];
+
+const DIVINATION_BY_PHASE: Record<PhaseKey, string> = {
+  "new": "Новолуние — время тихих вопросов о намерениях и новых планах на месяц; лучше вытянуть одну спокойную карту дня без перебора вариантов.",
+  "waxing-crescent": "Молодая растущая Луна хорошо подходит для раскладов на начинания, отношения и перспективы роста в ближайшие недели.",
+  "first-quarter": "Первая четверть помогает прояснить выбор и увидеть, что мешает движению вперёд — удобно использовать короткий вопрос «Да / Нет».",
+  "waxing-gibbous": "Перед полнолунием интуиция обостряется: в этот день проще увидеть скрытые мотивы и проверить готовность к важному шагу.",
+  "full": "Полнолуние — пик ясности для глубоких вопросов о результатах и отношениях; избегайте эмоциональной спешки и перепроверок одного и того же вопроса.",
+  "waning-gibbous": "На убывающей Луне после полнолуния лучше спрашивать, что стоит завершить, отпустить или разобрать в делах.",
+  "last-quarter": "Последняя четверть подходит для честного разбора накопленных сомнений и мягкого освобождения от лишних обязательств.",
+  "waning-crescent": "Конец лунного цикла — время спокойной рефлексии и отдыха; для гадания подойдёт одна настраивающая карта или руна дня.",
+};
 
 const plural = (n: number, one: string, few: string, many: string) =>
   n % 10 === 1 && n % 100 !== 11 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? few : many;
@@ -61,6 +75,7 @@ export default function LunarPage() {
   ]
     .filter((u): u is { label: string; next: { key: string; inDays: number } } => u.next !== null)
     .sort((a, b) => a.next.inDays - b.next.inDays);
+  const author = horoscopeAuthor();
   const tips = [
     { t: "Благоприятно", v: ld.good },
     { t: "Лучше избегать", v: ld.avoid },
@@ -94,15 +109,24 @@ export default function LunarPage() {
               </nav>
               {upcoming.length > 0 && (
                 <ul className="mt-6 grid grid-cols-2 gap-px max-w-md border border-[var(--night-line)] rounded-[4px] overflow-hidden bg-[var(--night-line)]">
-                  {upcoming.map((u) => (
-                    <li key={u.label} className="bg-[var(--night)]">
-                      <Link href={`/lunnyy-kalendar/${u.next.key}`} className="block p-3 hover:bg-[var(--night-2)]">
+                  {upcoming.map((u) => {
+                    const inner = (
+                      <>
                         <span className="mono block">{u.label}</span>
                         <span className="display text-lg mt-1 block">{formatDateRu(u.next.key, { day: "numeric", month: "long" })}</span>
                         <span className="text-xs text-muted block">через {u.next.inDays} {plural(u.next.inDays, "день", "дня", "дней")}</span>
-                      </Link>
-                    </li>
-                  ))}
+                      </>
+                    );
+                    return (
+                      <li key={u.label} className="bg-[var(--night)]">
+                        {isMoonDayIndexed(u.next.key, key) ? (
+                          <Link href={`/lunnyy-kalendar/${u.next.key}`} className="block p-3 hover:bg-[var(--night-2)]">{inner}</Link>
+                        ) : (
+                          <div className="block p-3">{inner}</div>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
@@ -136,6 +160,17 @@ export default function LunarPage() {
         </div>
         <p className="text-sm text-muted mt-3">Подробнее о дне — на странице <Link href={`/lunnyy-kalendar/${key}`} className="text-accent-text underline">{formatDateRu(key, { day: "numeric", month: "long" })}</Link>.</p>
       </section>
+      <section aria-labelledby="today-divination" className="card p-5 mt-8">
+        <h2 id="today-divination" className="text-xl font-semibold">Гадание и практики в {today.lunarDay}-й лунный день</h2>
+        <p className="text-muted mt-2">
+          {DIVINATION_BY_PHASE[today.phase]} Символ дня — «{ld.symbol}»: благоприятно {ld.good}, лучше избегать {ld.avoid}.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href="/karta-dnya" className="btn">Карта дня на сегодня</Link>
+          <Link href="/taro/da-net" className="btn btn-ghost">Таро «Да / Нет»</Link>
+          <Link href="/runy/runa-dnya" className="btn btn-ghost">Руна дня</Link>
+        </div>
+      </section>
       <TelegramDaily campaign="lunnyy-kalendar" text="Лунный день, фаза и карта дня — каждое утро в 8:00 по Москве. Коротко и без рекламы." />
 
       <section className="mt-10">
@@ -147,12 +182,22 @@ export default function LunarPage() {
           {Array.from({ length: lead }, (_, i) => <div key={`lead-${i}`} className="hidden sm:block" aria-hidden="true" />)}
           {days.map((d) => {
             const isToday = d.key === key;
-            return (
-              <Link key={d.key} href={`/lunnyy-kalendar/${d.key}`} aria-current={isToday ? "date" : undefined} className={`card card-hover p-2 text-center ${isToday ? "ring-2 ring-accent !bg-accent/10" : ""}`}>
+            const cls = `card p-2 text-center ${isToday ? "ring-2 ring-accent !bg-accent/10" : ""}`;
+            const cell = (
+              <>
                 <p className={`text-xs ${isToday ? "font-semibold text-accent-text" : "text-muted"}`}>{Number(d.key.slice(8))}{isToday && <span className="sr-only">, сегодня</span>}</p>
                 <MoonPhase age={d.age} size={34} className="mx-auto my-1" />
                 <p className="text-xs">{d.lunarDay} л.д.</p>
+              </>
+            );
+            return isMoonDayIndexed(d.key, key) ? (
+              <Link key={d.key} href={`/lunnyy-kalendar/${d.key}`} aria-current={isToday ? "date" : undefined} className={`${cls} card-hover`}>
+                {cell}
               </Link>
+            ) : (
+              <div key={d.key} aria-current={isToday ? "date" : undefined} className={cls}>
+                {cell}
+              </div>
             );
           })}
         </div>
@@ -180,6 +225,19 @@ export default function LunarPage() {
       </section>
       <ArticleLinks path="/lunnyy-kalendar" />
       <Faq items={FAQ} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: `Лунный календарь на ${formatDateRu(key)}: ${today.lunarDay}-й лунный день`,
+          datePublished: key,
+          dateModified: key,
+          inLanguage: "ru",
+          mainEntityOfPage: `${SITE.url}/lunnyy-kalendar`,
+          author: author ? authorJsonLd(author) : orgJsonLd(),
+          publisher: orgJsonLd(),
+        }}
+      />
       </div>
     </div>
   );

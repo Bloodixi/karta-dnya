@@ -24,7 +24,7 @@ import { allHoroscopes, horoscopeFor, PERIODS, PERIOD_KEYS, periodLabel, todayKe
 export const revalidate = 1800;
 export const dynamicParams = false;
 
-const isPeriod = (s: string): s is PeriodKey => (PERIOD_KEYS as string[]).includes(s) && s !== "segodnya";
+const isPeriod = (s: string): s is Exclude<PeriodKey, "segodnya"> => (PERIOD_KEYS as string[]).includes(s) && s !== "segodnya";
 
 export function generateStaticParams() {
   return [...getZodiac().map((z) => ({ sign: z.slug })), ...PERIOD_KEYS.filter((p) => p !== "segodnya").map((p) => ({ sign: p }))];
@@ -39,6 +39,31 @@ export async function generateMetadata({ params }: PageProps<"/goroskop/[sign]">
   if (!z) return {};
   return { ...signMeta(z.name, "segodnya"), alternates: { canonical: `/goroskop/${sign}` } };
 }
+
+const periodAnswer: Record<Exclude<PeriodKey, "segodnya">, string> = {
+  vchera: "Гороскоп на вчера помогает спокойно сверить астрологический фон прошедшего дня с реальными событиями: какие темы выходили на первый план в отношениях, работе и самочувствии и на что стоит опереться сегодня.",
+  zavtra: "Гороскоп на завтра обновляется заранее и показывает общий фон дня для каждого из 12 знаков: настроение, любовь, рабочие задачи, деньги, здоровье и главный совет. Для точной картины учитывайте не только солнечный знак, но и Асцендент.",
+  nedelya: "Гороскоп на неделю выделяет ключевые тенденции ближайших семи дней для всех знаков зодиака: когда проще договариваться, где стоит притормозить, на что обратить внимание в финансах и как распределить силы.",
+  mesyats: "Гороскоп на месяц задаёт общую рамку на весь календарный месяц: основные акценты в личной жизни, работе, ресурсах и самочувствии для каждого знака, чтобы планировать важные шаги без спешки.",
+  god: "Годовой гороскоп показывает главные векторы года для каждого знака зодиака: ключевые перемены, фокус в отношениях и делах, периоды активности и восстановления, а также практический совет на год.",
+};
+
+const periodFaq = (period: Exclude<PeriodKey, "segodnya">) => [
+  {
+    q: `Когда обновляется гороскоп ${PERIODS[period].title}?`,
+    a: period === "zavtra"
+      ? "Прогноз на завтра публикуется заранее и обновляется каждые сутки в полночь по московскому времени, чтобы вы могли сверить планы на следующий день."
+      : "Ежедневные прогнозы обновляются в полночь по Москве, а обзоры на неделю, месяц и год — с началом нового календарного периода.",
+  },
+  {
+    q: "По какому знаку лучше читать прогноз — по Солнцу или по Асценденту?",
+    a: "Солнечный знак описывает внутреннее состояние и общие темы периода, а восходящий знак (Асцендент) точнее указывает, в каких сферах жизни проиграются события. Удобнее всего прочитать прогноз для обоих знаков.",
+  },
+  {
+    q: "Чем общий гороскоп по знакам отличается от личного разбора по дате рождения?",
+    a: "Общий гороскоп отражает фон для всего знака зодиака. Персональный разбор учитывает точную дату рождения — число судьбы, квадрат Пифагора и ваш личный год на двенадцать месяцев вперёд.",
+  },
+];
 
 const signFaq = (name: string) => [
   {
@@ -61,15 +86,36 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
   const author = horoscopeAuthor();
   if (isPeriod(sign)) {
     const items = allHoroscopes(sign, date);
+    const periodDate = items[0]?.key ?? date;
+    const periodHeading = sign === "god" ? `Гороскоп на ${periodLabel(sign, date)}` : `Гороскоп ${PERIODS[sign].title}: ${periodLabel(sign, date)}`;
     return (
       <div className="mx-auto max-w-6xl px-4 py-8">
         <Breadcrumbs items={[{ href: "/goroskop", label: "Гороскоп" }, { href: `/goroskop/${sign}`, label: PERIODS[sign].title }]} />
-        <h1 className="text-3xl md:text-4xl font-semibold">{sign === "god" ? `Гороскоп на ${periodLabel(sign, date)}` : `Гороскоп ${PERIODS[sign].title}: ${periodLabel(sign, date)}`}</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold">{periodHeading}</h1>
         <p className="text-muted mt-2 max-w-2xl">Прогноз {PERIODS[sign].title} для каждого знака: общий фон, любовь, дела, самочувствие и совет.</p>
         <div className="mt-4"><PeriodNav current={sign} /></div>
+        <section className="card p-4 md:p-5 mt-6" aria-labelledby="period-answer">
+          <h2 id="period-answer" className="text-lg font-semibold">Что важно знать о гороскопе {PERIODS[sign].title}</h2>
+          <p className="text-sm text-muted mt-1.5">{periodAnswer[sign]}</p>
+        </section>
         {sign === "god" && <Year2027Teaser />}
         <HoroscopeGrid items={items} period={sign} />
+        <RazborCta from="goroskop-period-hub" />
+        <Faq items={periodFaq(sign)} />
         {author && items.some((h) => h.source === "astro") && <AuthorCard author={author} note="гороскопы ведёт" className="mt-10" />}
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: periodHeading,
+            datePublished: periodDate,
+            dateModified: periodDate,
+            inLanguage: "ru",
+            mainEntityOfPage: `${SITE.url}/goroskop/${sign}`,
+            author: author ? authorJsonLd(author) : orgJsonLd(),
+            publisher: orgJsonLd(),
+          }}
+        />
       </div>
     );
   }

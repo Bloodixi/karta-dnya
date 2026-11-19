@@ -1,14 +1,13 @@
 import Link from "next/link";
 import MoonPhase from "@/components/MoonPhase";
 import { formatDateRu, shiftKey } from "@/lib/daily";
-import { dayInfo, moonWindow, PHASES, type PhaseKey } from "@/lib/moon";
+import { dayInfo, isMoonDayIndexed, PHASES, type PhaseKey } from "@/lib/moon";
 
 /** Главные фазы, начало которых отмечаем в ленте золотой точкой. */
 const KEY_PHASES: PhaseKey[] = ["new", "first-quarter", "full", "last-quarter"];
 
 /** Лента фаз Луны на `days` дней (с двух дней до сегодня), для ночной шапки. Горизонтальная прокрутка со snap. */
 export default function MoonStrip({ today, days = 30, before = 2 }: { today: string; days?: number; before?: number }) {
-  const win = moonWindow(today);
   const keys = Array.from({ length: days }, (_, i) => shiftKey(today, i - before));
   const infos = keys.map((k) => dayInfo(k));
   return (
@@ -41,7 +40,7 @@ export default function MoonStrip({ today, days = 30, before = 2 }: { today: str
               ? "border-[var(--accent-soft)] bg-[rgba(179,162,204,0.12)]"
               : "border-[var(--night-line)] bg-[rgba(255,255,255,0.02)] hover:border-[var(--gold)]"
           }`;
-          const linkable = d.key >= win.from && d.key <= win.to;
+          const linkable = isMoonDayIndexed(d.key, today);
           return (
             <li key={d.key} className="snap-start shrink-0 w-[62px]" title={keyStart ? PHASES[d.phase].name : undefined}>
               {linkable ? (
