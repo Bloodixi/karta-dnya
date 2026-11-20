@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import PeriodNav from "@/components/PeriodNav";
 import RazborCta from "@/components/RazborCta";
@@ -13,6 +14,13 @@ import { SITE, orgJsonLd } from "@/lib/site";
 export const revalidate = 86400;
 
 const Y = FORECAST_YEAR;
+
+const FAQ = [
+  { q: "Каким будет 2027 год по астрологии и нумерологии?", a: "В астрологии 2027 год задают Сатурн и Нептун в Овне, переход Юпитера из Льва в Деву и два коридора затмений (февраль и июль–август). В нумерологии это год мастер-числа 11 и аркана XI «Справедливость», а по восточному календарю — год Красной Огненной Козы." },
+  { q: "Когда в 2027 году будут затмения и ретроградный Меркурий?", a: "Пять затмений: солнечные 6 февраля и 2 августа, полутеневые лунные 20–21 февраля, 18 июля и 17 августа. Подробный разбор дат — на странице затмений 2027 года." },
+  { q: "Когда начинается год Красной Огненной Козы?", a: "6 февраля 2027 года, с вторым новолунием после зимнего солнцестояния. До этого дня продолжается год Огненной Лошади." },
+  { q: "Как получить точный прогноз на 2027 год по своей дате рождения?", a: "Солнечный гороскоп показывает общие транзиты для знака зодиака. Личную картину на 12 месяцев вперёд даёт разбор по дате рождения: число судьбы, личный год и ключевые периоды." },
+];
 
 export const metadata: Metadata = {
   title: `Гороскоп на ${Y} год для всех знаков зодиака`,
@@ -28,6 +36,9 @@ export default function YearHubPage() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/goroskop", label: "Гороскоп" }, { href: `/goroskop/${Y}`, label: `На ${Y} год` }]} />
       <h1 className="text-3xl md:text-4xl font-semibold">Гороскоп на {Y} год для всех знаков зодиака</h1>
+      <p className="mt-3 max-w-3xl text-muted">
+        <strong>Коротко:</strong> 2027 год проходит под числом года 11 (аркан Таро XI «Справедливость») и символом Красной Огненной Козы (с 6 февраля). В западной астрологии тон задают Сатурн и Нептун в Овне, Юпитер во Льве и Деве и два коридора затмений — в феврале и июле–августе.
+      </p>
       {ov && <p className="text-muted mt-2 max-w-3xl">{ov.lead}</p>}
       <div className="mt-4"><PeriodNav /></div>
 
@@ -71,13 +82,18 @@ export default function YearHubPage() {
           <p>
             {ov.numerology} <Link href={`/numerologiya/${Y}`}>Нумерология {Y} года →</Link>
           </p>
+          <p>
+            Пять затмений {Y} года — 6 февраля, 20–21 февраля, 18 июля, 2 августа и 17 августа — подробно разобраны в <Link href="/astrologiya/zatmeniya-2027">календаре затмений 2027 →</Link>
+          </p>
           <p className="text-sm text-muted">
             Положения планет рассчитаны по эфемеридам на московское время. Это солнечный гороскоп — по знаку Солнца; личная картина точнее по <Link href="/astrologiya/natalnaya-karta">натальной карте</Link>. Даты ретроградного Меркурия по годам — на странице <Link href="/astrologiya/retrogradnyy-merkuriy">«Ретроградный Меркурий»</Link>.
           </p>
         </section>
       )}
 
-      <RazborCta from="goroskop-god" />
+      <RazborCta from="prognoz-2027" />
+
+      <Faq items={FAQ} />
 
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Другие гороскопы</h2>

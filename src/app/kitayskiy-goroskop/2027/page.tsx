@@ -4,6 +4,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import HanziMark from "@/components/HanziMark";
 import JsonLd from "@/components/JsonLd";
+import RazborCta from "@/components/RazborCta";
 import { COMPAT_LABELS, compatLevel, findChineseAnimal, getChineseAnimals, getForecast2027 } from "@/lib/chineseZodiac";
 import { pageTitle, SITE, orgJsonLd } from "@/lib/site";
 
@@ -41,8 +42,13 @@ export default function Year2027Page() {
       <div className="mt-4 flex flex-wrap gap-2">
         <span className="chip">丁未 · дин-вэй</span>
         <span className="chip">цвет года: красный</span>
+        <span className="chip">число года 11 · аркан XI Справедливость</span>
         <span className="chip">прошлый такой год: 1967</span>
       </div>
+
+      <p className="mt-4 max-w-3xl text-muted">
+        <strong>Коротко:</strong> символ 2027 года по восточному календарю — Красная Огненная Коза (Овца), её год длится с 6 февраля 2027 по 25 января 2028. В нумерологии 2027-й идёт под мастер-числом 11 и арканом Таро XI «Справедливость» — это время честного баланса, партнёрства и спокойных, выверенных решений.
+      </p>
 
       <section className="prose mt-8">
         <h2>Какой будет год Огненной Козы</h2>
@@ -101,8 +107,10 @@ export default function Year2027Page() {
             );
           })}
         </div>
-        <p className="text-sm text-muted mt-3">Не знаете своё животное? Узнайте его по дате рождения в <Link href="/kitayskiy-goroskop" className="text-accent-text underline">калькуляторе китайского гороскопа</Link>. Прогноз по западному знаку зодиака — в <Link href="/goroskop/god" className="text-accent-text underline">гороскопе на год</Link>.</p>
+        <p className="text-sm text-muted mt-3">Не знаете своё животное? Узнайте его по дате рождения в <Link href="/kitayskiy-goroskop" className="text-accent-text underline">калькуляторе китайского гороскопа</Link>. Другие прогнозы на 2027 год: <Link href="/goroskop/2027" className="text-accent-text underline">гороскоп для всех знаков</Link>, <Link href="/numerologiya/2027" className="text-accent-text underline">нумерология (число 11)</Link> и <Link href="/astrologiya/zatmeniya-2027" className="text-accent-text underline">календарь затмений 2027</Link>.</p>
       </section>
+
+      <RazborCta from="prognoz-2027" />
 
       <Faq items={FAQ} />
 

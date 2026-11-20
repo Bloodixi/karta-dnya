@@ -5,6 +5,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import NumerologyNav from "@/components/NumerologyNav";
+import RazborCta from "@/components/RazborCta";
 import { DateField } from "@/components/NumerologyFields";
 import { readJsonData } from "@/lib/content";
 import { pageTitle, SITE, orgJsonLd } from "@/lib/site";
@@ -35,7 +36,7 @@ export default function Numerology2027Page() {
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: PATH, label: "Прогноз на 2027 год" }]} />
       <h1 className="text-3xl md:text-4xl">Нумерологический прогноз на 2027 год</h1>
-      <p className="text-muted mt-3 max-w-2xl text-lg">2 + 0 + 2 + 7 = 11. Год под мастер-числом бывает раз в девять лет, и 2027-й — как раз такой: время союзов, интуиции и тонкой настройки отношений.</p>
+      <p className="text-muted mt-3 max-w-2xl text-lg">2 + 0 + 2 + 7 = 11 — мастер-число года и аркан Таро XI «Справедливость». Год под таким числом бывает раз в девять лет: время союзов, честного баланса, интуиции и тонкой настройки отношений.</p>
 
       <div className="mt-6 grid gap-4 md:grid-cols-[320px_1fr]">
         <div className="card p-6 text-center content-center">
@@ -67,7 +68,7 @@ export default function Numerology2027Page() {
           <li><strong>Вдохновение.</strong> Год поддерживает творчество, обучение, наставничество и всё, что помогает другим.</li>
           <li><strong>Бережность.</strong> Чуткость высокая, поэтому важны отдых, тишина и границы.</li>
         </ul>
-        <p>Китайский календарь в этом году тоже говорит о мягкости: 6 февраля 2027 года наступает <Link href="/kitayskiy-goroskop/2027">год Красной Огненной Козы</Link>, самого миролюбивого знака цикла. Подробнее о самом числе — на странице <Link href="/numerologiya/master-chisla">мастер-числа 11, 22 и 33</Link> и в описании <Link href="/chislo-sudby/11">числа судьбы 11</Link>.</p>
+        <p>Китайский календарь в этом году тоже говорит о мягкости: 6 февраля 2027 года наступает <Link href="/kitayskiy-goroskop/2027">год Красной Огненной Козы</Link>, самого миролюбивого знака цикла. Астрологическую картину смотрите в <Link href="/goroskop/2027">гороскопе на 2027 год</Link> и <Link href="/astrologiya/zatmeniya-2027">календаре затмений 2027</Link>. Подробнее о самом числе — на странице <Link href="/numerologiya/master-chisla">мастер-числа 11, 22 и 33</Link> и в описании <Link href="/chislo-sudby/11">числа судьбы 11</Link>.</p>
       </section>
 
       <section className="mt-12">
@@ -93,6 +94,8 @@ export default function Numerology2027Page() {
         </ol>
         <p>Личный год описывает ваш собственный этап, а число 11 — общий фон, одинаковый для всех. Читайте их вместе: например, личный год 5 зовёт к переменам, а год 11 подсказывает, что перемены лучше делать по согласию с близкими.</p>
       </section>
+
+      <RazborCta from="prognoz-2027" />
 
       <Faq items={FAQ} />
       <NumerologyNav current={PATH} />
