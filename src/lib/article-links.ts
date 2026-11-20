@@ -23,12 +23,12 @@ export const ARTICLE_LINKS: Record<string, string[]> = {
   "/matrica-sudby": ["numerologiya/matrica-sudby-rasshifrovka"],
 
   // Таро
-  "/karta-dnya": ["taro/karta-dnya-taro-kak-ispolzovat", "taro/kak-nachat-gadat-na-taro"],
+  "/karta-dnya": ["taro/karta-dnya-taro-kak-ispolzovat", "taro/kak-nachat-gadat-na-taro", "taro/kogda-mozhno-gadat-po-lunnomu-kalendaryu"],
   "/taro/rasklady/keltskiy-krest": ["taro/keltskiy-krest-taro", "taro/perevernutye-karty-taro"],
   "/taro/rasklady/na-god": ["taro/rasklad-taro-na-novyy-god", "praktiki/novogodnie-i-svyatochnye-gadaniya"],
   "/taro/rasklady/na-otnosheniya": ["taro/rasklad-taro-na-otnosheniya"],
   "/taro/rasklady/na-lyubov": ["taro/rasklad-taro-na-otnosheniya"],
-  "/taro/rasklady/*": ["taro/kak-nachat-gadat-na-taro"],
+  "/taro/rasklady/*": ["taro/kak-nachat-gadat-na-taro", "taro/kogda-mozhno-gadat-po-lunnomu-kalendaryu"],
   "/taro/arkany/mladshie": ["taro/mladshie-arkany-taro"],
   "/taro/arkany/starshie": ["taro/perevernutye-karty-taro"],
   // Страницы младших арканов (/taro/karty/<slug> с arcana: "minor") — отдельный ключ, его передаёт страница карты.
@@ -58,8 +58,8 @@ export const ARTICLE_LINKS: Record<string, string[]> = {
   "/praktiki/affirmacii": ["praktiki/affirmacii-na-kazhdyy-den"],
   "/praktiki/affirmacii/na-dengi": ["praktiki/ritual-na-dengi", "kamni/kamni-dlya-deneg"],
   "/praktiki/affirmacii/*": ["praktiki/affirmacii-na-kazhdyy-den", "praktiki/meditatsiya-dlya-nachinayushchih"],
-  "/runy": ["praktiki/gadanie-na-runah-dlya-nachinayushchih"],
-  "/runy/*": ["praktiki/gadanie-na-runah-dlya-nachinayushchih"],
+  "/runy": ["praktiki/gadanie-na-runah-dlya-nachinayushchih", "taro/kogda-mozhno-gadat-po-lunnomu-kalendaryu"],
+  "/runy/*": ["praktiki/gadanie-na-runah-dlya-nachinayushchih", "taro/kogda-mozhno-gadat-po-lunnomu-kalendaryu"],
 };
 
 function matches(pattern: string, path: string) {
