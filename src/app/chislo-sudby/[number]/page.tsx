@@ -3,12 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import NumerologyNav from "@/components/NumerologyNav";
 import { ScopedRazborCta } from "@/components/RazborDateScope";
 import TelegramBot from "@/components/TelegramBot";
 import { findNumerology, getNumerology } from "@/lib/content";
+import { firstSentence } from "@/lib/meta";
 import { isMaster, NUMBER_WORDS, toCore } from "@/lib/numerology";
-import { pageTitle } from "@/lib/site";
+import { pageTitle, SITE, orgJsonLd } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
 
 export const dynamicParams = false;
@@ -51,6 +53,14 @@ export default async function DestinyNumberPage({ params }: PageProps<"/chislo-s
       </div>
       <p className="mt-3 flex flex-wrap gap-2">{n.keywords.map((k) => <span key={k} className="chip">{k}</span>)}</p>
       <p className="text-muted mt-4 max-w-2xl text-lg">{n.description}</p>
+      <div className="card p-4 mt-5 max-w-3xl">
+        <p className="mono mb-2">Краткий ответ: число судьбы {n.number}</p>
+        <p className="text-sm text-muted">
+          <strong className="text-ink">Главные качества:</strong> {n.keywords.join(", ")}.{" "}
+          <strong className="text-ink">Любовь и дело:</strong> {firstSentence(n.love)} {firstSentence(n.career)}{" "}
+          {n.advice && <><strong className="text-ink">Совет:</strong> {firstSentence(n.advice)}</>}
+        </p>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px] mt-8">
         <div className="prose">
@@ -66,6 +76,24 @@ export default async function DestinyNumberPage({ params }: PageProps<"/chislo-s
           <p>{n.love}</p>
           <h2>В работе</h2>
           <p>{n.career}</p>
+          {n.finance && (
+            <>
+              <h2>Деньги и профессии</h2>
+              <p>{n.finance}</p>
+            </>
+          )}
+          {n.forWomen && (
+            <>
+              <h2>Число {n.number} для женщины</h2>
+              <p>{n.forWomen}</p>
+            </>
+          )}
+          {n.forMen && (
+            <>
+              <h2>Число {n.number} для мужчины</h2>
+              <p>{n.forMen}</p>
+            </>
+          )}
           {compat && (
             <>
               <h2>Совместимость числа {n.number} с другими числами</h2>
@@ -114,6 +142,18 @@ export default async function DestinyNumberPage({ params }: PageProps<"/chislo-s
       <ArticleLinks path={`/chislo-sudby/${number}`} />
       <Faq items={n.faq ?? []} />
       <NumerologyNav current="/chislo-sudby" />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: `Число судьбы ${n.number} — ${n.title}`,
+          description: n.description,
+          inLanguage: "ru",
+          mainEntityOfPage: `${SITE.url}/chislo-sudby/${n.number}`,
+          author: orgJsonLd(),
+          publisher: orgJsonLd(),
+        }}
+      />
     </div>
   );
 }

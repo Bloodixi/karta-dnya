@@ -20,3 +20,10 @@ export function metaDescription(text: string, min = 140, max = 160): string {
   const cut = clause >= 0 ? clause : space > 0 ? space : max - 1;
   return `${t.slice(0, cut).replace(/[\s,;:—–-]+$/, "")}…`;
 }
+
+/** Первое предложение текста для компактных блоков Answer-First. */
+export function firstSentence(text: string): string {
+  const t = text.replace(/\s+/g, " ").trim();
+  const m = /[.!?…](?=\s|$)/.exec(t);
+  return m ? t.slice(0, m.index + 1) : t;
+}

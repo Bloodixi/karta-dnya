@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
+import RazborCta from "@/components/RazborCta";
 import StonePhoto from "@/components/StonePhoto";
 import ZodiacSign from "@/components/ZodiacSign";
 import { findZodiac, getStoneImages, getZodiac } from "@/lib/content";
-import { pageTitle, SITE } from "@/lib/site";
-import { getStoneSigns, stonesForSign } from "@/lib/stones";
+import { metaDescription } from "@/lib/meta";
+import { pageTitle, SITE, orgJsonLd } from "@/lib/site";
+import { getStoneSigns, stonesForSign, stoneTasksForSign } from "@/lib/stones";
 import ArticleLinks from "@/components/ArticleLinks";
 
 const HUB = "/kamni/po-znaku-zodiaka";
@@ -46,6 +48,7 @@ export default async function StonesForSignPage({ params }: PageProps<"/kamni/po
   const images = getStoneImages();
   const featured = stones.slice(0, 6);
   const rest = stones.slice(6);
+  const tasks = stoneTasksForSign(stones);
   const others = getZodiac().filter((x) => x.slug !== znak);
   const faq = [
     { q: `Какой камень считается главным для знака ${z.name}?`, a: `В традиции чаще всего называют ${z.stone}. ${info?.tip ?? ""}`.trim() },
@@ -104,6 +107,63 @@ export default async function StonesForSignPage({ params }: PageProps<"/kamni/po
         )}
       </section>
 
+      <section className="mt-10">
+        <h2 className="text-2xl mb-3">Подбор камня знака {z.name} под задачу</h2>
+        <ul className="sm:hidden grid gap-2">
+          {tasks.map((row) => (
+            <li key={row.task} className="card p-3">
+              <p className="font-semibold">{row.task}</p>
+              <p className="text-xs text-muted mt-0.5">{row.note}</p>
+              <p className="text-sm mt-1">
+                {row.picked.map((s, i) => (
+                  <span key={s.slug}>{i > 0 && ", "}<Link href={`/kamni/${s.slug}`} className="text-accent-text underline underline-offset-2">{s.name}</Link></span>
+                ))}
+              </p>
+            </li>
+          ))}
+        </ul>
+        <div className="prose overflow-x-auto hidden sm:block" style={{ maxWidth: "none" }}>
+          <table style={{ display: "table" }}>
+            <thead>
+              <tr><th>Задача</th><th>Подходящие камни</th><th>На что опирается</th></tr>
+            </thead>
+            <tbody>
+              {tasks.map((row) => (
+                <tr key={row.task}>
+                  <td className="font-semibold whitespace-nowrap">{row.task}</td>
+                  <td>
+                    {row.picked.map((s, i) => (
+                      <span key={s.slug}>{i > 0 && ", "}<Link href={`/kamni/${s.slug}`}>{s.name}</Link></span>
+                    ))}
+                  </td>
+                  <td>{row.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {(info?.forWomen || info?.forMen) && (
+        <section className="mt-10">
+          <h2 className="text-2xl mb-3">Рекомендации для женщины и для мужчины</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {info.forWomen && (
+              <div className="card p-5">
+                <h3 className="font-semibold text-lg mb-2">Для женщины</h3>
+                <p className="text-sm text-muted">{info.forWomen}</p>
+              </div>
+            )}
+            {info.forMen && (
+              <div className="card p-5">
+                <h3 className="font-semibold text-lg mb-2">Для мужчины</h3>
+                <p className="text-sm text-muted">{info.forMen}</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {info && (
         <section className="prose mt-10">
           <h2>Как носить камень знака {z.name}</h2>
@@ -118,6 +178,7 @@ export default async function StonesForSignPage({ params }: PageProps<"/kamni/po
       )}
 
       <ArticleLinks path={`/kamni/po-znaku-zodiaka/${znak}`} />
+      <RazborCta from="kamni-znak" />
       <Faq items={faq} />
 
       <section className="mt-10">
@@ -130,6 +191,18 @@ export default async function StonesForSignPage({ params }: PageProps<"/kamni/po
         </div>
       </section>
 
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: `Камни для знака ${z.name}: талисманы и как их носить`,
+          description: metaDescription(info?.why || z.description),
+          inLanguage: "ru",
+          mainEntityOfPage: `${SITE.url}${HUB}/${znak}`,
+          author: orgJsonLd(),
+          publisher: orgJsonLd(),
+        }}
+      />
       <JsonLd
         data={{
           "@context": "https://schema.org",

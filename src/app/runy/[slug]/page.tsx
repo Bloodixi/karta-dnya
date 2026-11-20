@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
+import RazborCta from "@/components/RazborCta";
 import RuneGlyph from "@/components/RuneGlyph";
 import { findRune, getRunes } from "@/lib/content";
+import { firstSentence } from "@/lib/meta";
 import { ATTS, neighbours, runeFaq, runesOfAtt } from "@/lib/runes";
 import { pageTitle, SITE, orgJsonLd } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
@@ -61,6 +63,14 @@ export default async function RunePage({ params }: PageProps<"/runy/[slug]">) {
         <article>
           <h1 className="text-3xl md:text-4xl font-semibold">Руна {r.name}: значение</h1>
           <p className="text-muted mt-2">Название переводится как «{r.translation}». Ключевые слова: {r.keywords.join(", ")}.</p>
+          <div className="card p-4 mt-4">
+            <p className="mono mb-2">Краткий ответ: руна {r.name}</p>
+            <dl className="grid gap-1.5 text-sm">
+              <div><dt className="inline font-semibold">Ключевой смысл: </dt><dd className="inline text-muted">«{r.translation}» — {r.keywords.slice(0, 3).join(", ")}.</dd></div>
+              <div><dt className="inline font-semibold">Прямо / перевёрнуто: </dt><dd className="inline text-muted">{firstSentence(r.upright)} {r.reversed ? `В перевёрнутом положении: ${firstSentence(r.reversed)}` : "Перевёрнутого положения нет — знак симметричен."}</dd></div>
+              <div><dt className="inline font-semibold">Совет: </dt><dd className="inline text-muted">{r.advice}</dd></div>
+            </dl>
+          </div>
           <div className="prose mt-4">
             <p>{r.about}</p>
             <h2>Значение в прямом положении</h2>
@@ -83,6 +93,7 @@ export default async function RunePage({ params }: PageProps<"/runy/[slug]">) {
       </div>
 
       <ArticleLinks path={`/runy/${slug}`} />
+      <RazborCta from="runa" />
       <Faq items={faq} />
 
       <section className="mt-10">

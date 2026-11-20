@@ -152,6 +152,7 @@ function DreamPage({ slug }: { slug: string }) {
   const img = findDreamImage(slug);
   const others = dreamNeighbours(slug, 6);
   const article = dreamArticle(slug);
+  const author = horoscopeAuthor();
   const moodLabel = d.mood === "warning" ? "предупреждение" : d.mood === "good" ? "благоприятный знак" : "нейтральный символ";
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
@@ -214,6 +215,8 @@ function DreamPage({ slug }: { slug: string }) {
         </Link>
       )}
       {d.long && <Faq items={d.long.faq} />}
+      <RazborCta from="sonnik" className="mt-8 max-w-[72ch]" />
+      {author && <AuthorCard author={author} note="редактор материалов" className="mt-8 max-w-[72ch]" />}
       <TelegramDaily campaign="sonnik-simvol" text="Карта дня, Луна и новые статьи о снах — каждое утро в 8:00 по Москве." />
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Другие символы</h2>
@@ -226,6 +229,19 @@ function DreamPage({ slug }: { slug: string }) {
           <Link href="/sonnik" className="chip hover:text-ink">все символы →</Link>
         </div>
       </section>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: `К чему снится ${d.word.toLowerCase()}: толкование сна`,
+          description: metaDescription(`${d.short} ${d.meaning}`),
+          ...(img ? { image: `${SITE.url}${img.file}` } : {}),
+          inLanguage: "ru",
+          mainEntityOfPage: `${SITE.url}/sonnik/${slug}`,
+          author: author ? authorJsonLd(author) : orgJsonLd(),
+          publisher: orgJsonLd(),
+        }}
+      />
     </article>
   );
 }
@@ -258,7 +274,17 @@ function StonePage({ slug }: { slug: string }) {
   const img = findStoneImage(slug);
   const zodiac = getZodiac();
   const signs = s.zodiac.map((z) => zodiac.find((x) => x.slug === z)).filter(Boolean);
+  const signNames = signs.map((z) => z!.name).join(", ");
   const related = relatedStones(slug, 6);
+  const faq = [
+    {
+      q: `Кому подходит камень ${s.name.toLowerCase()}?`,
+      a: `${signNames ? `По традиции ${s.name.toLowerCase()} чаще всего связывают со знаками: ${signNames}. ` : ""}Минерал ценят за свойства: ${s.properties.slice(0, 3).join(", ")} (чакра: ${s.chakra}). Также камень можно подобрать индивидуально по дате рождения.`,
+    },
+    { q: `Как носить и использовать ${s.name.toLowerCase()}?`, a: s.howToUse },
+    { q: `Как очищать ${s.name.toLowerCase()} и ухаживать за ним?`, a: s.care },
+  ];
+  const headline = s.name.length > 12 ? `${s.name}: свойства и кому подходит` : `${s.name}: свойства, кому подходит и как носить`;
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/kamni", label: "Камни" }, { href: `/kamni/${slug}`, label: s.name }]} />
@@ -293,8 +319,15 @@ function StonePage({ slug }: { slug: string }) {
             </p>
           </>
         )}
+        <p>
+          Помимо знака зодиака, камень подбирают по числу судьбы — проверить своё сочетание можно в{" "}
+          <Link href="/kamni/po-date-rozhdeniya">подборе камня по дате рождения</Link> или в{" "}
+          <Link href="/kamni/po-znaku-zodiaka">таблице по знакам</Link>.
+        </p>
       </div>
       <ArticleLinks path={`/kamni/${slug}`} />
+      <RazborCta from="kamen" />
+      <Faq items={faq} />
       {related.length > 0 && (
         <section className="mt-12">
           <div className="ornament mb-4 border-b border-line pb-2">
@@ -325,6 +358,19 @@ function StonePage({ slug }: { slug: string }) {
           </ul>
         </section>
       )}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline,
+          description: metaDescription(s.description),
+          ...(img ? { image: `${SITE.url}${img.file}` } : {}),
+          inLanguage: "ru",
+          mainEntityOfPage: `${SITE.url}/kamni/${slug}`,
+          author: orgJsonLd(),
+          publisher: orgJsonLd(),
+        }}
+      />
     </article>
   );
 }

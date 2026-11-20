@@ -132,6 +132,9 @@ export type NumerologyNumber = {
   weaknesses?: string[];
   compat?: { best: number[]; good: number[]; hard: number[]; text: string };
   advice?: string;
+  forWomen?: string;
+  forMen?: string;
+  finance?: string;
   faq?: Faq[];
 };
 export type NumerologyPair = { pair: string; percent: number; title: string; text: string; love: string; work: string; advice: string };
