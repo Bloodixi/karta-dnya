@@ -3,8 +3,11 @@ import Link from "next/link";
 import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import MoonPhase from "@/components/MoonPhase";
-import { horoscopeAuthor } from "@/lib/authors";
+import RazborCta from "@/components/RazborCta";
+import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
+import { SITE, orgJsonLd } from "@/lib/site";
 import { aspectRows, inSignRu, intoSignRu, monthEvents, mskDate, mskDateTime, mskTime, PHASE_EVENT_RU } from "@/lib/astro/calendar";
 import { BODY_NAMES_RU, mskNoon, SIGN_NAMES_RU, sky } from "@/lib/astro/engine";
 import { getAstroData } from "@/lib/astro/interpret";
@@ -44,6 +47,14 @@ export default function TransitsPage() {
       <h1 className="text-3xl md:text-4xl font-semibold">Транзиты планет на {formatDateRu(key)}</h1>
       <p className="text-muted mt-2 max-w-2xl">Небо дня для всех знаков: где стоят планеты, какие аспекты точны сегодня, кто ретрограден, и что ждёт в ближайший месяц. Из этих данных складываются наши гороскопы.</p>
       <p className="mono-text mt-2 normal-case">Рассчитано на {formatDateRu(key)}, 12:00 МСК · <Link href="/astrologiya/kak-my-schitaem" className="text-accent underline">как мы считаем</Link></p>
+      <section className="card p-4 md:p-5 mt-5" aria-labelledby="transits-answer">
+        <h2 id="transits-answer" className="text-lg font-semibold">Главное в транзитах сегодня</h2>
+        <p className="text-sm text-muted mt-1.5">
+          Сегодня {rows.length > 0 ? `действуют ${rows.length} точных мажорных аспекта` : "точных мажорных аспектов немного"}, Луна {inSignRu(s.positions.find((p) => p.body === "moon")!.sign)} ({phase.name.toLowerCase()}),{" "}
+          {retro.length > 0 ? `ретроградных планет: ${retro.length} (${retro.map((p) => BODY_NAMES_RU[p.body]).join(", ")})` : "все планеты идут прямо"}. Чтобы соотнести небо с вашей датой рождения, откройте{" "}
+          <Link href="/astrologiya/natalnaya-karta" className="text-accent-text underline">натальную карту</Link> или <Link href="/razbor" className="text-accent-text underline">персональный разбор</Link>.
+        </p>
+      </section>
 
       <section className="mt-8 grid gap-4 md:grid-cols-[1fr_280px]">
         <div className="card p-6">
@@ -150,6 +161,7 @@ export default function TransitsPage() {
 
       {author && <AuthorCard author={author} className="mt-10" />}
 
+      <RazborCta from="astrologiya-tranzity" className="mt-10" />
       <Faq items={FAQ} />
 
       <section className="mt-10">
@@ -162,6 +174,19 @@ export default function TransitsPage() {
           <Link href="/astrologiya/natalnaya-karta" className="btn btn-ghost">Натальная карта</Link>
         </div>
       </section>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: `Транзиты планет на ${formatDateRu(key)}`,
+          datePublished: key,
+          dateModified: key,
+          inLanguage: "ru",
+          mainEntityOfPage: `${SITE.url}/astrologiya/tranzity`,
+          author: author ? authorJsonLd(author) : orgJsonLd(),
+          publisher: orgJsonLd(),
+        }}
+      />
     </div>
   );
 }

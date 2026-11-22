@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/sonnik" },
 };
 
-const POPULAR = ["bumazhnye-dengi", "belaya-koshka", "zmeya", "voda", "zuby", "byvshiy", "beremennost", "pokoynik", "umershiy-rodstvennik", "koshka", "sobaka", "dengi", "svadba", "polet", "padenie", "volosy-vypadayut"];
+const POPULAR = ["bumazhnye-dengi", "belaya-koshka", "rebenok-plachet", "rebenok", "zmeya", "voda", "zuby", "byvshiy", "beremennost", "pokoynik", "umershiy-rodstvennik", "koshka", "sobaka", "dengi", "svadba", "polet", "padenie", "volosy-vypadayut"];
 
 export default function DreamsPage() {
   const dreams = getDreams();

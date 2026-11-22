@@ -3,9 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import RazborCta from "@/components/RazborCta";
 import TarotHint from "@/components/TarotHint";
-import { CLOCK_KINDS, DIGITS, clockDescription, clockFaq, clockSteps, clockTitle, compactTime, digitsOf, findClock, getClockNumbers, reduceDigit, relatedClocks } from "@/lib/clock";
+import { CLOCK_KINDS, DIGITS, clockDescription, clockFaq, clockSpellings, clockSteps, clockTitle, compactTime, digitsOf, findClock, getClockNumbers, firstSentence, reduceDigit, relatedClocks } from "@/lib/clock";
+import { SITE, orgJsonLd } from "@/lib/site";
 import { cardsOfNumber } from "@/lib/tarot-links";
 
 export const dynamicParams = false;
@@ -39,6 +41,7 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
   const { mirror, sameSum } = relatedClocks(c, all);
   const steps = clockSteps(c);
   const faq = clockFaq(c);
+  const spellings = clockSpellings(c.time);
   const kindWord = CLOCK_KINDS[c.kind].plural;
   const tarot = cardsOfNumber(c.sum);
   return (
@@ -55,8 +58,12 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
         </div>
         <div className="prose">
           <h1 className="text-3xl md:text-4xl !mt-0">{c.time} на часах: значение и что это значит</h1>
-          <p className="text-lg">{c.short}</p>
+          <div className="card p-4 not-prose mb-5">
+            <p className="font-semibold text-sm">Короткий ответ</p>
+            <p className="text-sm text-muted mt-1">{c.short} В любви: {firstSentence(c.love)}</p>
+          </div>
           {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+          <p>В поиске это время пишут по-разному — {spellings.slice(0, -1).join(", ")} или {spellings[spellings.length - 1]}, — но речь об одном и том же моменте на часах, и значение у него одно.</p>
           <h2>{c.time} в любви и отношениях</h2>
           <p>{c.love}</p>
           <h2>{c.time} в работе и деньгах</h2>
@@ -113,6 +120,18 @@ export default async function ClockPage({ params }: PageProps<"/numerologiya/chi
         <Link href={`/numerologiya/chisla-na-chasah/${prev.slug}`} className="btn btn-ghost">← {prev.time}</Link>
         <Link href={`/numerologiya/chisla-na-chasah/${next.slug}`} className="btn btn-ghost">{next.time} →</Link>
       </div>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: `${c.time} на часах: значение и что это значит`,
+          description: clockDescription(c),
+          inLanguage: "ru",
+          mainEntityOfPage: `${SITE.url}/numerologiya/chisla-na-chasah/${time}`,
+          author: orgJsonLd(),
+          publisher: orgJsonLd(),
+        }}
+      />
     </article>
   );
 }

@@ -87,48 +87,73 @@ export function clockSteps(c: ClockNumber): string[] {
   return digits.slice(0, 3).map((d) => DIGIT_STEPS[d]);
 }
 
-/** Title под запросы «12:21 на часах», «1221», «что значит», «в любви»: время в начале, не длиннее 60 знаков. */
+/** Как время пишут в поиске: 02:02 → «02 02», «0202», «02.02», «02-02». */
+export function clockSpellings(time: string): string[] {
+  const [h, m] = time.split(":");
+  return [`${h} ${m}`, `${h}${m}`, `${h}.${m}`, `${h}-${m}`];
+}
+
+/** Перечисление «а, б, в и г». */
+const listRu = (xs: string[]) => (xs.length > 1 ? `${xs.slice(0, -1).join(", ")} и ${xs[xs.length - 1]}` : xs[0] || "");
+
+/** Title под намерение «что значит 12:21 на часах»: время в начале, ответ на вопрос, не длиннее 60 знаков. */
 export function clockTitle(c: ClockNumber): string | { absolute: string } {
-  const t = c.time, n = compactTime(c.time);
+  const t = c.time;
   const opts = [
-    `${t} (${n}) на часах: значение в любви и что делать`,
-    `${t} на часах: значение в любви и что делать`,
-    `${t} на часах: что значит в любви`,
+    `${t} на часах — что значит: знак в любви и совет дня`,
+    `${t} на часах — что значит в любви и совет дня`,
+    `${t} на часах — что значит`,
   ];
-  // Без суффикса сайта: с ним вариант с «(1221)» длиннее 60 знаков, а оба написания времени важнее для запроса.
   return { absolute: opts.find((o) => o.length <= 60) || opts[opts.length - 1] };
 }
 
-/** Description 140–160 знаков: время и вид комбинации в начале, ключевые слова, затем что есть на странице. */
+/** Description до 155 знаков: время, его смысл по ключевым словам, затем повод открыть страницу. */
 export function clockDescription(c: ClockNumber): string {
   const t = c.time, n = compactTime(c.time);
   const k = CLOCK_KINDS[c.kind];
+  const hooks = [
+    `Что оно говорит об отношениях, какой шаг сделать сегодня и почему ${n} попадается снова.`,
+    `Что оно говорит об отношениях и какой шаг сделать сегодня.`,
+    `Что оно говорит о любви и совет на день.`,
+  ];
   const opts: string[] = [];
   for (let i = Math.min(3, c.keywords.length); i >= 1; i--) {
-    const kw = c.keywords.slice(0, i).join(", ");
-    opts.push(
-      `${t} (${n}) на часах — ${k.time}: ${kw}. Что значит ${n} в любви и отношениях, в работе и деньгах, что сделать сегодня и совет на день.`,
-      `${t} (${n}) на часах — ${k.time}: ${kw}. Значение в любви и отношениях, в работе и деньгах, что сделать, когда видите ${t}, и совет.`,
-      `${t} (${n}) на часах: ${kw}. Что значит это время в любви и в работе, что сделать сегодня, совет на день и похожие числа.`,
-    );
+    const kw = listRu(c.keywords.slice(0, i));
+    for (const h of hooks) opts.push(`${t} на часах — ${k.time}: ${kw}. ${h}`);
   }
-  const ok = opts.find((o) => o.length >= 140 && o.length <= 160);
+  const ok = opts.find((o) => o.length >= 130 && o.length <= 155);
   if (ok) return ok;
-  const fit = opts.filter((o) => o.length <= 160).sort((a, b) => b.length - a.length);
-  return fit[0] || opts[opts.length - 1].slice(0, 160);
+  const fit = opts.filter((o) => o.length <= 155).sort((a, b) => b.length - a.length);
+  return fit[0] || opts[opts.length - 1].slice(0, 155);
 }
 
-/** FAQ страницы: вопросы из данных + общие под запросы «в любви», «что делать», «сумма цифр». */
+const OFTEN_RE = /(часто|постоянно|регулярно|каждый день)/i;
+const SEE_RE = /(вижу|видеть|видишь)/i;
+
+/** FAQ страницы: вопросы из данных + общие под запросы «в любви», «часто вижу», «варианты написания», «сумма цифр». */
 export function clockFaq(c: ClockNumber): ClockFaq[] {
   const sum = reduceDigit(c.sum);
+  const often = `Что значит, если часто видишь ${c.time}?`;
+  let hasOften = false;
+  const base = c.faq.map((f) => {
+    if (!hasOften && OFTEN_RE.test(f.q) && SEE_RE.test(f.q) && !/^Что делать/i.test(f.q)) {
+      hasOften = true;
+      return { q: often, a: f.a };
+    }
+    return f;
+  });
+  const sp = clockSpellings(c.time);
+  const kw = listRu(c.keywords.slice(0, 3));
   const extra: ClockFaq[] = [
     { q: `Что значит ${c.time} на часах в любви?`, a: `${firstSentence(c.love)} ${c.advice}`.trim() },
+    ...(hasOften ? [] : [{ q: often, a: `Если ${c.time} попадается на глаза снова и снова, в нумерологии это читают как приглашение задержаться на теме времени: ${kw}. ${firstSentence(c.short)}` }]),
+    { q: `${listRu(sp)} на часах — это одно и то же?`, a: `Да, это одно и то же время — ${c.time}. Его просто записывают по-разному: с пробелом, слитно, через точку или дефис. Значение у всех вариантов одно: ${kw}.` },
     { q: `Что делать, если часто видишь ${c.time}?`, a: `Остановитесь на секунду и отметьте, о чём вы думали в этот момент: в этом и смысл подсказки. ${clockSteps(c)[0]}` },
     { q: `Какое число даёт ${c.time} в нумерологии?`, a: `Сумма цифр ${c.time} равна ${c.sum}${c.sum !== sum ? `, а сведённая к одной цифре — ${sum}` : ""}: ${DIGITS[sum].title.toLowerCase()}. ${DIGITS[sum].text}` },
   ];
-  const hasDo = c.faq.some((f) => /что делать/i.test(f.q));
+  const hasDo = base.some((f) => /что делать/i.test(f.q));
   const seen = new Set<string>();
-  return [...c.faq, ...extra.filter((f) => !(hasDo && /^Что делать/.test(f.q)))].filter((f) => {
+  return [...base, ...extra.filter((f) => !(hasDo && /^Что делать/.test(f.q)))].filter((f) => {
     const k = f.q.toLowerCase().replace(/[^а-яё0-9]/g, "");
     if (seen.has(k)) return false;
     seen.add(k);

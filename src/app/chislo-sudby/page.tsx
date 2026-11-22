@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DestinyCalc from "@/components/DestinyCalc";
+import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import NumerologyNav from "@/components/NumerologyNav";
 import TelegramBot from "@/components/TelegramBot";
@@ -12,9 +13,16 @@ import ArticleLinks from "@/components/ArticleLinks";
 
 export const metadata: Metadata = {
   title: "Число судьбы по дате рождения: расчёт и значение",
-  description: "Рассчитайте число судьбы по дате рождения онлайн за секунду и узнайте его значение: характер, любовь, работа, мастер-числа 11, 22 и 33.",
+  description: "Рассчитайте число судьбы по дате рождения онлайн за секунду: расшифровка чисел 1–9 и мастер-чисел 11, 22, 33 — характер, любовь, работа и прогноз.",
   alternates: { canonical: "/chislo-sudby" },
 };
+
+const DESTINY_FAQ = [
+  { q: "Как считается число судьбы по дате рождения?", a: "Сложите все цифры дня, месяца и года рождения. Если получилась сумма больше 9, складывайте её цифры дальше до однозначного числа 1–9 или остановитесь на мастер-числах 11, 22 и 33." },
+  { q: "Что такое мастер-числа 11, 22 и 33?", a: "Это управляющие числа, которые в классической нумерологии не сворачивают до 2, 4 и 6: они дают повышенную чувствительность, масштаб задач и дополнительную ответственность." },
+  { q: "Чем число судьбы отличается от квадрата Пифагора?", a: "Число судьбы задаёт главный вектор жизненного пути одной цифрой, а квадрат Пифагора показывает распределение девяти качеств (характер, энергия, логика, труд) по всем цифрам даты." },
+  { q: "Как связать число судьбы с прогнозом на 2027 год?", a: "После расчёта числа судьбы проверьте свой личный год 2027 и полный разбор по дате рождения: он соединяет базовый характер с тоном каждого месяца." },
+];
 
 export default function DestinyPage() {
   const numbers = getNumerology();
@@ -52,6 +60,7 @@ export default function DestinyPage() {
       )}
       <ArticleLinks path="/chislo-sudby" />
       <RazborCta from="chislo-sudby" />
+      <Faq items={DESTINY_FAQ} />
       <p className="mt-6 text-sm text-muted">Также посмотрите <Link className="text-accent-text underline" href="/numerologiya/lichnyy-god">калькулятор личного года</Link> и <Link className="text-accent-text underline" href="/numerologiya/2027">нумерологический прогноз на 2027 год</Link>.</p>
       <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Калькулятор числа судьбы", url: `${SITE.url}/chislo-sudby`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
       <NumerologyNav current="/chislo-sudby" />

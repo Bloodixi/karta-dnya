@@ -144,6 +144,17 @@ export default async function SignPage({ params }: PageProps<"/goroskop/[sign]">
       <div className="mt-4"><PeriodNav current="segodnya" sign={z.slug} /></div>
       {h && <div className="mt-4"><HoroscopeCard h={h} /></div>}
       {h && <GenderHoroscope h={h} />}
+      <section className="card p-4 md:p-5 mt-6" aria-labelledby="sign-quick">
+        <h2 id="sign-quick" className="text-lg font-semibold">Короткий маршрут для знака {z.name}</h2>
+        <p className="text-sm text-muted mt-1.5">
+          {z.name} — знак стихии «{z.element}» под управлением {z.planet} ({z.dates}). Сверьте{" "}
+          <Link href={`/goroskop/${z.slug}/zavtra`} className="text-accent-text underline">прогноз на завтра</Link>,{" "}
+          <Link href={`/goroskop/${z.slug}/2027`} className="text-accent-text underline">подробный гороскоп на 2027 год</Link> и{" "}
+          <Link href="/astrologiya/tranzity" className="text-accent-text underline">транзиты планет сегодня</Link>, а для индивидуального портрета —{" "}
+          <Link href="/astrologiya/natalnaya-karta" className="text-accent-text underline">натальную карту</Link> или{" "}
+          <Link href="/razbor" className="text-accent-text underline">персональный разбор</Link>.
+        </p>
+      </section>
       <Year2027Teaser sign={z.slug} name={z.name} />
 
       <section className="prose mt-10">
