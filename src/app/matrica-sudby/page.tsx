@@ -100,7 +100,7 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: PATH, label: "Матрица судьбы" }]} />
       <h1 className="text-3xl md:text-4xl">Матрица судьбы по дате рождения</h1>
-      <p className="text-muted mt-3 max-w-2xl text-lg">Введите дату рождения и получите арканы дня, месяца, года и центр матрицы с краткими трактовками. Расчёт по классической схеме, значения — на страницах 22 арканов.</p>
+      <p className="text-muted mt-3 max-w-2xl text-lg">Матрица судьбы — это метод самопознания по дате рождения, основанный на 22 старших арканах Таро. Введите дату, чтобы рассчитать арканы дня, месяца, года, центр матрицы и личное предназначение с краткими трактовками по классической схеме и ссылками на подробные значения каждого аркана.</p>
 
       <div className="card p-6 mt-6 max-w-3xl">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
@@ -123,7 +123,7 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
           <li><strong>Личное предназначение</strong> — сумма неба (B + D) и земли (A + C).</li>
         </ul>
         <p>Пример: 14.03.1987. A = 14, B = 3, год 1 + 9 + 8 + 7 = 25 → 2 + 5 = 7, C = 7. D = 14 + 3 + 7 = 24 → 6. Центр E = 14 + 3 + 7 + 6 = 30 → 3 + 0 = 3. Центральный аркан — 3, Императрица.</p>
-        <p>Нумерация арканов совпадает со старшими арканами Таро: аркан 22 соответствует Шуту (карта 0). Значения арканов связаны со страницами карт на сайте, например <Link href="/taro/karty/mag">Маг</Link> и <Link href="/taro/karty/imperatritsa">Императрица</Link>. Если интересуют числа даты рождения без арканов, посмотрите <Link href="/numerologiya/po-date-rozhdeniya">нумерологию по дате рождения</Link> и <Link href="/chislo-sudby">число судьбы</Link>.</p>
+        <p>Нумерация арканов совпадает со старшими арканами Таро: аркан 22 соответствует Шуту (карта 0). Значения арканов связаны со страницами карт на сайте, например <Link href="/taro/karty/mag">Маг</Link> и <Link href="/taro/karty/imperatritsa">Императрица</Link>. Если интересуют числа даты рождения без арканов, посмотрите <Link href="/numerologiya/po-date-rozhdeniya">нумерологию по дате рождения</Link>, <Link href="/chislo-sudby">число судьбы</Link>, <Link href="/numerologiya/lichnyy-god">личный год</Link> и <Link href="/numerologiya/2027">прогноз на 2027 год</Link>.</p>
       </section>
 
       <section className="mt-10">

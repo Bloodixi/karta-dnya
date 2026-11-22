@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DestinyCalc from "@/components/DestinyCalc";
+import JsonLd from "@/components/JsonLd";
 import NumerologyNav from "@/components/NumerologyNav";
 import TelegramBot from "@/components/TelegramBot";
 import RazborCta from "@/components/RazborCta";
 import { getArticles, getNumerology } from "@/lib/content";
+import { SITE } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
 
 export const metadata: Metadata = {
@@ -24,7 +26,7 @@ export default function DestinyPage() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/chislo-sudby", label: "Число судьбы" }]} />
       <h1 className="text-3xl md:text-4xl font-semibold">Число судьбы по дате рождения</h1>
-      <p className="text-muted mt-3 max-w-2xl text-lg">Сложите все цифры даты рождения до одной цифры, кроме мастер-чисел 11, 22 и 33. Калькулятор сделает это за вас и покажет значение. Нужны сразу все числа даты и имени — откройте <Link className="text-accent-text underline" href="/numerologiya/po-date-rozhdeniya">нумерологию по дате рождения</Link>, а для разбора через 22 аркана — <Link className="text-accent-text underline" href="/matrica-sudby">матрицу судьбы</Link>.</p>
+      <p className="text-muted mt-3 max-w-2xl text-lg">Число судьбы (жизненного пути) — это сумма всех цифр даты рождения, свёрнутая до одной цифры от 1 до 9 или мастер-числа 11, 22 и 33. Оно описывает главный вектор характера, таланты, любовь и работу. Калькулятор рассчитает его за секунду. Нужны сразу все числа даты — откройте <Link className="text-accent-text underline" href="/numerologiya/po-date-rozhdeniya">нумерологию по дате рождения</Link>, а для разбора через 22 аркана — <Link className="text-accent-text underline" href="/matrica-sudby">матрицу судьбы</Link>.</p>
       <div className="mt-6 max-w-2xl">
         <DestinyCalc numbers={numbers} />
         <TelegramBot from="chislo-sudby" className="mt-6" />
@@ -50,6 +52,8 @@ export default function DestinyPage() {
       )}
       <ArticleLinks path="/chislo-sudby" />
       <RazborCta from="chislo-sudby" />
+      <p className="mt-6 text-sm text-muted">Также посмотрите <Link className="text-accent-text underline" href="/numerologiya/lichnyy-god">калькулятор личного года</Link> и <Link className="text-accent-text underline" href="/numerologiya/2027">нумерологический прогноз на 2027 год</Link>.</p>
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Калькулятор числа судьбы", url: `${SITE.url}/chislo-sudby`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
       <NumerologyNav current="/chislo-sudby" />
     </div>
   );

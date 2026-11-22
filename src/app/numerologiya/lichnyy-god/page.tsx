@@ -3,18 +3,20 @@ import Form from "next/form";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import NumerologyNav from "@/components/NumerologyNav";
 import RazborCta from "@/components/RazborCta";
 import { DateField, FormError, NumberField, ShareLink, dateErrorText } from "@/components/NumerologyFields";
 import ScrollToResult from "@/components/ScrollToResult";
 import { getPersonalYears } from "@/lib/content";
 import { currentYearMsk, formatDate, parseDate, personalMonth, personalYear } from "@/lib/numerology";
+import { orgJsonLd, pageTitle, SITE } from "@/lib/site";
 
 const PATH = "/numerologiya/lichnyy-god";
 
 export const metadata: Metadata = {
-  title: "Личный год в нумерологии: расчёт онлайн и значение",
-  description: "Калькулятор личного года по дате рождения: какой год девятилетнего цикла идёт у вас сейчас, значение всех девяти лет, личные месяцы и совет на этот этап.",
+  title: pageTitle("Личный год 2027 по дате рождения: расчёт онлайн и прогноз"),
+  description: "Калькулятор личного года 2027 по дате рождения: формула расчёта (число года 11/2), значение всех девяти личных лет, личные месяцы и прогноз на 2027 год.",
   alternates: { canonical: PATH },
 };
 
@@ -32,10 +34,11 @@ const MONTH_HINTS: Record<number, string> = {
 };
 
 const FAQ = [
+  { q: "Как рассчитать личный год 2027 по дате рождения?", a: "Сложите день и месяц рождения, каждый свёрнутый до одной цифры, и прибавьте 2 — основу 2027 года (2 + 0 + 2 + 7 = 11 → 2). Итоговую сумму сверните до числа от 1 до 9. Например, для 14 марта: (1 + 4) + 3 + 2 = 10 → 1." },
   { q: "Когда начинается личный год: 1 января или в день рождения?", a: "Есть обе традиции. Мы считаем от 1 января, как большинство русскоязычных источников. Если ваш день рождения ближе к концу года, можно читать новый год постепенно: с января темы начинают проступать, а после дня рождения звучат в полную силу." },
   { q: "Почему личный год не бывает 11 или 22?", a: "В расчёте личного года мастер-числа принято сводить до одной цифры: цикл состоит из девяти лет, и каждый год описывает одну из девяти тем. Если промежуточная сумма даёт 11 или 22, читайте 2 или 4 с поправкой на усиленную чувствительность." },
   { q: "Что такое личный месяц?", a: "Личный год плюс номер месяца, свёрнутые до одной цифры. Он показывает, какая тема года звучит в конкретном месяце. Таблица месяцев появляется после расчёта." },
-  { q: "Можно ли посчитать прошлый или будущий год?", a: "Да. Введите любой год в поле «Год», и калькулятор покажет его номер в цикле. Удобно проверить, как читались уже прожитые годы, и понять логику цикла." },
+  { q: "Можно ли посчитать прошлый или будущий год?", a: "Да. Введите любой год в поле «Год» (например, 2027), и калькулятор покажет его номер в цикле. Удобно проверить, как читались уже прожитые годы, и понять логику цикла." },
 ];
 
 export default async function PersonalYearPage({ searchParams }: PageProps<typeof PATH>) {
@@ -91,8 +94,16 @@ export default async function PersonalYearPage({ searchParams }: PageProps<typeo
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: PATH, label: "Личный год" }]} />
-      <h1 className="text-3xl md:text-4xl">Личный год по дате рождения</h1>
-      <p className="text-muted mt-3 max-w-2xl text-lg">Жизнь в нумерологии делится на циклы по девять лет, и у каждого года своя тема: начало, рост, перемены, итоги. Введите дату рождения и узнайте, какой год идёт у вас в {now}-м.</p>
+      <h1 className="text-3xl md:text-4xl">Личный год 2027 по дате рождения</h1>
+      <p className="text-muted mt-3 max-w-2xl text-lg">Жизнь в нумерологии делится на циклы по девять лет, и у каждого года своя тема: начало, рост, перемены, итоги. Введите дату рождения и узнайте свой личный год на {now}-й или 2027-й.</p>
+
+      <section className="card p-5 mt-5 max-w-3xl">
+        <p className="text-sm leading-relaxed">
+          <strong>Коротко о 2027 годе:</strong> сумма цифр 2 + 0 + 2 + 7 = <strong>11</strong> (мастер-число года и аркан XI «Справедливость», основа <strong>2</strong>). Чтобы рассчитать личный год 2027 по дате рождения, сложите свёрнутые до одной цифры день и месяц рождения и прибавьте <strong>2</strong>. Подробнее о фоне года — в{" "}
+          <Link href="/numerologiya/2027" className="text-accent-text underline">нумерологическом прогнозе на 2027 год</Link> и{" "}
+          <Link href="/astrologiya/zatmeniya-2027" className="text-accent-text underline">календаре затмений 2027</Link>.
+        </p>
+      </section>
 
       <div className="card p-6 mt-6 max-w-3xl">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
@@ -106,7 +117,7 @@ export default async function PersonalYearPage({ searchParams }: PageProps<typeo
       {result}
       <ScrollToResult key={`${date?.iso}-${year}`} id="rezultat" when={!!date} />
 
-      <RazborCta from="lichnyy-god" date={date?.iso} />
+      <RazborCta from="lichnyy-god-2027" date={date?.iso} />
 
       <section className="mt-12">
         <div className="ornament mb-4"><h2 className="text-2xl">Девять личных лет</h2><span className="mono">значение каждого</span></div>
@@ -129,6 +140,17 @@ export default async function PersonalYearPage({ searchParams }: PageProps<typeo
 
       <Faq items={FAQ} />
       <NumerologyNav current={PATH} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: "Личный год 2027 по дате рождения: расчёт онлайн и прогноз",
+          url: `${SITE.url}${PATH}`,
+          inLanguage: "ru",
+          author: orgJsonLd(),
+          publisher: orgJsonLd(),
+        }}
+      />
     </div>
   );
 }

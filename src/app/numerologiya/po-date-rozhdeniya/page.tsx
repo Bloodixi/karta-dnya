@@ -3,11 +3,13 @@ import Form from "next/form";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import NumerologyNav from "@/components/NumerologyNav";
 import RazborCta from "@/components/RazborCta";
 import { DateField, FormError, ShareLink, TextField } from "@/components/NumerologyFields";
 import { getBirthdayNumbers, getLuckyNumbers, getNameNumbers, getNumerology, getPersonalYears } from "@/lib/content";
 import { birthdayNumber, cleanName, currentYearMsk, destinyNumber, formatDate, isMaster, luckyNumbers, nameNumbers, parseDate, personalYear } from "@/lib/numerology";
+import { SITE } from "@/lib/site";
 
 const PATH = "/numerologiya/po-date-rozhdeniya";
 
@@ -119,7 +121,7 @@ export default async function NumerologyByDatePage({ searchParams }: PageProps<t
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: PATH, label: "По дате рождения" }]} />
       <h1 className="text-3xl md:text-4xl">Нумерология по дате рождения и имени</h1>
-      <p className="text-muted mt-3 max-w-2xl text-lg">Один расчёт вместо шести: число судьбы, число дня рождения, числа имени, души и личности, личный год и счастливые числа. Введите дату, при желании имя, и получите портрет с понятными трактовками.</p>
+      <p className="text-muted mt-3 max-w-2xl text-lg">Нумерология по дате рождения рассчитывает ключевые числа личности из суммы цифр дня, месяца и года: число судьбы (жизненного пути), число дня рождения, личный год и счастливые числа. Добавьте имя, чтобы получить числа выражения, души и личности с подробными трактовками онлайн.</p>
 
       <div className="card p-6 mt-6 max-w-3xl">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
@@ -144,7 +146,7 @@ export default async function NumerologyByDatePage({ searchParams }: PageProps<t
         <h3>Числа имени, души и личности</h3>
         <p>Каждой букве соответствует цифра по таблице русского алфавита. Сумма всех букв даёт число имени (выражения), сумма гласных — число души, сумма согласных — число личности. Подробная таблица и значения на странице <Link href="/numerologiya/chislo-imeni">числа имени</Link>.</p>
         <h3>Личный год</h3>
-        <p>День и месяц рождения складываются с текущим годом. Получается число от 1 до 9, которое описывает этап девятилетнего цикла: начало, рост, перемены, итоги. Подробнее в <Link href="/numerologiya/lichnyy-god">калькуляторе личного года</Link>.</p>
+        <p>День и месяц рождения складываются с текущим годом. Получается число от 1 до 9, которое описывает этап девятилетнего цикла: начало, рост, перемены, итоги. Подробнее в <Link href="/numerologiya/lichnyy-god">калькуляторе личного года</Link> и в <Link href="/numerologiya/2027">нумерологическом прогнозе на 2027 год</Link>.</p>
         <h3>Счастливые числа</h3>
         <p>Число судьбы, сведённое к 1–9, и ряд чисел, которые к нему сводятся (например, 3, 12, 21, 30). Это числа, которые по традиции считают удачными для важных дат и выборов. Подробнее на странице <Link href="/numerologiya/schastlivoe-chislo">счастливого числа</Link>.</p>
         <h2>Как мы считаем</h2>
@@ -153,6 +155,7 @@ export default async function NumerologyByDatePage({ searchParams }: PageProps<t
       </section>
 
       <Faq items={FAQ} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Калькулятор нумерологии по дате рождения и имени", url: `${SITE.url}${PATH}`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
       <NumerologyNav current={PATH} />
     </div>
   );

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import JsonLd from "@/components/JsonLd";
 import RazborCta from "@/components/RazborCta";
 import Faq from "@/components/Faq";
 import { getSpreads, spreadHref } from "@/lib/content";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Расклады Таро онлайн: 10 бесплатных раскладов",
@@ -29,7 +31,7 @@ export default function SpreadsHubPage() {
       <Breadcrumbs items={[{ href: "/taro", label: "Таро" }, { href: "/taro/rasklady", label: "Расклады" }]} />
       <h1 className="text-3xl md:text-4xl">Расклады Таро онлайн</h1>
       <div className="mt-3 max-w-3xl grid gap-3 text-lg text-muted">
-        <p>Здесь собраны десять раскладов Таро, которые можно сделать онлайн бесплатно: от одной карты на короткий вопрос до годового круга из двенадцати карт. Каждый расклад открывается на своей странице с описанием позиций, порядком чтения и ответами на частые вопросы. Карты вытягиваются случайно из полной колоды Райдера–Уэйта в 78 карт, часть выпадает перевёрнутыми, и под каждой картой показано короткое значение именно для её положения.</p>
+        <p>Онлайн-расклады Таро помогают бесплатно получить подсказку по вопросу на полную колоду Райдера–Уэйта из 78 карт. Здесь собраны десять раскладов: от одной карты и гадания «да или нет» до «Кельтского креста» и годового круга. Карты вытягиваются случайно с учётом перевёрнутых положений и сразу показывают краткое значение.</p>
         <p>Расклад стоит выбирать по вопросу, а не по числу карт. Когда нужен быстрый ответ, достаточно одной карты или гадания «да или нет». Если важно увидеть ситуацию во времени, подойдут три карты или «Подкова». Чувства и пару лучше рассматривать через расклады на любовь и отношения, а для серьёзного запутанного вопроса есть «Кельтский крест». Для ежедневной практики подойдут «Совет дня» и <Link href="/karta-dnya" className="text-accent-text underline">карта дня</Link>, а значения всех карт собраны в <Link href="/taro/karty" className="text-accent-text underline">каталоге карт Таро</Link>.</p>
       </div>
 
@@ -64,6 +66,7 @@ export default function SpreadsHubPage() {
         <p>Перевёрнутые карты читаются как ослабленное, задержанное или внутреннее проявление значения, а не как противоположность. Если хотите разобраться глубже, начните с <Link href="/taro/kak-nachat-gadat-na-taro">руководства для новичков</Link> и подробного разбора <Link href="/taro/tri-karty">расклада на три карты</Link>.</p>
       </section>
       <Faq items={FAQ} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Расклады Таро онлайн", url: `${SITE.url}/taro/rasklady`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
     </div>
   );
 }

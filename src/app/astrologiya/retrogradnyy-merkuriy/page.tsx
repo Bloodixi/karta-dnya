@@ -4,6 +4,7 @@ import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
+import RazborCta from "@/components/RazborCta";
 import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
 import { inSignRu, mskDate, mskDateTime, retroPeriodsByYears, retroStatus, type RetroPeriod } from "@/lib/astro/calendar";
 import { SIGN_NAMES_RU } from "@/lib/astro/engine";
@@ -65,6 +66,15 @@ export default async function MercuryRetroPage() {
       <h1 className="text-3xl md:text-4xl font-semibold">Ретроградный Меркурий {y} и {y + 1}: даты, что делать</h1>
       <p className="text-muted mt-2 max-w-2xl">Точные моменты разворотов по эфемеридам, знаки, в которых они происходят, и спокойное объяснение, что это значит на практике.</p>
 
+      <section className="card p-5 mt-6 border-gold/40" aria-label="Короткий ответ">
+        <p className="mono">коротко</p>
+        <p className="mt-1 text-sm md:text-base">
+          В 2027 году Меркурий будет ретроградным трижды: <strong>9 февраля – 3 марта</strong> (Рыбы → Водолей),{" "}
+          <strong>10 июня – 4 июля</strong> (Рак → Близнецы) и <strong>7 – 28 октября</strong> (Скорпион → Весы).
+          В эти недели лучше не спешить с новыми запусками, а перепроверять договорённости, документы, билеты и завершать отложенные дела.
+        </p>
+      </section>
+
       {upcoming && <NearestBlock p={upcoming} now={now} />}
 
       <section className="card p-6 mt-6">
@@ -86,18 +96,20 @@ export default async function MercuryRetroPage() {
         <div className="prose overflow-x-auto" style={{ maxWidth: "none" }}>
           <table style={{ display: "table" }}>
             <thead>
-              <tr><th>Начало (МСК)</th><th>Конец (МСК)</th><th>Знак</th><th>Длительность</th></tr>
+              <tr><th>Начало (МСК)</th><th>Конец (МСК)</th><th>Знак</th><th>Длительность</th><th>Рекомендация</th></tr>
             </thead>
             <tbody>
               {periods.map((p) => {
                 const active = upcoming === p && new Date(p.start).getTime() <= now.getTime();
                 const signs = p.startSign === p.endSign ? SIGN_NAMES_RU[p.startSign] : `${SIGN_NAMES_RU[p.startSign]} → ${SIGN_NAMES_RU[p.endSign]}`;
+                const tip = signFocus(p.startSign)?.tips[0] ?? CALM_TIPS[0];
                 return (
                   <tr key={p.start} className={active ? "font-semibold" : ""}>
                     <td>{mskDateTime(p.start, true)}</td>
                     <td>{mskDateTime(p.end, true)}</td>
                     <td>{signs}</td>
                     <td>{p.days} дн.{active ? " · идёт сейчас" : ""}</td>
+                    <td>{tip}</td>
                   </tr>
                 );
               })}
@@ -131,6 +143,8 @@ export default async function MercuryRetroPage() {
       )}
 
       {author && <AuthorCard author={author} className="mt-10" />}
+
+      <RazborCta from="retro-merkuriy-2027" />
 
       <Faq items={faq} />
 
