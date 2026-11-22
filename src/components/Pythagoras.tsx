@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { todayIso } from "@/components/NumerologyFields";
-import RazborLink from "@/components/RazborLink";
+import RazborCta from "@/components/RazborCta";
 import ScrollToResult from "@/components/ScrollToResult";
 import { isValidDate } from "@/lib/numerology";
 import { pythagoras } from "@/lib/pythagoras";
@@ -85,10 +85,7 @@ export default function Pythagoras() {
               </ul>
             </div>
           </div>
-          <p className="mt-5 text-sm text-muted">
-            Квадрат Пифагора входит в полный разбор вместе с числом судьбы и личным годом.{" "}
-            <RazborLink from="kvadrat-pifagora-kalkulyator" date={date} className="text-accent-text underline">Бесплатная часть разбора по этой дате</RazborLink>
-          </p>
+          <RazborCta from="kvadrat-pifagora-kalkulyator" date={date} className="mt-6" />
         </div>
       )}
     </div>

@@ -183,7 +183,7 @@ export function PaymentWaiter({ order, max = 71, fallback }: { order: string; ma
  * Липкая кнопка оплаты на телефоне: видна, пока читаешь бесплатную часть (`from`), и прячется,
  * как только блок оплаты (`to`) дошёл до экрана или остался выше. Стоит над нижней панелью TabBar.
  */
-export function RazborStickyCta({ price, from = "razbor-teaser", to = "oplata", label = "Открыть полный разбор" }: { price: number; from?: string; to?: string; label?: string }) {
+export function RazborStickyCta({ price, from = "razbor-teaser", to = "oplata", label = "Открыть полный разбор", counter }: { price: number; from?: string; to?: string; label?: string; counter?: string }) {
   const [show, setShow] = useState(false);
   useEffect(() => {
     const start = document.getElementById(from);
@@ -213,7 +213,7 @@ export function RazborStickyCta({ price, from = "razbor-teaser", to = "oplata", 
       inert={!show}
       className={`md:hidden no-print fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-bg/95 backdrop-blur px-4 py-2.5 transition-[opacity,transform,visibility] duration-200 ${show ? "opacity-100 translate-y-0" : "invisible opacity-0 translate-y-2"}`}
     >
-      <a href={`#${to}`} className="btn w-full justify-center">
+      <a href={`#${to}`} className="btn w-full justify-center" onClick={() => reachGoal(counter, "razbor_sticky_click")}>
         {label} — {price} ₽
       </a>
     </div>
@@ -222,16 +222,27 @@ export function RazborStickyCta({ price, from = "razbor-teaser", to = "oplata", 
 
 const FIELD = "border border-line rounded-lg px-3 py-2 bg-surface min-w-0";
 
+/** Доверие перед кнопками оплаты: ссылка и чек, гарантия возврата, ЮKassa. */
+export function PayTrustList() {
+  return (
+    <ul className="mt-4 grid gap-1 text-sm text-muted list-none p-0" aria-label="Как проходит оплата">
+      <li>✓ Ссылка и чек придут на e-mail сразу после оплаты</li>
+      <li>✓ Если разбор не открылся по технической ошибке — вернём деньги полностью (<Link href="/vozvrat" className="underline underline-offset-4">условия возврата</Link>)</li>
+      <li>✓ Оплату принимает ЮKassa, данные карты мы не видим</li>
+    </ul>
+  );
+}
+
 /** Кнопки оплаты: СБП и карта (name="method" — выбор способа в ЮKassa). */
 export function PayButtons({ price }: { price: number }) {
   return (
     <>
-      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1">
+      <div className="mt-5 flex flex-wrap items-center gap-3">
         <button type="submit" name="method" value="sbp" className="btn btn-lg max-sm:w-full">
           Оплатить {price} ₽ по СБП
         </button>
-        <button type="submit" name="method" value="" className="min-h-11 text-sm text-accent-text underline underline-offset-4 cursor-pointer max-sm:mx-auto">
-          Картой или другим способом
+        <button type="submit" name="method" value="" className="btn btn-ghost max-sm:w-full">
+          Картой, ЮMoney или SberPay
         </button>
       </div>
       <p className="text-xs text-muted mt-2">СБП — оплата по QR-коду или в приложении банка, без ввода карты.</p>
@@ -492,13 +503,7 @@ export function RazborGiftFields({ counter, date, name: initialName, today, maxD
         {gift ? "Твой e-mail — пришлём сюда ссылку на разбор и чек" : packOn ? "E-mail — пришлём сюда обе ссылки и чек" : "E-mail — пришлём сюда ссылку на разбор и чек"}
         <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={err === "email" || undefined} className={FIELD} />
       </label>
-      {price ? (
-        <ul className="mt-4 grid gap-1 text-sm text-muted list-none p-0" aria-label="Как проходит оплата">
-          <li>✓ Ссылка и чек придут на e-mail сразу после оплаты</li>
-          <li>✓ Если разбор не открылся по технической ошибке — вернём деньги полностью (<Link href="/vozvrat" className="underline underline-offset-4">условия возврата</Link>)</li>
-          <li>✓ Оплату принимает ЮKassa, данные карты мы не видим</li>
-        </ul>
-      ) : null}
+      {price ? <PayTrustList /> : null}
       {price ? <PayButtons price={packOn && offer ? offer.total : price} /> : null}
     </>
   );

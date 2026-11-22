@@ -39,8 +39,7 @@ const WHAT: Record<Product, string> = {
 async function send(o: Order): Promise<void> {
   const product = productOf(o.product);
   const what = o.gift && product === "razbor" ? "разбор по дате рождения в подарок" : WHAT[product];
-  const [pathQ, hash = ""] = resumePath(o).split("#");
-  const url = `${SITE.url}${pathQ}${pathQ.includes("?") ? "&" : "?"}from=abandon${hash ? `#${hash}` : ""}`;
+  const url = `${SITE.url}${resumePath(o, "abandon")}`;
   const subject = `${o.test ? "[ТЕСТ] " : ""}Оплата не завершилась — ${PRODUCTS[product].short.toLowerCase()}`;
   const text = [
     "Здравствуй!",

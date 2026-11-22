@@ -491,7 +491,7 @@ export function buildRazbor(i: RazborInput): RazborDoc {
 /** Сколько месяцев прогноза открыто в бесплатной части. */
 const TEASER_MONTHS = 3;
 
-/** Бесплатная часть: числа (расчёт свёрнут), начало «сути», тема личного года одной фразой, три ближайших месяца и оглавление закрытых разделов. */
+/** Бесплатная часть: числа (расчёт свёрнут), начало «сути», первый абзац личного года, три ближайших месяца и оглавление закрытых разделов. */
 export function buildTeaser(i: RazborInput): RazborTeaser {
   const doc = buildRazbor(i);
   const get = (id: string) => doc.sections.find((s) => s.id === id)!;
@@ -508,7 +508,7 @@ export function buildTeaser(i: RazborInput): RazborTeaser {
     sections: [
       get("chisla"),
       { ...sut, blocks: sut.blocks.slice(0, 2) },
-      { ...god, blocks: godFirst ? [{ kind: "p", text: firstSentence(godFirst.text) }] : [] },
+      { ...god, blocks: godFirst ? [godFirst] : [] },
       { ...mes, blocks: [{ kind: "months", items: open }] },
     ],
     locked: RAZBOR_TOC.filter((t) => !shown.has(t.id)),

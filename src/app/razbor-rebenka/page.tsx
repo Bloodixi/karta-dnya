@@ -13,7 +13,7 @@ import RazborPreview from "@/components/RazborPreview";
 import RazborView from "@/components/RazborView";
 import RazborWhoWrote, { RazborPriceAside } from "@/components/RazborWhoWrote";
 import ScrollToResult from "@/components/ScrollToResult";
-import { PayButtons, RazborCheckoutForm, RazborGoal, RazborStickyCta } from "@/components/RazborClient";
+import { PayButtons, PayTrustList, RazborCheckoutForm, RazborGoal, RazborStickyCta } from "@/components/RazborClient";
 import { cleanName, parseDate } from "@/lib/numerology";
 import { ageAt, nowMsk } from "@/lib/razbor";
 import { buildChildTeaser, CHILD, CHILD_MAX_AGE, CHILD_TOC, childReady } from "@/lib/razborChild";
@@ -110,13 +110,22 @@ export default async function ChildRazborPage({ searchParams }: PageProps<"/razb
                 <a href="#oplata" className="text-accent-text underline">перейти к оплате</a>
               </p>
               <RazborView sections={teaser.sections} toc={false} />
-              <RazborLocked items={teaser.locked} label={`Ещё ${teaser.locked.length} разделов в полном разборе`} />
-              {ready ? <RazborStickyCta price={price} from="teaser" label="Открыть детский разбор" /> : null}
+              <RazborLocked
+                items={teaser.locked}
+                label={`Ещё ${teaser.locked.length} разделов в полном разборе`}
+                cta={ready ? { href: "#oplata", label: `Открыть полный разбор — ${price} ₽` } : undefined}
+              />
+              {ready ? <RazborStickyCta price={price} from="teaser" label="Открыть детский разбор" counter={counter} /> : null}
             </section>
           )}
 
           <section id="oplata" className="mt-6 max-w-3xl scroll-mt-24">
             <div className="card p-6 frame-gold">
+              {teaser && date ? (
+                <p className="mb-4 rounded-lg border border-accent/40 bg-sunk px-4 py-2.5 text-sm">
+                  Документ для {teaser.date}{teaser.who ? ` · ${teaser.who}` : ""} готов к открытию сразу после оплаты.
+                </p>
+              ) : null}
               <div className="flex flex-col gap-6 md:grid md:grid-cols-[minmax(0,1fr)_17rem] md:items-start">
                 <div className="min-w-0">
                   <p className="mono">Полный детский разбор</p>
@@ -155,6 +164,7 @@ export default async function ChildRazborPage({ searchParams }: PageProps<"/razb
                     Твой e-mail — пришлём сюда ссылку на разбор и чек
                     <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" aria-invalid={err === "email" || undefined} className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
                   </label>
+                  <PayTrustList />
                   <PayButtons price={price} />
                   <p className="text-xs text-muted mt-3 max-w-md">
                     Нажимая кнопку, ты принимаешь условия <Link href="/oferta" className="underline">оферты</Link>. Оплата через ЮKassa. Разбор носит развлекательный и ознакомительный характер.

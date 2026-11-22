@@ -109,13 +109,22 @@ export default async function CompatRazborPage({ searchParams }: PageProps<"/sov
                 <a href="#oplata" className="text-accent-text underline">перейти к оплате</a>
               </p>
               <RazborView sections={teaser.sections} toc={false} />
-              <RazborLocked items={teaser.locked} label={`Ещё ${teaser.locked.length} разделов в полной совместимости`} />
-              {ready ? <RazborStickyCta price={price} from="teaser" label="Открыть совместимость" /> : null}
+              <RazborLocked
+                items={teaser.locked}
+                label={`Ещё ${teaser.locked.length} разделов в полной совместимости`}
+                cta={ready ? { href: "#oplata", label: `Открыть совместимость — ${price} ₽` } : undefined}
+              />
+              {ready ? <RazborStickyCta price={price} from="teaser" label="Открыть совместимость" counter={counter} /> : null}
             </section>
           )}
 
           <section id="oplata" className="mt-6 max-w-3xl scroll-mt-24">
             <div className="card p-6 frame-gold">
+              {teaser && a && b ? (
+                <p className="mb-4 rounded-lg border border-accent/40 bg-sunk px-4 py-2.5 text-sm">
+                  Документ для {teaser.date}{na || nb ? ` · ${teaser.who}` : ""} готов к открытию сразу после оплаты.
+                </p>
+              ) : null}
               <div className="flex flex-col gap-6 md:grid md:grid-cols-[minmax(0,1fr)_17rem] md:items-start">
                 <div className="min-w-0">
                   <p className="mono">Полная совместимость</p>

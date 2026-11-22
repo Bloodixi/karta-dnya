@@ -4,6 +4,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import NumerologyNav from "@/components/NumerologyNav";
+import RazborCta from "@/components/RazborCta";
 import { DateField, FormError, ShareLink } from "@/components/NumerologyFields";
 import { getLuckyNumbers } from "@/lib/content";
 import { formatDate, luckyNumbers, parseDate } from "@/lib/numerology";
@@ -84,6 +85,8 @@ export default async function LuckyNumberPage({ searchParams }: PageProps<typeof
       </div>
 
       {result}
+
+      <RazborCta from="schastlivoe-chislo" date={date?.iso} className="mt-8" />
 
       <section className="mt-12">
         <div className="ornament mb-4"><h2 className="text-2xl">Значение счастливых чисел</h2><span className="mono">от 1 до 9</span></div>

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import GiftModeFields from "@/components/GiftModeFields";
-import { PayButtons } from "@/components/RazborClient";
+import { PayButtons, PayTrustList } from "@/components/RazborClient";
 import { umamiTrack } from "@/lib/umami";
 
 type Ym = (id: number, action: "reachGoal", goal: string) => void;
@@ -76,6 +76,7 @@ export default function CompatPackFields({
         {packOn ? "E-mail — пришлём сюда обе ссылки и чек" : gift ? "Твой e-mail — пришлём сюда ссылку и чек" : "E-mail — пришлём сюда ссылку и чек"}
         <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" aria-invalid={err === "email" || undefined} className={FIELD} />
       </label>
+      <PayTrustList />
       <PayButtons price={packOn && offer ? offer.total : price} />
     </>
   );

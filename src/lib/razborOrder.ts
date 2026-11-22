@@ -393,7 +393,7 @@ export async function orderState(orderId: string, cookiePaymentId?: string, offl
   if (!isOrderId(orderId)) return { status: "unknown", missing: true };
   let o = await getOrder(orderId);
   if (offline) {
-    if (o?.status !== "paid") return { status: o?.status === "canceled" || o?.status === "refunded" ? o.status : "pending", ...(o ? { product: productOf(o.product), resume: resumePath(o) } : {}) };
+    if (o?.status !== "paid") return { status: o?.status === "canceled" || o?.status === "refunded" ? o.status : "pending", ...(o ? { product: productOf(o.product), resume: resumePath(o, "resume") } : {}) };
   } else if (o?.status !== "paid" && o?.status !== "refunded") {
     let p: Payment | null = null;
     if (o?.payment_id) {
@@ -408,7 +408,7 @@ export async function orderState(orderId: string, cookiePaymentId?: string, offl
     if (!o && !p) return { status: "unknown", missing: true };
   }
   if (!o) return { status: "unknown" };
-  if (o.status !== "paid") return { status: o.status, product: productOf(o.product), resume: resumePath(o) };
+  if (o.status !== "paid") return { status: o.status, product: productOf(o.product), resume: resumePath(o, "resume") };
   if (!o.receipt_url) o = (await getOrder(o.id)) ?? o; // чек мог пробиться в вебхуке после первого чтения
   if (!offline && o.receipt_due && (!o.receipt_uuid || (o.email && !o.mail_sent_at))) o = await retryPaid(o).catch(() => o!);
   if (o.status !== "paid") return { status: o.status }; // возврат мог прийти, пока шла проверка

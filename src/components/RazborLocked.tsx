@@ -8,7 +8,7 @@ function LockIcon() {
 }
 
 /** Закрытые разделы платного документа (совместимость, детский разбор) — оглавлением с замком. */
-export default function RazborLocked({ items, label }: { items: { id: string; title: string }[]; label: string }) {
+export default function RazborLocked({ items, label, cta }: { items: { id: string; title: string }[]; label: string; cta?: { href: string; label: string } }) {
   return (
     <div className="card p-5 mt-8 max-w-3xl razbor-locked">
       <p className="mono mb-3">{label}</p>
@@ -19,6 +19,11 @@ export default function RazborLocked({ items, label }: { items: { id: string; ti
           </li>
         ))}
       </ul>
+      {cta ? (
+        <a href={cta.href} className="btn mt-4">
+          {cta.label}
+        </a>
+      ) : null}
     </div>
   );
 }

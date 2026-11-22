@@ -219,6 +219,16 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
             </Form>
             <FormError text={invalid ? "Проверь дату: нужна настоящая дата рождения, например 17.05.1990." : undefined} />
             <p className="text-xs text-muted mt-3">Бесплатная часть откроется сразу, без регистрации.</p>
+            {!teaser ? (
+              <div className="mt-4 pt-3 border-t border-line text-sm">
+                <p className="font-medium">Что откроется бесплатно прямо сейчас:</p>
+                <ul className="mt-1.5 grid gap-1 text-muted">
+                  <li>✓ Твои числа и их сведение</li>
+                  <li>✓ Тема личного года</li>
+                  <li>✓ Прогноз на 3 ближайших месяца</li>
+                </ul>
+              </div>
+            ) : null}
           </div>
 
           {teaser && date && (
@@ -262,13 +272,21 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
                     </li>
                   ))}
                 </ul>
+                <a href="#oplata" className="btn mt-4">
+                  Открыть все {RAZBOR_TOC.length} разделов — {RAZBOR.price} ₽
+                </a>
               </div>
-              <RazborStickyCta price={RAZBOR.price} />
+              <RazborStickyCta price={RAZBOR.price} counter={counter} />
             </section>
           )}
 
           <section id="oplata" className="mt-6 max-w-3xl scroll-mt-24">
             <div className="card p-6 frame-gold">
+              {date && teaser ? (
+                <p className="mb-4 rounded-lg border border-accent/40 bg-sunk px-4 py-2.5 text-sm">
+                  Разбор для {teaser.date}{teaser.who ? ` · ${teaser.who}` : ""} рассчитан и готов к открытию сразу после оплаты.
+                </p>
+              ) : null}
               <div className="flex flex-col gap-6 md:grid md:grid-cols-[minmax(0,1fr)_17rem] md:items-start">
                 <div className="min-w-0">
                   <p className="mono">Полный разбор</p>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import RazborCta from "@/components/RazborCta";
 import ScrollToResult from "@/components/ScrollToResult";
 import StoneDateForm from "@/components/StoneDateForm";
 import ZodiacSign from "@/components/ZodiacSign";
@@ -129,6 +130,8 @@ export default async function StoneByDatePage({ searchParams }: PageProps<"/kamn
           </div>
         </section>
       )}
+
+      <RazborCta from="kamni-po-date" date={date?.key} className="mt-8" />
 
       <section className="prose mt-12">
         <h2>Как работает подбор</h2>

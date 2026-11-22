@@ -9,7 +9,7 @@ import { PRODUCTS, productOf } from "./razborProducts";
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
-export function resumePath(o: Pick<Order, "product" | "date" | "name" | "date2" | "name2" | "gift">): string {
+export function resumePath(o: Pick<Order, "product" | "date" | "name" | "date2" | "name2" | "gift">, from?: string): string {
   const product = productOf(o.product);
   const q = new URLSearchParams();
   const date = ISO.test(o.date ?? "") ? o.date : "";
@@ -31,6 +31,7 @@ export function resumePath(o: Pick<Order, "product" | "date" | "name" | "date2" 
     }
   }
   if (o.gift && product !== "pack" && product !== "cert") q.set("g", "1");
+  if (from) q.set("from", from);
   const s = q.toString();
   return `${PRODUCTS[product].path}${s ? `?${s}` : ""}#oplata`;
 }

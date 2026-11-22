@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { IconBadge } from "@/components/Icons";
 import { GiftExtraFields } from "@/components/GiftModeFields";
-import { PayButtons, RazborCheckoutForm } from "@/components/RazborClient";
+import { PayButtons, PayTrustList, RazborCheckoutForm } from "@/components/RazborClient";
 import { NY_ANCHOR } from "@/lib/giftSeason";
 
 /**
@@ -70,6 +70,7 @@ export function CertBlock({ counter, price, today, maxDate, err, errors }: { cou
               Твой e-mail — пришлём сюда ссылку на сертификат и чек
               <input type="email" name="email" required autoComplete="email" maxLength={200} placeholder="you@example.ru" aria-invalid={err === "email" || undefined} className="border border-line rounded-lg px-3 py-2 bg-surface min-w-0" />
             </label>
+            <PayTrustList />
             <PayButtons price={price} />
             <p className="text-xs text-muted mt-3 max-w-md">
               Нажимая кнопку, ты принимаешь условия <Link href="/oferta" className="underline">оферты</Link>. Оплата через ЮKassa. Разбор носит развлекательный и ознакомительный характер.

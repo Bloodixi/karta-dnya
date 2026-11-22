@@ -5,6 +5,7 @@ import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
+import RazborCta from "@/components/RazborCta";
 import ZodiacSign from "@/components/ZodiacSign";
 import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
 import { ASC_PATH, formatOffset, natalQuery, parseAscParams } from "@/lib/astro/ascendant";
@@ -123,6 +124,7 @@ export default async function AscendantPage({ searchParams }: PageProps<"/astrol
               Адрес этой страницы уже содержит дату, время и город — его можно сохранить или отправить. Расчёт по эфемеридам, местное время переведено во всемирное по правилам часового пояса · <Link href="/astrologiya/kak-my-schitaem" className="text-accent underline">как мы считаем</Link>.
             </p>
           </div>
+          <RazborCta from="voshodyaschiy-znak" date={r.date} className="mt-6" />
         </section>
       )}
 
@@ -171,6 +173,8 @@ export default async function AscendantPage({ searchParams }: PageProps<"/astrol
       )}
 
       {author && <AuthorCard author={author} className="mt-10" />}
+
+      {!r && <RazborCta from="voshodyaschiy-znak" />}
 
       <Faq items={faq} />
 

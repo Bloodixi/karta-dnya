@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { todayIso } from "@/components/NumerologyFields";
-import RazborLink from "@/components/RazborLink";
+import RazborCta from "@/components/RazborCta";
 import ScrollToResult from "@/components/ScrollToResult";
 import type { NumerologyNumber } from "@/lib/content";
 import { destinyNumber, isValidDate } from "@/lib/numerology";
@@ -76,10 +76,7 @@ export default function DestinyCalc({ numbers }: { numbers: NumerologyNumber[] }
           ) : (
             <p className="text-muted mt-3">Описание числа готовится.</p>
           )}
-          <p className="mt-5 text-sm text-muted">
-            Число судьбы — одна из частей полного разбора по дате.{" "}
-            <RazborLink from="chislo-sudby-kalkulyator" date={date} className="text-accent-text underline">Бесплатная часть разбора по этой дате</RazborLink>
-          </p>
+          <RazborCta from="chislo-sudby-kalkulyator" date={date} className="mt-6" />
         </div>
       )}
     </div>

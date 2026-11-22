@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import RazborCta from "@/components/RazborCta";
 import NatalWheel, { PLANET_GLYPH, SIGN_GLYPHS } from "./NatalWheel";
 import { cityLabel, indexCities, searchCities, findCityBySlug, type City, type IndexedCity } from "@/lib/astro/cities";
 import type { NatalChart } from "@/lib/astro/natal";
 import type { AspectKind, Body, SignSlug } from "@/lib/astro/types";
+import { parseDate } from "@/lib/numerology";
 
 /** Компактные справочники, которые страница передаёт из content/data (склонения для заголовков трактовок). */
 export type NatalRefs = {
@@ -59,7 +61,7 @@ export default function NatalCalc({ refs }: { refs: NatalRefs }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [errField, setErrField] = useState<ErrField>(null);
-  const [result, setResult] = useState<{ chart: NatalChart; texts: NatalTexts; natal: Loaded["natal"]; city: IndexedCity } | null>(null);
+  const [result, setResult] = useState<{ chart: NatalChart; texts: NatalTexts; natal: Loaded["natal"]; city: IndexedCity; date: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -70,7 +72,7 @@ export default function NatalCalc({ refs }: { refs: NatalRefs }) {
     try {
       const { natal, texts } = await loadEngine();
       const chart = natal.natalChart({ date: d, time: t, lat: c.lat, lon: c.lon, tz: c.tz });
-      setResult({ chart, texts, natal, city: c });
+      setResult({ chart, texts, natal, city: c, date: d });
       const q = new URLSearchParams({ d });
       if (t) q.set("t", t);
       q.set("c", c.slug);
@@ -235,10 +237,11 @@ function FieldError({ msg }: { msg: string }) {
 
 /* ------------------------------------------------------------------ результат */
 
-function Result({ chart, texts, natal, city, refs, onShare, copied, anchor }: {
-  chart: NatalChart; texts: NatalTexts; natal: Loaded["natal"]; city: IndexedCity; refs: NatalRefs;
+function Result({ chart, texts, natal, city, date, refs, onShare, copied, anchor }: {
+  chart: NatalChart; texts: NatalTexts; natal: Loaded["natal"]; city: IndexedCity; date: string; refs: NatalRefs;
   onShare: () => void; copied: boolean; anchor: React.RefObject<HTMLDivElement | null>;
 }) {
+  const parsedDate = parseDate(date);
   const sign = (slug: SignSlug) => refs.signs.find((s) => s.slug === slug);
   const planet = (b: Body) => refs.planets.find((p) => p.body === b);
   const aspectInfo = (k: AspectKind) => refs.aspects.find((a) => a.kind === k);
@@ -389,9 +392,12 @@ function Result({ chart, texts, natal, city, refs, onShare, copied, anchor }: {
           <li><Link className="text-accent-text underline" href={`/goroskop/${sun.sign}`}>Гороскоп для знака {SIGN_NAMES[sun.sign]} на сегодня</Link></li>
           <li><Link className="text-accent-text underline" href="/sovmestimost">Совместимость знаков зодиака</Link></li>
           <li><Link className="text-accent-text underline" href="/chislo-sudby">Число судьбы по той же дате рождения</Link></li>
+          {parsedDate && <li><Link className="text-accent-text underline" href={`/sovmestimost-razbor?a=${parsedDate.iso}#forma`}>Совместимость пары по дате рождения</Link></li>}
           <li><Link className="text-accent-text underline" href="/lunnyy-kalendar">Лунный календарь</Link></li>
         </ul>
       </section>
+
+      <RazborCta from="natalnaya-karta" date={date} className="mt-8" />
     </div>
   );
 }
