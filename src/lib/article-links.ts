@@ -46,6 +46,7 @@ export const ARTICLE_LINKS: Record<string, string[]> = {
   "/goroskop/*/*": ["astrologiya/znaki-zodiaka-po-datam"],
 
   // Камни
+  "/kamni/po-date-rozhdeniya": ["kamni/kamni-po-znaku-zodiaka", "kamni/kak-ochistit-kamni", "kamni/chernyy-turmalin-kak-nosit-i-komu-podhodit"],
   "/kamni/po-znaku-zodiaka": ["kamni/kamni-po-znaku-zodiaka", "kamni/kak-ochistit-kamni"],
   "/kamni/po-znaku-zodiaka/*": ["kamni/kamni-po-znaku-zodiaka", "astrologiya/znaki-zodiaka-po-datam"],
   // «Денежные» камни из статьи kamni-dlya-deneg

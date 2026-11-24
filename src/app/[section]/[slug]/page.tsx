@@ -155,6 +155,7 @@ function DreamPage({ slug }: { slug: string }) {
   const d = findDream(slug)!;
   const img = findDreamImage(slug);
   const others = dreamNeighbours(slug, 6);
+  const related = DREAM_RELATED[slug] ?? [];
   const article = dreamArticle(slug);
   const author = horoscopeAuthor();
   const moodLabel = d.mood === "warning" ? "предупреждение" : d.mood === "good" ? "благоприятный знак" : "нейтральный символ";
@@ -222,6 +223,21 @@ function DreamPage({ slug }: { slug: string }) {
       <RazborCta from="sonnik" className="mt-8 max-w-[72ch]" />
       {author && <AuthorCard author={author} note="редактор материалов" className="mt-8 max-w-[72ch]" />}
       <TelegramDaily campaign="sonnik-simvol" text="Карта дня, Луна и новые статьи о снах — каждое утро в 8:00 по Москве." />
+      {related.length > 0 && (
+        <section className="mt-8 max-w-[72ch]" aria-labelledby="dream-related">
+          <h2 id="dream-related" className="text-2xl mb-3">Похожие сны и статьи</h2>
+          <ul className="card divide-y divide-line">
+            {related.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className="flex items-baseline justify-between gap-3 px-4 py-3 min-h-11 hover:text-accent-text">
+                  <span className="font-semibold leading-snug">{item.label}</span>
+                  {item.hint && <span className="text-xs text-muted shrink-0">{item.hint}</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Другие символы</h2>
         <div className="flex flex-wrap gap-2">
@@ -263,6 +279,25 @@ function dreamNeighbours(slug: string, n: number) {
   }
   return out;
 }
+
+/** Тематическая перелинковка символов сонника и смежных статей. */
+const DREAM_RELATED: Record<string, { href: string; label: string; hint?: string }[]> = {
+  "rebenok-plachet": [
+    { href: "/sonnik/rebenok", label: "Ребёнок", hint: "образ детства и новых начинаний" },
+    { href: "/sonnik/mladenets", label: "Младенец", hint: "к чему снится малыш" },
+    { href: "/praktiki/dnevnik-snov", label: "Дневник снов: как вести и расшифровывать", hint: "практика работы со снами" },
+  ],
+  rebenok: [
+    { href: "/sonnik/rebenok-plachet", label: "Ребёнок плачет", hint: "к чему снится плач ребёнка" },
+    { href: "/sonnik/mladenets", label: "Младенец", hint: "символ нового начала" },
+    { href: "/praktiki/dnevnik-snov", label: "Дневник снов: как вести и расшифровывать", hint: "практика работы со снами" },
+  ],
+  mladenets: [
+    { href: "/sonnik/rebenok-plachet", label: "Ребёнок плачет", hint: "к чему снится плач ребёнка" },
+    { href: "/sonnik/rebenok", label: "Ребёнок", hint: "образ детства и заботы" },
+    { href: "/praktiki/dnevnik-snov", label: "Дневник снов: как вести и расшифровывать", hint: "практика работы со снами" },
+  ],
+};
 
 /** Статьи раздела «Сонник», которые подробно разбирают символ, если slug статьи не совпадает с концом slug символа. */
 const DREAM_ARTICLE_ALIASES: Record<string, string> = { pokoynik: "k-chemu-snyatsya-umershie", "umershiy-rodstvennik": "k-chemu-snyatsya-umershie" };
