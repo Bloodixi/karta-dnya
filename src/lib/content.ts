@@ -145,7 +145,30 @@ export type BirthdayNumberText = { number: number; title: string; text: string }
 /** Расширенный разбор символа (у главных символов сонника): общий смысл, детали сна, для женщины/мужчины, повторяющийся сон, FAQ. */
 export type DreamLong = { intro: string[]; details: { title: string; text: string }[]; forWhom?: { who: string; text: string }[]; repeat: string; faq: Faq[] };
 export type Dream = { slug: string; word: string; short: string; meaning: string; variants: { when: string; means: string }[]; mood: string; long?: DreamLong };
-export type Stone = { slug: string; name: string; color: string; chakra: string; zodiac: string[]; numbers: number[]; properties: string[]; description: string; howToUse: string; care: string };
+export type Stone = {
+  slug: string;
+  name: string;
+  color: string;
+  chakra: string;
+  zodiac: string[];
+  numbers: number[];
+  properties: string[];
+  description: string;
+  howToUse: string;
+  care: string;
+  /** Короткий Answer-First абзац (40–60 слов) для ИИ-ответов и быстрого чтения. */
+  answerFirst?: string;
+  /** Происхождение и тип породы/минерала. */
+  origin?: string;
+  /** Отношение к воде и быстрый ориентир по уходу. */
+  waterSafe?: string;
+  /** Кому и в каких ситуациях носить с осторожностью. */
+  caution?: string;
+  /** Основные разновидности или оттенки камня. */
+  varieties?: string[];
+  /** Дополнительные целевые FAQ-пары помимо трёх базовых. */
+  faq?: Faq[];
+};
 
 export type Rune = {
   slug: string; pos: number; name: string; orig: string; sound: string; att: 1 | 2 | 3; translation: string; associations: string; keywords: string[];

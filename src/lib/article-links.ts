@@ -50,8 +50,8 @@ export const ARTICLE_LINKS: Record<string, string[]> = {
   "/kamni/pirit": ["kamni/kamni-dlya-deneg", "praktiki/ritual-na-dengi"],
   "/kamni/aventurin": ["kamni/kamni-dlya-deneg", "praktiki/ritual-na-dengi"],
   "/kamni/tigrovyy-glaz": ["kamni/kamni-dlya-deneg", "praktiki/ritual-na-dengi"],
-  "/kamni/nefrit": ["kamni/kamni-dlya-deneg", "praktiki/ritual-na-dengi"],
-  "/kamni/*": ["kamni/kak-ochistit-kamni"],
+  "/kamni/nefrit": ["kamni/kamni-dlya-deneg", "kamni/kamni-po-znaku-zodiaka", "praktiki/ritual-na-dengi"],
+  "/kamni/*": ["kamni/kamni-po-znaku-zodiaka", "kamni/kak-ochistit-kamni"],
 
   // Практики
   "/praktiki": ["praktiki/chto-takoe-ezoterika", "praktiki/energetika-cheloveka", "praktiki/chakry-znachenie"],

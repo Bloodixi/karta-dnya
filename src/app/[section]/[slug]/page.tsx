@@ -276,7 +276,7 @@ function StonePage({ slug }: { slug: string }) {
   const signs = s.zodiac.map((z) => zodiac.find((x) => x.slug === z)).filter(Boolean);
   const signNames = signs.map((z) => z!.name).join(", ");
   const related = relatedStones(slug, 6);
-  const faq = [
+  const baseFaq = [
     {
       q: `Кому подходит камень ${s.name.toLowerCase()}?`,
       a: `${signNames ? `По традиции ${s.name.toLowerCase()} чаще всего связывают со знаками: ${signNames}. ` : ""}Минерал ценят за свойства: ${s.properties.slice(0, 3).join(", ")} (чакра: ${s.chakra}). Также камень можно подобрать индивидуально по дате рождения.`,
@@ -284,7 +284,11 @@ function StonePage({ slug }: { slug: string }) {
     { q: `Как носить и использовать ${s.name.toLowerCase()}?`, a: s.howToUse },
     { q: `Как очищать ${s.name.toLowerCase()} и ухаживать за ним?`, a: s.care },
   ];
+  const faq = [...(s.faq ?? []), ...baseFaq];
   const headline = s.name.length > 12 ? `${s.name}: свойства и кому подходит` : `${s.name}: свойства, кому подходит и как носить`;
+  const summary =
+    s.answerFirst ??
+    `${s.name} — ${s.color} камень, который в традиции связывают со свойствами: ${s.properties.join(", ")}. Чаще всего его подбирают знакам ${signNames || "разных стихий"} и числу судьбы ${s.numbers.join(", ")}.`;
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/kamni", label: "Камни" }, { href: `/kamni/${slug}`, label: s.name }]} />
@@ -298,17 +302,86 @@ function StonePage({ slug }: { slug: string }) {
               <span key={p} className="chip">{p}</span>
             ))}
           </div>
+          <p className="mt-5 text-base leading-relaxed max-w-[65ch]">{summary}</p>
         </div>
       </div>
-      <div className="prose mt-6">
+      <div className="prose mt-8">
+        <h2>Характеристики камня {s.name.toLowerCase()}</h2>
+        <div className="overflow-x-auto">
+          <table style={{ display: "table" }}>
+            <tbody>
+              {s.origin && (
+                <tr>
+                  <th>Происхождение</th>
+                  <td>{s.origin}</td>
+                </tr>
+              )}
+              <tr>
+                <th>Цвет</th>
+                <td>{s.color}</td>
+              </tr>
+              <tr>
+                <th>Главные свойства</th>
+                <td>{s.properties.join(", ")}</td>
+              </tr>
+              {signs.length > 0 && (
+                <tr>
+                  <th>Знаки зодиака</th>
+                  <td>
+                    {signs.map((z, i) => (
+                      <span key={z!.slug}>
+                        {i > 0 && ", "}
+                        <Link href={`/kamni/po-znaku-zodiaka/${z!.slug}`}>{z!.symbol} {z!.name}</Link>
+                      </span>
+                    ))}
+                  </td>
+                </tr>
+              )}
+              {s.numbers.length > 0 && (
+                <tr>
+                  <th>Числа судьбы</th>
+                  <td>
+                    {s.numbers.map((n, i) => (
+                      <span key={n}>
+                        {i > 0 && ", "}
+                        <Link href={`/chislo-sudby/${n}`}>число {n}</Link>
+                      </span>
+                    ))}
+                  </td>
+                </tr>
+              )}
+              <tr>
+                <th>Чакра</th>
+                <td>{s.chakra}</td>
+              </tr>
+              {s.waterSafe && (
+                <tr>
+                  <th>Вода и уход</th>
+                  <td>{s.waterSafe}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <h2>Описание и символика</h2>
         <p>{s.description}</p>
-        <h2>Как использовать</h2>
+        {s.varieties && s.varieties.length > 0 && (
+          <>
+            <h2>Разновидности камня</h2>
+            <ul>
+              {s.varieties.map((v) => (
+                <li key={v}>{v}</li>
+              ))}
+            </ul>
+          </>
+        )}
+        <h2>Как использовать и носить</h2>
         <p>{s.howToUse}</p>
         <h2>Уход и очищение</h2>
         <p>{s.care}</p>
         {signs.length > 0 && (
           <>
-            <h2>Кому подходит</h2>
+            <h2>Кому подходит по знаку зодиака</h2>
             <p>
               {signs.map((z, i) => (
                 <span key={z!.slug}>
@@ -319,10 +392,18 @@ function StonePage({ slug }: { slug: string }) {
             </p>
           </>
         )}
+        {s.caution && (
+          <>
+            <h2>Кому носить с осторожностью</h2>
+            <p>{s.caution}</p>
+          </>
+        )}
         <p>
-          Помимо знака зодиака, камень подбирают по числу судьбы — проверить своё сочетание можно в{" "}
-          <Link href="/kamni/po-date-rozhdeniya">подборе камня по дате рождения</Link> или в{" "}
-          <Link href="/kamni/po-znaku-zodiaka">таблице по знакам</Link>.
+          Знак зодиака — лишь один ориентир: в индивидуальном подборе учитывается вся дата рождения и{" "}
+          <Link href="/chislo-sudby">число судьбы</Link>. Проверьте своё сочетание в{" "}
+          <Link href="/kamni/po-date-rozhdeniya">подборе камня по дате рождения</Link>,{" "}
+          <Link href="/kamni/po-znaku-zodiaka">таблице по знакам</Link> или откройте{" "}
+          <Link href="/razbor">персональный разбор по дате рождения</Link>.
         </p>
       </div>
       <ArticleLinks path={`/kamni/${slug}`} />
