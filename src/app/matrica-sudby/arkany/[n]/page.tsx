@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import ArticleLinks from "@/components/ArticleLinks";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
 import MatrixNav from "@/components/MatrixNav";
 import RazborCta from "@/components/RazborCta";
+import { readJsonData } from "@/lib/content";
 import { ARCANA_NUMBERS, findMatrixArcana, findMatrixPositions, getMatrixArcana, POSITION_BLOCKS, POSITIONS, tarotFor } from "@/lib/matrix";
+import { firstSentence } from "@/lib/meta";
 import { SITE, pageTitle, orgJsonLd } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -46,6 +49,16 @@ export default async function ArcanaPage({ params }: PageProps<"/matrica-sudby/a
   const next = all[a.n % all.length];
   const tarot = tarotFor(a.n);
   const pos = findMatrixPositions(a.n);
+  const lastmod = readJsonData<Record<string, string>>("lastmod.json", {});
+  const dateModified =
+    [
+      lastmod["src/app/matrica-sudby/arkany/[n]/page.tsx"],
+      lastmod["content/data/matrix-positions.json"],
+      lastmod["content/data/matrix-arcana.json"],
+    ]
+      .filter(Boolean)
+      .sort()
+      .at(-1) || "2026-11-24";
   const faq = pos
     ? [
         { q: `Что значит ${a.n} аркан в визитной карточке?`, a: lead(pos.vizitka) },
@@ -61,6 +74,35 @@ export default async function ArcanaPage({ params }: PageProps<"/matrica-sudby/a
       <div className="prose max-w-3xl">
         <h1 className="text-3xl md:text-4xl font-semibold !mt-0">{a.n} аркан в матрице судьбы: {a.name}</h1>
         <p className="text-muted text-lg">{a.short} Ключевые слова: {a.keywords.join(", ")}.</p>
+        <section className="card p-4 md:p-5 not-prose my-5 border-gold/40" aria-label={`Короткий ответ: ${a.n} аркан ${a.name}`}>
+          <p className="mono mb-2">Коротко: {a.n} аркан «{a.name}»</p>
+          <dl className="grid gap-1.5 text-sm leading-relaxed">
+            <div>
+              <dt className="inline font-semibold">Суть: </dt>
+              <dd className="inline text-muted">{lead(a.essence)}</dd>
+            </div>
+            <div>
+              <dt className="inline font-semibold">В плюсе: </dt>
+              <dd className="inline text-muted">{firstSentence(a.plus)}</dd>
+            </div>
+            <div>
+              <dt className="inline font-semibold">Жизненный урок (в минусе): </dt>
+              <dd className="inline text-muted">{firstSentence(a.minus)}</dd>
+            </div>
+            <div>
+              <dt className="inline font-semibold">Деньги и работа: </dt>
+              <dd className="inline text-muted">{firstSentence(pos?.dengi || a.career)}</dd>
+            </div>
+            <div>
+              <dt className="inline font-semibold">Отношения: </dt>
+              <dd className="inline text-muted">{firstSentence(pos?.otnosheniya || a.love)}</dd>
+            </div>
+            <div>
+              <dt className="inline font-semibold">Совет: </dt>
+              <dd className="inline text-muted">{a.advice}</dd>
+            </div>
+          </dl>
+        </section>
         {pos && (
           <nav aria-label="Содержание" className="card p-4 my-6">
             <p className="mono mb-2">Аркан {a.n} в позициях матрицы</p>
@@ -119,8 +161,26 @@ export default async function ArcanaPage({ params }: PageProps<"/matrica-sudby/a
         {tarot && <p>Образ связан с картой Таро: <Link href={`/taro/karty/${tarot.slug}`}>{tarot.name}: значение карты</Link>. Там трактовка в раскладах, прямом и перевёрнутом положении.</p>}
       </div>
       <RazborCta from="matrica-arkan" className="mt-10 max-w-3xl" />
+      <p className="mt-3 max-w-3xl text-sm text-muted">
+        Если этот аркан встречается в дате рождения ребёнка до 18 лет, посмотрите{" "}
+        <Link href="/razbor-rebenka" className="text-accent-text underline">детский разбор матрицы и чисел ребёнка</Link>{" "}
+        — бережный портрет по возрасту без взрослых сценариев.
+      </p>
+      <ArticleLinks path="/matrica-sudby/arkany/*" />
       <Faq items={faq} />
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "Article", headline: `${a.n} аркан в матрице судьбы: ${a.name}`, inLanguage: "ru", mainEntityOfPage: `${SITE.url}/matrica-sudby/arkany/${a.n}`, author: orgJsonLd(), publisher: orgJsonLd() }} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: `${a.n} аркан в матрице судьбы: ${a.name}`,
+          description: pos?.desc || `${a.n} аркан в матрице судьбы — ${a.name}. ${a.short}`,
+          dateModified,
+          inLanguage: "ru",
+          mainEntityOfPage: `${SITE.url}/matrica-sudby/arkany/${a.n}`,
+          author: orgJsonLd(),
+          publisher: orgJsonLd(),
+        }}
+      />
       <div className="mt-10 flex flex-wrap gap-2 justify-between text-sm">
         <Link href={`/matrica-sudby/arkany/${prev.n}`} className="btn btn-ghost">← {prev.n} · {prev.name}</Link>
         <Link href="/matrica-sudby/arkany" className="btn btn-ghost">Все арканы</Link>

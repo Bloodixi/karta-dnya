@@ -3,6 +3,7 @@ import Form from "next/form";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import MatrixNav from "@/components/MatrixNav";
 import CompatCta from "@/components/CompatCta";
 import RazborCta from "@/components/RazborCta";
@@ -110,6 +111,12 @@ export default async function PairPage({ searchParams }: PageProps<typeof PATH>)
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: "/matrica-sudby", label: "Матрица судьбы" }, { href: PATH, label: "Совместимость" }]} />
       <h1 className="text-3xl md:text-4xl">Совместимость по матрице судьбы</h1>
       <p className="text-muted mt-3 max-w-2xl text-lg">Введите две даты рождения. Калькулятор покажет арканы каждого, сложит их по позициям и найдёт общий аркан пары: энергию, которую вы проживаете вместе.</p>
+      <section className="card p-4 md:p-5 mt-5 max-w-3xl border-gold/40" aria-label="Как читать совместимость пары за 30 секунд">
+        <p className="mono mb-1.5">Как читать совместимость пары за 30 секунд</p>
+        <p className="text-sm text-muted leading-relaxed">
+          Калькулятор переводит две даты рождения в пять точек матрицы (от 1 до 22) и складывает центральные арканы партнёров — сумма, сведённая к диапазону <strong>1–22</strong>, даёт <strong>общий аркан пары</strong>. Он показывает главную тему союза, сильные стороны, риски в отношениях и подход к общему делу, а таблица позиций A–E уточняет точки поддержки.
+        </p>
+      </section>
       <div className="card p-6 mt-6 max-w-3xl">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
           <DateField name="a" label="Ваша дата рождения" defaultValue={a?.iso ?? (typeof sp.a === "string" ? sp.a : "")} invalid={invalid && !a} />
@@ -128,6 +135,18 @@ export default async function PairPage({ searchParams }: PageProps<typeof PATH>)
         <p>Для астрологического взгляда на пару есть <Link href="/sovmestimost">совместимость знаков зодиака</Link>, для числового — <Link href="/numerologiya/sovmestimost">совместимость по числу судьбы</Link>. Свою матрицу можно <Link href="/matrica-sudby">рассчитать отдельно</Link>, а значения всех арканов — в <Link href="/matrica-sudby/arkany">справочнике</Link>.</p>
       </section>
       <Faq items={FAQ} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "Калькулятор совместимости по матрице судьбы",
+          url: `${SITE.url}${PATH}`,
+          applicationCategory: "LifestyleApplication",
+          operatingSystem: "Any",
+          inLanguage: "ru",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" },
+        }}
+      />
       <MatrixNav current={PATH} />
     </div>
   );

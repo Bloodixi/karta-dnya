@@ -21,6 +21,11 @@ export const ARTICLE_LINKS: Record<string, string[]> = {
   "/chislo-sudby/*": ["numerologiya/chislo-sudby-1-9-znachenie", "numerologiya/chislo-sudby-po-date-rozhdeniya"],
   "/kvadrat-pifagora": ["numerologiya/kvadrat-pifagora", "numerologiya/chislo-sudby-po-date-rozhdeniya"],
   "/matrica-sudby": ["numerologiya/matrica-sudby-rasshifrovka"],
+  "/matrica-sudby/arkany/*": [
+    "numerologiya/matrica-sudby-rasshifrovka",
+    "numerologiya/karmicheskiy-hvost-v-matrice-sudby",
+    "numerologiya/kak-uznat-svoe-prednaznachenie",
+  ],
 
   // Таро
   "/karta-dnya": ["taro/karta-dnya-taro-kak-ispolzovat", "taro/kak-nachat-gadat-na-taro", "taro/kogda-mozhno-gadat-po-lunnomu-kalendaryu"],
