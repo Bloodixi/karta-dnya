@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
+import ArticleLinks from "@/components/ArticleLinks";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import HanziMark from "@/components/HanziMark";
 import JsonLd from "@/components/JsonLd";
 import { DateField, FormError, ShareLink } from "@/components/NumerologyFields";
+import RazborCta from "@/components/RazborCta";
 import ScrollToResult from "@/components/ScrollToResult";
 import { animalOrder, chineseSign, elementForYear, FIRST_YEAR, formatRuDate, getChineseAnimals, getChineseElements, getNewYears, LAST_YEAR, signName } from "@/lib/chineseZodiac";
 import { parseDate } from "@/lib/numerology";
@@ -77,6 +79,16 @@ export default async function ChineseHoroscopePage({ searchParams }: PageProps<t
       )}
       <ScrollToResult key={date?.iso} id="rezultat" when={!!sign} />
 
+      <section className="card p-5 mt-8 max-w-3xl">
+        <p className="text-sm font-semibold">2027 год — год Красной Огненной Козы</p>
+        <p className="text-sm text-muted mt-1">
+          Китайский знак определяется не только по году, но и по дате лунного Нового года (в 2027 году он наступает {formatRuDate(newYears["2027"])}).{" "}
+          <Link href={`${PATH}/2027`} className="text-accent-text hover:underline font-medium">
+            Читать прогноз на 2027 год →
+          </Link>
+        </p>
+      </section>
+
       <section className="mt-12">
         <div className="ornament mb-4"><h2 className="text-2xl">12 животных китайского гороскопа</h2><span className="mono">по порядку цикла</span></div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -147,6 +159,9 @@ export default async function ChineseHoroscopePage({ searchParams }: PageProps<t
 
       <Faq items={FAQ} />
 
+      <ArticleLinks path={PATH} />
+      <RazborCta from="kitayskiy-goroskop" date={date?.iso} />
+
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Ещё по теме</h2>
         <div className="flex flex-wrap gap-2">
@@ -158,6 +173,18 @@ export default async function ChineseHoroscopePage({ searchParams }: PageProps<t
         </div>
       </section>
 
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "Калькулятор китайского гороскопа по году рождения",
+          url: `${SITE.url}${PATH}`,
+          applicationCategory: "LifestyleApplication",
+          operatingSystem: "Any",
+          inLanguage: "ru",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" },
+        }}
+      />
       <JsonLd
         data={{
           "@context": "https://schema.org",
