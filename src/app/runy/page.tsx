@@ -3,12 +3,21 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
+import RazborCta from "@/components/RazborCta";
 import RuneGlyph from "@/components/RuneGlyph";
-import { getArticles, getRunes } from "@/lib/content";
+import { getArticles, getRunes, type Rune } from "@/lib/content";
 import ArticleCard from "@/components/ArticleCard";
+import { firstSentence } from "@/lib/meta";
 import { ATTS, HUB_FAQ, runesOfAtt } from "@/lib/runes";
-import { SITE } from "@/lib/site";
+import { orgJsonLd, SECTIONS, SITE } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
+
+function uprightSummary(r: Rune): string {
+  if (r.reversed) return firstSentence(r.upright);
+  // У симметричных рун первое предложение описывает симметрию, а смысл начинается со второго.
+  const sentences = r.upright.split(/(?<=[.!?])\s+/);
+  return sentences[1] ?? firstSentence(r.upright);
+}
 
 export const metadata: Metadata = {
   title: "Значение рун Старшего Футарка: все 24 руны и руна дня",
@@ -59,6 +68,33 @@ export default function RunesHub() {
         </section>
       ))}
 
+      <section className="mt-12">
+        <h2 className="text-2xl mb-3">Сводная таблица значений всех 24 рун Старшего Футарка</h2>
+        <div className="prose overflow-x-auto" style={{ maxWidth: "none" }}>
+          <table style={{ display: "table" }}>
+            <thead>
+              <tr>
+                <th>Руна</th>
+                <th>Прямое значение</th>
+                <th>Перевёрнутое значение</th>
+              </tr>
+            </thead>
+            <tbody>
+              {runes.map((r) => (
+                <tr key={r.slug}>
+                  <td className="whitespace-nowrap">
+                    <Link href={`/runy/${r.slug}`} className="font-semibold">{r.name}</Link>
+                    <span className="block text-xs text-muted">{r.translation}</span>
+                  </td>
+                  <td>{uprightSummary(r)}</td>
+                  <td>{r.reversed ? firstSentence(r.reversed) : "симметричная (не переворачивается)"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <section className="mt-10 max-w-3xl prose">
         <h2>Как читать значение руны</h2>
         <p>
@@ -72,6 +108,8 @@ export default function RunesHub() {
         </p>
       </section>
 
+      <RazborCta from="runy" className="mt-10" />
+
       {articles.length > 0 && (
         <section className="mt-12">
           <h2 className="text-2xl mb-3">Статьи</h2>
@@ -83,6 +121,17 @@ export default function RunesHub() {
 
       <ArticleLinks path="/runy" />
       <Faq items={HUB_FAQ} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: SECTIONS.runy.seoTitle ?? SECTIONS.runy.title,
+          description: SECTIONS.runy.description,
+          url: `${SITE.url}/runy`,
+          inLanguage: "ru",
+          publisher: orgJsonLd(),
+        }}
+      />
       <JsonLd
         data={{
           "@context": "https://schema.org",

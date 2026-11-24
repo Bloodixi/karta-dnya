@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ArticleLinks from "@/components/ArticleLinks";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import RazborCta from "@/components/RazborCta";
 import ScrollToResult from "@/components/ScrollToResult";
 import StoneDateForm from "@/components/StoneDateForm";
 import ZodiacSign from "@/components/ZodiacSign";
 import { getNumerology, getStoneImages, type Stone } from "@/lib/content";
 import { destinyNumber } from "@/lib/numerology";
-import { pageTitle } from "@/lib/site";
+import { pageTitle, SITE } from "@/lib/site";
 import { baseNumber, NUMBER_NOTES, parseDateParam, signByDate, stonesForNumber, stonesForSign } from "@/lib/stones";
 
 const PATH = "/kamni/po-date-rozhdeniya";
@@ -166,6 +168,7 @@ export default async function StoneByDatePage({ searchParams }: PageProps<"/kamn
         <p className="text-sm text-muted mt-2">Мастер-числа 11, 22 и 33 для подбора камня сводятся к 2, 4 и 6.</p>
       </section>
 
+      <ArticleLinks path={PATH} />
       <Faq items={FAQ} />
 
       <p className="mt-10 text-muted">
@@ -173,6 +176,7 @@ export default async function StoneByDatePage({ searchParams }: PageProps<"/kamn
         <Link className="text-accent-text underline" href="/chislo-sudby">калькулятор числа судьбы</Link>,{" "}
         <Link className="text-accent-text underline" href="/goroskop">гороскоп на сегодня</Link>.
       </p>
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Подбор камня по дате рождения", url: `${SITE.url}${PATH}`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
     </div>
   );
 }
