@@ -19,7 +19,8 @@ import { ageAt, nowMsk } from "@/lib/razbor";
 import { buildChildTeaser, CHILD, CHILD_MAX_AGE, CHILD_TOC, childReady } from "@/lib/razborChild";
 import { PRODUCTS } from "@/lib/razborProducts";
 import { plural } from "@/lib/ruCount";
-import { pageTitle, SELLER, SITE } from "@/lib/site";
+import { authorJsonLd, horoscopeAuthor } from "@/lib/authors";
+import { orgJsonLd, pageTitle, SELLER, SITE } from "@/lib/site";
 
 const PATH = "/razbor-rebenka";
 const PRIMER = `${PATH}/primer`;
@@ -40,6 +41,9 @@ const FAQ = [
   { q: "Как я получу разбор?", a: "Сразу после оплаты откроется страница с разбором, ссылка и чек придут на e-mail. Страницу можно сохранить в PDF кнопкой на странице." },
   { q: "Можно ли вернуть деньги?", a: "Если из-за технической ошибки разбор не открылся, мы вернём оплату полностью. Подробности на странице «Возврат»." },
   { q: "Можно ли подарить детский разбор?", a: "Да, например родителям малыша. Введи дату рождения ребёнка, а в форме оплаты выбери «В подарок»: подпись, пожелание и e-mail родителя — письмо уйдёт сразу или в выбранный день. Ссылка и чек придут тебе." },
+  { q: "Нужно ли знать точное время рождения ребёнка?", a: "Нет. Детский нумерологический разбор строится только по дню, месяцу и году рождения — время и место рождения не требуются." },
+  { q: "Чем детский разбор отличается от взрослого разбора по дате?", a: "В детском разборе нет разделов про романтические отношения и карьеру. Вместо них — возрастные подсказки (0–3, 4–6, 7–11, 12–17 лет), к каким кружкам присмотреться, детские трактовки квадрата Пифагора и пять советов родителю." },
+  { q: "Как читать квадрат Пифагора для ребёнка?", a: "В детском разборе квадрат Пифагора показывает природный баланс энергии, интереса, усидчивости и самостоятельности без оценок «хорошо» или «плохо». Это подсказка для выбора темпа занятий и мягкой поддержки." },
 ];
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -66,6 +70,7 @@ export default async function ChildRazborPage({ searchParams }: PageProps<"/razb
   const ready = childReady();
   const price = PRODUCTS.child.price;
   const contactEmail = SELLER.email.includes("@") ? SELLER.email : null;
+  const author = horoscopeAuthor();
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -80,7 +85,17 @@ export default async function ChildRazborPage({ searchParams }: PageProps<"/razb
 
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10 lg:items-start">
         <div className="min-w-0">
-          <div id="forma" className="card p-6 mt-6 max-w-3xl scroll-mt-24">
+          <section className="card p-5 mt-6 max-w-3xl border-gold/40" aria-label="Коротко о детском разборе">
+            <p className="mono">Коротко</p>
+            <p className="mt-1.5 text-sm md:text-base leading-relaxed">
+              <strong>Детский нумерологический разбор</strong> по дате рождения показывает число судьбы и дня рождения ребёнка,
+              его сильные стороны по квадрату Пифагора, особенности возраста от 0 до 17 лет, подходящие кружки и пять спокойных советов родителю.
+              Время рождения не нужно — первые разделы открываются бесплатно, а{" "}
+              <Link href={PRIMER} className="text-accent-text underline">пример готового разбора</Link> можно прочитать заранее.
+            </p>
+          </section>
+
+          <div id="forma" className="card p-6 mt-5 max-w-3xl scroll-mt-24">
             <Form action={PATH} className="grid gap-3 sm:flex sm:flex-wrap sm:items-end">
               <DateField name="d" label="Дата рождения ребёнка" defaultValue={date?.iso ?? (typeof sp.d === "string" ? sp.d : "")} />
               <TextField name="n" label="Имя ребёнка (необязательно)" defaultValue={name} placeholder="Например, Маша" />
@@ -235,6 +250,18 @@ export default async function ChildRazborPage({ searchParams }: PageProps<"/razb
           url: SITE.url + PATH,
           brand: { "@type": "Brand", name: SITE.name },
           offers: { "@type": "Offer", price: String(price), priceCurrency: "RUB", availability: ready ? "https://schema.org/InStock" : "https://schema.org/PreOrder", url: SITE.url + PATH },
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: "Детский разбор по дате рождения — для родителя",
+          description: DESCRIPTION,
+          inLanguage: "ru",
+          mainEntityOfPage: SITE.url + PATH,
+          author: author ? authorJsonLd(author) : orgJsonLd(),
+          publisher: orgJsonLd(),
         }}
       />
     </div>

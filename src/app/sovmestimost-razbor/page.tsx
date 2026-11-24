@@ -89,7 +89,14 @@ export default async function CompatRazborPage({ searchParams }: PageProps<"/sov
               <TextField name="na" label="Имя" defaultValue={na} placeholder="Например, Анна" />
               <DateField name="b" label="Вторая дата рождения" defaultValue={b?.iso ?? (typeof sp.b === "string" ? sp.b : "")} />
               <TextField name="nb" label="Имя" defaultValue={nb} placeholder="Например, Сергей" />
-              <button type="submit" className="btn justify-center sm:col-span-2 sm:justify-self-start">Посмотреть бесплатно</button>
+              <div className="flex flex-wrap gap-2.5 sm:col-span-2">
+                <button type="submit" className="btn justify-center">Посмотреть бесплатно</button>
+                {!teaser ? (
+                  <Link href={PRIMER} className="btn btn-ghost justify-center">
+                    Посмотреть пример готового разбора
+                  </Link>
+                ) : null}
+              </div>
             </Form>
             <FormError text={invalid ? "Проверь обе даты: нужны настоящие даты рождения, например 17.05.1990." : undefined} />
             <p className="text-xs text-muted mt-3">Бесплатная часть откроется сразу, без регистрации. Пара — любая: партнёры, друзья, родные, коллеги.</p>

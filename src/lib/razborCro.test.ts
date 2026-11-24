@@ -26,6 +26,8 @@ test("razborHref: подставляет ?d=, &n= и #razbor-teaser при ва�
   assert.equal(razborHref("1990-03-14"), "/razbor?d=1990-03-14#razbor-teaser");
   assert.equal(razborHref("1990-03-14", "  "), "/razbor?d=1990-03-14#razbor-teaser");
   assert.equal(razborHref("1990-03-14", "Анна 123!"), "/razbor?d=1990-03-14&n=%D0%90%D0%BD%D0%BD%D0%B0#razbor-teaser");
+  assert.equal(razborHref(undefined, undefined, "itogi2026"), "/razbor?from=itogi2026");
+  assert.equal(razborHref("1990-03-14", "Анна", "itogi2026"), "/razbor?d=1990-03-14&n=%D0%90%D0%BD%D0%BD%D0%B0&from=itogi2026#razbor-teaser");
 });
 
 test("buildTeaser: раздел «Личный год» показывает весь первый абзац без обрезки", () => {

@@ -205,7 +205,7 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
         Твои числа одним связным текстом: характер, сильные стороны, призвание, квадрат Пифагора, любовь и работа, личный год и прогноз на двенадцать месяцев вперёд.
       </p>
       <p className="chip mt-4">
-        Бесплатно — первые разделы · полный разбор {RAZBOR.price} ₽ · {RAZBOR_TOC.length} {plural(RAZBOR_TOC.length, ["раздел", "раздела", "разделов"])}
+        Бесплатно — первые разделы · полный разбор {RAZBOR.price} ₽ · {RAZBOR_TOC.length} {plural(RAZBOR_TOC.length, ["раздел", "раздела", "разделов"])} · включая прогноз на 2027 год
       </p>
 
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10 lg:items-start">
@@ -215,7 +215,14 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
               {isGift ? <input type="hidden" name="g" value="1" /> : null}
               <DateField name="d" label={isGift ? "Дата рождения получателя" : "Дата рождения"} defaultValue={date?.iso ?? (typeof sp.d === "string" ? sp.d : "")} />
               <TextField name="n" label={isGift ? "Имя получателя (необязательно)" : "Имя (необязательно)"} defaultValue={name} placeholder="Например, Анна" />
-              <button type="submit" className="btn justify-center">Посмотреть бесплатно</button>
+              <div className="flex flex-wrap gap-2.5">
+                <button type="submit" className="btn justify-center">Посмотреть бесплатно</button>
+                {!teaser ? (
+                  <Link href={`${PATH}/primer`} className="btn btn-ghost justify-center">
+                    Посмотреть пример готового разбора
+                  </Link>
+                ) : null}
+              </div>
             </Form>
             <FormError text={invalid ? "Проверь дату: нужна настоящая дата рождения, например 17.05.1990." : undefined} />
             <p className="text-xs text-muted mt-3">Бесплатная часть откроется сразу, без регистрации.</p>

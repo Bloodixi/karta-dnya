@@ -3,8 +3,10 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import JsonLd from "@/components/JsonLd";
 import RazborCta from "@/components/RazborCta";
+import RazborLink from "@/components/RazborLink";
+import Spread from "@/components/Spread";
 import Faq from "@/components/Faq";
-import { getSpreads, spreadHref } from "@/lib/content";
+import { getSpreads, getTarot, spreadHref } from "@/lib/content";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -20,12 +22,19 @@ const FAQ = [
   { q: "Нужно ли знать значения всех карт?", a: "Нет. Под каждой картой показано короткое значение для её положения, а по ссылке открывается полная страница карты с толкованием для любви, работы и советом." },
 ];
 
+const ITOGI_2026_POSITIONS = [
+  { name: "Главный итог 2026", meaning: "Что стало самым важным опытом, опорой и результатом уходящего года." },
+  { name: "Что оставить в 2026", meaning: "От каких привычек, ожиданий или лишних обязательств стоит спокойно освободиться." },
+  { name: "Фокус 2027", meaning: "На что опереться и куда направить внимание в новом году." },
+];
+
 function count(n: number) {
   return `${n} ${n === 1 ? "карта" : n < 5 ? "карты" : "карт"}`;
 }
 
 export default function SpreadsHubPage() {
   const spreads = getSpreads();
+  const cards = getTarot().map((c) => ({ slug: c.slug, name: c.name, upright: c.upright, reversed: c.reversed }));
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/taro", label: "Таро" }, { href: "/taro/rasklady", label: "Расклады" }]} />
@@ -34,6 +43,38 @@ export default function SpreadsHubPage() {
         <p>Онлайн-расклады Таро помогают бесплатно получить подсказку по вопросу на полную колоду Райдера–Уэйта из 78 карт. Здесь собраны десять раскладов: от одной карты и гадания «да или нет» до «Кельтского креста» и годового круга. Карты вытягиваются случайно с учётом перевёрнутых положений и сразу показывают краткое значение.</p>
         <p>Расклад стоит выбирать по вопросу, а не по числу карт. Когда нужен быстрый ответ, достаточно одной карты или гадания «да или нет». Если важно увидеть ситуацию во времени, подойдут три карты или «Подкова». Чувства и пару лучше рассматривать через расклады на любовь и отношения, а для серьёзного запутанного вопроса есть «Кельтский крест». Для ежедневной практики подойдут «Совет дня» и <Link href="/karta-dnya" className="text-accent-text underline">карта дня</Link>, а значения всех карт собраны в <Link href="/taro/karty" className="text-accent-text underline">каталоге карт Таро</Link>.</p>
       </div>
+
+      <section id="itogi-2026" className="mt-8 scroll-mt-24">
+        <div className="ornament mb-3">
+          <h2 className="text-2xl">Сезонный расклад: Итоги 2026 → фокус 2027</h2>
+          <span className="mono">3 карты</span>
+        </div>
+        <p className="text-muted max-w-3xl mb-4">
+          Быстрый переходный расклад прямо здесь: три карты покажут, что важно забрать с собой из 2026 года, что оставить позади и на чём сосредоточиться в 2027-м. Нужен личный расчёт по месяцам?{" "}
+          <RazborLink from="itogi2026" keepFrom className="text-accent-text underline">
+            Открыть разбор на 2027 год по дате рождения →
+          </RazborLink>
+        </p>
+        {cards.length ? (
+          <Spread
+            positions={ITOGI_2026_POSITIONS}
+            cards={cards}
+            afterDraw={
+              <div className="card frame-gold p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold">Сравни подсказку карт с твоим личным годом 2027</p>
+                  <p className="text-sm text-muted mt-1">
+                    В полном разборе по дате рождения — твой личный год 2027, ритм каждого из 12 месяцев, любовь, работа и 5 практических шагов. Бесплатная часть откроется сразу.
+                  </p>
+                </div>
+                <RazborLink from="itogi2026" keepFrom className="btn self-start sm:self-center whitespace-nowrap">
+                  Прогноз на 2027 год →
+                </RazborLink>
+              </div>
+            }
+          />
+        ) : null}
+      </section>
 
       <RazborCta from="taro-rasklady" className="mt-8" />
 

@@ -123,7 +123,7 @@ export default async function MatrixPage({ searchParams }: PageProps<typeof PATH
           <li><strong>Личное предназначение</strong> — сумма неба (B + D) и земли (A + C).</li>
         </ul>
         <p>Пример: 14.03.1987. A = 14, B = 3, год 1 + 9 + 8 + 7 = 25 → 2 + 5 = 7, C = 7. D = 14 + 3 + 7 = 24 → 6. Центр E = 14 + 3 + 7 + 6 = 30 → 3 + 0 = 3. Центральный аркан — 3, Императрица.</p>
-        <p>Нумерация арканов совпадает со старшими арканами Таро: аркан 22 соответствует Шуту (карта 0). Значения арканов связаны со страницами карт на сайте, например <Link href="/taro/karty/mag">Маг</Link> и <Link href="/taro/karty/imperatritsa">Императрица</Link>. Если интересуют числа даты рождения без арканов, посмотрите <Link href="/numerologiya/po-date-rozhdeniya">нумерологию по дате рождения</Link>, <Link href="/chislo-sudby">число судьбы</Link>, <Link href="/numerologiya/lichnyy-god">личный год</Link> и <Link href="/numerologiya/2027">прогноз на 2027 год</Link>.</p>
+        <p>Нумерация арканов совпадает со старшими арканами Таро: аркан 22 соответствует Шуту (карта 0). Значения арканов связаны со страницами карт на сайте, например <Link href="/taro/karty/mag">Маг</Link> и <Link href="/taro/karty/imperatritsa">Императрица</Link>. Если интересуют числа даты рождения без арканов, посмотрите <Link href="/numerologiya/po-date-rozhdeniya">нумерологию по дате рождения</Link>, <Link href="/chislo-sudby">число судьбы</Link>, <Link href="/numerologiya/lichnyy-god">личный год</Link> и <Link href="/numerologiya/2027">прогноз на 2027 год</Link>. А если рассчитываете дату ребёнка до 18 лет, для родителей есть <Link href="/razbor-rebenka">детский разбор по дате рождения</Link>.</p>
       </section>
 
       <section className="mt-10">

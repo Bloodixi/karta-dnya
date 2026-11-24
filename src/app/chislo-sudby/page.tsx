@@ -61,7 +61,7 @@ export default function DestinyPage() {
       <ArticleLinks path="/chislo-sudby" />
       <RazborCta from="chislo-sudby" />
       <Faq items={DESTINY_FAQ} />
-      <p className="mt-6 text-sm text-muted">Также посмотрите <Link className="text-accent-text underline" href="/numerologiya/lichnyy-god">калькулятор личного года</Link> и <Link className="text-accent-text underline" href="/numerologiya/2027">нумерологический прогноз на 2027 год</Link>.</p>
+      <p className="mt-6 text-sm text-muted">Также посмотрите <Link className="text-accent-text underline" href="/numerologiya/lichnyy-god">калькулятор личного года</Link>, <Link className="text-accent-text underline" href="/numerologiya/2027">нумерологический прогноз на 2027 год</Link> и <Link className="text-accent-text underline" href="/razbor-rebenka">детский разбор по дате рождения</Link> для родителей.</p>
       <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Калькулятор числа судьбы", url: `${SITE.url}/chislo-sudby`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
       <NumerologyNav current="/chislo-sudby" />
     </div>

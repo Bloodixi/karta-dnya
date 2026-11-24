@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import TarotCardView from "./TarotCardView";
 
 export type SpreadCard = { slug: string; name: string; upright: string; reversed: string };
@@ -24,7 +24,7 @@ function brief(text: string) {
   return m ? m[0].trim() : text;
 }
 
-export default function Spread({ positions, cards }: { positions: Position[]; cards: SpreadCard[] }) {
+export default function Spread({ positions, cards, afterDraw }: { positions: Position[]; cards: SpreadCard[]; afterDraw?: ReactNode }) {
   const [res, setRes] = useState<Drawn[] | null>(null);
   const [round, setRound] = useState(0);
   const n = positions.length;
@@ -56,19 +56,22 @@ export default function Spread({ positions, cards }: { positions: Position[]; ca
         </div>
       )}
       {res && (
-        <div className={grid}>
-          {res.map((d, i) => (
-            <div key={`${round}-${d.card.slug}`} className="grid gap-2 content-start">
-              <div style={{ "--flip-delay": `${0.1 + i * 0.12}s` } as React.CSSProperties}>
-                <TarotCardView slug={d.card.slug} name={d.card.name} reversed={d.reversed} flipIn className="tcard-thumb" sizes="(min-width: 768px) 200px, 30vw" />
+        <>
+          <div className={grid}>
+            {res.map((d, i) => (
+              <div key={`${round}-${d.card.slug}`} className="grid gap-2 content-start">
+                <div style={{ "--flip-delay": `${0.1 + i * 0.12}s` } as React.CSSProperties}>
+                  <TarotCardView slug={d.card.slug} name={d.card.name} reversed={d.reversed} flipIn className="tcard-thumb" sizes="(min-width: 768px) 200px, 30vw" />
+                </div>
+                <p className="mono">{i + 1}. {positions[i].name}</p>
+                <p className="font-semibold text-sm leading-snug">{d.card.name}{d.reversed ? <span className="text-muted font-normal"> (перевёрнутая)</span> : null}</p>
+                <p className="text-xs text-muted leading-snug">{brief(d.reversed ? d.card.reversed : d.card.upright)}</p>
+                <p className="text-xs"><Link href={`/taro/karty/${d.card.slug}`} className="text-accent underline">о карте</Link></p>
               </div>
-              <p className="mono">{i + 1}. {positions[i].name}</p>
-              <p className="font-semibold text-sm leading-snug">{d.card.name}{d.reversed ? <span className="text-muted font-normal"> (перевёрнутая)</span> : null}</p>
-              <p className="text-xs text-muted leading-snug">{brief(d.reversed ? d.card.reversed : d.card.upright)}</p>
-              <p className="text-xs"><Link href={`/taro/karty/${d.card.slug}`} className="text-accent underline">о карте</Link></p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+          {afterDraw ? <div className="mt-6 pt-5 border-t border-line">{afterDraw}</div> : null}
+        </>
       )}
     </div>
   );
