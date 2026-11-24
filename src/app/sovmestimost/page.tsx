@@ -1,17 +1,39 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import PairPicker from "@/components/PairPicker";
 import CompatCta from "@/components/CompatCta";
+import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
+import PairPicker from "@/components/PairPicker";
 import RazborCta from "@/components/RazborCta";
 import { getZodiac } from "@/lib/content";
 import { canonicalPairSlug, compatibility } from "@/lib/compat";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Совместимость знаков зодиака: таблица пар в любви",
   description: "Совместимость знаков зодиака в любви, дружбе и работе: выберите два знака и получите процент и разбор пары. Полная таблица 12×12 и лучшие пары.",
   alternates: { canonical: "/sovmestimost" },
 };
+
+const FAQ = [
+  {
+    q: "Какие знаки зодиака лучше всего подходят друг другу?",
+    a: "Традиционно гармоничнее всего сочетаются пары дружественных стихий — Огонь с Воздухом (например, Овен и Водолей, Лев и Весы) и Земля с Водой (Телец и Рак, Дева и Скорпион), а также знаки одной стихии при уважении границ.",
+  },
+  {
+    q: "Что делать, если по таблице совместимости низкий процент?",
+    a: "Низкий балл показывает зоны разного темпа и привычек, но не запрет на отношения. На практике ключевую роль играют не только солнечные знаки, но и полные даты рождения, а также готовность договариваться в быту.",
+  },
+  {
+    q: "В чём разница между совместимостью по знаку зодиака и по дате рождения?",
+    a: "Совместимость по знакам оценивает общую динамику стихий и характера. Расчёт по дате рождения в нумерологии дополняет картину числами судьбы, общими задачами и динамикой пары по годам.",
+  },
+  {
+    q: "Как получить подробный разбор конкретной пары?",
+    a: "Выберите оба знака в калькуляторе выше для базового разбора или перейдите к персональному разбору совместимости по точным датам рождения с акцентом на любовь, брак, конфликты и перспективы пары.",
+  },
+];
 
 /** Текстовый вариант глифа знака: без него телефоны рисуют цветные эмодзи. */
 const VS = "\uFE0E";
@@ -26,12 +48,22 @@ export default function CompatIndex() {
       <p className="text-muted mt-2 max-w-2xl">Выберите два знака и узнайте, насколько они подходят друг другу в любви, дружбе и работе. Оценка строится на стихиях и характере знаков.</p>
       <div className="mt-6 max-w-2xl"><PairPicker signs={signs} /></div>
 
+      <section className="card p-5 mt-8 max-w-3xl">
+        <p className="text-sm font-semibold">Как работает совместимость знаков зодиака</p>
+        <p className="text-sm text-muted mt-1">
+          В основе расчёта лежит баланс четырёх стихий (Огонь и Воздух усиливают друг друга, Земля и Вода дают устойчивость и глубину). Для более точной картины пары дополните знак зодиака{" "}
+          <Link href="/numerologiya/sovmestimost" className="text-accent-text hover:underline font-medium">совместимостью по дате рождения</Link>{" "}
+          или откройте{" "}
+          <Link href="/sovmestimost-razbor" className="text-accent-text hover:underline font-medium">персональный разбор пары →</Link>
+        </p>
+      </section>
+
       {best.length > 0 && (
         <section className="mt-10">
           <h2 className="text-2xl mb-3">Самые гармоничные пары</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {best.map(({ a, b, c }) => (
-              <Link key={a.slug + b.slug} href={`/sovmestimost/${a.slug}-${b.slug}`} className="card card-hover p-4">
+              <Link key={a.slug + b.slug} href={`/sovmestimost/${canonicalPairSlug(a, b)}`} className="card card-hover p-4">
                 <p className="font-semibold">{a.symbol}{VS} {a.name} + {b.symbol}{VS} {b.name}</p>
                 <p className="text-sm text-muted mt-1">{c.score}% · {c.verdict}</p>
               </Link>
@@ -87,8 +119,21 @@ export default function CompatIndex() {
         <p>Процент складывается из стихий и характера знаков: огонь легче понимает воздух, земля — воду, а знаки одной стихии быстро находят общий язык, но могут соперничать. Низкая оценка не приговор: она показывает, где паре придётся чаще договариваться. Откуда берутся такие правила и как к ним относиться, рассказано в статье <Link href="/astrologiya/sovmestimost-znakov-zodiaka">почему одни знаки сходятся легче</Link>.</p>
         <p>Если не уверены в знаке партнёра, особенно когда день рождения на стыке, сверьтесь с таблицей <Link href="/astrologiya/znaki-zodiaka-po-datam">знаков зодиака по датам</Link>. Взгляд нумерологии на ту же пару даёт <Link href="/numerologiya/sovmestimost">совместимость по дате рождения</Link>.</p>
       </section>
+      <Faq items={FAQ} />
       <CompatCta from="sovmestimost" />
       <RazborCta from="sovmestimost" className="mt-6" />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "Калькулятор совместимости знаков зодиака",
+          url: `${SITE.url}/sovmestimost`,
+          applicationCategory: "LifestyleApplication",
+          operatingSystem: "Any",
+          inLanguage: "ru",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" },
+        }}
+      />
     </div>
   );
 }

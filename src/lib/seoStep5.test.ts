@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { clockDescription, clockFaq, clockSpellings, clockTitle, getClockNumbers } from "./clock";
+import { canonicalPairSlug, compatibility } from "./compat";
+import { getZodiac } from "./content";
 import { SECTIONS } from "./site";
 
 test("clockSpellings and metadata fit limits for top clock numbers", () => {
@@ -28,4 +30,21 @@ test("astrologiya section metadata has SEO title and description within limits",
   assert.ok(a.seoTitle, "astrologiya seoTitle missing");
   assert.ok(`${a.seoTitle} — Карта дня`.length <= 65);
   assert.ok(a.description.length >= 130 && a.description.length <= 165);
+});
+
+test("harmonious zodiac pairs resolve to canonicalPairSlug without noindex mirrors", () => {
+  const signs = getZodiac();
+  const order = new Map(signs.map((s, i) => [s.slug, i]));
+  const best = signs
+    .flatMap((a) => signs.filter((b) => a.slug < b.slug).map((b) => ({ a, b, c: compatibility(a, b) })))
+    .sort((x, y) => y.c.score - x.c.score)
+    .slice(0, 8);
+  assert.equal(best.length, 8);
+  for (const { a, b } of best) {
+    const slug = canonicalPairSlug(a, b);
+    const ia = order.get(a.slug)!;
+    const ib = order.get(b.slug)!;
+    const expected = ia <= ib ? `${a.slug}-${b.slug}` : `${b.slug}-${a.slug}`;
+    assert.equal(slug, expected);
+  }
 });
