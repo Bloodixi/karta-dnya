@@ -3,10 +3,14 @@ import Form from "next/form";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import NumerologyNav from "@/components/NumerologyNav";
 import { FormError, ShareLink, TextField } from "@/components/NumerologyFields";
+import RazborCta from "@/components/RazborCta";
+import ScrollToResult from "@/components/ScrollToResult";
 import { getNameNumbers } from "@/lib/content";
 import { cleanName, CYRILLIC_TABLE, isMaster, nameNumbers } from "@/lib/numerology";
+import { SITE } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
 
 const PATH = "/numerologiya/chislo-imeni";
@@ -36,7 +40,7 @@ export default async function NameNumberPage({ searchParams }: PageProps<typeof 
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: PATH, label: "Число имени" }]} />
       <h1 className="text-3xl md:text-4xl">Число имени: калькулятор по таблице букв</h1>
-      <p className="text-muted mt-3 max-w-2xl text-lg">Введите имя, и калькулятор переведёт каждую букву в цифру, сложит их и покажет три числа: имени, души и личности. Таблица и значения всех чисел ниже.</p>
+      <p className="text-muted mt-3 max-w-2xl text-lg">Число имени показывает, как человека воспринимают окружающие и в чём его сильная подача. Калькулятор переводит буквы имени по таблице в цифры от 1 до 9 и рассчитывает три показателя: число выражения по всем буквам, число души по гласным и число личности по согласным, сохраняя мастер-числа 11, 22 и 33.</p>
 
       <div className="card p-6 mt-6 max-w-3xl">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
@@ -47,7 +51,7 @@ export default async function NameNumberPage({ searchParams }: PageProps<typeof 
       </div>
 
       {nm && (
-        <section className="mt-8" id="rezultat">
+        <section className="mt-8 scroll-mt-24" id="rezultat">
           <div className="ornament mb-4"><h2 className="text-2xl">Числа имени {nm.clean}</h2><span className="mono">{nm.letters.length} букв</span></div>
           <p className="flex flex-wrap gap-1 mb-4">{nm.letters.map((l, i) => <span key={i} className={`chip ${l.vowel ? "text-accent" : ""}`}>{l.ch} {l.value}</span>)}</p>
           <p className="text-xs text-muted mb-4">Гласные выделены цветом: они дают число души, согласные — число личности.</p>
@@ -79,6 +83,7 @@ export default async function NameNumberPage({ searchParams }: PageProps<typeof 
           <ShareLink path={`https://karta-dnya.ru${PATH}?n=${nm.clean}`} />
         </section>
       )}
+      <ScrollToResult key={nm?.clean ?? ""} id="rezultat" when={!!nm} />
 
       <section className="mt-12">
         <div className="ornament mb-4"><h2 className="text-2xl">Таблица букв</h2><span className="mono">кириллица, по порядку алфавита</span></div>
@@ -117,8 +122,10 @@ export default async function NameNumberPage({ searchParams }: PageProps<typeof 
         </div>
       </section>
 
+      <RazborCta from="chislo-imeni" name={nm?.clean} />
       <ArticleLinks path="/numerologiya/chislo-imeni" />
       <Faq items={FAQ} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Калькулятор числа имени", url: `${SITE.url}/numerologiya/chislo-imeni`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
       <NumerologyNav current={PATH} />
     </div>
   );

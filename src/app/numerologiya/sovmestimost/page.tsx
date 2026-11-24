@@ -6,12 +6,14 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import CompatCta from "@/components/CompatCta";
 import ExtraText from "@/components/ExtraText";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import NumerologyNav from "@/components/NumerologyNav";
 import { DateField, FormError, ShareLink, dateErrorText } from "@/components/NumerologyFields";
 import ScrollToResult from "@/components/ScrollToResult";
 import { getNumerology, getNumerologyPairs } from "@/lib/content";
 import { getExtraText, mergeFaq } from "@/lib/extra-text";
 import { CORE_NUMBERS, destinyNumber, formatDate, isMaster, pairKey, parseDate, toCore } from "@/lib/numerology";
+import { SITE } from "@/lib/site";
 
 const PATH = "/numerologiya/sovmestimost";
 
@@ -97,7 +99,7 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/numerologiya", label: "Нумерология" }, { href: PATH, label: "Совместимость по дате рождения" }]} />
       <h1 className="text-3xl md:text-4xl">Совместимость по дате рождения</h1>
-      <p className="text-muted mt-3 max-w-2xl text-lg">Введите две даты рождения. Калькулятор посчитает число судьбы каждого, покажет процент совместимости и разбор пары: что объединяет, где возможны трения и как договориться.</p>
+      <p className="text-muted mt-3 max-w-2xl text-lg">Совместимость по дате рождения рассчитывается по числам судьбы обоих партнёров (от 1 до 9 и мастер-числа 11, 22, 33 как 2, 4, 6). Калькулятор за секунду определяет процент гармонии по матрице из 45 сочетаний и даёт разбор союза в любви, работе и главную рекомендацию для пары.</p>
 
       <div className="card p-6 mt-6 max-w-3xl">
         <Form action={PATH} className="flex flex-wrap gap-3 items-end">
@@ -162,6 +164,7 @@ export default async function CompatPage({ searchParams }: PageProps<typeof PATH
       {more && <ExtraText html={more.html} />}
       <TelegramBot from="sovmestimost" title="Совместимость по датам — в Telegram" text="Отправь боту две даты рождения — он покажет, как сочетаются ваши числа. Удобно переслать партнёру." />
       <Faq items={mergeFaq(FAQ, more?.faq)} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Калькулятор совместимости по дате рождения", url: `${SITE.url}/numerologiya/sovmestimost`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
       <NumerologyNav current={PATH} />
     </div>
   );

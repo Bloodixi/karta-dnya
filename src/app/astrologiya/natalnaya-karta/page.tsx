@@ -4,10 +4,13 @@ import AuthorCard from "@/components/AuthorCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { horoscopeAuthor } from "@/lib/authors";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import NatalCalc, { type NatalRefs } from "@/components/NatalCalc";
+import RazborCta from "@/components/RazborCta";
 import { getArticles, type Faq as FaqItem } from "@/lib/content";
 import { getAstroData } from "@/lib/astro/interpret";
 import { BODIES, SIGNS } from "@/lib/astro/types";
+import { SITE } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
 
 export const metadata: Metadata = {
@@ -52,7 +55,7 @@ export default function NatalPage() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Breadcrumbs items={[{ href: "/astrologiya", label: "Астрология" }, { href: "/astrologiya/natalnaya-karta", label: "Натальная карта" }]} />
       <h1 className="text-3xl md:text-4xl font-semibold">Натальная карта онлайн: рассчитать бесплатно</h1>
-      <p className="text-muted mt-2 max-w-2xl">Введите дату, время и город рождения. Калькулятор построит колесо карты, покажет планеты в знаках и домах, Асцендент, Середину неба и аспекты, а затем даст спокойные трактовки каждого положения.</p>
+      <p className="text-muted mt-2 max-w-2xl">Натальная карта онлайн строится по дате, времени и городу рождения: калькулятор рассчитывает положение Солнца, Луны и восьми планет в знаках зодиака и 12 домах Плацидуса, определяет Асцендент, Середину неба и ключевые аспекты с подробной расшифровкой. Если точное время неизвестно, можно отметить расчёт на полдень.</p>
 
       <div className="mt-6">
         <NatalCalc refs={refs} />
@@ -67,8 +70,10 @@ export default function NatalPage() {
 
       {author && <AuthorCard author={author} className="mt-10" />}
 
+      <RazborCta from="natalnaya-karta" />
       <ArticleLinks path="/astrologiya/natalnaya-karta" />
       <Faq items={FAQ} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Натальная карта онлайн", url: `${SITE.url}/astrologiya/natalnaya-karta`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
 
       <section className="mt-10">
         <h2 className="text-2xl mb-3">Рядом по теме</h2>
