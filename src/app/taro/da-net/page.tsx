@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ArticleLinks from "@/components/ArticleLinks";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RazborCta from "@/components/RazborCta";
 import ExtraText from "@/components/ExtraText";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import TelegramDaily from "@/components/TelegramDaily";
 import YesNo from "@/components/YesNo";
 import { getTarot, getTarotExtra } from "@/lib/content";
 import { getExtraText, mergeFaq } from "@/lib/extra-text";
+import { SITE } from "@/lib/site";
 
 const POPULAR_SLUGS = [
   "shut", "mag", "verhovnaya-zhritsa", "imperatritsa",
@@ -69,7 +72,9 @@ export default async function YesNoPage() {
       <section className="prose mt-8">
         <p>Для более подробного ответа посмотрите <Link href="/taro/tri-karty">расклад на три карты</Link> или прочитайте <Link href="/taro/kak-nachat-gadat-na-taro">руководство для новичков</Link>. Если вопрос о заветной мечте, попробуйте <Link href="/taro/na-zhelanie">гадание на желание</Link>. Значения всех карт собраны в <Link href="/taro/karty">каталоге карт</Link>, а другие схемы — на странице <Link href="/taro/rasklady">все расклады Таро онлайн</Link>.</p>
       </section>
+      <ArticleLinks path="/taro/da-net" />
       <Faq items={mergeFaq(FAQ, more?.faq)} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Таро да или нет онлайн", url: `${SITE.url}/taro/da-net`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
     </div>
   );
 }

@@ -12,7 +12,7 @@ import RazborCta from "@/components/RazborCta";
 import TelegramDaily from "@/components/TelegramDaily";
 import ReadingProgress from "@/components/ReadingProgress";
 import StonePhoto from "@/components/StonePhoto";
-import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac } from "@/lib/content";
+import { findDream, findDreamImage, findStone, findStoneImage, getArticle, getArticles, getDreams, getStones, getZodiac, readJsonData } from "@/lib/content";
 import { metaDescription } from "@/lib/meta";
 import { pageTitle, SECTIONS, SECTION_KEYS, SITE, type SectionKey, orgJsonLd } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
@@ -69,7 +69,9 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
   const siblings = getArticles(key);
   const at = siblings.findIndex((x) => x.slug === slug);
   const more = Array.from({ length: Math.min(3, siblings.length - 1) }, (_, i) => siblings[(at + 1 + i) % siblings.length]);
-  const author = key === "astrologiya" ? horoscopeAuthor() : null;
+  const author = horoscopeAuthor();
+  const lastmod = readJsonData<Record<string, string>>("lastmod.json", {});
+  const modified = [lastmod[`content/articles/${key}/${slug}.md`], a.date].filter(Boolean).sort().at(-1) || a.date;
   const showToc = a.toc.length >= 3;
   return (
     <article className="mx-auto max-w-6xl px-4 py-8">
@@ -111,7 +113,7 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
         )}
       </div>
       <RazborCta from={`statya-${slug}`} className="mt-10 max-w-[72ch]" />
-      {author && <AuthorCard author={author} className="mt-10 max-w-[72ch]" />}
+      {author && <AuthorCard author={author} note={key === "astrologiya" ? undefined : "редактор материалов"} className="mt-10 max-w-[72ch]" />}
       <Faq items={a.faq} />
       {a.tags.length > 0 && (
         <p className="mt-8 flex flex-wrap gap-2">
@@ -136,7 +138,9 @@ export default async function Page({ params }: PageProps<"/[section]/[slug]">) {
           "@type": "Article",
           headline: a.title,
           description: a.description,
+          ...(a.cover ? { image: `${SITE.url}${a.cover.file}` } : {}),
           datePublished: a.date,
+          dateModified: modified,
           inLanguage: "ru",
           mainEntityOfPage: `${SITE.url}/${key}/${slug}`,
           author: author ? authorJsonLd(author) : orgJsonLd(),

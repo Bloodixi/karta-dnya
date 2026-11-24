@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ArticleLinks from "@/components/ArticleLinks";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
+import RazborCta from "@/components/RazborCta";
 import WishCards from "@/components/WishCards";
 import { getTarot } from "@/lib/content";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Гадание на желание онлайн: Таро на одну или три карты",
@@ -27,6 +31,7 @@ export default function WishPage() {
       <h1 className="text-3xl md:text-4xl font-semibold">Гадание на желание на картах Таро</h1>
       <p className="text-muted mt-2 max-w-2xl">Подумайте о том, чего хотите, выберите одну карту или три и переверните их. Карты ответят, сбудется ли желание, подскажут условия и дадут совет.</p>
       <div className="mt-6 max-w-4xl">{cards.length ? <WishCards cards={cards} /> : <p className="text-muted">Колода готовится.</p>}</div>
+      <RazborCta from="taro-na-zhelanie" className="mt-8 max-w-4xl" />
       <section className="prose mt-10">
         <h2>Как гадать на желание</h2>
         <p>Перед тем как тянуть карту, побудьте минуту в тишине. Представьте желание так, будто оно уже исполнилось: где вы, что вокруг, что чувствуете. Чем яснее картинка, тем точнее ответ — карты откликаются на то, что вы действительно держите в мыслях, а не на случайную формулировку.</p>
@@ -43,7 +48,9 @@ export default function WishPage() {
         <p>В народной традиции самое подходящее время загадывать желания — Святки, дни между Рождеством и Крещением. Святочные вечера считались временем, когда будущее «приоткрыто»: гадали на суженого, на урожай, на удачу в новом году. Гадание на желание по картам Таро — современное продолжение этой привычки: спокойный вечер, свеча, одно заветное желание и карта, которая подсказывает, как к нему идти. Если хотите собрать желания на весь год, загадайте их на Святки и запишите ответы — в конце года интересно перечитать.</p>
         <p>Для вопроса с ответом «да или нет» подойдёт <Link href="/taro/da-net">гадание да/нет на одной карте</Link>, для подробного разбора ситуации — <Link href="/taro/tri-karty">расклад на три карты</Link>. Значения всех 78 карт собраны в <Link href="/taro/karty">каталоге карт Таро</Link>, а другие схемы — на странице <Link href="/taro/rasklady">все расклады онлайн</Link>. Карта на сегодня — в разделе <Link href="/karta-dnya">карта дня</Link>.</p>
       </section>
+      <ArticleLinks path="/taro/na-zhelanie" />
       <Faq items={FAQ} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Гадание на желание на картах Таро", url: `${SITE.url}/taro/na-zhelanie`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
     </div>
   );
 }

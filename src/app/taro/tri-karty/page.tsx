@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ArticleLinks from "@/components/ArticleLinks";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RazborCta from "@/components/RazborCta";
 import ExtraText from "@/components/ExtraText";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
 import TelegramDaily from "@/components/TelegramDaily";
 import ThreeCards from "@/components/ThreeCards";
 import { getTarot } from "@/lib/content";
 import { getExtraText, mergeFaq } from "@/lib/extra-text";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Расклад Таро на три карты онлайн: прошлое и будущее",
@@ -36,7 +39,9 @@ export default async function ThreeCardsPage() {
       <section className="prose mt-8">
         <p>Перевёрнутые карты читаются как ослабленное, заблокированное или внутреннее проявление значения. Для короткого ответа подойдёт <Link href="/taro/da-net">гадание «да или нет»</Link>, для загаданной мечты — <Link href="/taro/na-zhelanie">гадание на желание</Link>, а расклады на любовь, отношения, работу и год собраны в каталоге <Link href="/taro/rasklady">все расклады Таро онлайн</Link>.</p>
       </section>
+      <ArticleLinks path="/taro/tri-karty" />
       <Faq items={mergeFaq(FAQ, more?.faq)} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Расклад Таро на три карты онлайн", url: `${SITE.url}/taro/tri-karty`, applicationCategory: "LifestyleApplication", operatingSystem: "Any", inLanguage: "ru", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } }} />
     </div>
   );
 }

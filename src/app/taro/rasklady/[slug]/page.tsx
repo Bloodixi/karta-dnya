@@ -4,9 +4,10 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Faq from "@/components/Faq";
 import JsonLd from "@/components/JsonLd";
+import RazborCta from "@/components/RazborCta";
 import Spread from "@/components/Spread";
 import { findSpread, getSpreads, getTarot, spreadHref } from "@/lib/content";
-import { SITE } from "@/lib/site";
+import { pageTitle, SITE } from "@/lib/site";
 import ArticleLinks from "@/components/ArticleLinks";
 
 export const dynamicParams = false;
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: PageProps<"/taro/rasklady/[sl
   const { slug } = await params;
   const s = findSpread(slug);
   if (!s) return {};
-  return { title: s.title, description: s.short, alternates: { canonical: `/taro/rasklady/${slug}` } };
+  return { title: pageTitle(s.title), description: s.short, alternates: { canonical: `/taro/rasklady/${slug}` } };
 }
 
 export default async function SpreadPage({ params }: PageProps<"/taro/rasklady/[slug]">) {
@@ -76,6 +77,7 @@ export default async function SpreadPage({ params }: PageProps<"/taro/rasklady/[
         </aside>
       </div>
 
+      <RazborCta from={`rasklad-${slug}`} className="mt-10" />
       <ArticleLinks path={`/taro/rasklady/${slug}`} />
       <Faq items={s.faq} />
       <JsonLd
@@ -86,6 +88,18 @@ export default async function SpreadPage({ params }: PageProps<"/taro/rasklady/[
           description: s.short,
           url: `${SITE.url}/taro/rasklady/${slug}`,
           step: s.howTo.map((t, i) => ({ "@type": "HowToStep", position: i + 1, text: t })),
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: s.title,
+          url: `${SITE.url}/taro/rasklady/${slug}`,
+          applicationCategory: "LifestyleApplication",
+          operatingSystem: "Any",
+          inLanguage: "ru",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" },
         }}
       />
     </article>

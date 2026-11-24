@@ -29,6 +29,9 @@ export const ARTICLE_LINKS: Record<string, string[]> = {
   "/taro/rasklady/na-otnosheniya": ["taro/rasklad-taro-na-otnosheniya"],
   "/taro/rasklady/na-lyubov": ["taro/rasklad-taro-na-otnosheniya"],
   "/taro/rasklady/*": ["taro/kak-nachat-gadat-na-taro", "taro/kogda-mozhno-gadat-po-lunnomu-kalendaryu"],
+  "/taro/na-zhelanie": ["taro/kak-nachat-gadat-na-taro", "taro/kogda-mozhno-gadat-po-lunnomu-kalendaryu", "taro/karta-dnya-taro-kak-ispolzovat"],
+  "/taro/da-net": ["taro/kak-nachat-gadat-na-taro", "taro/perevernutye-karty-taro", "taro/kogda-mozhno-gadat-po-lunnomu-kalendaryu"],
+  "/taro/tri-karty": ["taro/kak-nachat-gadat-na-taro", "taro/perevernutye-karty-taro", "taro/rasklad-taro-na-otnosheniya"],
   "/taro/arkany/mladshie": ["taro/mladshie-arkany-taro"],
   "/taro/arkany/starshie": ["taro/perevernutye-karty-taro"],
   // Страницы младших арканов (/taro/karty/<slug> с arcana: "minor") — отдельный ключ, его передаёт страница карты.
