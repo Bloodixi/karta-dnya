@@ -393,9 +393,12 @@ export default async function RazborPage({ searchParams }: PageProps<"/razbor">)
           </p>
 
           <section className="prose mt-10">
-            <h2>Бесплатные расчёты</h2>
+            <h2>Бесплатные расчёты и другие разборы</h2>
             <p>
               Отдельные числа можно посчитать бесплатно: <Link href="/chislo-sudby">число судьбы</Link>, <Link href="/kvadrat-pifagora">квадрат Пифагора</Link> и <Link href="/numerologiya/lichnyy-god">личный год</Link>. Разбор собирает их вместе и добавляет то, чего нет в калькуляторах: как числа сочетаются между собой и что из этого следует на ближайший год.
+            </p>
+            <p>
+              Если нужен разбор для двоих — посмотрите <Link href="/sovmestimost-razbor">полную совместимость по датам рождения</Link>. Для родителей детей и подростков до 18 лет есть отдельный <Link href="/razbor-rebenka">детский разбор по дате рождения</Link>.
             </p>
           </section>
 
