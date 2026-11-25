@@ -22,10 +22,10 @@ def _words(n: int, prefix: str = "слово") -> str:
 def _valid_item(sign: str, idx: int) -> dict:
     return {
         "sign": sign,
-        "general": f"Уникальный зачин {idx} {sign}: " + _words(145, f"общ{idx}"),
-        "love": _words(50, f"люб{idx}"),
-        "career": _words(50, f"раб{idx}"),
-        "health": _words(50, f"здр{idx}"),
+        "general": f"Уникальный зачин {idx} {sign}: " + _words(145, f"общ{idx}") + ".",
+        "love": _words(50, f"люб{idx}") + ".",
+        "career": _words(50, f"раб{idx}") + ".",
+        "health": _words(50, f"здр{idx}") + ".",
         "advice": "Действуйте спокойно и последовательно.",
         "mood": "ровное",
     }
@@ -66,6 +66,17 @@ class FallbackToAgyTest(unittest.TestCase):
         self.assertEqual(set(good), set(hp.SIGNS[:4]))
         self.assertEqual(good[self.drafts[0]["sign"]]["_model"], "free_llm")
         self.assertEqual(good[self.drafts[2]["sign"]]["_model"], "gemini-4-argon-low")
+
+    def test_validate_rejects_mixed_script_cutoff_and_yesterday(self) -> None:
+        items = [_valid_item(s, i) for i, s in enumerate(hp.SIGNS[:4])]
+        items[0]["general"] = items[0]["general"].replace("общ010", "хламa")
+        items[1]["love"] = items[1]["love"].rstrip(".")
+        items[2]["career"] = "Вчера было сложно, " + items[2]["career"]
+        errs = hp.validate(items, self.drafts, "zavtra")
+        joined = "\n".join(errs)
+        self.assertIn("смешанный алфавит", joined)
+        self.assertIn("незавершённое предложение", joined)
+        self.assertIn("«сегодня»/«вчера»", joined)
 
 
 if __name__ == "__main__":

@@ -42,8 +42,11 @@ GENERAL_WORDS = {"day": (120, 180), "nedelya": (220, 320), "mesyats": (220, 320)
 SPHERE_WORDS = (40, 70)
 SLACK = 0.15  # допуск ±15 % при проверке
 
-# «Гороскоп на завтра» читают накануне: слово «сегодня» в нём — брак (так же проверяет scripts/horoscope-check.mjs при сборке).
+# «Гороскоп на завтра» читают накануне: слово «сегодня» (и «вчера») в нём — брак (так же проверяет scripts/horoscope-check.mjs при сборке).
 TODAY_RE = re.compile(r"(?<![а-яё])сегодня", re.I)
+YESTERDAY_RE = re.compile(r"(?<![а-яё])вчера", re.I)
+MIXED_SCRIPT_RE = re.compile(r"\b\w*(?:[а-яА-ЯёЁ][a-zA-Z]|[a-zA-Z][а-яА-ЯёЁ])\w*\b")
+SENTENCE_END_CHARS = ".!?…»\""
 
 MSK = timezone(timedelta(hours=3))
 
@@ -220,8 +223,12 @@ def validate(items, drafts: list[dict], period: str) -> list[str]:
                 continue
             if re.search(r"<\s*(script|iframe|img|a)\b|javascript:", v, re.I):
                 errs.append(f"{name}: разметка в поле {f}")
-            if period == "zavtra" and TODAY_RE.search(v):
-                errs.append(f"{name}: «сегодня» в гороскопе на завтра (поле {f})")
+            if period == "zavtra" and (TODAY_RE.search(v) or YESTERDAY_RE.search(v)):
+                errs.append(f"{name}: «сегодня»/«вчера» в гороскопе на завтра (поле {f})")
+            if MIXED_SCRIPT_RE.search(v):
+                errs.append(f"{name}: смешанный алфавит в поле {f}")
+            if f != "mood" and v.strip()[-1] not in SENTENCE_END_CHARS:
+                errs.append(f"{name}: незавершённое предложение в поле {f}")
             if re.search(r"\b(ИИ|нейросет|искусственн\w+ интеллект|языков\w+ модел|алгоритм)", v, re.I):
                 errs.append(f"{name}: упоминание ИИ в поле {f}")
         g = words(it.get("general", ""))
